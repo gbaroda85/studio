@@ -144,7 +144,6 @@ export default function DocumentScanner() {
   const [isSharing, setIsSharing] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{current: number, total: number} | null>(null);
 
-  // Initialize with 8 points for the magnet logic
   const [points, setPoints] = useState<Point[]>([
     { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
     { x: 90, y: 50 }, { x: 90, y: 90 },                   
@@ -154,7 +153,7 @@ export default function DocumentScanner() {
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
   
-  const [rectCrop, setRectCrop] = useState<Crop>();
+  const [crop, setCrop] = useState<Crop>();
   const [completedRectCrop, setCompletedRectCrop] = useState<PixelCrop>();
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -356,11 +355,13 @@ export default function DocumentScanner() {
         for (let i = 0; i < pixels.length; i += 4) {
             let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+            
             if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
             else if (activeFilter === 'document') { r = g = b = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma; }
             else if (activeFilter === 'gray') { r = g = b = luma; }
             else if (activeFilter === 'photo') { r = Math.min(255, r * 1.05); g = Math.min(255, g * 1.05); b = Math.min(255, b * 1.05); }
-            else if (activeFilter === 'magic' || activeFilter === 'ai_enhance') { r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15); }
+            else if (activeFilter === 'magic') { r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15); }
+            else if (activeFilter === 'ai_enhance') { r = Math.min(255, r * 1.02); g = Math.min(255, g * 1.02); b = Math.min(255, b * 1.02); }
             
             if (activeFilter !== 'bw' && activeFilter !== 'gray') { r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF; }
             pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
@@ -756,13 +757,13 @@ export default function DocumentScanner() {
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-6 border-t shrink-0 flex justify-center gap-4">
                         <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-black text-xs uppercase" onClick={() => handleNavigate(-1)} disabled={pendingPages.length <= 1}>
-                            <ChevronLeftIcon className="mr-1.5 size-4" /> PREVIOUS
+                            <ChevronLeft className="mr-1.5 size-4" /> PREVIOUS
                         </Button>
                         <Button className="h-14 px-12 rounded-2xl bg-primary text-primary-foreground font-black text-lg shadow-2xl active:scale-95 transition-all group" onClick={() => handleConfirmAdd(false)}>
                             <CheckCircle2 className="mr-2 size-5" /> CONFIRM & ADD
                         </Button>
                         <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 font-black text-xs uppercase" onClick={() => handleConfirmAdd(true)} disabled={pendingPages.length <= 1}>
-                            NEXT <ChevronRightIcon className="ml-1.5 size-4" />
+                            NEXT <ChevronRight className="ml-1.5 size-4" />
                         </Button>
                     </CardFooter>
                 </Card>
