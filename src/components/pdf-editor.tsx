@@ -223,7 +223,7 @@ export default function PdfEditor() {
 
                 for (let i = 1; i <= totalPages; i++) {
                     const page = await pdf.getPage(i);
-                    const viewport = page.getViewport({ scale: 2.2 }); // Higher fidelity render for editor
+                    const viewport = page.getViewport({ scale: 2.2 }); 
                     const canvas = document.createElement('canvas');
                     const context = canvas.getContext('2d');
                     canvas.height = viewport.height;
@@ -463,35 +463,44 @@ export default function PdfEditor() {
                 const ox = cropBox.x;
                 const oy = cropBox.y;
 
-                for (const el of pageState.elements) {
-                    const isLeaning = pageRotation === 90 || pageRotation === 270;
-                    const visualW = isLeaning ? pageHeight : pageWidth;
-                    const visualH = isLeaning ? pageWidth : pageHeight;
+                // Perceived dimensions by user in editor
+                const isLeaning = pageRotation === 90 || pageRotation === 270;
+                const visualW = isLeaning ? pageHeight : pageWidth;
+                const visualH = isLeaning ? pageWidth : pageHeight;
 
-                    // POINT MAPPING: Convert UI % to PDF points
+                for (const el of pageState.elements) {
+                    // Visual points from percentage
                     const px = (el.x / 100) * visualW;
                     const py = (el.y / 100) * visualH;
 
-                    let finalX = 0;
-                    let finalY = 0;
+                    let x_pdf = 0;
+                    let y_pdf = 0;
 
-                    // CONVERSION: Map visual (top-left) to PDF (bottom-left)
+                    /**
+                     * CRITICAL FIX: Robust Coordinate Mapping for Rotated Pages
+                     * PDF-Lib coordinate (0,0) is always bottom-left of the MediaBox.
+                     * Page rotation attribute (Rotate) shifts the perceived origin for viewers.
+                     */
                     if (pageRotation === 0) {
-                        finalX = px;
-                        finalY = pageHeight - py;
+                        x_pdf = px;
+                        y_pdf = pageHeight - py;
                     } else if (pageRotation === 90) {
-                        finalX = py;
-                        finalY = px;
+                        x_pdf = py;
+                        y_pdf = px;
                     } else if (pageRotation === 180) {
-                        finalX = pageWidth - px;
-                        finalY = py;
+                        x_pdf = pageWidth - px;
+                        y_pdf = py;
                     } else if (pageRotation === 270) {
-                        finalX = pageWidth - py;
-                        finalY = pageHeight - px;
+                        x_pdf = pageWidth - py;
+                        y_pdf = pageHeight - px;
                     }
 
-                    const x = ox + finalX;
-                    const y = oy + finalY;
+                    const x = ox + x_pdf;
+                    const y = oy + y_pdf;
+
+                    // All elements must also be rotated relative to the page's coordinate system
+                    const elRotDeg = (el as any).rotation || 0;
+                    const finalRotation = degrees(elRotDeg - pageRotation);
 
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
@@ -503,7 +512,8 @@ export default function PdfEditor() {
                             size: el.size, 
                             font, 
                             color: hexToRgb(el.color), 
-                            opacity: el.opacity / 100 
+                            opacity: el.opacity / 100,
+                            rotate: finalRotation
                         });
                     } else if (el.type === 'mask' || el.type === 'highlight' || el.type === 'shape') {
                         const shapeW = (el.width / 100) * visualW;
@@ -514,7 +524,8 @@ export default function PdfEditor() {
                             width: shapeW,
                             height: shapeH,
                             color: hexToRgb(el.color),
-                            opacity: el.opacity / 100
+                            opacity: el.opacity / 100,
+                            rotate: finalRotation
                         });
                     } else if (el.type === 'image') {
                         const imgBuffer = await getImageBytes(el.src);
@@ -529,11 +540,12 @@ export default function PdfEditor() {
                             y: y - imgH, 
                             width: imgW, 
                             height: imgH, 
-                            rotate: degrees(-el.rotation), 
+                            rotate: finalRotation, 
                             opacity: el.opacity / 100 
                         });
                     } else if (el.type === 'arrow') {
-                        const angleRad = (el.rotation * Math.PI) / 180;
+                        // Arrow rotation logic also needs to be relative to the coordinate system
+                        const angleRad = ((elRotDeg - pageRotation) * Math.PI) / 180;
                         const len = (el.length / 100) * visualW;
                         const endX = x + Math.cos(angleRad) * len;
                         const endY = y - Math.sin(angleRad) * len;
@@ -544,21 +556,6 @@ export default function PdfEditor() {
                             thickness: el.thickness,
                             color: hexToRgb(el.color),
                             opacity: el.opacity / 100
-                        });
-                        
-                        const headSize = el.thickness * 4;
-                        const headAngle = Math.PI / 6;
-                        pdfPage.drawLine({
-                            start: { x: endX, y: endY },
-                            end: { x: endX - headSize * Math.cos(angleRad - headAngle), y: endY + headSize * Math.sin(angleRad - headAngle) },
-                            thickness: el.thickness,
-                            color: hexToRgb(el.color)
-                        });
-                        pdfPage.drawLine({
-                            start: { x: endX, y: endY },
-                            end: { x: endX - headSize * Math.cos(angleRad + headAngle), y: endY + headSize * Math.sin(angleRad + headAngle) },
-                            thickness: el.thickness,
-                            color: hexToRgb(el.color)
                         });
                     }
                 }
@@ -576,7 +573,7 @@ export default function PdfEditor() {
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `GR7-Edited-${pdfFile.name}`;
+            link.download = `Edited_${pdfFile.name}`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -607,10 +604,9 @@ export default function PdfEditor() {
                         </div>
                         <Separator orientation="vertical" className="h-6 opacity-10 mx-2" />
                         <div className="flex items-center gap-1 md:gap-2">
-                            <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg hover:bg-primary/90 hover:text-primary-foreground" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> TEXT</Button>
+                            <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> TEXT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
-                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
                             
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -618,14 +614,14 @@ export default function PdfEditor() {
                                         <Pencil className="size-3.5 mr-1.5"/> SIGN
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-48 p-2 rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900 z-[110]">
-                                    <DropdownMenuItem onClick={() => overlayImgInputRef.current?.click()} className="flex items-center gap-2 py-2.5 px-3 cursor-pointer rounded-lg hover:bg-muted font-bold text-xs">
-                                        <UploadCloud className="size-4 text-blue-500" />
-                                        UPLOAD SIGNATURE
+                                <DropdownMenuContent align="start" className="w-56 p-2 rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900 z-[110]">
+                                    <DropdownMenuItem onClick={() => overlayImgInputRef.current?.click()} className="flex items-center gap-2 py-3 px-4 cursor-pointer rounded-lg hover:bg-muted font-bold text-xs uppercase">
+                                        <ImageIcon className="size-4 text-blue-500" />
+                                        upload signature
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => setIsSignDialogOpen(true)} className="flex items-center gap-2 py-2.5 px-3 cursor-pointer rounded-lg hover:bg-muted font-bold text-xs">
+                                    <DropdownMenuItem onClick={() => setIsSignDialogOpen(true)} className="flex items-center gap-2 py-3 px-4 cursor-pointer rounded-lg hover:bg-muted font-bold text-xs uppercase">
                                         <Pencil className="size-4 text-emerald-500" />
-                                        ADD SIGN (DRAW)
+                                        add sign
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
@@ -680,7 +676,7 @@ export default function PdfEditor() {
                                     <p className="text-[10px] md:text-sm font-bold uppercase opacity-60 mt-1">100% Private local rendering.</p>
                                 </div>
                             </div>
-                            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
+                            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                         </CardContent>
                         <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
@@ -726,7 +722,7 @@ export default function PdfEditor() {
                                                                 value={el.text} 
                                                                 onChange={e => updateElement({ text: e.target.value })} 
                                                                 onBlur={commitChange} 
-                                                                className="bg-transparent border-none font-bold outline-none focus:ring-0 px-2 placeholder:text-white/20" 
+                                                                className="bg-transparent border-none font-bold outline-none focus:ring-0 px-2 placeholder:text-white/20 text-white" 
                                                                 style={{ fontSize: `${el.size}px`, fontFamily: el.font, color: el.color, minWidth: '50px' }} 
                                                                 autoFocus 
                                                                 onMouseDown={(e) => e.stopPropagation()} 
