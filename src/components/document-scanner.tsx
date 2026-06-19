@@ -1,3 +1,4 @@
+
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -38,6 +39,7 @@ import {
     ShieldCheck,
     Share2,
     Archive,
+    FileArchive,
     Edit3,
     CheckCircle,
     LayoutGrid,
@@ -141,8 +143,12 @@ export default function DocumentScanner() {
   const [isSharing, setIsSharing] = useState(false);
   const [batchProgress, setBatchProgress] = useState<{current: number, total: number} | null>(null);
 
+  // Initialize with 8 points for the magnet logic
   const [points, setPoints] = useState<Point[]>([
-    { x: 10, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 90 }, { x: 10, y: 90 }
+    { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
+    { x: 90, y: 50 }, { x: 90, y: 90 },                   
+    { x: 50, y: 90 }, { x: 10, y: 90 },                   
+    { x: 10, y: 50 }                                      
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -192,10 +198,6 @@ export default function DocumentScanner() {
         stopCamera();
         setStage('adjust');
     }
-  };
-
-  const resetDots = (w: number, h: number) => {
-    setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
   };
 
   const resetAdjustments = () => {
@@ -709,7 +711,7 @@ export default function DocumentScanner() {
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-10 shadow-3xl border-4 border-white" style={{ touchAction: 'none' }}>
                             {cropMode === 'rect' ? (
-                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
+                                <ReactCrop crop={rectCrop} onChange={(c) => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)}>
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
