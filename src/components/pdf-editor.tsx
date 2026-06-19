@@ -54,6 +54,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -154,6 +160,7 @@ export default function PdfEditor() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
+    const [isSignDialogOpen, setIsSignDialogOpen] = useState(false);
     
     const [history, setHistory] = useState<PageState[][]>([]);
     const [historyIndex, setHistoryIndex] = useState(-1);
@@ -518,7 +525,7 @@ export default function PdfEditor() {
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
                         
                         pdfPage.drawImage(embeddedImg, { 
-                            x, 
+                            x: x, 
                             y: y - imgH, 
                             width: imgW, 
                             height: imgH, 
@@ -604,8 +611,26 @@ export default function PdfEditor() {
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><ArrowUpRight className="size-3.5 mr-1.5"/> ARROW</Button>
-                            <Dialog>
-                                <DialogTrigger asChild><Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5"><Pencil className="size-3.5 mr-1.5"/> SIGN</Button></DialogTrigger>
+                            
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5">
+                                        <Pencil className="size-3.5 mr-1.5"/> SIGN
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="start" className="w-48 p-2 rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900 z-[110]">
+                                    <DropdownMenuItem onClick={() => overlayImgInputRef.current?.click()} className="flex items-center gap-2 py-2.5 px-3 cursor-pointer rounded-lg hover:bg-muted font-bold text-xs">
+                                        <UploadCloud className="size-4 text-blue-500" />
+                                        UPLOAD SIGNATURE
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setIsSignDialogOpen(true)} className="flex items-center gap-2 py-2.5 px-3 cursor-pointer rounded-lg hover:bg-muted font-bold text-xs">
+                                        <Pencil className="size-4 text-emerald-500" />
+                                        ADD SIGN (DRAW)
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
+                            <Dialog open={isSignDialogOpen} onOpenChange={setIsSignDialogOpen}>
                                 <DialogContent className="max-w-md bg-slate-900 border-white/10 text-white shadow-3xl rounded-[2.5rem]">
                                     <DialogHeader><DialogTitle className="uppercase font-black tracking-widest text-primary">Handwriting Signature</DialogTitle></DialogHeader>
                                     <div className="bg-white rounded-xl overflow-hidden touch-none border-4 border-primary/20 shadow-inner">
@@ -613,10 +638,11 @@ export default function PdfEditor() {
                                     </div>
                                     <DialogFooter className="gap-2 pt-4">
                                         <Button variant="ghost" onClick={() => drawingCanvasRef.current?.getContext('2d')?.clearRect(0,0,400,200)} className="font-black text-[10px] uppercase text-white/60">Clear Pad</Button>
-                                        <Button onClick={saveDrawnSignature} className="bg-primary text-black font-black uppercase text-[10px] px-8 hover:bg-primary/90 hover:text-primary-foreground">Add to PDF</Button>
+                                        <Button onClick={() => { saveDrawnSignature(); setIsSignDialogOpen(false); }} className="bg-primary text-black font-black uppercase text-[10px] px-8 hover:bg-primary/90 hover:text-primary-foreground">Add to PDF</Button>
                                     </DialogFooter>
                                 </DialogContent>
                             </Dialog>
+
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={() => overlayImgInputRef.current?.click()}><ImageIcon className="size-3.5 mr-1.5"/> IMAGE</Button>
                         </div>
                     </div>
