@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -158,6 +157,15 @@ export default function DocumentScanner() {
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  const resetDots = () => {
+    setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
+  };
+
+  const resetAdjustments = () => {
+      setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]);
+      setActiveFilter('original');
+  };
+
   const startCamera = async () => {
     setIsCameraStarting(true);
     setStage('camera');
@@ -202,18 +210,6 @@ export default function DocumentScanner() {
     }
   };
 
-<<<<<<< HEAD
-=======
-  const resetDots = () => {
-    setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
-  };
-
-  const resetAdjustments = () => {
-      setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]);
-      setActiveFilter('original');
-  };
-
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
   const handleFilesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const filesList = e.target.files;
     if (!filesList || filesList.length === 0) return;
@@ -348,7 +344,6 @@ export default function DocumentScanner() {
         for (let i = 0; i < pixels.length; i += 4) {
             let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-<<<<<<< HEAD
             
             if (activeFilter === 'bw' || activeFilter === 'gray' || activeFilter === 'docu') {
               r = g = b = luma;
@@ -363,23 +358,6 @@ export default function DocumentScanner() {
               b = luma + (b - luma) * sF; 
             }
 
-=======
-            if (activeFilter === 'bw') {
-                r = g = b = luma > 128 ? 255 : 0;
-            } else if (activeFilter === 'document') {
-                r = g = b = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma;
-            } else if (activeFilter === 'gray') {
-                r = g = b = luma;
-            } else if (activeFilter === 'magic' || activeFilter === 'ai_enhance') {
-                const boost = activeFilter === 'ai_enhance' ? 1.2 : 1.15;
-                r = Math.min(255, r * boost); 
-                g = Math.min(255, g * boost); 
-                b = Math.min(255, b * boost); 
-            }
-            if (activeFilter !== 'bw' && activeFilter !== 'gray') { 
-                r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF; 
-            }
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
             pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
             pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cF + 0.5) * 255 * bF));
             pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cF + 0.5) * 255 * bF));
@@ -760,11 +738,7 @@ export default function DocumentScanner() {
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white my-10 shadow-3xl border-4 border-white" style={{ touchAction: 'none' }}>
                             {cropMode === 'rect' ? (
-<<<<<<< HEAD
                                 <ReactCrop crop={crop} onChange={(c) => setCrop(c)} onComplete={c => setCompletedRectCrop(c)}>
-=======
-                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
@@ -819,7 +793,6 @@ export default function DocumentScanner() {
                         <div className="w-full space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Fidelity Filters</Label>
-<<<<<<< HEAD
                             </div>
                             <div className="grid grid-cols-6 gap-1 w-full">
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); setSharpness([1.0]); }} />
@@ -828,18 +801,6 @@ export default function DocumentScanner() {
                                 <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([120]); setSaturation([100]); setSharpness([0.5]); }} />
                                 <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([83]); setSaturation([0]); setSharpness([1.6]); }} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={X} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }} />
-=======
-                                <Button size="sm" variant="ghost" className="h-7 text-[8px] font-black uppercase text-primary bg-primary/5 hover:bg-primary/10 rounded-full" onClick={() => { setActiveFilter('ai_enhance'); setBrightness([125]); setContrast([130]); setSaturation([120]); setSharpness([4.0]); }}><Wand2 className="size-3 mr-1" /> SMART ENHANCE</Button>
-                            </div>
-                            <div className="grid grid-cols-7 gap-1 w-full">
-                                <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }} />
-                                <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); setSharpness([3.0]); }} />
-                                <FilterBtn active={activeFilter === 'ai_enhance'} label="AI Pro" icon={Wand2} onClick={() => { setActiveFilter('ai_enhance'); setBrightness([125]); setContrast([130]); setSaturation([120]); setSharpness([4.0]); }} />
-                                <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); setSaturation([0]); setSharpness([4.0]); }} />
-                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([108]); setContrast([112]); setSaturation([115]); setSharpness([1.5]); }} />
-                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([120]); setContrast([110]); setSaturation([0]); setSharpness([2.0]); }} />
-                                <FilterBtn active={activeFilter === 'original'} label="None" icon={RefreshCcw} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }} />
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
                             </div>
                         </div>
                         <div className="w-full space-y-4 pt-4 border-t border-white/10">
@@ -864,14 +825,8 @@ export default function DocumentScanner() {
 function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, label: string, icon: any, onClick: () => void }) {
     return (
         <div className="flex flex-col items-center gap-1">
-<<<<<<< HEAD
             <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-10 w-10 rounded-xl shadow-md border-2 transition-all", active ? "bg-primary border-primary text-white scale-105" : "bg-white/50 border-white/20 hover:border-primary/40")} onClick={onClick}><Icon className="size-5"/></Button>
             <span className={cn("text-[7px] font-black uppercase", active ? "text-primary" : "text-muted-foreground")}>{label}</span>
-=======
-            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-9 w-9 rounded-xl shadow-md border-2", active ? "bg-primary border-primary text-white" : "bg-white/50 border-white/20")} onClick={onClick}><Icon className="size-4 md:size-5"/></Button>
-            <span className="text-[7px] font-black uppercase text-muted-foreground">{label}</span>
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
         </div>
     );
 }
-

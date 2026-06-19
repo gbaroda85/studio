@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -214,9 +213,6 @@ function SortablePage({
                         <DropdownMenuItem onClick={() => onInsertImage(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
                             <ImageIcon className="size-3.5 mr-2 text-blue-500" /> Upload Image
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onInsertPdf(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
-                            <FileText className="size-3.5 mr-2 text-emerald-500" /> Add PDF File
-                        </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
 
@@ -263,12 +259,6 @@ export default function PdfOrganizer() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const insertPdfInputRef = useRef<HTMLInputElement>(null);
     const insertImgInputRef = useRef<HTMLInputElement>(null);
-<<<<<<< HEAD
-    const insertPdfInputRef = useRef<HTMLInputElement>(null);
-    const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
-=======
-    const renderIdRef = useRef(0);
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -482,93 +472,6 @@ export default function PdfOrganizer() {
         insertImgInputRef.current?.click();
     };
 
-<<<<<<< HEAD
-    const onInsertPdfClick = (afterId: string) => {
-        setInsertAfterId(afterId);
-        insertPdfInputRef.current?.click();
-    };
-
-    const handleInsertImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !insertAfterId) return;
-
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            const src = ev.target?.result as string;
-            const imgId = `img-${Math.random().toString(36).substr(2, 9)}`;
-            const imgPage: PageItem = { 
-                id: imgId, 
-                index: -1, 
-                rotation: 0, 
-                isDeleted: false, 
-                previewSrc: src, 
-                type: 'image' 
-            };
-            
-            setPages(prev => {
-                const index = prev.findIndex(p => p.id === insertAfterId);
-                const next = [...prev];
-                next.splice(index + 1, 0, imgPage);
-                return next;
-            });
-            setInsertAfterId(null);
-            toast({ title: "Image Inserted as Page" });
-        };
-        reader.readAsDataURL(file);
-    };
-
-    const handleInsertPdfChange = async (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !insertAfterId || file.type !== 'application/pdf') return;
-
-        setIsRendering(true);
-        try {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjs.getDocument({ 
-                data: new Uint8Array(arrayBuffer),
-                cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-                cMapPacked: true
-            }).promise;
-
-            const insertedPages: PageItem[] = [];
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 1.0 });
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    canvas.height = viewport.height; canvas.width = viewport.width;
-                    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    await page.render({ canvasContext: ctx, viewport }).promise;
-                    insertedPages.push({
-                        id: `p-ins-${i}-${Date.now()}-${Math.random()}`,
-                        index: -1, 
-                        rotation: 0,
-                        isDeleted: false,
-                        previewSrc: canvas.toDataURL('image/jpeg', 0.8),
-                        type: 'original' // Treating as original since it's from a PDF source
-                    });
-                }
-            }
-
-            setPages(prev => {
-                const index = prev.findIndex(p => p.id === insertAfterId);
-                const next = [...prev];
-                next.splice(index + 1, 0, ...insertedPages);
-                return next;
-            });
-            setInsertAfterId(null);
-            toast({ title: "PDF Pages Inserted", description: `Added ${pdf.numPages} pages.` });
-        } catch (err) {
-            toast({ variant: 'destructive', title: "Insertion Error" });
-        } finally {
-            setIsRendering(false);
-            if (e.target) e.target.value = "";
-        }
-    };
-
-=======
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
     const rotateAll = (deg: number) => {
         setPages(prev => prev.map(p => ({ ...p, rotation: deg === 0 ? 0 : (p.rotation + deg) % 360 })));
         setResultPdfUrl(null);
@@ -668,7 +571,7 @@ export default function PdfOrganizer() {
                 <div className="lg:col-span-8 h-full flex flex-col min-h-[450px]">
                     {!pdfFile ? (
                         <Card className={cn(
-                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer h-[500px] flex flex-col",
+                            "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer h-[500px] flex flex-col",
                             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                         )}
                             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
@@ -895,14 +798,8 @@ export default function PdfOrganizer() {
                 </DialogContent>
             </Dialog>
 
-<<<<<<< HEAD
-            <input ref={insertImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleInsertImageChange} />
-            <input ref={insertPdfInputRef} type="file" className="hidden" accept="application/pdf" onChange={handleInsertPdfChange} />
-=======
-            {/* HIDDEN INPUTS FOR INSERTION */}
             <input ref={insertPdfInputRef} type="file" className="hidden" accept="application/pdf" onChange={onInsertPdfChange} />
             <input ref={insertImgInputRef} type="file" className="hidden" accept="image/*" onChange={onInsertImageChange} />
->>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
         </div>
     );
 }
