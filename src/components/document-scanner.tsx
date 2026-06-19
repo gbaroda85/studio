@@ -42,8 +42,8 @@ import {
     Edit3,
     CheckCircle,
     LayoutGrid,
-    BrainCircuit,
-    Share2
+    Share2,
+    Square
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -57,7 +57,6 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
-import { enhancePhoto } from '@/ai/flows/enhance-photo-flow';
 
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -91,7 +90,7 @@ function solvePerspective(src: Point[], dst: Point[]) {
     return x;
 }
 
-type ScanFilter = 'original' | 'magic' | 'photo' | 'bw' | 'gray' | 'ai_enhance';
+type ScanFilter = 'original' | 'magic' | 'docu' | 'photo' | 'bw' | 'gray';
 type Stage = 'viewfinder' | 'camera' | 'adjust';
 
 interface ScannedPage {
@@ -139,7 +138,6 @@ export default function DocumentScanner() {
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
   const [isCameraStarting, setIsCameraStarting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
@@ -202,11 +200,6 @@ export default function DocumentScanner() {
         stopCamera();
         setStage('adjust');
     }
-  };
-
-  const resetAdjustments = () => {
-      setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]);
-      setActiveFilter('original');
   };
 
   const handleFilesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -282,48 +275,6 @@ export default function DocumentScanner() {
       setIsImageReady(false);
   };
 
-  const getOptimizedPayload = async (src: string): Promise<string> => {
-      return new Promise((resolve) => {
-          const img = new window.Image();
-          img.src = src;
-          img.onload = () => {
-              const canvas = document.createElement('canvas');
-              const ctx = canvas.getContext('2d');
-              if (!ctx) return resolve(src);
-              const MAX_WIDTH = 1200; 
-              let width = img.width;
-              let height = img.height;
-              if (width > MAX_WIDTH) {
-                  height *= MAX_WIDTH / width;
-                  width = MAX_WIDTH;
-              }
-              canvas.width = width;
-              canvas.height = height;
-              ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.5)); 
-          };
-      });
-  };
-
-  const handleAiEnhance = async () => {
-    if (!currentRawImage) return;
-    setIsAiProcessing(true);
-    try {
-        const optimized = await getOptimizedPayload(currentRawImage);
-        const result = await enhancePhoto({ photoDataUri: optimized });
-        if (result?.imageDataUri) {
-            setCurrentRawImage(result.imageDataUri);
-            setActiveFilter('ai_enhance');
-            toast({ title: "AI Enhancement Ready", description: "Image optimized using Neural details." });
-        }
-    } catch (error: any) {
-        console.error(error);
-        toast({ variant: 'destructive', title: "AI limit reached", description: "Cloud AI process failed. Using local filters." });
-    } finally {
-        setIsAiProcessing(false);
-    }
-  };
-
   const applyIntelligentScan = useCallback(async (isHighRes = false): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
@@ -386,16 +337,14 @@ export default function DocumentScanner() {
             let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
             
-            // Filter Specific Overrides
-            if (activeFilter === 'bw' || activeFilter === 'gray') {
+            if (activeFilter === 'bw' || activeFilter === 'gray' || activeFilter === 'docu') {
               r = g = b = luma;
             }
             if (activeFilter === 'bw') {
               r = g = b = luma > 128 ? 255 : 0;
             }
             
-            // Saturation logic for colored filters
-            if (activeFilter !== 'bw' && activeFilter !== 'gray') { 
+            if (activeFilter !== 'bw' && activeFilter !== 'gray' && activeFilter !== 'docu') { 
               r = luma + (r - luma) * sF; 
               g = luma + (g - luma) * sF; 
               b = luma + (b - luma) * sF; 
@@ -549,19 +498,24 @@ export default function DocumentScanner() {
   const handleDownloadPdf = async () => {
     if (scannedPages.length === 0) return;
     setIsGenerating(true);
-    const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
-    const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
-    for (let i = 0; i < scannedPages.length; i++) {
-        if (i > 0) pdf.addPage();
-        const p = scannedPages[i];
-        const img = await ensureImageLoaded(p.processedSrc);
-        const props = pdf.getImageProperties(img);
-        const ratio = Math.min(pageWidth / props.width, pageHeight / props.height);
-        const fw = props.width * ratio, fh = props.height * ratio;
-        pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - fw) / 2, (pageHeight - fh) / 2, fw, fh, undefined, 'FAST');
+    try {
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+        const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
+        for (let i = 0; i < scannedPages.length; i++) {
+            if (i > 0) pdf.addPage();
+            const p = scannedPages[i];
+            const img = await ensureImageLoaded(p.processedSrc);
+            const props = pdf.getImageProperties(img);
+            const ratio = Math.min(pageWidth / props.width, pageHeight / props.height);
+            const fw = props.width * ratio, fh = props.height * ratio;
+            pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - fw) / 2, (pageHeight - fh) / 2, fw, fh, undefined, 'FAST');
+        }
+        pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
+    } catch (e) {
+        toast({ variant: 'destructive', title: 'Export Failed' });
+    } finally {
+        setIsGenerating(false);
     }
-    pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
-    setIsGenerating(false);
   };
 
   const handleDownloadIndividualJpg = (page: ScannedPage, index: number) => {
@@ -744,11 +698,11 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'camera' && (
-            <div className="flex flex-col items-center justify-center px-4 animate-in zoom-in-95 duration-500 min-h-[60vh]">
+            <div className="flex flex-col items-center justify-center px-4 animate-in zoom-in-95 duration-500 min-h-[60vh] py-10">
                 <Card className="w-full max-w-3xl border-none shadow-3xl rounded-[3rem] overflow-hidden bg-black relative">
                     <div className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 text-white text-[10px] font-black uppercase tracking-widest"><ScanLine className="size-3 text-primary animate-pulse" /> Live Viewfinder</div>
                     <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto object-contain max-h-[75vh]" />
-                    {isCameraStarting && <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 gap-4"><Loader2 className="size-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-white">Opening Camera...</p></div>}
+                    {isCameraStarting && <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 gap-4"><Loader2 className="size-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-white">Opening Lens...</p></div>}
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6">
                         <Button className="size-20 rounded-full bg-white text-black p-0 shadow-3xl hover:scale-110 active:scale-95 transition-all ring-8 ring-white/20 border-8 border-slate-900" onClick={captureFrame}><Camera className="size-10"/></Button>
                         <Button variant="ghost" onClick={() => { stopCamera(); setStage('viewfinder'); }} className="bg-black/40 text-white hover:bg-black/60 rounded-full px-6 font-black uppercase text-[10px] border border-white/10">Cancel</Button>
@@ -817,11 +771,11 @@ export default function DocumentScanner() {
                     <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden h-full">
                         <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[400px] flex items-center justify-center overflow-hidden">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
-                            {(isProcessing || isAiProcessing) && (
+                            {isProcessing && (
                                 <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10">
                                     <Loader2 className="animate-spin size-8 text-primary" />
                                     <p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">
-                                        {isAiProcessing ? 'AI Enhancing...' : 'Rendering...'}
+                                        Rendering...
                                     </p>
                                 </div>
                             )}
@@ -831,21 +785,12 @@ export default function DocumentScanner() {
                         <div className="w-full space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Fidelity Filters</Label>
-                                <Button 
-                                    size="sm" 
-                                    variant="outline" 
-                                    onClick={handleAiEnhance} 
-                                    disabled={isAiProcessing}
-                                    className={cn("h-7 px-4 rounded-full border-2 font-black text-[8px] uppercase", activeFilter === 'ai_enhance' ? "bg-primary text-white border-primary" : "bg-primary/5 text-primary border-primary/20")}
-                                >
-                                    {isAiProcessing ? <Loader2 className="size-2.5 animate-spin mr-1" /> : <BrainCircuit className="size-2.5 mr-1" />}
-                                    AI ENHANCE
-                                </Button>
                             </div>
-                            <div className="grid grid-cols-5 gap-1 w-full">
+                            <div className="grid grid-cols-6 gap-1 w-full">
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); setSharpness([1.0]); }} />
+                                <FilterBtn active={activeFilter === 'docu'} label="Docu" icon={FileText} onClick={() => { setActiveFilter('docu'); setBrightness([140]); setContrast([140]); setSaturation([100]); setSharpness([1.5]); }} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); setSharpness([2.0]); }} />
-                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([125]); setSaturation([115]); setSharpness([0.5]); }} />
+                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([120]); setSaturation([100]); setSharpness([0.5]); }} />
                                 <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([83]); setSaturation([0]); setSharpness([1.6]); }} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={X} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }} />
                             </div>
@@ -856,9 +801,6 @@ export default function DocumentScanner() {
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Saturation</span><span>{saturation[0]}%</span></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Sharpness</span><span>{sharpness[0]}x</span></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Contrast</span><span>{contrast[0]}%</span></div><Slider min={50} max={250} step={1} value={contrast} onValueChange={setContrast} /></div>
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                                <Button variant="outline" size="sm" onClick={resetAdjustments} className="w-full h-10 text-[9px] font-black uppercase border-2 rounded-lg"><RefreshCcw className="size-3 mr-2" /> Reset Tuning</Button>
                             </div>
                         </div>
                     </CardFooter>
@@ -880,4 +822,3 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
-
