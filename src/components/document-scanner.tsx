@@ -15,7 +15,6 @@ import {
     CheckCircle2,
     Zap, 
     ScanLine,
-    RotateCw,
     Sparkles,
     Maximize,
     Move,
@@ -29,32 +28,19 @@ import {
     FileStack,
     Layers,
     Smartphone,
-    SearchCode,
-    Type,
     Wand2,
-    RotateCcw,
     Eye,
     Droplets,
-    Sun,
-    Contrast,
-    FileArchive,
     Highlighter,
     Scan,
-    Grid3X3,
     Monitor,
     ImageIcon,
-    Grip,
-    Circle,
     ShieldCheck,
     Share2,
     Archive,
-    FileDigit,
     Edit3,
-    CameraIcon,
-    Images,
     CheckCircle,
     LayoutGrid,
-    SkipForward,
     ChevronRight as ChevronRightIcon,
     ChevronLeft as ChevronLeftIcon
 } from 'lucide-react';
@@ -68,7 +54,6 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -157,10 +142,7 @@ export default function DocumentScanner() {
   const [batchProgress, setBatchProgress] = useState<{current: number, total: number} | null>(null);
 
   const [points, setPoints] = useState<Point[]>([
-    { x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, 
-    { x: 90, y: 50 }, { x: 90, y: 90 },                   
-    { x: 50, y: 90 }, { x: 10, y: 90 },                   
-    { x: 10, y: 50 }                                      
+    { x: 10, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 90 }, { x: 10, y: 90 }
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
   const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
@@ -209,11 +191,10 @@ export default function DocumentScanner() {
         setIsImageReady(false);
         stopCamera();
         setStage('adjust');
-        resetDots();
     }
   };
 
-  const resetDots = () => {
+  const resetDots = (w: number, h: number) => {
     setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
   };
 
@@ -308,7 +289,8 @@ export default function DocumentScanner() {
     const workH = Math.round(originalHeight * activeScale);
 
     if (cropMode === 'rect') {
-        const c = completedRectCrop || { x: 5, y: 5, width: 90, height: 90, unit: 'px' } as PixelCrop;
+        const c = completedRectCrop;
+        if (!c) return "";
         const scaleX = originalWidth / image.width;
         const scaleY = originalHeight / image.height;
         cropCanvas.width = Math.max(10, Math.round(c.width * scaleX * activeScale));
@@ -399,7 +381,20 @@ export default function DocumentScanner() {
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness]);
 
-  const onImageLoad = () => setIsImageReady(true);
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { width, height } = e.currentTarget;
+    const initialCrop = centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+    setRectCrop(initialCrop);
+    setCompletedRectCrop({
+        unit: 'px',
+        x: (initialCrop.x / 100) * width,
+        y: (initialCrop.y / 100) * height,
+        width: (initialCrop.width / 100) * width,
+        height: (initialCrop.height / 100) * height
+    });
+    setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
+    setIsImageReady(true);
+  };
 
   const handleConfirmAdd = async (goToNext = false) => {
     setIsProcessing(true);
@@ -567,7 +562,6 @@ export default function DocumentScanner() {
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 items-stretch w-full px-4 min-h-[70vh]">
                 
-                {/* LEFT: PENDING PAGES */}
                 <div className="lg:col-span-4 flex flex-col">
                     <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] flex-1">
                         <CardHeader className="bg-muted/30 border-b p-6 flex items-center justify-between">
@@ -605,7 +599,6 @@ export default function DocumentScanner() {
                     </Card>
                 </div>
 
-                {/* MIDDLE: SCANNER CONTROL */}
                 <div className="lg:col-span-4 flex flex-col">
                     <Card className="w-full border-2 border-dashed bg-card/50 text-center rounded-[3rem] overflow-hidden shadow-lg hover:border-primary/40 transition-all flex-1 flex flex-col justify-center">
                         <CardHeader className="pt-8 pb-4 shrink-0">
@@ -628,7 +621,6 @@ export default function DocumentScanner() {
                     </Card>
                 </div>
 
-                {/* RIGHT: SCANNED BUNDLE */}
                 <div className="lg:col-span-4 flex flex-col">
                     <Card className="border-2 shadow-lg flex flex-col bg-card/50 rounded-[3rem] flex-1">
                         <CardHeader className="bg-emerald-500/5 border-b p-6 flex items-center justify-between">
@@ -704,15 +696,20 @@ export default function DocumentScanner() {
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-5 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle></div>
                         <div className="flex items-center gap-4">
-                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border"><TabsList className="h-9 w-[160px]"><TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger><TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger></TabsList></Tabs>
+                            <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
+                                <TabsList className="h-9 w-[160px]">
+                                    <TabsTrigger value="rect" className="text-[10px] font-black uppercase">RECT</TabsTrigger>
+                                    <TabsTrigger value="scanner" className="text-[10px] font-black uppercase">SCANNER</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
                             <Button variant="ghost" className="h-9 w-9 rounded-full text-destructive" onClick={() => setStage('viewfinder')}><X className="size-5"/></Button>
                         </div>
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-slate-200 dark:bg-black/40 flex-1"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-10 shadow-3xl border-4 border-white">
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-10 shadow-3xl border-4 border-white" style={{ touchAction: 'none' }}>
                             {cropMode === 'rect' ? (
-                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedCrop(c)}>
+                                <ReactCrop crop={rectCrop} onChange={(_, p) => setRectCrop(p)} onComplete={c => setCompletedRectCrop(c)}>
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
