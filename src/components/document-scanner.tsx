@@ -284,8 +284,8 @@ export default function DocumentScanner() {
               const canvas = document.createElement('canvas');
               const ctx = canvas.getContext('2d');
               if (!ctx) return resolve(src);
-              // CRITICAL: Reducing size further for cloud processing stability
-              const MAX_WIDTH = 1000; 
+              // CRITICAL: Reducing size for cloud processing stability to prevent 413 error
+              const MAX_WIDTH = 800; 
               let width = img.width;
               let height = img.height;
               if (width > MAX_WIDTH) {
@@ -295,7 +295,7 @@ export default function DocumentScanner() {
               canvas.width = width;
               canvas.height = height;
               ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.7)); // 0.7 quality for small payload
+              resolve(canvas.toDataURL('image/jpeg', 0.6)); 
           };
       });
   };
