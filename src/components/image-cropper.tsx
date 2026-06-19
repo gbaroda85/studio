@@ -189,13 +189,17 @@ export default function ImageCropper() {
     if (!ctx) return;
 
     if (cropMode === 'perspective') {
-        const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
-        const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
-        const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
-        const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
+        const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
+            x: p.x * (image.naturalWidth / 100), 
+            y: p.y * (image.naturalHeight / 100) 
+        }));
+        const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+        const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
+        const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
+        const h2 = Math.hypot(corners[2].x - corners[1].x, corners[2].y - corners[1].y);
         
-        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
-        let targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
+        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2)));
+        let targetHeight = Math.max(10, Math.floor(Math.max(h1, h2)));
 
         if (aspect) {
             targetHeight = targetWidth / aspect;
@@ -369,11 +373,19 @@ export default function ImageCropper() {
             {croppedImageSrc && (
                 <Button 
                     size="lg" 
+<<<<<<< HEAD
                     className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-1 md:flex-none shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                     onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}
                 >
                     <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                     <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD PHOTO</span>
+=======
+                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                    onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}
+                >
+                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD HD</span>
+>>>>>>> 6237032cb9ec34605f574edecac7ea0b96b929e7
                     <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                         <Download className="size-6 group-hover:scale-110 transition-transform" />
                         <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />

@@ -159,7 +159,6 @@ export default function ColorPicker() {
     
     // Sampler State
     const [samplerImage, setSamplerImage] = useState<string | null>(null);
-    const [isDragOver, setIsDragOver] = useState(false);
     const samplerCanvasRef = useRef<HTMLCanvasElement>(null);
     const samplerImgRef = useRef<HTMLImageElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -236,11 +235,9 @@ export default function ColorPicker() {
             clientY = e.clientY;
         }
 
-        // Calculate click position relative to the image
         const x_css = clientX - rect.left;
         const y_css = clientY - rect.top;
 
-        // Map CSS coordinates to natural image coordinates
         const scaleX = img.naturalWidth / rect.width;
         const scaleY = img.naturalHeight / rect.height;
         const x = Math.floor(x_css * scaleX);
@@ -251,7 +248,6 @@ export default function ColorPicker() {
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
         if (!ctx) return;
 
-        // Redraw image to canvas if needed (once per load is better but let's keep it robust)
         canvas.width = img.naturalWidth;
         canvas.height = img.naturalHeight;
         ctx.drawImage(img, 0, 0);
@@ -262,6 +258,9 @@ export default function ColorPicker() {
         setColor(hex);
         addToHistory(hex);
     };
+
+    // DROPPER CURSOR DEFINITION
+    const dropperCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 22 1-1h3l9-9'/%3E%3Cpath d='M3 21v-3l9-9'/%3E%3Cpath d='m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l-3-3Z'/%3E%3Ccircle cx='4' cy='20' r='1' fill='white'/%3E%3C/svg%3E") 0 32, crosshair`;
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20 mx-auto">
@@ -281,14 +280,13 @@ export default function ColorPicker() {
                             <X className="mr-1.5 size-3 md:size-4" /> Clear Image
                         </Button>
                     )}
-                    <Button variant="outline" onClick={() => { setColor("#3B82F6"); handleReset(); }} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5">
+                    <Button variant="outline" onClick={() => { setColor("#3B82F6"); setHistory([]); }} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5">
                         <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset
                     </Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                {/* Main Viewport: Color Area / Image Sampler */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
@@ -311,9 +309,10 @@ export default function ColorPicker() {
                                         className="relative w-full h-full flex flex-col items-center justify-center gap-6"
                                     >
                                         <div 
-                                            className="relative max-w-full max-h-[500px] overflow-hidden rounded-3xl border-4 border-white shadow-2xl cursor-crosshair group"
+                                            className="relative max-w-full max-h-[500px] overflow-hidden rounded-3xl border-4 border-white shadow-2xl group transition-all"
                                             onMouseDown={handleSamplerClick}
                                             onTouchStart={handleSamplerClick}
+                                            style={{ cursor: dropperCursor }}
                                         >
                                             <img 
                                                 ref={samplerImgRef} 
@@ -324,7 +323,7 @@ export default function ColorPicker() {
                                             <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                         <div className="flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl">
-                                             <MousePointer2 className="size-3.5 text-primary animate-pulse" /> CLICK IMAGE TO SAMPLE PIXEL
+                                             <Pipette className="size-3.5 text-primary animate-pulse" /> CLICK IMAGE TO SAMPLE COLOR
                                         </div>
                                         <canvas ref={samplerCanvasRef} className="hidden" />
                                     </motion.div>
@@ -335,7 +334,6 @@ export default function ColorPicker() {
                                         animate={{ opacity: 1 }}
                                         className="w-full max-w-md flex flex-col gap-10"
                                     >
-                                        {/* Color Block */}
                                         <div 
                                             className="w-full aspect-video rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.3)] border-8 border-white flex flex-col items-center justify-center relative overflow-hidden group transition-all duration-500"
                                             style={{ backgroundColor: color }}
@@ -354,7 +352,6 @@ export default function ColorPicker() {
                                             </Button>
                                         </div>
 
-                                        {/* Inputs Grid */}
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <FormatInput label="HEX" value={color} onCopy={() => handleCopy(color, 'hex')} />
                                             <FormatInput label="RGB" value={`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`} onCopy={() => handleCopy(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'rgb')} />
@@ -367,7 +364,6 @@ export default function ColorPicker() {
                         </CardContent>
                     </Card>
 
-                    {/* History Strip */}
                     <Card className="border-2 shadow-xl bg-card/40 rounded-[2rem] overflow-hidden no-print">
                         <CardHeader className="p-4 bg-muted/30 border-b">
                             <div className="flex items-center gap-2">
@@ -399,7 +395,6 @@ export default function ColorPicker() {
                     </Card>
                 </div>
 
-                {/* Sidebar: Config */}
                 <div className="lg:col-span-5 space-y-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[3rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
@@ -422,7 +417,7 @@ export default function ColorPicker() {
                                             />
                                             <div className="flex-1 text-left">
                                                 <p className="text-[10px] font-black uppercase">Spectrum Wheel</p>
-                                                <p className="text-[8px] font-bold opacity-40 uppercase">Open native color system</p>
+                                                <p className="text-[8px] font-bold opacity-40 uppercase">Native OS Tool</p>
                                             </div>
                                             <Button 
                                                 variant="outline" 
@@ -456,40 +451,12 @@ export default function ColorPicker() {
                                 </div>
 
                                 <div className="space-y-4 pt-4 border-t border-dashed text-left">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Tints & Shades</Label>
-                                    <ScrollArea className="w-full whitespace-nowrap pb-2">
-                                        <div className="flex gap-1.5">
-                                            {shades.map((s, i) => (
-                                                <button 
-                                                    key={i} 
-                                                    className="size-8 rounded-md border shadow-sm shrink-0 transition-transform hover:scale-125" 
-                                                    style={{ backgroundColor: s }}
-                                                    onClick={() => setColor(s)}
-                                                    title={s}
-                                                />
-                                            ))}
-                                        </div>
-                                        <ScrollBar orientation="horizontal" />
-                                    </ScrollArea>
-                                </div>
-
-                                <div className="space-y-4 pt-4 border-t border-dashed text-left">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">AI Smart Palette</Label>
                                     <div className="grid gap-3">
                                         <PaletteRow label="Complementary" colors={[palette.complementary]} onPick={setColor} />
                                         <PaletteRow label="Analogous" colors={palette.analogous} onPick={setColor} />
                                         <PaletteRow label="Triadic" colors={palette.triadic} onPick={setColor} />
                                     </div>
-                                </div>
-                            </div>
-
-                            <div className="p-4 md:p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm text-left">
-                                <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">WCAG 2.1 Compliant</p>
-                                    <p className="text-[8px] md:text-[10px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
-                                        Contrast ratios are verified locally for web accessibility standards.
-                                    </p>
                                 </div>
                             </div>
                         </CardContent>
@@ -502,12 +469,6 @@ export default function ColorPicker() {
                                 <Copy className="size-8 text-white group-hover:scale-110 transition-transform" />
                                 <span className="uppercase tracking-tighter text-xl font-black">COPY HEX CODE</span>
                             </Button>
-                            
-                            <div className="flex items-center justify-center gap-8 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
-                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT SYNC</div>
-                                <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> DESIGNER PRO</div>
-                            </div>
                         </CardFooter>
                     </Card>
                 </div>
@@ -522,7 +483,7 @@ function FormatInput({ label, value, onCopy }: { label: string, value: string, o
             <Label className="text-[8px] font-black uppercase opacity-40 ml-1">{label}</Label>
             <div className="relative group">
                 <Input value={value} readOnly className="h-10 font-bold bg-white dark:bg-slate-900 border-2 rounded-xl pr-10 text-xs shadow-sm" />
-                <button onClick={onCopy} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/5 transition-all">
+                <button onClick={onCopy} className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-muted-foreground hover:text-primary transition-all">
                     <Copy className="size-3.5" />
                 </button>
             </div>
@@ -564,7 +525,6 @@ function PaletteRow({ label, colors, onPick }: { label: string, colors: string[]
                         className="size-8 rounded-lg border-2 border-white shadow-md transition-all hover:scale-125" 
                         style={{ backgroundColor: c }}
                         onClick={() => onPick(c)}
-                        title={c}
                     />
                 ))}
             </div>
