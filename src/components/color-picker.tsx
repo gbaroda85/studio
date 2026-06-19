@@ -1,6 +1,7 @@
+
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, type ChangeEvent } from 'react';
 import { 
     Palette, 
     Copy, 
@@ -259,7 +260,6 @@ export default function ColorPicker() {
         addToHistory(hex);
     };
 
-    // DROPPER CURSOR DEFINITION
     const dropperCursor = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 22 1-1h3l9-9'/%3E%3Cpath d='M3 21v-3l9-9'/%3E%3Cpath d='m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l-3-3Z'/%3E%3Ccircle cx='4' cy='20' r='1' fill='white'/%3E%3C/svg%3E") 0 32, crosshair`;
 
     return (
@@ -271,7 +271,7 @@ export default function ColorPicker() {
                     </div>
                     <div className="text-left">
                         <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Color <span className="text-primary">Studio</span></h2>
-                        <p className="text-[9px] font-bold opacity-40 uppercase tracking-widest mt-1">AI Palette & Image Sampler</p>
+                        <p className="text-[9px] font-bold opacity-40 uppercase tracking-widest mt-1 text-left">AI Palette & Image Sampler</p>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
