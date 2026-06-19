@@ -144,20 +144,20 @@ const ALL_TOOLS = [
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
     <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2.5rem] p-2 shadow-[0_15px_35px_-12px_rgba(0,0,0,0.12),0_4px_10px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.25)] dark:hover:shadow-[0_45px_100px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-3 hover:scale-[1.03] border-2 border-slate-100/80 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_2px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)] ring-1 ring-black/[0.03]">
-      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-5 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]", lightBg, "dark:bg-[#0a040d]/60")}>
-        {/* ENHANCED 3D ICON CONTAINER */}
+      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-4 shadow-[inset_0_1px_4px_rgba(0,0,0,0.02)]", lightBg, "dark:bg-[#0a040d]/60")}>
+        {/* COMPACT 3D ICON CONTAINER */}
         <div className={cn(
-          `size-14 md:size-16 rounded-[1.5rem] flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
-          "shadow-[inset_3px_3px_6px_rgba(255,255,255,0.5),inset_-3px_-3px_6px_rgba(0,0,0,0.3),0_15px_30px_-5px_rgba(0,0,0,0.3)]",
+          `size-12 md:size-14 rounded-[1.25rem] flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
+          "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.5),inset_-2px_-2px_4px_rgba(0,0,0,0.3),0_10px_20px_-5px_rgba(0,0,0,0.3)]",
           colorClass
         )}>
-          <Icon className="size-7 md:size-8 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
+          <Icon className="size-6 md:size-7 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
-          <p className="text-[10px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 tracking-tight">{description}</p>
+          <h3 className="text-base md:text-lg font-bold mb-1 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
+          <p className="text-[9px] text-slate-600 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 tracking-tight">{description}</p>
           
-          <div className="flex flex-wrap gap-2 mt-auto pt-4">
+          <div className="flex flex-wrap gap-2 mt-auto pt-3">
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Professional</Badge>
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Local RAM</Badge>
           </div>
