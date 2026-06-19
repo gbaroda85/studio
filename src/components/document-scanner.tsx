@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -42,7 +41,8 @@ import {
     Edit3,
     CheckCircle,
     LayoutGrid,
-    BrainCircuit
+    BrainCircuit,
+    Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -124,7 +124,6 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
-  // Default values for 'document'
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -620,7 +619,7 @@ export default function DocumentScanner() {
                                     <p className="text-[10px] font-black uppercase">Import PDF to see pages</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar text-left">
                                     {pendingPages.map((p) => (
                                         <Card key={p.id} className="relative group overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-sm flex flex-col rounded-2xl animate-in slide-in-from-bottom-2">
                                             <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onClick={() => handleEditPage(p)}>
@@ -677,7 +676,7 @@ export default function DocumentScanner() {
                                     <p className="text-[10px] font-black uppercase">No Scanned Results Yet</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar text-left">
                                     {scannedPages.map((p) => (
                                         <Card key={p.id} className="relative group overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl flex flex-col rounded-2xl animate-in zoom-in-95">
                                             <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onClick={() => handleEditPage(p)}>
@@ -738,7 +737,7 @@ export default function DocumentScanner() {
             <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto h-auto">
                 <Card className="lg:col-span-7 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
                     <CardHeader className="bg-muted/30 border-b p-4 md:p-5 flex flex-row items-center justify-between shrink-0">
-                        <div className="flex items-center gap-4"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle></div>
+                        <div className="flex items-center gap-4 text-left"><div className="size-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary shadow-lg border border-primary/20"><ScanLine className="size-5" /></div><CardTitle className="text-xl font-black uppercase tracking-tighter">1. CORNER MAPPING</CardTitle></div>
                         <div className="flex items-center gap-4">
                             <Tabs value={cropMode} onValueChange={(v) => setCropMode(v as any)} className="bg-background/50 p-1 rounded-xl border">
                                 <TabsList className="h-9 w-[160px]">
@@ -790,7 +789,7 @@ export default function DocumentScanner() {
                 </Card>
 
                 <Card className="lg:col-span-5 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full">
-                    <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-4 md:p-5 shrink-0"><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW & FINE-TUNE</CardTitle></CardHeader>
+                    <CardHeader className="bg-[#f0f9f9] dark:bg-slate-800 border-b p-4 md:p-5 shrink-0 text-left"><CardTitle className="text-xl font-black uppercase tracking-tighter">2. HD PREVIEW & FINE-TUNE</CardTitle></CardHeader>
                     <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden h-full">
                         <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[400px] flex items-center justify-center overflow-hidden">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
@@ -829,7 +828,7 @@ export default function DocumentScanner() {
                             </div>
                         </div>
                         <div className="w-full space-y-4 pt-4 border-t border-white/10">
-                            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-left">
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Exposure</span><span>{brightness[0]}%</span></div><Slider min={50} max={250} step={1} value={brightness} onValueChange={setBrightness} /></div>
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Saturation</span><span>{saturation[0]}%</span></div><Slider min={0} max={200} step={1} value={saturation} onValueChange={setSaturation} /></div>
                                 <div className="space-y-1.5"><div className="flex justify-between text-[8px] font-black uppercase text-muted-foreground"><span>Sharpness</span><span>{sharpness[0]}x</span></div><Slider min={0} max={10} step={0.1} value={sharpness} onValueChange={setSharpness} /></div>
