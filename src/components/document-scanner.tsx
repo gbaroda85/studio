@@ -289,7 +289,7 @@ export default function DocumentScanner() {
               const canvas = document.createElement('canvas');
               const ctx = canvas.getContext('2d');
               if (!ctx) return resolve(src);
-              const MAX_WIDTH = 1000; 
+              const MAX_WIDTH = 1200; 
               let width = img.width;
               let height = img.height;
               if (width > MAX_WIDTH) {
@@ -299,7 +299,7 @@ export default function DocumentScanner() {
               canvas.width = width;
               canvas.height = height;
               ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.7)); 
+              resolve(canvas.toDataURL('image/jpeg', 0.5)); 
           };
       });
   };
@@ -317,11 +317,7 @@ export default function DocumentScanner() {
         }
     } catch (error: any) {
         console.error(error);
-        const errorMsg = error.message?.includes('quota') || error.message?.includes('429')
-            ? "Cloud AI Quota Exceeded. Please try again in a few minutes or use local filters."
-            : "Could not enhance image via cloud. Check network connection.";
-            
-        toast({ variant: 'destructive', title: "AI Limit reached", description: errorMsg });
+        toast({ variant: 'destructive', title: "AI limit reached", description: "Cloud AI process failed. Using local filters." });
     } finally {
         setIsAiProcessing(false);
     }
@@ -389,11 +385,10 @@ export default function DocumentScanner() {
             let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
             
-            // Core Grayscale override for Gray/BW
+            // Filter Specific Overrides
             if (activeFilter === 'bw' || activeFilter === 'gray') {
               r = g = b = luma;
             }
-
             if (activeFilter === 'bw') {
               r = g = b = luma > 128 ? 255 : 0;
             }
@@ -410,6 +405,7 @@ export default function DocumentScanner() {
             pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cF + 0.5) * 255 * bF));
         }
         cCtx.putImageData(imageData, 0, 0);
+        
         if (sharpness[0] > 0) {
             const factor = sharpness[0] / 3.0;
             const weights = [0, -factor, 0, -factor, 1 + (4 * factor), -factor, 0, -factor, 0];
@@ -440,7 +436,7 @@ export default function DocumentScanner() {
         const timer = setTimeout(async () => {
             const res = await applyIntelligentScan(false);
             setLiveResultSrc(res);
-        }, 10); 
+        }, 20); 
         return () => clearTimeout(timer);
     }
   }, [points, activeFilter, cropMode, completedRectCrop, stage, currentRawImage, isImageReady, applyIntelligentScan, brightness, contrast, saturation, sharpness]);
@@ -557,16 +553,11 @@ export default function DocumentScanner() {
     for (let i = 0; i < scannedPages.length; i++) {
         if (i > 0) pdf.addPage();
         const p = scannedPages[i];
-        const img = new window.Image(); img.src = p.processedSrc;
-        await new Promise((resolve) => {
-            img.onload = () => {
-                const props = pdf.getImageProperties(img);
-                const ratio = Math.min(pageWidth / props.width, pageHeight / props.height);
-                const fw = props.width * ratio, fh = props.height * ratio;
-                pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - fw) / 2, (pageHeight - fh) / 2, fw, fh, undefined, 'FAST');
-                resolve(null);
-            };
-        });
+        const img = await ensureImageLoaded(p.processedSrc);
+        const props = pdf.getImageProperties(img);
+        const ratio = Math.min(pageWidth / props.width, pageHeight / props.height);
+        const fw = props.width * ratio, fh = props.height * ratio;
+        pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - fw) / 2, (pageHeight - fh) / 2, fw, fh, undefined, 'FAST');
     }
     pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
     setIsProcessing(false);
@@ -581,15 +572,12 @@ export default function DocumentScanner() {
   const handleDownloadJpgAll = async () => {
     if (scannedPages.length === 0) return;
     setIsProcessing(true);
-    if (scannedPages.length === 1) handleDownloadIndividualJpg(scannedPages[0], 0);
-    else {
-        const zip = new JSZip();
-        scannedPages.forEach((p) => zip.file(`Page-${p.originalIndex}.jpg`, p.processedSrc.split(',')[1], { base64: true }));
-        const blob = await zip.generateAsync({ type: "blob" });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob); link.download = `Scans-${Date.now()}.zip`;
-        link.click();
-    }
+    const zip = new JSZip();
+    scannedPages.forEach((p) => zip.file(`Page-${p.originalIndex}.jpg`, p.processedSrc.split(',')[1], { base64: true }));
+    const blob = await zip.generateAsync({ type: "blob" });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob); link.download = `Scans-${Date.now()}.zip`;
+    link.click();
     setIsProcessing(false);
   };
 
@@ -612,7 +600,7 @@ export default function DocumentScanner() {
           await navigator.share({ 
               files: [file], 
               title: "Scanned Document", 
-              text: "Sent via GR7 Tools - https://www.gr7imagepdf.com/" 
+              text: "Sent via GR7 Tools" 
           });
       } catch (e) { console.error(e); } finally { setIsSharing(false); }
   };
@@ -731,10 +719,18 @@ export default function DocumentScanner() {
                             )}
                         </CardContent>
                         <CardFooter className="p-6 border-t flex flex-col gap-3 shrink-0 bg-muted/5">
-                            <Button disabled={scannedPages.length === 0} className="magic-button w-full h-14 bg-primary font-black rounded-2xl shadow-xl transition-all text-white hover:text-primary-foreground border-4 border-primary" onClick={handleDownloadPdf}>
-                                <StarIcons />
-                                <FileText className="size-4 mr-2" />
-                                <span className="uppercase text-xs tracking-widest">DOWNLOAD FULL PDF</span>
+                             <Button 
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                onClick={handleDownloadPdf}
+                                disabled={scannedPages.length === 0 || isProcessing}
+                            >
+                                <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF BUNDLE</span>
+                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                    {isGenerating ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />}
+                                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                </div>
                             </Button>
                             <div className="grid grid-cols-2 gap-3 w-full">
                                 <Button variant="outline" disabled={scannedPages.length === 0} className="h-12 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-emerald-600 hover:text-white text-emerald-600 border-emerald-100 transition-colors" onClick={handleDownloadJpgAll}><Archive className="mr-2 size-3" /> ZIP BUNDLE</Button>
@@ -883,3 +879,4 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
+
