@@ -54,7 +54,7 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollAreaProps, ScrollBar } from '@/components/ui/scroll-area';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 import { enhancePhoto } from '@/ai/flows/enhance-photo-flow';
@@ -359,9 +359,6 @@ export default function DocumentScanner() {
             if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
             else if (activeFilter === 'document') { r = g = b = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma; }
             else if (activeFilter === 'gray') { r = g = b = luma; }
-            else if (activeFilter === 'photo') { r = Math.min(255, r * 1.05); g = Math.min(255, g * 1.05); b = Math.min(255, b * 1.05); }
-            else if (activeFilter === 'magic') { r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15); }
-            else if (activeFilter === 'ai_enhance') { r = Math.min(255, r * 1.02); g = Math.min(255, g * 1.02); b = Math.min(255, b * 1.02); }
             
             if (activeFilter !== 'bw' && activeFilter !== 'gray') { r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF; }
             pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
@@ -407,7 +404,7 @@ export default function DocumentScanner() {
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     const initialCrop = centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
-    setRectCrop(initialCrop);
+    setCrop(initialCrop);
     setCompletedRectCrop({
         unit: 'px',
         x: (initialCrop.x / 100) * width,
@@ -656,7 +653,7 @@ export default function DocumentScanner() {
                                     <p className="text-[10px] font-black uppercase">No Scanned Results Yet</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar pr-2">
+                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                                     {scannedPages.map((p) => (
                                         <Card key={p.id} className="relative group overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl flex flex-col rounded-2xl animate-in zoom-in-95">
                                             <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onClick={() => handleEditPage(p)}>
@@ -803,7 +800,7 @@ export default function DocumentScanner() {
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
                                 <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([110]); setSaturation([105]); }} />
-                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([115]); setSaturation([0]); }} />
+                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([125]); setSaturation([0]); }} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
                             </div>
                         </div>
