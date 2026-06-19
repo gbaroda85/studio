@@ -29,10 +29,10 @@ import {
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 type Font = 'helvetica' | 'times' | 'courier';
 
@@ -241,9 +241,9 @@ export default function TextToPdfConverter() {
                     </Card>
                 </div>
 
-                {/* RIGHT: HD VIEWPORT */}
+                {/* RIGHT: HD VIEWPORT - FIXED HEIGHT SCROLLABLE */}
                 <div className="lg:col-span-7 flex flex-col gap-6 h-full">
-                    <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 flex-1 min-h-[700px]">
+                    <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 flex-1 h-[650px] md:h-[850px]">
                         <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
                                 <Eye className="size-4 text-primary" />
@@ -251,38 +251,43 @@ export default function TextToPdfConverter() {
                             </div>
                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
                         </CardHeader>
-                        <CardContent className="flex-1 p-4 md:p-12 lg:p-16 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex justify-center items-start min-h-[600px]">
+                        <CardContent className="flex-1 p-0 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex flex-col">
                             
-                            <div className="relative transform-gpu scale-[0.55] sm:scale-[0.8] md:scale-[0.9] lg:scale-[1.0] xl:scale-[1.05] origin-top transition-transform duration-500 flex justify-center w-full">
-                                <div 
-                                    ref={previewRef} 
-                                    className="bg-white shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] relative text-left select-none pointer-events-none overflow-hidden" 
-                                    style={{ 
-                                        width: '210mm',
-                                        minHeight: '297mm',
-                                        padding: `${margin}mm`,
-                                        fontFamily: font === 'times' ? 'Times New Roman, serif' : font === 'courier' ? 'Courier New, monospace' : 'Helvetica, sans-serif',
-                                        fontSize: `${fontSize}pt`,
-                                        fontWeight: isBold ? 'bold' : 'normal',
-                                        color: textColor,
-                                        whiteSpace: 'pre-wrap',
-                                        wordBreak: 'break-word',
-                                        overflowWrap: 'break-word',
-                                        lineHeight: '1.2', 
-                                        boxSizing: 'border-box',
-                                        textAlign: 'left',
-                                        display: 'block'
-                                    }}
-                                >
-                                    {text || <span className="opacity-10 italic uppercase tracking-widest text-4xl block text-center mt-40 w-full">Start Typing...</span>}
+                            <ScrollArea className="flex-1 w-full h-full">
+                                <div className="flex justify-center p-6 md:p-12 lg:p-20">
+                                    <div className="relative transform-gpu scale-[0.45] sm:scale-[0.7] md:scale-[0.8] lg:scale-[0.9] xl:scale-[1.0] origin-top transition-transform duration-500 flex justify-center w-full">
+                                        <div 
+                                            ref={previewRef} 
+                                            className="bg-white shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] relative text-left select-none pointer-events-none overflow-hidden" 
+                                            style={{ 
+                                                width: '210mm',
+                                                minHeight: '297mm',
+                                                padding: `${margin}mm`,
+                                                fontFamily: font === 'times' ? 'Times New Roman, serif' : font === 'courier' ? 'Courier New, monospace' : 'Helvetica, sans-serif',
+                                                fontSize: `${fontSize}pt`,
+                                                fontWeight: isBold ? 'bold' : 'normal',
+                                                color: textColor,
+                                                whiteSpace: 'pre-wrap',
+                                                wordBreak: 'break-word',
+                                                overflowWrap: 'break-word',
+                                                lineHeight: '1.2', 
+                                                boxSizing: 'border-box',
+                                                textAlign: 'left',
+                                                display: 'block'
+                                            }}
+                                        >
+                                            {text || <span className="opacity-10 italic uppercase tracking-widest text-4xl block text-center mt-40 w-full">Start Typing...</span>}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
+                                <ScrollBar />
+                            </ScrollArea>
 
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
-                                <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
+                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
+                                 <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center">
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center shrink-0">
                             <Button 
                                 size="lg" 
                                 className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
@@ -309,3 +314,4 @@ export default function TextToPdfConverter() {
         </div>
     );
 }
+
