@@ -436,18 +436,6 @@ export default function PassportPhotoMaker() {
             {/* 1. SETUP: JUST UPLOAD */}
             {stage === 'setup' && (
                 <div className="flex flex-col items-center justify-start gap-2 pt-2 animate-in fade-in duration-700">
-                    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center space-y-4 mb-6">
-                        <div className="mx-auto mb-2 grid size-16 place-items-center rounded-[2rem] bg-primary/10 text-primary shadow-xl relative">
-                            <UserCircle className="size-8" />
-                            <div className="absolute -top-1 -right-1 bg-accent text-accent-foreground size-5 rounded-full flex items-center justify-center shadow-lg animate-bounce">
-                                <Sparkles className="size-2.5" />
-                            </div>
-                        </div>
-                        <p className="text-xs md:text-sm text-muted-foreground font-semibold max-xl mx-auto">
-                            Step 1: Upload your photo or document to begin. <br/>100% Private local processing.
-                        </p>
-                    </motion.div>
-
                     <Card className="w-full max-w-3xl glass-card overflow-hidden neon-border">
                         <CardContent className="p-3 md:p-6">
                             <div 
