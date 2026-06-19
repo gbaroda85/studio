@@ -150,7 +150,7 @@ export default function ImageCropper() {
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.target.files?.[0] || null); };
+  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
   const handleAspectChange = (value: number) => {
       setAspect(value === 0 ? undefined : value);
@@ -319,7 +319,7 @@ export default function ImageCropper() {
     return (
       <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
         <Card className={cn(
-            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
+            "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
         )}
             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -359,7 +359,7 @@ export default function ImageCropper() {
                 <Settings2 className="size-5 md:size-6" />
             </div>
             <div>
-                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+                <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter text-left">Studio <span className="text-primary">Panel</span></h2>
             </div>
         </div>
         <div className="flex gap-2 w-full md:w-auto">
@@ -367,10 +367,17 @@ export default function ImageCropper() {
                 <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Change Image
             </Button>
             {croppedImageSrc && (
-                <Button size="lg" className="magic-button magic-button-success flex-1 md:flex-none h-11 md:h-12 px-8 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center justify-center gap-3" onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}>
-                    <StarIcons />
-                    <Download className="mr-1.5 size-7 md:size-8 group-hover:translate-y-1 transition-transform" /> 
-                    <span className="uppercase tracking-tighter text-[10px] md:text-xs">DOWNLOAD HD</span>
+                <Button 
+                    size="lg" 
+                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-1 md:flex-none shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                    onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}
+                >
+                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD PHOTO</span>
+                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                        <Download className="size-6 group-hover:scale-110 transition-transform" />
+                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                    </div>
                 </Button>
             )}
         </div>
@@ -382,7 +389,7 @@ export default function ImageCropper() {
             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <Eye className="h-4 w-4 text-primary" />
+                        <ArrowLeftRight className="h-4 w-4 text-primary" />
                         <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Studio Viewport</CardTitle>
                     </div>
                     <div className="flex items-center gap-3 bg-background/50 p-1 rounded-xl border">
@@ -455,7 +462,7 @@ export default function ImageCropper() {
         <div className="lg:col-span-4 space-y-4">
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4">
-                    <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter">
+                    <CardTitle className="text-sm flex items-center gap-2 font-black uppercase tracking-tighter text-left">
                         <Settings2 className="size-4 text-primary" /> Adjustments
                     </CardTitle>
                 </CardHeader>
@@ -510,7 +517,7 @@ export default function ImageCropper() {
                         </Select>
                     </div>
 
-                    <div className="p-4 bg-green-500/5 rounded-xl border-2 border-green-500/10 flex gap-4 shadow-sm">
+                    <div className="p-4 bg-green-500/5 rounded-xl border-2 border-green-500/10 flex gap-4 shadow-sm text-left">
                         <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
                             <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">HD Output</p>
