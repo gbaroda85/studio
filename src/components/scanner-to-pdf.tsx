@@ -299,7 +299,7 @@ export default function ScannerToPdf() {
               if (ctx) {
                   canvas.height = vp.height; canvas.width = vp.width;
                   ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                  await pg.render({ canvasContext: ctx, viewport: vp }).promise;
+                  await page.render({ canvasContext: ctx, viewport: vp }).promise;
                   imgs.push(canvas.toDataURL('image/jpeg', 0.8));
               }
           }
@@ -536,12 +536,18 @@ export default function ScannerToPdf() {
                                     </Button>
                                     <Button 
                                         size="lg" 
-                                        className="magic-button magic-button-success w-full md:w-auto h-16 px-12 bg-green-600 hover:bg-transparent border-4 border-green-600 text-white hover:text-green-600 font-black rounded-full transition-all active:scale-95 group flex items-center gap-4 shadow-3xl" 
+                                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full md:w-auto min-w-[240px]" 
                                         onClick={handleDownloadPdf}
+                                        disabled={isGenerating}
                                     >
-                                        <StarIcons />
-                                        <Download className="size-7 md:size-8 group-hover:translate-y-1 transition-transform" />
-                                        <span className="uppercase tracking-tighter text-lg md:text-xl">DOWNLOAD PDF BUNDLE</span>
+                                        <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                        <span className="flex-1 px-10 text-center tracking-widest text-sm md:text-lg uppercase">
+                                            {isGenerating ? 'SAVING...' : 'SAVE PDF BUNDLE'}
+                                        </span>
+                                        <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                            {isGenerating ? <Loader2 className="size-6 md:size-8 animate-spin" /> : <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />}
+                                            <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
+                                        </div>
                                     </Button>
                                 </CardFooter>
                             </Card>
