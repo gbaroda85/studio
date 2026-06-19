@@ -161,7 +161,7 @@ export default function TextToPdfConverter() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch min-h-0">
                 {/* LEFT: SOURCE EDITOR */}
-                <div className="lg:col-span-5 flex flex-col gap-6 h-[600px] lg:h-[800px]">
+                <div className="lg:col-span-5 flex flex-col gap-6 h-[700px] lg:h-[850px]">
                     <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30 h-full min-h-0">
                         <CardHeader className="bg-primary/5 border-b p-4 md:p-6 shrink-0">
                             <div className="flex items-center justify-between">
@@ -241,7 +241,7 @@ export default function TextToPdfConverter() {
                 </div>
 
                 {/* RIGHT: HD VIEWPORT - FIXED HEIGHT SCROLLABLE */}
-                <div className="lg:col-span-7 flex flex-col gap-6 h-[600px] lg:h-[800px] min-h-0">
+                <div className="lg:col-span-7 flex flex-col gap-6 h-[700px] lg:h-[850px] min-h-0">
                     <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 h-full min-h-0">
                         <CardHeader className="bg-muted/30 border-b p-4 md:p-6 flex flex-row items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
