@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -181,7 +180,8 @@ export default function PdfMerger() {
             
             for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 0.8 });
+                // INCREASED SCALE FOR CRISP HD PREVIEW
+                const viewport = page.getViewport({ scale: 1.5 });
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 if (context) {
@@ -191,7 +191,8 @@ export default function PdfMerger() {
                     context.fillRect(0, 0, canvas.width, canvas.height);
                     
                     await page.render({ canvasContext: context, viewport: viewport }).promise;
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+                    // INCREASED QUALITY FOR CLEARER PREVIEW IMAGES
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
                     setPreviewImages(prev => [...prev, dataUrl]);
                 }
                 setRenderingProgress(Math.round((i / totalPages) * 100));
@@ -318,7 +319,7 @@ export default function PdfMerger() {
                                                             <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs shrink-0 border border-primary/20 shadow-inner">{index + 1}</div>
                                                             <div className="truncate text-left">
                                                                 <p className="text-xs md:text-sm font-black truncate max-w-[150px] md:max-w-[300px] uppercase tracking-tight" title={file.name}>{file.name}</p>
-                                                                <p className="text-[8px] md:text-[9px] font-mono text-muted-foreground/60 uppercase">{formatBytes(file.size)}</p>
+                                                                <p className="text-[8px] md:text-[9px] font-mono text-muted-foreground/60 uppercase mt-0.5">{formatBytes(file.size)}</p>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -497,14 +498,14 @@ export default function PdfMerger() {
                             </Button>
                             <Button 
                                 size="lg" 
-                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#22c55e] hover:bg-[#16a34a] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(34,197,94,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(34,197,94,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(34,197,94,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(34,197,94,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                                 onClick={handleDownload}
                             >
                                 <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                                 <span className="flex-1 px-10 text-center tracking-widest text-sm md:text-lg uppercase">SAVE BUNDLE</span>
-                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#22c55e] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                     <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
-                                    <div className="absolute right-3 w-0.5 h-6 bg-[#22c55e]/20 rounded-full" />
+                                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                                 </div>
                             </Button>
                         </div>
