@@ -681,7 +681,7 @@ export default function DocumentScanner() {
                                 disabled={scannedPages.length === 0 || isGenerating}
                             >
                                 <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
-                                <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF BUNDLE</span>
+                                <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">{isGenerating ? 'GENERATING...' : 'SAVE PDF BUNDLE'}</span>
                                 <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                     {isGenerating ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />}
                                     <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
@@ -736,8 +736,8 @@ export default function DocumentScanner() {
                             ) : (
                                 <div className="relative">
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
-                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 100" preserveAspectRatio="none">
-                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8] dash-array-[5,5]" />
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                        <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${points[3].x},${points[3].y} ${points[4].x},${points[4].y} ${points[5].x},${points[5].y} ${points[6].x},${points[6].y} ${points[7].x},${points[7].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" strokeDasharray="5,5" />
                                     </svg>
                                     {points.map((p, i) => (
                                         <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab transition-transform z-20 flex items-center justify-center", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
