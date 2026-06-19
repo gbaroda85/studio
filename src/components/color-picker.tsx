@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
     Palette, 
     Copy, 
@@ -21,7 +21,12 @@ import {
     ArrowRightLeft,
     Layers,
     Share2,
-    Check
+    Check,
+    UploadCloud,
+    ImageIcon,
+    X,
+    MousePointer2,
+    Maximize
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -35,6 +40,7 @@ import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import confetti from 'canvas-confetti';
+import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * COLOR CONVERSION UTILS
@@ -150,6 +156,13 @@ export default function ColorPicker() {
     const [color, setColor] = useState("#3B82F6");
     const [history, setHistory] = useState<string[]>([]);
     const [copiedKey, setCopiedKey] = useState<string | null>(null);
+    
+    // Sampler State
+    const [samplerImage, setSamplerImage] = useState<string | null>(null);
+    const [isDragOver, setIsDragOver] = useState(false);
+    const samplerCanvasRef = useRef<HTMLCanvasElement>(null);
+    const samplerImgRef = useRef<HTMLImageElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const rgb = useMemo(() => hexToRgb(color), [color]);
     const hsl = useMemo(() => rgbToHsl(rgb.r, rgb.g, rgb.b), [rgb]);
@@ -170,6 +183,10 @@ export default function ColorPicker() {
             triadic: [rgbToHex(triadic1.r, triadic1.g, triadic1.b), rgbToHex(triadic2.r, triadic2.g, triadic2.b)]
         };
     }, [hsl]);
+
+    const addToHistory = (hex: string) => {
+        setHistory(prev => [hex, ...prev.filter(c => c !== hex)].slice(0, 12));
+    };
 
     const handleCopy = (text: string, key: string) => {
         navigator.clipboard.writeText(text);
@@ -192,8 +209,58 @@ export default function ColorPicker() {
         } catch (e) {}
     };
 
-    const addToHistory = (hex: string) => {
-        setHistory(prev => [hex, ...prev.filter(c => c !== hex)].slice(0, 12));
+    const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setSamplerImage(event.target?.result as string);
+                toast({ title: "Image Loaded", description: "Click anywhere on image to pick color." });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSamplerClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+        const container = e.currentTarget;
+        const rect = container.getBoundingClientRect();
+        const img = samplerImgRef.current;
+        if (!img) return;
+
+        let clientX, clientY;
+        if ('touches' in e) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else {
+            clientX = e.clientX;
+            clientY = e.clientY;
+        }
+
+        // Calculate click position relative to the image
+        const x_css = clientX - rect.left;
+        const y_css = clientY - rect.top;
+
+        // Map CSS coordinates to natural image coordinates
+        const scaleX = img.naturalWidth / rect.width;
+        const scaleY = img.naturalHeight / rect.height;
+        const x = Math.floor(x_css * scaleX);
+        const y = Math.floor(y_css * scaleY);
+
+        const canvas = samplerCanvasRef.current;
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return;
+
+        // Redraw image to canvas if needed (once per load is better but let's keep it robust)
+        canvas.width = img.naturalWidth;
+        canvas.height = img.naturalHeight;
+        ctx.drawImage(img, 0, 0);
+
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        const hex = rgbToHex(pixel[0], pixel[1], pixel[2]);
+        
+        setColor(hex);
+        addToHistory(hex);
     };
 
     return (
@@ -203,57 +270,100 @@ export default function ColorPicker() {
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
                         <Palette className="size-5 md:size-6" />
                     </div>
-                    <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Color <span className="text-primary">Studio</span></h2>
+                    <div className="text-left">
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Color <span className="text-primary">Studio</span></h2>
+                        <p className="text-[9px] font-bold opacity-40 uppercase tracking-widest mt-1">AI Palette & Image Sampler</p>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                    <Button variant="outline" onClick={() => setColor("#3B82F6")} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5">
+                    {samplerImage && (
+                        <Button variant="outline" onClick={() => setSamplerImage(null)} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5">
+                            <X className="mr-1.5 size-3 md:size-4" /> Clear Image
+                        </Button>
+                    )}
+                    <Button variant="outline" onClick={() => { setColor("#3B82F6"); handleReset(); }} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5">
                         <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset
                     </Button>
                 </div>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                {/* Main Viewport: Color Area */}
+                {/* Main Viewport: Color Area / Image Sampler */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-2">
-                                <Eye className="h-4 w-4 text-primary" />
-                                <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Studio Viewport</CardTitle>
+                                {samplerImage ? <ImageIcon className="h-4 w-4 text-primary" /> : <Eye className="h-4 w-4 text-primary" />}
+                                <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                                    {samplerImage ? "Image Sampler Mode" : "Studio Viewport"}
+                                </CardTitle>
                             </div>
                             <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">HD RENDERING</Badge>
                         </CardHeader>
-                        <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex flex-col items-center justify-center relative select-none">
-                            <div className="w-full max-w-md flex flex-col gap-10">
-                                {/* Color Block */}
-                                <div 
-                                    className="w-full aspect-video rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.3)] border-8 border-white flex flex-col items-center justify-center relative overflow-hidden group transition-all duration-500"
-                                    style={{ backgroundColor: color }}
-                                >
-                                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                    <p className="text-4xl md:text-6xl font-black tracking-tighter drop-shadow-2xl" style={{ color: contrast.black > contrast.white ? '#000' : '#fff' }}>
-                                        {color}
-                                    </p>
-                                    <Button 
-                                        variant="ghost" 
-                                        size="icon" 
-                                        className="absolute bottom-4 right-4 h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/40"
-                                        onClick={() => handleCopy(color, 'main')}
+                        <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex flex-col items-center justify-center relative select-none">
+                            <AnimatePresence mode="wait">
+                                {samplerImage ? (
+                                    <motion.div 
+                                        key="sampler"
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        className="relative w-full h-full flex flex-col items-center justify-center gap-6"
                                     >
-                                        {copiedKey === 'main' ? <CheckCircle2 className="size-5" /> : <Copy className="size-5" />}
-                                    </Button>
-                                </div>
+                                        <div 
+                                            className="relative max-w-full max-h-[500px] overflow-hidden rounded-3xl border-4 border-white shadow-2xl cursor-crosshair group"
+                                            onMouseDown={handleSamplerClick}
+                                            onTouchStart={handleSamplerClick}
+                                        >
+                                            <img 
+                                                ref={samplerImgRef} 
+                                                src={samplerImage} 
+                                                alt="sampler" 
+                                                className="max-w-full max-h-full object-contain pointer-events-none" 
+                                            />
+                                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                        </div>
+                                        <div className="flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl">
+                                             <MousePointer2 className="size-3.5 text-primary animate-pulse" /> CLICK IMAGE TO SAMPLE PIXEL
+                                        </div>
+                                        <canvas ref={samplerCanvasRef} className="hidden" />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div 
+                                        key="swatch"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="w-full max-w-md flex flex-col gap-10"
+                                    >
+                                        {/* Color Block */}
+                                        <div 
+                                            className="w-full aspect-video rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.3)] border-8 border-white flex flex-col items-center justify-center relative overflow-hidden group transition-all duration-500"
+                                            style={{ backgroundColor: color }}
+                                        >
+                                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                            <p className="text-4xl md:text-6xl font-black tracking-tighter drop-shadow-2xl" style={{ color: contrast.black > contrast.white ? '#000' : '#fff' }}>
+                                                {color}
+                                            </p>
+                                            <Button 
+                                                variant="ghost" 
+                                                size="icon" 
+                                                className="absolute bottom-4 right-4 h-10 w-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 text-white hover:bg-white/40"
+                                                onClick={() => handleCopy(color, 'main')}
+                                            >
+                                                {copiedKey === 'main' ? <CheckCircle2 className="size-5" /> : <Copy className="size-5" />}
+                                            </Button>
+                                        </div>
 
-                                {/* Inputs Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <FormatInput label="HEX" value={color} onCopy={() => handleCopy(color, 'hex')} />
-                                    <FormatInput label="RGB" value={`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`} onCopy={() => handleCopy(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'rgb')} />
-                                    <FormatInput label="HSL" value={`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`} onCopy={() => handleCopy(`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`, 'hsl')} />
-                                    <FormatInput label="CMYK" value={`cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`} onCopy={() => handleCopy(`cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`, 'cmyk')} />
-                                </div>
-                            </div>
+                                        {/* Inputs Grid */}
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <FormatInput label="HEX" value={color} onCopy={() => handleCopy(color, 'hex')} />
+                                            <FormatInput label="RGB" value={`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`} onCopy={() => handleCopy(`rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`, 'rgb')} />
+                                            <FormatInput label="HSL" value={`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`} onCopy={() => handleCopy(`hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`, 'hsl')} />
+                                            <FormatInput label="CMYK" value={`cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`} onCopy={() => handleCopy(`cmyk(${cmyk.c}%, ${cmyk.m}%, ${cmyk.y}%, ${cmyk.k}%)`, 'cmyk')} />
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </CardContent>
                     </Card>
 
@@ -322,6 +432,16 @@ export default function ColorPicker() {
                                                 <Pipette className="size-3.5 mr-1.5" /> Eyedropper
                                             </Button>
                                         </div>
+
+                                        <Button 
+                                            variant="outline" 
+                                            className="w-full h-14 border-2 border-dashed border-primary/20 hover:border-primary rounded-2xl font-black text-xs uppercase group shadow-sm"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <UploadCloud className="size-5 mr-3 text-primary group-hover:scale-110 transition-transform" />
+                                            {samplerImage ? "CHANGE SAMPLER IMAGE" : "UPLOAD IMAGE SAMPLER"}
+                                        </Button>
+                                        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
                                     </div>
                                 </div>
 
@@ -384,7 +504,7 @@ export default function ColorPicker() {
                             </Button>
                             
                             <div className="flex items-center justify-center gap-8 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
-                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
+                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT SYNC</div>
                                 <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> DESIGNER PRO</div>
                             </div>
