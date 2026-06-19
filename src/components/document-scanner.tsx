@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -157,6 +156,15 @@ export default function DocumentScanner() {
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  const resetDots = () => {
+    setPoints([{ x: 10, y: 10 }, { x: 50, y: 10 }, { x: 90, y: 10 }, { x: 90, y: 50 }, { x: 90, y: 90 }, { x: 50, y: 90 }, { x: 10, y: 90 }, { x: 10, y: 50 }]);
+  };
+
+  const resetAdjustments = () => {
+      setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]);
+      setActiveFilter('original');
+  };
 
   const startCamera = async () => {
     setIsCameraStarting(true);

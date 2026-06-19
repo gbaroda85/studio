@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -66,38 +67,40 @@ const ASPECT_RATIOS = [
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i}`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
+
+const solvePerspective = (src: Point[], dst: Point[]) => {
+    const p = [];
+    for (let i = 0; i < 4; i++) {
+        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
+        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
+    }
+    const n = 8;
+    for (let i = 0; i < n; i++) {
+        let max = i;
+        for (let j = i + 1; j < n; j++) if (Math.abs(p[j][i]) > Math.abs(p[max][i])) max = j;
+        const temp = p[i]; p[i] = p[max]; p[max] = temp;
+        for (let j = i + 1; j < n; j++) {
+            const f = p[j][i] / p[i][i];
+            for (let k = i; k <= n; k++) p[j][k] -= f * p[i][k];
+        }
+    }
+    const x = new Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+        let s = 0;
+        for (let j = i + 1; j < n; j++) s += p[i][j] * x[j];
+        x[i] = (p[i][n] - s) / p[i][i];
+    }
+    return x;
+};
 
 export default function ImageCropper() {
   const { toast } = useToast();
@@ -189,13 +192,17 @@ export default function ImageCropper() {
     if (!ctx) return;
 
     if (cropMode === 'perspective') {
-        const w1 = Math.hypot(points[2].x - points[0].x, points[2].y - points[0].y);
-        const w2 = Math.hypot(points[4].x - points[6].x, points[4].y - points[6].y);
-        const h1 = Math.hypot(points[6].x - points[0].x, points[6].y - points[0].y);
-        const h2 = Math.hypot(points[4].x - points[2].x, points[4].y - points[2].y);
+        const corners = [points[0], points[2], points[4], points[6]].map(p => ({ 
+            x: p.x * (image.naturalWidth / 100), 
+            y: p.y * (image.naturalHeight / 100) 
+        }));
+        const w1 = Math.hypot(corners[1].x - corners[0].x, corners[1].y - corners[0].y);
+        const w2 = Math.hypot(corners[2].x - corners[3].x, corners[2].y - corners[3].y);
+        const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
+        const h2 = Math.hypot(corners[2].x - corners[1].x, corners[2].y - corners[1].y);
         
-        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2) * (image.naturalWidth / 100)));
-        let targetHeight = Math.max(10, Math.floor(Math.max(h1, h2) * (image.naturalHeight / 100)));
+        const targetWidth = Math.max(10, Math.floor(Math.max(w1, w2)));
+        let targetHeight = Math.max(10, Math.floor(Math.max(h1, h2)));
 
         if (aspect) {
             targetHeight = targetWidth / aspect;
@@ -369,11 +376,11 @@ export default function ImageCropper() {
             {croppedImageSrc && (
                 <Button 
                     size="lg" 
-                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-1 md:flex-none shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                     onClick={() => { const l=document.createElement('a'); l.href=croppedImageSrc; l.download=`crop-${Date.now()}.${outputFormat}`; l.click(); }}
                 >
                     <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
-                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD PHOTO</span>
+                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD HD</span>
                     <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                         <Download className="size-6 group-hover:scale-110 transition-transform" />
                         <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
@@ -527,9 +534,9 @@ export default function ImageCropper() {
                         </div>
                     </div>
                 </CardContent>
-                <CardFooter className="bg-muted/10 p-5 md:p-8 border-t border-white/10">
+                <CardFooter className="bg-muted/10 p-5 md:p-6 border-t border-white/10">
                     <Button 
-                        className="magic-button w-full h-14 md:h-16 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4" 
+                        className="magic-button w-full h-14 md:h-16 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-3" 
                         onClick={handleApplyCrop}
                         disabled={isProcessing || !!croppedImageSrc}
                     >
@@ -553,28 +560,3 @@ export default function ImageCropper() {
     </div>
   );
 }
-
-const solvePerspective = (src: Point[], dst: Point[]) => {
-    const p = [];
-    for (let i = 0; i < 4; i++) {
-        p.push([src[i].x, src[i].y, 1, 0, 0, 0, -src[i].x * dst[i].x, -src[i].y * dst[i].x, dst[i].x]);
-        p.push([0, 0, 0, src[i].x, src[i].y, 1, -src[i].x * dst[i].y, -src[i].y * dst[i].y, dst[i].y]);
-    }
-    const n = 8;
-    for (let i = 0; i < n; i++) {
-        let max = i;
-        for (let j = i + 1; j < n; j++) if (Math.abs(p[j][i]) > Math.abs(p[max][i])) max = j;
-        const temp = p[i]; p[i] = p[max]; p[max] = temp;
-        for (let j = i + 1; j < n; j++) {
-            const f = p[j][i] / p[i][i];
-            for (let k = i; k <= n; k++) p[j][k] -= f * p[i][k];
-        }
-    }
-    const x = new Array(n);
-    for (let i = n - 1; i >= 0; i--) {
-        let s = 0;
-        for (let j = i + 1; j < n; j++) s += p[i][j] * x[j];
-        x[i] = (p[i][n] - s) / p[i][i];
-    }
-    return x;
-};
