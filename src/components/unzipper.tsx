@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from 'react';
@@ -29,6 +30,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { motion, AnimatePresence } from 'framer-motion';
+import confetti from 'canvas-confetti';
 
 type ExtractedFile = {
     id: string;
@@ -39,36 +41,13 @@ type ExtractedFile = {
 
 const StarIcons = () => (
     <>
-        <div className="star-1">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-4">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-5">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-6">
-            <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
-                <path className="fil0" d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
 
@@ -86,9 +65,16 @@ export default function Unzipper() {
     const [zipFile, setZipFile] = useState<File | null>(null);
     const [extractedFiles, setExtractedFiles] = useState<ExtractedFile[]>([]);
     const [isUnzipping, setIsUnzipping] = useState(false);
+    const [isDownloadingAll, setIsDownloadingAll] = useState(false);
     const [isDragOver, setIsDragOver] = useState(false);
     const [progress, setProgress] = useState(0);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        return () => {
+            extractedFiles.forEach(f => URL.revokeObjectURL(f.url));
+        };
+    }, [extractedFiles]);
 
     const handleFileChange = (file: File | null) => {
         if (!file) return;
@@ -162,7 +148,35 @@ export default function Unzipper() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-    }
+    };
+
+    const handleDownloadAll = async () => {
+        if (extractedFiles.length === 0) return;
+        setIsDownloadingAll(true);
+        
+        toast({ 
+            title: "Batch Download Started", 
+            description: `Processing ${extractedFiles.length} files. Please allow multiple downloads in your browser.` 
+        });
+        
+        for (let i = 0; i < extractedFiles.length; i++) {
+            const file = extractedFiles[i];
+            handleDownload(file.url, file.name);
+            
+            // Sequential delay to prevent browser download protection blocking
+            if (extractedFiles.length > 2) {
+                await new Promise(resolve => setTimeout(resolve, 400));
+            }
+        }
+        
+        setIsDownloadingAll(false);
+        confetti({ 
+            particleCount: 150, 
+            spread: 70, 
+            origin: { y: 0.6 },
+            colors: ['#0d5a71', '#3b82f6', '#ffffff']
+        });
+    };
     
     const resetState = () => {
         extractedFiles.forEach(f => URL.revokeObjectURL(f.url));
@@ -170,7 +184,7 @@ export default function Unzipper() {
         setExtractedFiles([]);
         setProgress(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
-    }
+    };
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-500 px-4 flex flex-col items-center gap-6">
@@ -193,7 +207,7 @@ export default function Unzipper() {
                                     <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                                 </div>
-                                <div className="text-center px-4">
+                                <div className="text-center">
                                     <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop ZIP File here</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Sanitization & Extract active.</p>
                                 </div>
@@ -215,7 +229,7 @@ export default function Unzipper() {
                         <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                             <CardHeader className="bg-primary/5 border-b p-6">
                                 <div className="flex items-center justify-between">
-                                    <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3">
+                                    <CardTitle className="text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-left">
                                         <FileArchive className="size-6 text-primary" /> Source Archive
                                     </CardTitle>
                                     <Button variant="ghost" size="icon" onClick={resetState} className="h-8 w-8 text-destructive hover:bg-destructive/5"><X className="size-5" /></Button>
@@ -224,8 +238,8 @@ export default function Unzipper() {
                             <CardContent className="p-8 space-y-8">
                                 <div className="p-6 bg-muted/20 border-2 border-dashed border-muted-foreground/20 rounded-2xl flex flex-col items-center gap-4 text-center">
                                     <div className="size-14 rounded-2xl bg-white dark:bg-slate-900 border flex items-center justify-center shadow-lg"><FileIcon className="size-8 text-primary" /></div>
-                                    <div>
-                                        <p className="text-sm font-black uppercase tracking-tight truncate max-w-[250px]" title={zipFile.name}>{zipFile.name}</p>
+                                    <div className="text-center overflow-hidden w-full">
+                                        <p className="text-sm font-black uppercase tracking-tight truncate w-full" title={zipFile.name}>{zipFile.name}</p>
                                         <p className="text-[10px] font-mono opacity-50 uppercase mt-1">{formatBytes(zipFile.size)}</p>
                                     </div>
                                 </div>
@@ -249,7 +263,7 @@ export default function Unzipper() {
                                 ) : (
                                     <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 animate-in zoom-in-95">
                                         <CheckCircle2 className="size-6 text-green-600 shrink-0 mt-0.5" />
-                                        <div>
+                                        <div className="text-left">
                                             <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Archive Ready</p>
                                             <p className="text-[8px] text-green-600/80 font-medium leading-relaxed mt-1 uppercase">
                                                 {extractedFiles.length} files extracted.
@@ -312,10 +326,32 @@ export default function Unzipper() {
                                     </div>
                                 </ScrollArea>
                             </CardContent>
-                            <CardFooter className="bg-muted/20 border-t p-6 md:p-8 flex justify-between items-center">
-                                <Button variant="ghost" onClick={resetState} className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive h-10 px-6 rounded-xl border-2">
-                                    <RefreshCcw className="size-3.5 mr-2" /> Start New Unzip
+                            <CardFooter className="bg-muted/20 border-t p-6 md:p-8 flex flex-col sm:flex-row gap-4 justify-between items-center">
+                                <Button 
+                                    variant="outline" 
+                                    onClick={resetState} 
+                                    className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-destructive/5 hover:text-destructive h-12 px-8 rounded-xl border-2 w-full sm:w-auto"
+                                >
+                                    <RefreshCcw className="size-4 mr-2" /> Start Over
                                 </Button>
+
+                                {extractedFiles.length > 0 && (
+                                    <Button 
+                                        size="lg" 
+                                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full sm:w-auto flex-1 max-w-[400px]" 
+                                        onClick={handleDownloadAll}
+                                        disabled={isDownloadingAll}
+                                    >
+                                        <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                        <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">
+                                            {isDownloadingAll ? "DOWNLOADING..." : "DOWNLOAD ALL FILES"}
+                                        </span>
+                                        <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                            {isDownloadingAll ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />}
+                                            <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                        </div>
+                                    </Button>
+                                )}
                             </CardFooter>
                         </Card>
                     </div>
