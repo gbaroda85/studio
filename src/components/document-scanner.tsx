@@ -43,8 +43,7 @@ import {
     Edit3,
     CheckCircle,
     LayoutGrid,
-    ChevronRight as ChevronRightIcon,
-    ChevronLeft as ChevronLeftIcon
+    BrainCircuit
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
@@ -58,6 +57,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
+import { enhancePhoto } from '@/ai/flows/enhance-photo-flow';
 
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
@@ -138,6 +138,7 @@ export default function DocumentScanner() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
   const [isCameraStarting, setIsCameraStarting] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
@@ -201,8 +202,8 @@ export default function DocumentScanner() {
   };
 
   const resetAdjustments = () => {
-      setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]);
-      setActiveFilter('document');
+      setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]);
+      setActiveFilter('original');
   };
 
   const handleFilesUpload = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -277,6 +278,23 @@ export default function DocumentScanner() {
       setIsImageReady(false);
   };
 
+  const handleAiEnhance = async () => {
+    if (!currentRawImage) return;
+    setIsAiProcessing(true);
+    try {
+        const result = await enhancePhoto({ photoDataUri: currentRawImage });
+        if (result?.imageDataUri) {
+            setCurrentRawImage(result.imageDataUri);
+            setActiveFilter('ai_enhance');
+            toast({ title: "AI Enhancement Ready", description: "Image optimized using Neural details." });
+        }
+    } catch (error) {
+        toast({ variant: 'destructive', title: "AI Error", description: "Could not enhance image via cloud." });
+    } finally {
+        setIsAiProcessing(false);
+    }
+  };
+
   const applyIntelligentScan = useCallback(async (isHighRes = false): Promise<string> => {
     const image = imgRef.current;
     if (!image || !currentRawImage || !image.naturalWidth) return "";
@@ -340,8 +358,10 @@ export default function DocumentScanner() {
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
             if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
             else if (activeFilter === 'document') { r = g = b = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma; }
-            else if (activeFilter === 'gray') r = g = b = luma;
+            else if (activeFilter === 'gray') { r = g = b = luma; }
+            else if (activeFilter === 'photo') { r = Math.min(255, r * 1.05); g = Math.min(255, g * 1.05); b = Math.min(255, b * 1.05); }
             else if (activeFilter === 'magic' || activeFilter === 'ai_enhance') { r = Math.min(255, r * 1.15); g = Math.min(255, g * 1.15); b = Math.min(255, b * 1.15); }
+            
             if (activeFilter !== 'bw' && activeFilter !== 'gray') { r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF; }
             pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
             pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cF + 0.5) * 255 * bF));
@@ -635,7 +655,7 @@ export default function DocumentScanner() {
                                     <p className="text-[10px] font-black uppercase">No Scanned Results Yet</p>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar pr-2">
                                     {scannedPages.map((p) => (
                                         <Card key={p.id} className="relative group overflow-hidden border-2 bg-white dark:bg-slate-900 shadow-xl flex flex-col rounded-2xl animate-in zoom-in-95">
                                             <div className="relative aspect-[3/4] overflow-hidden bg-slate-100 cursor-pointer" onClick={() => handleEditPage(p)}>
@@ -682,7 +702,7 @@ export default function DocumentScanner() {
             <div className="flex flex-col items-center justify-center px-4 animate-in zoom-in-95 duration-500 min-h-[60vh]">
                 <Card className="w-full max-w-3xl border-none shadow-3xl rounded-[3rem] overflow-hidden bg-black relative">
                     <div className="absolute top-6 left-6 z-20 flex items-center gap-2 px-4 py-2 bg-black/60 backdrop-blur-xl rounded-full border border-white/10 text-white text-[10px] font-black uppercase tracking-widest"><ScanLine className="size-3 text-primary animate-pulse" /> Live Viewfinder</div>
-                    <video ref={videoRef} autoPlay playsInline className="w-full h-auto object-contain max-h-[75vh]" />
+                    <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto object-contain max-h-[75vh]" />
                     {isCameraStarting && <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 gap-4"><Loader2 className="size-12 animate-spin text-primary" /><p className="text-[10px] font-black uppercase text-white">Opening Camera...</p></div>}
                     <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6">
                         <Button className="size-20 rounded-full bg-white text-black p-0 shadow-3xl hover:scale-110 active:scale-95 transition-all ring-8 ring-white/20 border-8 border-slate-900" onClick={captureFrame}><Camera className="size-10"/></Button>
@@ -711,14 +731,14 @@ export default function DocumentScanner() {
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-10 shadow-3xl border-4 border-white" style={{ touchAction: 'none' }}>
                             {cropMode === 'rect' ? (
-                                <ReactCrop crop={rectCrop} onChange={(c) => setRectCrop(c)} onComplete={c => setCompletedRectCrop(c)}>
+                                <ReactCrop crop={crop} onChange={(c) => setCrop(c)} onComplete={c => setCompletedRectCrop(c)}>
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
                                 </ReactCrop>
                             ) : (
                                 <div className="relative">
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
                                     <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" />
+                                        <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8] dash-array-[5,5]" />
                                     </svg>
                                     {points.map((p, i) => (
                                         <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab transition-transform z-20 flex items-center justify-center", draggingPoint === i ? "bg-white scale-125" : "bg-white/90")}
@@ -752,18 +772,37 @@ export default function DocumentScanner() {
                     <CardContent className="flex-1 p-4 flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-900/50 shadow-inner relative overflow-hidden h-full">
                         <div className="relative bg-white shadow-lg border-[6px] border-white w-full max-w-[400px] flex items-center justify-center overflow-hidden">
                             {liveResultSrc ? <img src={liveResultSrc} className="max-w-full max-h-[65vh] object-contain block animate-in fade-in zoom-in-95 duration-500" alt="r" /> : <Loader2 className="animate-spin size-12 text-primary opacity-20" />}
-                            {isProcessing && <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10"><Loader2 className="animate-spin size-8 text-primary" /><p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering...</p></div>}
+                            {(isProcessing || isAiProcessing) && (
+                                <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex flex-col items-center justify-center gap-4 z-10">
+                                    <Loader2 className="animate-spin size-8 text-primary" />
+                                    <p className="text-[8px] font-black uppercase tracking-widest text-primary animate-pulse">
+                                        {isAiProcessing ? 'AI Enhancing...' : 'Rendering...'}
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                     <CardFooter className="p-4 md:p-6 border-t bg-[#f0f9f9] dark:bg-slate-800 flex-col gap-6 shrink-0">
                         <div className="w-full space-y-4">
-                            <div className="flex items-center justify-between"><Label className="text-[10px] font-black uppercase opacity-60">Fidelity Filters</Label></div>
+                            <div className="flex items-center justify-between">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Fidelity Filters</Label>
+                                <Button 
+                                    size="sm" 
+                                    variant="outline" 
+                                    onClick={handleAiEnhance} 
+                                    disabled={isAiProcessing}
+                                    className={cn("h-7 px-4 rounded-full border-2 font-black text-[8px] uppercase", activeFilter === 'ai_enhance' ? "bg-primary text-white border-primary" : "bg-primary/5 text-primary border-primary/20")}
+                                >
+                                    {isAiProcessing ? <Loader2 className="size-2.5 animate-spin mr-1" /> : <BrainCircuit className="size-2.5 mr-1" />}
+                                    AI ENHANCE
+                                </Button>
+                            </div>
                             <div className="grid grid-cols-6 gap-1 w-full">
                                 <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
-                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
-                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([120]); setContrast([110]); }} />
+                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([110]); setSaturation([105]); }} />
+                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([115]); setSaturation([0]); }} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
                             </div>
                         </div>
@@ -792,8 +831,8 @@ export default function DocumentScanner() {
 function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, label: string, icon: any, onClick: () => void }) {
     return (
         <div className="flex flex-col items-center gap-1">
-            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-10 w-10 rounded-xl shadow-md border-2", active ? "bg-primary border-primary text-white" : "bg-white/50 border-white/20")} onClick={onClick}><Icon className="size-5"/></Button>
-            <span className="text-[7px] font-black uppercase text-muted-foreground">{label}</span>
+            <Button variant={active ? 'default' : 'outline'} size="icon" className={cn("h-10 w-10 rounded-xl shadow-md border-2 transition-all", active ? "bg-primary border-primary text-white scale-105" : "bg-white/50 border-white/20 hover:border-primary/40")} onClick={onClick}><Icon className="size-5"/></Button>
+            <span className={cn("text-[7px] font-black uppercase", active ? "text-primary" : "text-muted-foreground")}>{label}</span>
         </div>
     );
 }
