@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, type ChangeEvent, useCallback } from 'react';
@@ -299,7 +300,7 @@ export default function ScannerToPdf() {
               if (ctx) {
                   canvas.height = vp.height; canvas.width = vp.width;
                   ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                  await page.render({ canvasContext: ctx, viewport: vp }).promise;
+                  await pg.render({ canvasContext: ctx, viewport: vp }).promise;
                   imgs.push(canvas.toDataURL('image/jpeg', 0.8));
               }
           }
@@ -391,7 +392,7 @@ export default function ScannerToPdf() {
   };
 
   return (
-    <div className="w-full max-w-7xl flex flex-col gap-6 animate-in fade-in duration-700 relative mt-4 overflow-x-hidden">
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-4 overflow-x-hidden">
         <div className="grid lg:grid-cols-12 gap-8 items-start mt-8">
             
             {/* LEFT: WORKSPACE */}
@@ -544,7 +545,7 @@ export default function ScannerToPdf() {
                                         <span className="flex-1 px-10 text-center tracking-widest text-sm md:text-lg uppercase">
                                             {isGenerating ? 'SAVING...' : 'SAVE PDF BUNDLE'}
                                         </span>
-                                        <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                        <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                             {isGenerating ? <Loader2 className="size-6 md:size-8 animate-spin" /> : <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />}
                                             <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
                                         </div>
