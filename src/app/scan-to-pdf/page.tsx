@@ -21,8 +21,7 @@ export default function ScanToPdfPage() {
     <main className="flex-1 flex flex-col items-center pt-4 md:pt-8">
         <ToolNavigation href="/tools?tab=pdf" label="Back to PDF Tools" />
 
-        {/* WIDTH INCREASED SLIGHTLY TO 6XL */}
-        <div className="w-full max-w-6xl mx-auto flex justify-center mb-12 px-4">
+        <div className="w-full max-w-7xl mx-auto flex justify-center mb-12 px-4">
             <ScannerToPdf />
         </div>
 

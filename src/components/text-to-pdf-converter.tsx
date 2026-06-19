@@ -24,7 +24,8 @@ import {
     Bold,
     Palette,
     Baseline,
-    Move
+    Move,
+    SearchCode
 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import { Badge } from '@/components/ui/badge';
@@ -283,7 +284,7 @@ export default function TextToPdfConverter() {
                             </div>
 
                             <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-2.5 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
-                                 <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
+                                 <SearchCode className="size-4 text-primary animate-pulse" /> Real-time Native Mapping Active
                             </div>
                         </CardContent>
 
