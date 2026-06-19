@@ -37,7 +37,6 @@ import {
     Monitor,
     ImageIcon,
     ShieldCheck,
-    Share2,
     Archive,
     FileArchive,
     Edit3,
@@ -54,7 +53,7 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { ScrollArea, ScrollAreaProps, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import { motion, AnimatePresence } from 'framer-motion';
 import { enhancePhoto } from '@/ai/flows/enhance-photo-flow';
@@ -125,6 +124,7 @@ export default function DocumentScanner() {
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
   const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
   
+  // Default values for 'document'
   const [brightness, setBrightness] = useState([145]);
   const [contrast, setContrast] = useState([96]);
   const [saturation, setSaturation] = useState([70]);
@@ -277,11 +277,35 @@ export default function DocumentScanner() {
       setIsImageReady(false);
   };
 
+  const getOptimizedPayload = async (src: string): Promise<string> => {
+      return new Promise((resolve) => {
+          const img = new window.Image();
+          img.src = src;
+          img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const ctx = canvas.getContext('2d');
+              if (!ctx) return resolve(src);
+              const MAX_WIDTH = 1200; 
+              let width = img.width;
+              let height = img.height;
+              if (width > MAX_WIDTH) {
+                  height *= MAX_WIDTH / width;
+                  width = MAX_WIDTH;
+              }
+              canvas.width = width;
+              canvas.height = height;
+              ctx.drawImage(img, 0, 0, width, height);
+              resolve(canvas.toDataURL('image/jpeg', 0.8));
+          };
+      });
+  };
+
   const handleAiEnhance = async () => {
     if (!currentRawImage) return;
     setIsAiProcessing(true);
     try {
-        const result = await enhancePhoto({ photoDataUri: currentRawImage });
+        const optimized = await getOptimizedPayload(currentRawImage);
+        const result = await enhancePhoto({ photoDataUri: optimized });
         if (result?.imageDataUri) {
             setCurrentRawImage(result.imageDataUri);
             setActiveFilter('ai_enhance');
@@ -313,7 +337,7 @@ export default function DocumentScanner() {
         const scaleX = originalWidth / image.width;
         const scaleY = originalHeight / image.height;
         cropCanvas.width = Math.max(10, Math.round(c.width * scaleX * activeScale));
-        cropCanvas.height = Math.max(10, Math.round(c.height * scaleY * activeScale));
+        cropCanvas.height = Math.round(c.height * scaleY * activeScale);
         cCtx.drawImage(image, c.x * scaleX, c.y * scaleY, c.width * scaleX, c.height * scaleY, 0, 0, cropCanvas.width, cropCanvas.height);
     } else {
         const corners = [points[0], points[2], points[4], points[6]].map(p => ({ x: (p.x / 100) * workW, y: (p.y / 100) * workH }));
@@ -727,7 +751,7 @@ export default function DocumentScanner() {
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center relative overflow-hidden select-none bg-slate-200 dark:bg-black/40 flex-1"
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white max-w-[95%] my-10 shadow-3xl border-4 border-white" style={{ touchAction: 'none' }}>
+                        <div ref={containerRef} className="relative cursor-crosshair transform-gpu bg-white my-10 shadow-3xl border-4 border-white" style={{ touchAction: 'none' }}>
                             {cropMode === 'rect' ? (
                                 <ReactCrop crop={crop} onChange={(c) => setCrop(c)} onComplete={c => setCompletedRectCrop(c)}>
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block" onLoad={onImageLoad} />
@@ -796,12 +820,12 @@ export default function DocumentScanner() {
                                 </Button>
                             </div>
                             <div className="grid grid-cols-6 gap-1 w-full">
-                                <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); }} />
-                                <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); }} />
-                                <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); }} />
-                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([110]); setSaturation([105]); }} />
-                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([125]); setSaturation([0]); }} />
-                                <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); }} />
+                                <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }} />
+                                <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); setSharpness([1.0]); }} />
+                                <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); setSharpness([2.0]); }} />
+                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([105]); setContrast([120]); setSaturation([110]); setSharpness([0.5]); }} />
+                                <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([83]); setSaturation([0]); setSharpness([1.6]); }} />
+                                <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }} />
                             </div>
                         </div>
                         <div className="w-full space-y-4 pt-4 border-t border-white/10">
