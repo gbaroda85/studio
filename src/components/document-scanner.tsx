@@ -138,6 +138,7 @@ export default function DocumentScanner() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [isImageReady, setIsImageReady] = useState(false);
   const [isCameraStarting, setIsCameraStarting] = useState(false);
@@ -547,7 +548,7 @@ export default function DocumentScanner() {
 
   const handleDownloadPdf = async () => {
     if (scannedPages.length === 0) return;
-    setIsProcessing(true);
+    setIsGenerating(true);
     const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
     const pageWidth = pdf.internal.pageSize.getWidth(), pageHeight = pdf.internal.pageSize.getHeight();
     for (let i = 0; i < scannedPages.length; i++) {
@@ -560,7 +561,7 @@ export default function DocumentScanner() {
         pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - fw) / 2, (pageHeight - fh) / 2, fw, fh, undefined, 'FAST');
     }
     pdf.save(`Scan-Bundle-${Date.now()}.pdf`);
-    setIsProcessing(false);
+    setIsGenerating(false);
   };
 
   const handleDownloadIndividualJpg = (page: ScannedPage, index: number) => {
@@ -723,7 +724,7 @@ export default function DocumentScanner() {
                                 size="lg" 
                                 className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                                 onClick={handleDownloadPdf}
-                                disabled={scannedPages.length === 0 || isProcessing}
+                                disabled={scannedPages.length === 0 || isGenerating}
                             >
                                 <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                                 <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF BUNDLE</span>
@@ -781,7 +782,7 @@ export default function DocumentScanner() {
                             ) : (
                                 <div className="relative">
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
-                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[2].x},${points[2].y} ${points[4].x},${points[4].y} ${points[6].x},${points[6].y}`} className="fill-primary/10 stroke-primary stroke-[0.8] dash-array-[5,5]" />
                                     </svg>
                                     {points.map((p, i) => (
