@@ -91,7 +91,7 @@ function solvePerspective(src: Point[], dst: Point[]) {
     return x;
 }
 
-type ScanFilter = 'original' | 'magic' | 'document' | 'bw' | 'photo' | 'gray' | 'ai_enhance';
+type ScanFilter = 'original' | 'magic' | 'photo' | 'bw' | 'gray' | 'ai_enhance';
 type Stage = 'viewfinder' | 'camera' | 'adjust';
 
 interface ScannedPage {
@@ -123,12 +123,12 @@ export default function DocumentScanner() {
   const [scannedPages, setScannedPages] = useState<ScannedPage[]>([]);
   
   const [cropMode, setCropMode] = useState<'rect' | 'scanner'>('scanner');
-  const [activeFilter, setActiveFilter] = useState<ScanFilter>('document');
+  const [activeFilter, setActiveFilter] = useState<ScanFilter>('magic');
   
-  const [brightness, setBrightness] = useState([145]);
-  const [contrast, setContrast] = useState([96]);
-  const [saturation, setSaturation] = useState([70]);
-  const [sharpness, setSharpness] = useState([2.5]);
+  const [brightness, setBrightness] = useState([165]);
+  const [contrast, setContrast] = useState([127]);
+  const [saturation, setSaturation] = useState([107]);
+  const [sharpness, setSharpness] = useState([1.0]);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -289,7 +289,7 @@ export default function DocumentScanner() {
               const canvas = document.createElement('canvas');
               const ctx = canvas.getContext('2d');
               if (!ctx) return resolve(src);
-              const MAX_WIDTH = 1200; // Increased to 1200 for better AI analysis while keeping payload safe
+              const MAX_WIDTH = 1000; 
               let width = img.width;
               let height = img.height;
               if (width > MAX_WIDTH) {
@@ -299,7 +299,7 @@ export default function DocumentScanner() {
               canvas.width = width;
               canvas.height = height;
               ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.5)); // Reduced quality to stay under 1MB payload
+              resolve(canvas.toDataURL('image/jpeg', 0.7)); 
           };
       });
   };
@@ -315,9 +315,13 @@ export default function DocumentScanner() {
             setActiveFilter('ai_enhance');
             toast({ title: "AI Enhancement Ready", description: "Image optimized using Neural details." });
         }
-    } catch (error) {
+    } catch (error: any) {
         console.error(error);
-        toast({ variant: 'destructive', title: "AI Error", description: "Could not enhance image via cloud. Check network." });
+        const errorMsg = error.message?.includes('quota') || error.message?.includes('429')
+            ? "Cloud AI Quota Exceeded. Please try again in a few minutes or use local filters."
+            : "Could not enhance image via cloud. Check network connection.";
+            
+        toast({ variant: 'destructive', title: "AI Limit reached", description: errorMsg });
     } finally {
         setIsAiProcessing(false);
     }
@@ -385,11 +389,22 @@ export default function DocumentScanner() {
             let r = pixels[i], g = pixels[i+1], b = pixels[i+2];
             const luma = 0.299 * r + 0.587 * g + 0.114 * b;
             
-            if (activeFilter === 'bw') r = g = b = luma > 128 ? 255 : 0;
-            else if (activeFilter === 'document') { r = g = b = luma > 180 ? 255 : luma < 100 ? luma * 0.7 : luma; }
-            else if (activeFilter === 'gray') { r = g = b = luma; }
+            // Core Grayscale override for Gray/BW
+            if (activeFilter === 'bw' || activeFilter === 'gray') {
+              r = g = b = luma;
+            }
+
+            if (activeFilter === 'bw') {
+              r = g = b = luma > 128 ? 255 : 0;
+            }
             
-            if (activeFilter !== 'bw' && activeFilter !== 'gray') { r = luma + (r - luma) * sF; g = luma + (g - luma) * sF; b = luma + (b - luma) * sF; }
+            // Saturation logic for colored filters
+            if (activeFilter !== 'bw' && activeFilter !== 'gray') { 
+              r = luma + (r - luma) * sF; 
+              g = luma + (g - luma) * sF; 
+              b = luma + (b - luma) * sF; 
+            }
+
             pixels[i] = Math.max(0, Math.min(255, ((r / 255 - 0.5) * cF + 0.5) * 255 * bF));
             pixels[i+1] = Math.max(0, Math.min(255, ((g / 255 - 0.5) * cF + 0.5) * 255 * bF));
             pixels[i+2] = Math.max(0, Math.min(255, ((b / 255 - 0.5) * cF + 0.5) * 255 * bF));
@@ -830,13 +845,12 @@ export default function DocumentScanner() {
                                     AI ENHANCE
                                 </Button>
                             </div>
-                            <div className="grid grid-cols-6 gap-1 w-full">
-                                <FilterBtn active={activeFilter === 'document'} label="Doc" icon={FileText} onClick={() => { setActiveFilter('document'); setBrightness([145]); setContrast([96]); setSaturation([70]); setSharpness([2.5]); }} />
+                            <div className="grid grid-cols-5 gap-1 w-full">
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => { setActiveFilter('magic'); setBrightness([165]); setContrast([127]); setSaturation([107]); setSharpness([1.0]); }} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => { setActiveFilter('bw'); setBrightness([120]); setContrast([150]); setSharpness([2.0]); }} />
-                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([105]); setContrast([120]); setSaturation([110]); setSharpness([0.5]); }} />
+                                <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => { setActiveFilter('photo'); setBrightness([100]); setContrast([125]); setSaturation([115]); setSharpness([0.5]); }} />
                                 <FilterBtn active={activeFilter === 'gray'} label="Gray" icon={Droplets} onClick={() => { setActiveFilter('gray'); setBrightness([110]); setContrast([83]); setSaturation([0]); setSharpness([1.6]); }} />
-                                <FilterBtn active={activeFilter === 'original'} label="None" icon={ImageIcon} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }} />
+                                <FilterBtn active={activeFilter === 'original'} label="None" icon={X} onClick={() => { setActiveFilter('original'); setBrightness([100]); setContrast([100]); setSaturation([100]); setSharpness([0]); }} />
                             </div>
                         </div>
                         <div className="w-full space-y-4 pt-4 border-t border-white/10">

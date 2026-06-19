@@ -40,9 +40,9 @@ const imageToTextFlow = ai.defineFlow(
   },
   async (input) => {
     try {
-      // Using 2.5 Flash as it is the most stable and updated for OCR tasks
+      // Using 1.5 Flash as it has much higher free tier limits and stable OCR
       const llmResponse = await ai.generate({
-        model: googleAI.model('gemini-2.5-flash'),
+        model: googleAI.model('gemini-1.5-flash'),
         prompt: [
           {
             text: 'You are an expert at Optical Character Recognition (OCR). Extract all text from the provided image accurately. Preserve line breaks and formatting as much as possible. If the image is a document, ID card, or certificate, extract all visible text content precisely. Output ONLY the extracted text.',
