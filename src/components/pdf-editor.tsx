@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
 import * as pdfjs from 'pdfjs-dist';
 import { PDFDocument, rgb, StandardFonts, degrees, PDFName } from 'pdf-lib';
 import { useToast } from '@/hooks/use-toast';
@@ -69,7 +69,7 @@ if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
-type ElementType = 'text' | 'image' | 'shape' | 'mask' | 'arrow' | 'highlight';
+type ElementType = 'text' | 'image' | 'mask' | 'highlight' | 'shape';
 
 interface BaseElement {
     id: string;
@@ -101,15 +101,7 @@ interface OverlayShape extends BaseElement {
     color: string;
 }
 
-interface OverlayArrow extends BaseElement {
-    type: 'arrow';
-    length: number; // %
-    rotation: number;
-    color: string;
-    thickness: number;
-}
-
-type Element = OverlayText | OverlayImage | OverlayShape | OverlayArrow;
+type Element = OverlayText | OverlayImage | OverlayShape;
 
 interface PageState {
     id: string;
@@ -122,21 +114,13 @@ interface PageState {
 
 const StarIcons = () => (
     <>
-        <div className="star-1 pointer-events-none">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-2 pointer-events-none">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
-        <div className="star-3 pointer-events-none">
-            <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-            </svg>
-        </div>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
     </>
 );
 
@@ -255,6 +239,11 @@ export default function PdfEditor() {
         }
     };
 
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+    const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+    const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+
     const addElement = (element: Element) => {
         if (selectedPageIndex === null) return;
         const updated = [...pages];
@@ -288,14 +277,6 @@ export default function PdfEditor() {
             type: 'highlight',
             x: 30, y: 30, width: 30, height: 4, color: "#ffff00", opacity: 40
         } as OverlayShape);
-    };
-
-    const handleAddArrow = () => {
-        addElement({
-            id: Math.random().toString(36).substr(2, 9),
-            type: 'arrow',
-            x: 50, y: 50, length: 15, rotation: 45, color: "#FF0000", thickness: 4, opacity: 100
-        } as OverlayArrow);
     };
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
@@ -463,24 +444,19 @@ export default function PdfEditor() {
                 const ox = cropBox.x;
                 const oy = cropBox.y;
 
-                // Perceived dimensions by user in editor
+                // Perceived dimensions
                 const isLeaning = pageRotation === 90 || pageRotation === 270;
                 const visualW = isLeaning ? pageHeight : pageWidth;
                 const visualH = isLeaning ? pageWidth : pageHeight;
 
                 for (const el of pageState.elements) {
-                    // Visual points from percentage
                     const px = (el.x / 100) * visualW;
                     const py = (el.y / 100) * visualH;
 
                     let x_pdf = 0;
                     let y_pdf = 0;
 
-                    /**
-                     * CRITICAL FIX: Robust Coordinate Mapping for Rotated Pages
-                     * PDF-Lib coordinate (0,0) is always bottom-left of the MediaBox.
-                     * Page rotation attribute (Rotate) shifts the perceived origin for viewers.
-                     */
+                    // STRICT COORDINATE TRANSFORMATION BASED ON ROTATION
                     if (pageRotation === 0) {
                         x_pdf = px;
                         y_pdf = pageHeight - py;
@@ -498,7 +474,6 @@ export default function PdfEditor() {
                     const x = ox + x_pdf;
                     const y = oy + y_pdf;
 
-                    // All elements must also be rotated relative to the page's coordinate system
                     const elRotDeg = (el as any).rotation || 0;
                     const finalRotation = degrees(elRotDeg - pageRotation);
 
@@ -543,30 +518,9 @@ export default function PdfEditor() {
                             rotate: finalRotation, 
                             opacity: el.opacity / 100 
                         });
-                    } else if (el.type === 'arrow') {
-                        // Arrow rotation logic also needs to be relative to the coordinate system
-                        const angleRad = ((elRotDeg - pageRotation) * Math.PI) / 180;
-                        const len = (el.length / 100) * visualW;
-                        const endX = x + Math.cos(angleRad) * len;
-                        const endY = y - Math.sin(angleRad) * len;
-
-                        pdfPage.drawLine({
-                            start: { x, y },
-                            end: { x: endX, y: endY },
-                            thickness: el.thickness,
-                            color: hexToRgb(el.color),
-                            opacity: el.opacity / 100
-                        });
                     }
                 }
             }
-
-            const catalog = newPdfDoc.catalog;
-            catalog.set(PDFName.of('ViewerPreferences'), newPdfDoc.context.obj({
-                FitWindow: true,
-                CenterWindow: true,
-                DisplayDocTitle: true
-            }));
 
             const finalPdfBytes = await newPdfDoc.save();
             const blob = new Blob([finalPdfBytes], { type: 'application/pdf' });
@@ -581,8 +535,8 @@ export default function PdfEditor() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "PDF Exported Successfully" });
         } catch (e) {
-            console.error('[Export Error]:', e);
-            toast({ variant: 'destructive', title: "Export Failed", description: "Internal rendering error." });
+            console.error(e);
+            toast({ variant: 'destructive', title: "Export Failed" });
         } finally {
             setIsExporting(false);
         }
@@ -659,7 +613,7 @@ export default function PdfEditor() {
                         "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:-translate-y-1 hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
                     )}
-                        onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
+                        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-6 text-center">
@@ -734,10 +688,6 @@ export default function PdfEditor() {
                                                 </div>
                                             ) : (el.type === 'mask' || el.type === 'highlight' || el.type === 'shape') ? (
                                                 <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, backgroundColor: el.color, opacity: el.opacity / 100, border: selectedElementId === el.id ? '2px dashed #ff0000' : 'none' }} />
-                                            ) : el.type === 'arrow' ? (
-                                                <div style={{ transform: `rotate(${el.rotation}deg)`, transformOrigin: 'left center', width: `${el.length * (containerRef.current?.clientWidth || 0) / 100}px`, height: `${el.thickness}px`, backgroundColor: el.color, opacity: el.opacity/100, position: 'relative' }}>
-                                                    <div className="absolute right-[-4px] top-1/2 -translate-y-1/2 w-0 h-0 border-y-[6px] border-y-transparent border-l-[10px]" style={{ borderLeftColor: el.color }} />
-                                                </div>
                                             ) : (
                                                 <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}><img src={el.src} className="size-full" alt="img" /></div>
                                             )}
@@ -784,13 +734,6 @@ export default function PdfEditor() {
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height (%)</Label></div><Slider min={1} max={100} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">FILL COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#ADD8E6'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
-                                        </div>
-                                    )}
-                                    {selectedElement.type === 'arrow' && (
-                                        <div className="space-y-6">
-                                            <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Length (%)</Label><Slider min={1} max={100} value={[selectedElement.length]} onValueChange={v => updateElement({ length: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-4"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Angle Rotation</Label><Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#FF0000', '#000000', '#00FF00', '#0000FF'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
                                     {selectedElement.type === 'image' && (
