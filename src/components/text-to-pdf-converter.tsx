@@ -163,8 +163,8 @@ export default function TextToPdfConverter() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 {/* LEFT: SOURCE EDITOR */}
                 <div className="lg:col-span-5 flex flex-col gap-6">
-                    <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30 flex-1">
-                        <CardHeader className="bg-primary/5 border-b p-6">
+                    <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30 h-[700px] lg:h-[900px]">
+                        <CardHeader className="bg-primary/5 border-b p-6 shrink-0">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-3">
                                     <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/20">
@@ -177,8 +177,8 @@ export default function TextToPdfConverter() {
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-8">
-                            <div className="flex-1 flex flex-col gap-3">
+                        <CardContent className="flex-1 flex flex-col gap-6 p-6 md:p-8 min-h-0">
+                            <div className="flex-1 flex flex-col gap-3 min-h-0">
                                 <div className="flex justify-between items-center px-1">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Type or Paste Content</Label>
                                     <Badge variant="outline" className="bg-primary/5 text-primary text-[8px] font-black border-primary/20 uppercase tracking-widest">Safe Input</Badge>
@@ -187,13 +187,13 @@ export default function TextToPdfConverter() {
                                     value={text}
                                     onChange={(e) => setText(e.target.value)}
                                     placeholder="Start typing your document content here..."
-                                    className="flex-1 min-h-[400px] text-base resize-none font-bold border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-5 bg-muted/20 custom-scrollbar shadow-inner text-left"
+                                    className="flex-1 text-base resize-none font-bold border-2 focus-visible:ring-primary/20 rounded-[1.5rem] p-5 bg-muted/20 custom-scrollbar shadow-inner text-left h-full"
                                     style={{ lineHeight: '1.2' }}
                                 />
                             </div>
 
                             {/* ADVANCED CONTROLS GRID */}
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-dashed items-start">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-dashed items-start shrink-0">
                                 <div className="space-y-2">
                                     <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-1.5"><Baseline className="size-3"/> Font & Style</Label>
                                     <div className="flex gap-2">
@@ -232,7 +232,7 @@ export default function TextToPdfConverter() {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-6 border-t flex justify-center">
+                        <CardFooter className="bg-muted/10 p-6 border-t flex justify-center shrink-0">
                             <div className="flex items-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT PERFORMANCE</div>
@@ -243,7 +243,7 @@ export default function TextToPdfConverter() {
 
                 {/* RIGHT: HD VIEWPORT - FIXED HEIGHT SCROLLABLE */}
                 <div className="lg:col-span-7 flex flex-col gap-6 h-full">
-                    <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 flex-1 h-[650px] md:h-[850px]">
+                    <Card className="flex flex-col border-2 shadow-3xl rounded-[2.5rem] overflow-hidden bg-slate-100 dark:bg-slate-900 border-primary/10 flex-1 h-[700px] lg:h-[900px]">
                         <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
                                 <Eye className="size-4 text-primary" />
@@ -251,7 +251,7 @@ export default function TextToPdfConverter() {
                             </div>
                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">A4 LAYOUT</Badge>
                         </CardHeader>
-                        <CardContent className="flex-1 p-0 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex flex-col">
+                        <CardContent className="flex-1 p-0 relative bg-slate-200 dark:bg-slate-800 shadow-inner overflow-hidden flex flex-col min-h-0">
                             
                             <ScrollArea className="flex-1 w-full h-full">
                                 <div className="flex justify-center p-6 md:p-12 lg:p-20">
@@ -305,7 +305,7 @@ export default function TextToPdfConverter() {
                             </Button>
                             <div className="flex flex-col items-center justify-center gap-1 text-muted-foreground/30 text-[8px] font-black uppercase tracking-widest shrink-0">
                                 <div className="flex items-center gap-1.5"><Smartphone className="size-3 text-primary" /> MOBILE SYNC</div>
-                                <div className="flex items-center gap-1.5"><Monitor className="size-3 text-yellow-500" /> 300 DPI RENDER</div>
+                                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> 300 DPI RENDER</div>
                             </div>
                         </CardFooter>
                     </Card>
@@ -314,4 +314,3 @@ export default function TextToPdfConverter() {
         </div>
     );
 }
-
