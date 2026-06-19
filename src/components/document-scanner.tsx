@@ -284,7 +284,8 @@ export default function DocumentScanner() {
               const canvas = document.createElement('canvas');
               const ctx = canvas.getContext('2d');
               if (!ctx) return resolve(src);
-              const MAX_WIDTH = 1200; 
+              // CRITICAL: Reducing size further for cloud processing stability
+              const MAX_WIDTH = 1000; 
               let width = img.width;
               let height = img.height;
               if (width > MAX_WIDTH) {
@@ -294,7 +295,7 @@ export default function DocumentScanner() {
               canvas.width = width;
               canvas.height = height;
               ctx.drawImage(img, 0, 0, width, height);
-              resolve(canvas.toDataURL('image/jpeg', 0.8));
+              resolve(canvas.toDataURL('image/jpeg', 0.7)); // 0.7 quality for small payload
           };
       });
   };
@@ -581,13 +582,10 @@ export default function DocumentScanner() {
           for (let i = 0; i < scannedPages.length; i++) {
               if (i > 0) pdf.addPage();
               const p = scannedPages[i];
-              const img = new window.Image(); img.src = p.processedSrc;
-              await new Promise((r) => { img.onload = () => {
-                  const props = pdf.getImageProperties(img);
-                  const ratio = Math.min(pageWidth / props.width, pageHeight / props.height);
-                  pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - props.width * ratio) / 2, (pageHeight - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
-                  r(null);
-              }; });
+              const img = await ensureImageLoaded(p.processedSrc);
+              const props = pdf.getImageProperties(img);
+              const ratio = Math.min(pageWidth / props.width, pageHeight / props.height);
+              pdf.addImage(p.processedSrc, 'JPEG', (pageWidth - props.width * ratio) / 2, (pageHeight - props.height * ratio) / 2, props.width * ratio, props.height * ratio, undefined, 'FAST');
           }
           const blob = pdf.output('blob');
           const file = new File([blob], "Scanned_Document.pdf", { type: "application/pdf" });
@@ -597,6 +595,15 @@ export default function DocumentScanner() {
               text: "Sent via GR7 Tools - https://www.gr7imagepdf.com/" 
           });
       } catch (e) { console.error(e); } finally { setIsSharing(false); }
+  };
+
+  const ensureImageLoaded = (src: string): Promise<HTMLImageElement> => {
+      return new Promise((resolve, reject) => {
+          const img = new window.Image();
+          img.onload = () => resolve(img);
+          img.onerror = reject;
+          img.src = src;
+      });
   };
 
   return (
