@@ -53,7 +53,8 @@ import {
     FilePlus2,
     Grip,
     History,
-    ImageIcon
+    ImageIcon,
+    FileText
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -119,6 +120,7 @@ function SortablePage({
     onRotate, 
     onInsertBlank,
     onInsertImage,
+    onInsertPdf,
     onView,
     isRestored
 }: { 
@@ -127,6 +129,7 @@ function SortablePage({
     onRotate: (id: string) => void;
     onInsertBlank: (id: string) => void;
     onInsertImage: (id: string) => void;
+    onInsertPdf: (id: string) => void;
     onView: (page: PageItem) => void;
     isRestored: boolean;
 }) {
@@ -202,10 +205,13 @@ function SortablePage({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="center" className="z-[1000] rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900">
                         <DropdownMenuItem onClick={() => onInsertBlank(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
-                            <Plus className="size-3.5 mr-2 text-primary" /> Add Blank Page
+                            <FilePlus2 className="size-3.5 mr-2 text-primary" /> Add Blank Page
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onInsertImage(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
                             <ImageIcon className="size-3.5 mr-2 text-blue-500" /> Upload Image
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onInsertPdf(page.id)} className="font-bold text-[10px] uppercase py-2 cursor-pointer">
+                            <FileText className="size-3.5 mr-2 text-emerald-500" /> Add PDF File
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -252,6 +258,7 @@ export default function PdfOrganizer() {
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const insertImgInputRef = useRef<HTMLInputElement>(null);
+    const insertPdfInputRef = useRef<HTMLInputElement>(null);
     const pdfDocRef = useRef<pdfjs.PDFDocumentProxy | null>(null);
 
     const sensors = useSensors(
@@ -407,6 +414,11 @@ export default function PdfOrganizer() {
         insertImgInputRef.current?.click();
     };
 
+    const onInsertPdfClick = (afterId: string) => {
+        setInsertAfterId(afterId);
+        insertPdfInputRef.current?.click();
+    };
+
     const handleInsertImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file || !insertAfterId) return;
@@ -434,6 +446,56 @@ export default function PdfOrganizer() {
             toast({ title: "Image Inserted as Page" });
         };
         reader.readAsDataURL(file);
+    };
+
+    const handleInsertPdfChange = async (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !insertAfterId || file.type !== 'application/pdf') return;
+
+        setIsRendering(true);
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdf = await pdfjs.getDocument({ 
+                data: new Uint8Array(arrayBuffer),
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
+                cMapPacked: true
+            }).promise;
+
+            const insertedPages: PageItem[] = [];
+            for (let i = 1; i <= pdf.numPages; i++) {
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1.0 });
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    canvas.height = viewport.height; canvas.width = viewport.width;
+                    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    await page.render({ canvasContext: ctx, viewport }).promise;
+                    insertedPages.push({
+                        id: `p-ins-${i}-${Date.now()}-${Math.random()}`,
+                        index: -1, 
+                        rotation: 0,
+                        isDeleted: false,
+                        previewSrc: canvas.toDataURL('image/jpeg', 0.8),
+                        type: 'original' // Treating as original since it's from a PDF source
+                    });
+                }
+            }
+
+            setPages(prev => {
+                const index = prev.findIndex(p => p.id === insertAfterId);
+                const next = [...prev];
+                next.splice(index + 1, 0, ...insertedPages);
+                return next;
+            });
+            setInsertAfterId(null);
+            toast({ title: "PDF Pages Inserted", description: `Added ${pdf.numPages} pages.` });
+        } catch (err) {
+            toast({ variant: 'destructive', title: "Insertion Error" });
+        } finally {
+            setIsRendering(false);
+            if (e.target) e.target.value = "";
+        }
     };
 
     const rotateAll = (deg: number) => {
@@ -590,6 +652,7 @@ export default function PdfOrganizer() {
                                                             onRotate={rotatePage} 
                                                             onInsertBlank={addBlankPage} 
                                                             onInsertImage={onInsertImageClick}
+                                                            onInsertPdf={onInsertPdfClick}
                                                             onView={(page) => setZoomPage(page)}
                                                             isRestored={restoredId === p.id}
                                                         />
@@ -599,7 +662,7 @@ export default function PdfOrganizer() {
                                             <DragOverlay dropAnimation={{ sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.3' } } }) }}>
                                                 {activeId && activePage ? (
                                                     <div className="relative aspect-[1/1.414] rounded-2xl overflow-hidden border-4 border-primary bg-white shadow-3xl opacity-80 scale-105 transition-transform z-[9999] pointer-events-none transform-gpu">
-                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/20 shadow-lg">{activePage.index === -1 ? (activePage.type === 'blank' ? 'B' : 'IMG') : activePage.index}</div>
+                                                        <div className="absolute top-2 left-2 size-8 rounded-lg bg-black/80 backdrop-blur-md flex items-center justify-center text-[11px] font-black text-white z-20 border border-white/10 shadow-lg">{activePage.index === -1 ? (activePage.type === 'blank' ? 'B' : 'IMG') : activePage.index}</div>
                                                         {activePage.type === 'blank' ? (
                                                             <div className="size-full flex flex-col items-center justify-center bg-white text-muted-foreground gap-2 p-4"><FilePlus2 className="size-8 opacity-20" /><span className="text-[8px] font-black uppercase opacity-40">Blank Page</span></div>
                                                         ) : (
@@ -756,6 +819,7 @@ export default function PdfOrganizer() {
             </Dialog>
 
             <input ref={insertImgInputRef} type="file" className="hidden" accept="image/*" onChange={handleInsertImageChange} />
+            <input ref={insertPdfInputRef} type="file" className="hidden" accept="application/pdf" onChange={handleInsertPdfChange} />
         </div>
     );
 }
