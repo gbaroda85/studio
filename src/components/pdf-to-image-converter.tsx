@@ -213,6 +213,11 @@ export default function PdfToImageConverter() {
         });
     }, [selectedId]);
 
+    const updateAlignment = (vAlign: VAlign) => {
+        if (!selectedId) return;
+        setPages(prev => prev.map(p => p.id === selectedId ? { ...p, vAlign } : p));
+    };
+
     const updateSelectedPage = (updates: Partial<Pick<PageItem, 'vAlign' | 'fitMode'>>) => {
         if (!selectedId) return;
         setPages(prev => prev.map(p => p.id === selectedId ? { ...p, ...updates } : p));
@@ -385,7 +390,7 @@ export default function PdfToImageConverter() {
                     <div className="p-8 md:p-12 flex items-center justify-center">
                         <div 
                             className={cn(
-                                "w-full max-w-2xl border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-white dark:bg-slate-800/50 shadow-inner",
+                                "w-full max-w-xl border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-white dark:bg-slate-800/50 shadow-inner",
                                 isDragOver && "border-primary bg-primary/5 ring-8 ring-primary/10"
                             )}
                             onClick={() => fileInputRef.current?.click()}
@@ -502,7 +507,7 @@ export default function PdfToImageConverter() {
                                                 key={p.id} 
                                                 onClick={() => setSelectedId(p.id)}
                                                 className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-xl",
+                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-xl",
                                                     selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
                                                 )}
                                             >
@@ -580,4 +585,3 @@ export default function PdfToImageConverter() {
         </Card>
     );
 }
-
