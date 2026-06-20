@@ -64,7 +64,8 @@ import {
   Banknote,
   CalendarDays,
   Menu,
-  Palette
+  Palette,
+  Sparkles
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -241,14 +242,6 @@ function ToolsPageContent() {
       icon: Sparkles,
       color: 'bg-primary',
       lightBg: 'bg-[#f0fdf4]'
-    },
-    {
-      href: '/scan-to-pdf',
-      labelKey: 'scan_to_pdf_label',
-      descriptionKey: 'scan_to_pdf_description',
-      icon: Camera,
-      color: 'bg-indigo-500',
-      lightBg: 'bg-[#eff6ff]'
     },
     {
       href: '/unlock-pdf',
