@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -266,7 +265,7 @@ export default function PdfToImageConverter() {
 
         if (item.fitMode === 'original') {
             const targetW = Math.floor(viewport.width);
-            const targetH = Math.round(targetW * 1.414);
+            const targetH = Math.round(targetW * 1.414); 
             canvas.width = targetW;
             canvas.height = targetH;
             ctx.fillStyle = '#FFFFFF';
