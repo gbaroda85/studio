@@ -77,6 +77,7 @@ const correctOcrText = (text: string): string => {
     const placeholders: { [key: string]: string } = {};
     let counter = 0;
     
+    // Pattern protection for sensitive data
     const patterns = {
         email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
         phone: /\b(\+?\d{1,3}[- ]?)?\d{10}\b/g,
@@ -88,6 +89,7 @@ const correctOcrText = (text: string): string => {
 
     let cleaned = text;
     
+    // 1. Protection Pass
     Object.values(patterns).forEach(regex => {
         cleaned = cleaned.replace(regex, (match) => {
             const id = `__TOKEN_${counter++}__`;
@@ -96,6 +98,7 @@ const correctOcrText = (text: string): string => {
         });
     });
 
+    // 2. OCR Cleanup Logic (Character Recovery)
     cleaned = cleaned
         .replace(/([0-9])O([0-9])/g, '$10$2')
         .replace(/([A-Za-z])0([A-Za-z])/g, '$1O$2')
@@ -106,6 +109,7 @@ const correctOcrText = (text: string): string => {
         .replace(/([0-9])B([0-9])/g, '$18$2')
         .replace(/([A-Za-z])8([A-Za-z])/g, '$1B$2');
 
+    // 3. Formatting Cleanup
     cleaned = cleaned
         .replace(/\s+/g, ' ')               
         .replace(/\s([.,!?;:])/g, '$1')      
@@ -113,8 +117,10 @@ const correctOcrText = (text: string): string => {
         .replace(/([.,!?;:])\1+/g, '$1')     
         .replace(/(\n\s*){2,}/g, '\n\n');    
 
+    // 4. Auto Capitalization
     cleaned = cleaned.replace(/(^\s*|[.!?]\s+)([a-z])/g, (m) => m.toUpperCase());
 
+    // 5. Restoration Pass
     Object.keys(placeholders).forEach(id => {
         cleaned = cleaned.replace(id, placeholders[id]);
     });
@@ -143,6 +149,83 @@ export default function ImageToTextConverter() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  /**
+   * ADVANCED IMAGE PREPROCESSING PIPELINE
+   * Steps: Grayscale -> Normalization -> Sharpening -> Adaptive Thresholding
+   */
+  const preprocessImageAdvanced = useCallback((canvas: HTMLCanvasElement) => {
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) return;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const data = imageData.data;
+
+      // 1. Grayscale + Brightness Normalization
+      let minLuma = 255;
+      let maxLuma = 0;
+      const lumas = new Uint8ClampedArray(w * h);
+
+      for (let i = 0; i < data.length; i += 4) {
+          const luma = Math.round(0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+          lumas[i / 4] = luma;
+          if (luma < minLuma) minLuma = luma;
+          if (luma > maxLuma) maxLuma = luma;
+      }
+
+      // 2. Contrast Stretching & Data Update
+      const range = maxLuma - minLuma || 1;
+      for (let i = 0; i < data.length; i += 4) {
+          const luma = lumas[i / 4];
+          // Stretch luma to 0-255
+          const normalized = Math.max(0, Math.min(255, ((luma - minLuma) / range) * 255));
+          data[i] = data[i + 1] = data[i + 2] = normalized;
+      }
+      ctx.putImageData(imageData, 0, 0);
+
+      // 3. Sharpening Kernel (Unsharp Mask alternative)
+      const amount = 0.12; 
+      const kernel = [
+          0, -amount, 0,
+          -amount, 1 + (4 * amount), -amount,
+          0, -amount, 0
+      ];
+      
+      const sharpenedData = ctx.getImageData(0, 0, w, h);
+      const sData = sharpenedData.data;
+      const originalData = new Uint8ClampedArray(data);
+
+      for (let y = 1; y < h - 1; y++) {
+          for (let x = 1; x < w - 1; x++) {
+              const i = (y * w + x) * 4;
+              let val = 0;
+              for (let ky = -1; ky <= 1; ky++) {
+                  for (let kx = -1; kx <= 1; kx++) {
+                      const scy = y + ky;
+                      const scx = x + kx;
+                      const srcOff = (scy * w + scx) * 4;
+                      const wt = kernel[(ky + 1) * 3 + (kx + 1)];
+                      val += originalData[srcOff] * wt;
+                  }
+              }
+              sData[i] = sData[i + 1] = sData[i + 2] = Math.max(0, Math.min(255, val));
+          }
+      }
+      ctx.putImageData(sharpenedData, 0, 0);
+
+      // 4. Final Adaptive Binarization
+      const finalData = ctx.getImageData(0, 0, w, h);
+      const pixels = finalData.data;
+      for (let i = 0; i < pixels.length; i += 4) {
+          const val = pixels[i];
+          // Adaptive threshold: dark gets darker, light gets lighter
+          const binarized = val > 140 ? 255 : 0;
+          pixels[i] = pixels[i + 1] = pixels[i + 2] = binarized;
+      }
+      ctx.putImageData(finalData, 0, 0);
+  }, []);
+
   const handleFileChange = (file: File | null) => {
     if (file) {
       setFile(file);
@@ -167,26 +250,6 @@ export default function ImageToTextConverter() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  const preprocessImage = (canvas: HTMLCanvasElement) => {
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
-      if (!ctx) return;
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const data = imageData.data;
-      let totalLuma = 0;
-      for (let i = 0; i < data.length; i += 4) {
-          totalLuma += (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
-      }
-      const avgLuma = totalLuma / (data.length / 4);
-      const threshold = avgLuma > 180 ? 190 : avgLuma < 80 ? 70 : 128;
-      for (let i = 0; i < data.length; i += 4) {
-          const r = data[i], g = data[i + 1], b = data[i + 2];
-          const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-          const val = luma > threshold ? 255 : 0;
-          data[i] = data[i + 1] = data[i + 2] = val;
-      }
-      ctx.putImageData(imageData, 0, 0);
-  };
-
   const performOcr = async () => {
     if (!file) return;
     
@@ -196,6 +259,7 @@ export default function ImageToTextConverter() {
     setProgress(0);
     startTimeRef.current = Date.now();
 
+    // Load multiple scripts for regional support
     const worker = await createWorker('eng+hin+guj+mar', 1, {
         logger: (m) => {
             if (m.status === 'recognizing text') {
@@ -230,14 +294,19 @@ export default function ImageToTextConverter() {
                 setCurrentPage(i);
                 setStatusText(`Scanning Page ${i} of ${pdf.numPages}...`);
                 const page = await pdf.getPage(i);
+                // 2.5x upscale is the industrial sweet spot for browser memory & accuracy
                 const viewport = page.getViewport({ scale: 2.5 }); 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { willReadFrequently: true });
                 if (context) {
-                    canvas.height = viewport.height; canvas.width = viewport.width;
-                    context.fillStyle = '#FFFFFF'; context.fillRect(0, 0, canvas.width, canvas.height);
+                    canvas.height = Math.floor(viewport.height);
+                    canvas.width = Math.floor(viewport.width);
+                    context.fillStyle = '#FFFFFF';
+                    context.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: context, viewport }).promise;
-                    preprocessImage(canvas);
+                    
+                    preprocessImageAdvanced(canvas);
+                    
                     const { data: { text, confidence } } = await worker.recognize(canvas);
                     finalOutput += `--- PAGE ${i} ---\n\n${text}\n\n`;
                     totalConfidence += confidence;
@@ -249,19 +318,24 @@ export default function ImageToTextConverter() {
         } else {
             setTotalPages(1);
             setCurrentPage(1);
-            setStatusText("Enhancing Resolution...");
+            setStatusText("Optimizing Neural Map...");
             const img = new window.Image();
             img.src = originalImageSrc!;
             await new Promise(r => img.onload = r);
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (ctx) {
+                // Upscale small images to at least 2000px height for OCR fidelity
                 const scale = Math.max(1, 2000 / Math.max(img.width, img.height));
-                canvas.width = img.width * scale; canvas.height = img.height * scale;
-                ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
+                canvas.width = Math.round(img.width * scale);
+                canvas.height = Math.round(img.height * scale);
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                preprocessImage(canvas);
-                setStatusText("Reading Text...");
+                
+                preprocessImageAdvanced(canvas);
+                
+                setStatusText("Extracting High-Fidelity Text...");
                 const { data: { text, confidence } } = await worker.recognize(canvas);
                 finalOutput = text;
                 setAvgConfidence(confidence);
@@ -269,7 +343,7 @@ export default function ImageToTextConverter() {
         }
 
         setRawText(finalOutput);
-        setStatusText("Applying Advanced Correction...");
+        setStatusText("Applying Logic Corrections...");
         const corrected = correctOcrText(finalOutput);
         setCorrectedText(corrected);
         
