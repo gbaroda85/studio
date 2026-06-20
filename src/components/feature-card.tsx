@@ -29,8 +29,8 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block h-full">
-      <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-1 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.01] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02]">
-        <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-3 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
+      <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-1 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-1.5 hover:scale-[1.01] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02] min-h-[240px]">
+        <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-8 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
           {/* COMPACT 3D ICON CONTAINER */}
           <div className={cn(
             "grid size-11 place-items-center rounded-[1rem] transition-transform duration-200 group-hover:scale-105 shrink-0 transform-gpu",
@@ -39,7 +39,7 @@ export function FeatureCard({
           )}>
             <Icon className="h-5 w-5 text-white drop-shadow-[1.5px_1.5px_3px_rgba(0,0,0,0.3)]" />
           </div>
-          <div className="flex-1 flex flex-col mt-2.5">
+          <div className="flex-1 flex flex-col mt-4">
             <CardTitle className="text-[15px] md:text-[17px] font-bold mb-1 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors duration-200 uppercase font-body tracking-tight">
               {title}
             </CardTitle>

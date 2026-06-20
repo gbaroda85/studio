@@ -43,10 +43,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useFileStore } from '@/lib/file-store';
 
-// STABLE WORKER CONFIG
+// STABLE WORKER CONFIG FOR PRODUCTION (Vercel Fix)
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined') {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/build/pdf.worker.min.mjs`;
 }
 
 const StarIcons = () => (
@@ -153,7 +153,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataURL(file);
+            reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -215,7 +215,7 @@ export default function PdfUnlocker() {
         try {
             const pdfBuffer = await pdfFile.arrayBuffer();
 
-            // --- METHOD A: DIRECT VECTOR UNLOCK (SIZE PRESERVATION) ---
+            // --- METHOD A: DIRECT VECTOR UNLOCK ---
             try {
                 const pdfDoc = await PDFDocument.load(pdfBuffer, { 
                     password: password,
@@ -248,7 +248,7 @@ export default function PdfUnlocker() {
                 console.warn("pdf-lib direct unlock failed, falling back to sanitization.");
             }
 
-            // --- METHOD B: SANITIZATION FALLBACK (IMAGE RENDER) ---
+            // --- METHOD B: SANITIZATION FALLBACK ---
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(pdfBuffer),
                 password: password,
@@ -483,7 +483,7 @@ export default function PdfUnlocker() {
                                     ) : (
                                         <Button 
                                             size="lg" 
-                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95" 
+                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95 flex-[2] min-w-[200px]" 
                                             onClick={handleDownload}
                                         >
                                             <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />

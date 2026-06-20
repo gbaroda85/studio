@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -95,7 +94,7 @@ const ALL_TOOLS = [
   { icon: RotateCw, title: "ROTATE PDF", description: "Rotate PDF pages permanently and save.", href: "/rotate-pdf", colorClass: "bg-gradient-to-br from-blue-400 to-blue-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
   { icon: Lock, title: "PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-gradient-to-br from-slate-700 to-slate-900", lightBg: "bg-slate-50", category: "pdf-kit" },
   { icon: Unlock, title: "UNLOCK PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-gradient-to-br from-teal-400 to-teal-600", lightBg: "bg-[#f0fdfa]", category: "pdf-kit" },
-  { icon: FileArchive, title: "PDF COMPRESS", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-rose-50", category: "pdf-kit" },
+  { icon: FileArchive, title: "PDF COMPRESS", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
   { icon: FilePenLine, title: "PDF EDITOR", description: "Edit text, images and pages in any PDF document.", href: "/edit-pdf", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "pdf-kit" },
   { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-gradient-to-br from-cyan-500 to-cyan-700", lightBg: "bg-cyan-50", category: "pdf-kit" },
 
@@ -144,11 +143,10 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
-    <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02]">
-      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-3.5 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
-        {/* COMPACT 3D ICON CONTAINER */}
+    <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02] min-h-[240px]">
+      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-8 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
         <div className={cn(
-          `size-12 md:size-13 rounded-[1.1rem] flex items-center justify-center mb-3 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
+          `size-12 md:size-13 rounded-[1.1rem] flex items-center justify-center mb-5 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
           "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_8px_15px_-5px_rgba(0,0,0,0.3)]",
           colorClass
         )}>
@@ -329,7 +327,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* FINANCE CENTER - LIMIT 6 */}
+                {/* FINANCE CENTER - LIMIT 10 */}
                 <div className="mb-24">
                     <div className="flex items-center gap-2 text-indigo-500 font-bold text-[10px] uppercase tracking-[0.2em] mb-3 font-body">
                         <div className="w-12 h-1.5 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE CENTER</span>
