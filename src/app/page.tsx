@@ -143,18 +143,18 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
-    <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02] min-h-[240px]">
-      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-8 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
+    <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02] min-h-[260px]">
+      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-6 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
         <div className={cn(
-          `size-12 md:size-13 rounded-[1.1rem] flex items-center justify-center mb-5 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
+          `size-12 md:size-13 rounded-[1.1rem] flex items-center justify-center mb-4 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
           "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_8px_15px_-5px_rgba(0,0,0,0.3)]",
           colorClass
         )}>
           <Icon className="size-6 drop-shadow-[1.5px_1.5px_3px_rgba(0,0,0,0.3)]" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-base md:text-lg font-bold mb-1 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
-          <p className="text-[9px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-2">{description}</p>
+          <h3 className="text-lg md:text-xl font-bold mb-1 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-2">{description}</p>
           
           <div className="flex flex-wrap gap-1.5 mt-auto pt-2.5">
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6.5px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Professional</Badge>
