@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -29,7 +30,9 @@ import {
     Italic,
     Move,
     Loader2,
-    ListFilter
+    ListFilter,
+    MousePointer2,
+    Settings2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -167,8 +170,8 @@ export default function PdfPageNumberer() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [renderingProgress, setRenderingProgress] = useState(0);
   
-  // Custom Controls
-  const [position, setPosition] = useState<PageNumberPosition>('bottom-right');
+  // Custom Controls (Global)
+  const [globalPosition, setGlobalPosition] = useState<PageNumberPosition>('bottom-right');
   const [format, setFormat] = useState('Page {page} of {total}');
   const [numberStyle, setNumberStyle] = useState<NumberStyle>('arabic');
   const [fontSize, setFontSize] = useState(12);
@@ -178,6 +181,10 @@ export default function PdfPageNumberer() {
   const [textColor, setTextColor] = useState("#000000");
   const [pageRange, setPageRange] = useState<'all' | 'custom'>('all');
   const [customRange, setCustomRange] = useState('');
+  
+  // Per-Page Overrides
+  const [selectedPageIdx, setSelectedPageIdx] = useState<number | null>(null);
+  const [pageOverrides, setPageOverrides] = useState<Record<number, { position: PageNumberPosition }>>({});
   
   const [numberedPdfUrl, setNumberedPdfUrl] = useState<string | null>(null);
   const [previewPages, setPreviewPages] = useState<string[]>([]);
@@ -197,6 +204,8 @@ export default function PdfPageNumberer() {
       setPdfFile(file);
       setNumberedPdfUrl(null);
       setPreviewPages([]);
+      setSelectedPageIdx(null);
+      setPageOverrides({});
       setIsGeneratingPreview(true);
       setRenderingProgress(0);
 
@@ -219,7 +228,7 @@ export default function PdfPageNumberer() {
         }
         
         const imgs: string[] = [];
-        const pagesToRender = Math.min(count, 10); 
+        const pagesToRender = Math.min(count, 20); 
 
         for (let i = 1; i <= pagesToRender; i++) {
             const page = await pdf.getPage(i);
@@ -252,6 +261,35 @@ export default function PdfPageNumberer() {
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+
+  const handlePositionChange = (pos: PageNumberPosition) => {
+    if (selectedPageIdx !== null) {
+        setPageOverrides(prev => ({
+            ...prev,
+            [selectedPageIdx]: { position: pos }
+        }));
+    } else {
+        setGlobalPosition(pos);
+    }
+    if (numberedPdfUrl) setNumberedPdfUrl(null);
+  };
+
+  const handleApplyToAll = () => {
+    if (selectedPageIdx === null) return;
+    const currentPos = pageOverrides[selectedPageIdx]?.position || globalPosition;
+    setGlobalPosition(currentPos);
+    setPageOverrides({});
+    toast({ title: "Global Sync", description: "Position applied to all pages." });
+  };
+
+  const handleResetSelectedPage = () => {
+    if (selectedPageIdx === null) return;
+    setPageOverrides(prev => {
+        const next = { ...prev };
+        delete next[selectedPageIdx];
+        return next;
+    });
+  };
 
   const handleAddPageNumbers = async () => {
     if (!pdfFile) return;
@@ -300,17 +338,17 @@ export default function PdfPageNumberer() {
             const textWidth = font.widthOfTextAtSize(pageNumberText, fontSize);
             const textHeight = font.heightAtSize(fontSize);
             
-            let x, y;
+            // Use override if exists, otherwise global
+            const targetPos = pageOverrides[pageIndex]?.position || globalPosition;
 
-            switch (position) {
+            let x, y;
+            switch (targetPos) {
                 case 'top-left': x = currentMargin; y = height - currentMargin - textHeight; break;
                 case 'top-center': x = (width - textWidth) / 2; y = height - currentMargin - textHeight; break;
                 case 'top-right': x = width - textWidth - currentMargin; y = height - currentMargin - textHeight; break;
-                
                 case 'center-left': x = currentMargin; y = (height - textHeight) / 2; break;
                 case 'center-center': x = (width - textWidth) / 2; y = (height - textHeight) / 2; break;
                 case 'center-right': x = width - textWidth - currentMargin; y = (height - textHeight) / 2; break;
-                
                 case 'bottom-left': x = currentMargin; y = currentMargin; break;
                 case 'bottom-right': x = width - textWidth - currentMargin; y = currentMargin; break;
                 case 'bottom-center':
@@ -368,6 +406,8 @@ export default function PdfPageNumberer() {
       setTotalPagesPreview(0);
       setPageRange('all');
       setCustomRange('');
+      setSelectedPageIdx(null);
+      setPageOverrides({});
       setNumberStyle('arabic');
       setMargin([25]);
       setTextColor("#000000");
@@ -376,7 +416,7 @@ export default function PdfPageNumberer() {
       if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
-  const getPreviewStyle = (): React.CSSProperties => {
+  const getPreviewStyle = (index: number): React.CSSProperties => {
       const containerWidth = 550; 
       const scale = containerWidth / pageSize.width;
       
@@ -389,22 +429,21 @@ export default function PdfPageNumberer() {
           fontStyle: isItalic ? 'italic' : 'normal',
           textAlign: 'center',
           whiteSpace: 'nowrap',
-          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 50,
           padding: '2px'
       };
 
       const m = `${(margin[0] / pageSize.width) * 100}%`; 
+      const targetPos = pageOverrides[index]?.position || globalPosition;
       
-      switch (position) {
+      switch (targetPos) {
           case 'top-left': styles.top = m; styles.left = m; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = 'translateX(-50%)'; break;
           case 'top-right': styles.top = m; styles.right = m; break;
-          
           case 'center-left': styles.top = '50%'; styles.left = m; styles.transform = 'translateY(-50%)'; break;
           case 'center-center': styles.top = '50%'; styles.left = '50%'; styles.transform = 'translate(-50%, -50%)'; break;
           case 'center-right': styles.top = '50%'; styles.right = m; styles.transform = 'translateY(-50%)'; break;
-          
           case 'bottom-left': styles.bottom = m; styles.left = m; break;
           case 'bottom-right': styles.bottom = m; styles.right = m; break;
           case 'bottom-center':
@@ -416,7 +455,7 @@ export default function PdfPageNumberer() {
   }
   
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24">
+    <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24 mx-auto">
       {!pdfFile ? (
         <Card
             className={cn(
@@ -437,14 +476,14 @@ export default function PdfPageNumberer() {
                     </div>
                     <div className="text-center px-4">
                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to begin</p>
-                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
+                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">100% Private local processing.</p>
                     </div>
                 </div>
                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
             </CardContent>
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
+                <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> VISUAL EDIT</div>
                 <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> PRO FORMATS</div>
             </CardFooter>
         </Card>
@@ -454,86 +493,117 @@ export default function PdfPageNumberer() {
             <div className="lg:col-span-5 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
                     <CardHeader className="bg-primary/5 border-b p-4 md:p-6 text-left">
-                        <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
-                            <Palette className="size-5 text-primary" /> Configuration
-                        </CardTitle>
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary leading-none">
+                                <Palette className="size-5 text-primary" /> Configuration
+                            </CardTitle>
+                            {selectedPageIdx !== null && (
+                                <Badge className="bg-primary text-white font-black text-[8px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-in zoom-in-95">
+                                    EDITING PAGE {selectedPageIdx + 1}
+                                </Badge>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                         
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                            <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                    <Layout className="size-3" /> Position
-                                </Label>
-                                <div className="grid grid-cols-3 gap-1 p-2 bg-muted/20 border-2 border-dashed rounded-xl w-fit mx-auto">
-                                    {POSITIONS.map((pos) => (
-                                        <button
-                                            key={pos}
-                                            onClick={() => setPosition(pos)}
-                                            className={cn(
-                                                "size-8 rounded-md border-2 transition-all flex items-center justify-center relative",
-                                                position === pos ? "bg-primary border-primary text-white shadow-md scale-105" : "bg-white/50 border-border hover:border-primary/40",
-                                                "!ring-[3px] !ring-slate-950 dark:!ring-white"
-                                            )}
-                                            title={pos}
-                                        >
-                                            <div className={cn("size-1.5 rounded-full", position === pos ? "bg-white" : "bg-muted-foreground/30")} />
-                                        </button>
-                                    ))}
+                        <div className="space-y-6">
+                            <div className="space-y-2 text-left">
+                                <div className="flex justify-between items-center mb-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                        <Layout className="size-3" /> {selectedPageIdx !== null ? "Page Position" : "Global Position"}
+                                    </Label>
+                                    {selectedPageIdx !== null && pageOverrides[selectedPageIdx] && (
+                                        <Button variant="ghost" size="sm" className="h-6 text-[8px] font-black text-destructive" onClick={handleResetSelectedPage}>
+                                            <RefreshCcw className="size-2 mr-1" /> Reset to Global
+                                        </Button>
+                                    )}
                                 </div>
+                                <div className="grid grid-cols-3 gap-1.5 p-3 bg-muted/20 border-2 border-dashed rounded-2xl w-fit mx-auto">
+                                    {POSITIONS.map((pos) => {
+                                        const currentPos = selectedPageIdx !== null 
+                                            ? (pageOverrides[selectedPageIdx]?.position || globalPosition)
+                                            : globalPosition;
+                                        return (
+                                            <button
+                                                key={pos}
+                                                onClick={() => handlePositionChange(pos)}
+                                                className={cn(
+                                                    "size-10 rounded-xl border-2 transition-all flex items-center justify-center relative transform active:scale-95",
+                                                    currentPos === pos ? "bg-primary border-primary text-white shadow-xl scale-110 z-10" : "bg-white/50 border-border hover:border-primary/40",
+                                                    "!ring-[3px] !ring-slate-950 dark:!ring-white"
+                                                )}
+                                                title={pos}
+                                            >
+                                                <div className={cn("size-2 rounded-full", currentPos === pos ? "bg-white" : "bg-muted-foreground/20")} />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {selectedPageIdx !== null && (
+                                    <div className="flex gap-2 mt-4">
+                                        <Button variant="outline" className="flex-1 h-9 rounded-xl border-2 font-black text-[9px] uppercase" onClick={handleApplyToAll}>
+                                            <Layers className="size-3.5 mr-1.5 text-primary" /> Apply to All
+                                        </Button>
+                                        <Button variant="ghost" className="flex-1 h-9 rounded-xl text-[9px] font-black uppercase" onClick={() => setSelectedPageIdx(null)}>
+                                            <X className="size-3.5 mr-1.5" /> Back to Global
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
-                            <div className="space-y-4">
-                                <div className="space-y-1.5">
+
+                            <Separator className="opacity-10" />
+
+                            <div className="grid grid-cols-2 gap-6 text-left">
+                                <div className="space-y-3">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Text Style</Label>
                                     <div className="flex gap-1.5">
-                                        <Button variant="outline" size="sm" className={cn("h-8 flex-1 rounded-lg border-2", isBold && "bg-primary/10 border-primary text-primary")} onClick={() => setIsBold(!isBold)}><Bold className="size-3" /></Button>
-                                        <Button variant="outline" size="sm" className={cn("h-8 flex-1 rounded-lg border-2", isItalic && "bg-primary/10 border-primary text-primary")} onClick={() => setIsItalic(!isItalic)}><Italic className="size-3" /></Button>
+                                        <Button variant="outline" size="sm" className={cn("h-10 flex-1 rounded-xl border-2 transition-all", isBold && "bg-primary/10 border-primary text-primary")} onClick={() => setIsBold(!isBold)}><Bold className="size-3.5" /></Button>
+                                        <Button variant="outline" size="sm" className={cn("h-10 flex-1 rounded-xl border-2 transition-all", isItalic && "bg-primary/10 border-primary text-primary")} onClick={() => setIsItalic(!isItalic)}><Italic className="size-3.5" /></Button>
                                     </div>
                                 </div>
-                                <div className="space-y-1.5">
+                                <div className="space-y-3">
                                     <Label className="text-[10px] font-black uppercase opacity-60">Color</Label>
-                                    <div className="flex items-center gap-2 bg-muted/20 p-1 rounded-lg border-2 shadow-inner">
-                                        <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="size-6 rounded-md cursor-pointer border-none bg-transparent" />
-                                        <span className="text-[8px] font-black uppercase font-mono">{textColor}</span>
+                                    <div className="flex items-center gap-3 bg-muted/20 p-2 rounded-xl border-2 shadow-inner">
+                                        <input type="color" value={textColor} onChange={(e) => setTextColor(e.target.value)} className="size-8 rounded-lg cursor-pointer border-none bg-transparent" />
+                                        <span className="text-[10px] font-black uppercase font-mono tracking-tight">{textColor}</span>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed text-left">
+                        <div className="grid grid-cols-2 gap-4 pt-4 border-t border-dashed text-left">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-gap-2"><Type className="size-3" /> System</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Type className="size-3" /> System</Label>
                                 <Select value={numberStyle} onValueChange={(v) => setNumberStyle(v as NumberStyle)}>
-                                    <SelectTrigger className="h-9 border-2 font-black rounded-lg bg-background text-[10px]"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-lg border-2 shadow-2xl">
+                                    <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background text-[10px] shadow-sm"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
                                         {NUMBER_STYLES.map(s => (
-                                            <SelectItem key={s.value} value={s.value} className="font-bold py-2 uppercase text-[10px]">{s.label}</SelectItem>
+                                            <SelectItem key={s.value} value={s.value} className="font-bold py-3 uppercase text-[10px]">{s.label}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-gap-2"><Layers className="size-3" /> Format</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Layers className="size-3" /> Format</Label>
                                 <Select value={format} onValueChange={(v) => setFormat(v)}>
-                                    <SelectTrigger className="h-9 border-2 font-black rounded-lg bg-background text-[10px]"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-lg border-2 shadow-2xl">
+                                    <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background text-[10px] shadow-sm"><SelectValue /></SelectTrigger>
+                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
                                         {QUICK_FORMATS.map(f => (
-                                            <SelectItem key={f.value} value={f.value} className="font-bold py-2 uppercase text-[10px]">{f.display}</SelectItem>
+                                            <SelectItem key={f.value} value={f.value} className="font-bold py-3 uppercase text-[10px]">{f.display}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                         </div>
 
-                        {/* Page Selection Area */}
                         <div className="space-y-4 pt-4 border-t border-dashed text-left">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
-                                <ListFilter className="size-3" /> Page Selection
+                                <ListFilter className="size-3" /> Page Range
                             </Label>
                             <Tabs value={pageRange} onValueChange={(v) => setPageRange(v as any)} className="w-full">
-                                <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/20 border-2 rounded-xl">
-                                    <TabsTrigger value="all" className="text-[9px] font-black uppercase">All Pages</TabsTrigger>
-                                    <TabsTrigger value="custom" className="text-[9px] font-black uppercase">Custom Range</TabsTrigger>
+                                <TabsList className="grid w-full grid-cols-2 h-11 bg-muted/20 border-2 rounded-xl p-1">
+                                    <TabsTrigger value="all" className="text-[10px] font-black uppercase rounded-lg">All</TabsTrigger>
+                                    <TabsTrigger value="custom" className="text-[10px] font-black uppercase rounded-lg">Custom</TabsTrigger>
                                 </TabsList>
                             </Tabs>
                             {pageRange === 'custom' && (
@@ -542,69 +612,73 @@ export default function PdfPageNumberer() {
                                         value={customRange} 
                                         onChange={(e) => setCustomRange(e.target.value)} 
                                         placeholder="e.g. 1, 3-5, 8" 
-                                        className="h-10 border-2 font-bold text-center rounded-xl shadow-inner text-xs" 
+                                        className="h-11 border-2 font-black text-center rounded-xl shadow-inner text-xs" 
                                     />
-                                    <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 text-center">Example: 1, 3-5, 8</p>
                                 </div>
                             )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed text-left">
-                            <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Size (pt)</Label>
-                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-9 border-2 font-bold rounded-lg text-[10px] text-center" />
+                        <div className="grid grid-cols-2 gap-8 pt-4 border-t border-dashed text-left">
+                            <div className="space-y-3">
+                                <Label className="text-[10px] font-black uppercase opacity-60">Font Size (pt)</Label>
+                                <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-11 border-2 font-black rounded-xl text-center shadow-inner" />
                             </div>
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center px-1">
                                     <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-1.5">
-                                        <Move className="size-3" /> Margins
+                                        <Move className="size-3" /> Margin
                                     </Label>
-                                    <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
+                                    <Badge variant="secondary" className="font-mono text-[9px] h-5 px-2 bg-primary text-white">{margin[0]}pt</Badge>
                                 </div>
-                                <Slider value={margin} min={10} max={100} step={1} onValueChange={(v) => setMargin(v)} />
+                                <Slider value={margin} min={5} max={150} step={1} onValueChange={(v) => setMargin(v)} />
                             </div>
                         </div>
 
-                        <div className="p-4 bg-green-500/5 rounded-xl border-2 border-green-500/10 flex gap-4 text-left">
+                        <div className="p-5 bg-green-500/5 rounded-3xl border-2 border-green-500/10 flex gap-4 text-left shadow-sm">
                             <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
-                            <p className="text-[9px] text-green-700 font-bold uppercase leading-tight">Numbers are hard-encoded into the PDF structure.</p>
+                            <div className="space-y-1">
+                                <p className="text-[10px] font-black text-green-800 uppercase tracking-tight">Industrial Secure</p>
+                                <p className="text-[9px] font-medium text-green-700/70 leading-relaxed uppercase">
+                                    Numbers are hard-encoded into vectors for zero quality loss.
+                                </p>
+                            </div>
                         </div>
                     </CardContent>
-                    <CardFooter className="p-4 md:p-6 border-t flex flex-col gap-3">
+                    <CardFooter className="p-6 md:p-8 bg-muted/10 border-t flex flex-col gap-4 shrink-0">
                         {!numberedPdfUrl ? (
                             <Button 
-                                className="magic-button w-full h-14 md:h-16 text-base md:text-xl font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-[1.5rem] group transition-all active:scale-95 disabled:opacity-50 border-none"
                                 onClick={handleAddPageNumbers}
                                 disabled={isProcessing || !format}
                             >
                                 <StarIcons />
                                 {isProcessing ? (
                                     <div className="flex items-center gap-3">
-                                        <Loader2 className="size-6 md:size-7 animate-spin" />
-                                        <span className="uppercase text-xs md:text-sm tracking-tighter">PROCESSING...</span>
+                                        <Loader2 className="size-7 md:size-8 animate-spin" />
+                                        <span className="uppercase tracking-tighter">PROCESSING...</span>
                                     </div>
                                 ) : (
-                                    <div className="flex items-center gap-2 md:gap-3">
-                                        <Hash className="size-6 md:size-7 text-white group-hover:scale-125 transition-transform" />
-                                        <span className="uppercase tracking-tighter text-sm md:text-base">APPLY NUMBERS</span>
+                                    <div className="flex items-center gap-3">
+                                        <Hash className="size-7 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
+                                        <span className="uppercase tracking-tighter">APPLY NUMBERS</span>
                                     </div>
                                 )}
                             </Button>
                         ) : (
-                            <div className="space-y-3 w-full">
+                            <div className="space-y-4 w-full">
                                 <Button 
                                     size="lg" 
-                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-18 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
                                     onClick={handleDownload}
                                 >
-                                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
-                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE NUMBERED PDF</span>
-                                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                                        <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
-                                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                    <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
+                                    <span className="flex-1 px-12 text-center tracking-widest text-sm md:text-lg uppercase">SAVE NUMBERED PDF</span>
+                                    <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                        <Download className="size-7 group-hover:scale-110 transition-transform" />
+                                        <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
                                     </div>
                                 </Button>
-                                <Button variant="outline" onClick={resetState} className="w-full h-10 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3" /> Start Over</Button>
+                                <Button variant="outline" onClick={resetState} className="w-full h-11 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3.5 mr-2" /> Start New</Button>
                             </div>
                         )}
                     </CardFooter>
@@ -613,54 +687,73 @@ export default function PdfPageNumberer() {
 
             {/* Workspace: Live Preview */}
             <div className="lg:col-span-7 h-full flex flex-col no-print">
-                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[3rem] h-[600px] lg:h-[850px] flex flex-col">
+                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[2.5rem] h-[700px] lg:h-[900px] flex flex-col">
                     <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
-                            <Eye className="size-4 text-primary" />
-                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Live HD Studio View</CardTitle>
+                            <Eye className="size-5 text-primary" />
+                            <CardTitle className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Live HD Studio View</CardTitle>
                         </div>
-                        {numberedPdfUrl && (
-                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">PROCESSED</Badge>
+                        {previewPages.length > 0 && (
+                             <div className="flex items-center gap-3">
+                                <Badge variant="secondary" className="bg-green-600 text-white font-black text-[9px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">HD CANVAS</Badge>
+                             </div>
                         )}
                     </CardHeader>
                     <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1 flex flex-col">
-                        <ScrollArea className="flex-1 w-full h-full p-4 md:p-12 lg:p-20">
-                            <div className="flex flex-col items-center gap-16 pb-20">
+                        <ScrollArea className="flex-1 w-full h-full p-6 md:p-12 lg:p-16">
+                            <div className="flex flex-col items-center gap-12 pb-24">
                                 {isGeneratingPreview ? (
-                                    <div className="flex flex-col items-center gap-6 text-center py-40">
+                                    <div className="flex flex-col items-center gap-8 text-center py-48">
                                         <div className="relative">
                                             <Loader2 className="size-20 md:size-24 text-primary opacity-20 animate-spin stroke-[3]" />
                                             <Monitor className="absolute inset-0 m-auto size-10 text-primary/40 animate-pulse" />
                                         </div>
-                                        <div className="space-y-3 w-full max-w-[280px]">
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page Samples...</p>
+                                        <div className="space-y-4 w-full max-w-[280px]">
+                                            <p className="text-[11px] font-black uppercase tracking-widest text-primary animate-pulse">Rendering Page Samples...</p>
                                             <Progress value={renderingProgress} className="h-1.5 shadow-inner" />
                                         </div>
                                     </div>
                                 ) : previewPages.length > 0 ? (
                                     previewPages.map((src, i) => (
-                                        <div key={i} className="relative group w-full max-w-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-4 md:border-[12px] border-white bg-white rounded-sm animate-in slide-in-from-bottom-6 duration-700 overflow-hidden">
+                                        <div 
+                                            key={i} 
+                                            onClick={() => setSelectedPageIdx(i)}
+                                            className={cn(
+                                                "relative group w-full max-w-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-4 md:border-[12px] rounded-sm bg-white animate-in slide-in-from-bottom-6 duration-700 overflow-hidden cursor-pointer transition-all",
+                                                selectedPageIdx === i ? "border-primary scale-[1.03] ring-[15px] ring-primary/10 z-[60]" : "border-white hover:border-primary/20"
+                                            )}
+                                        >
                                             <img src={src} alt={`P${i+1}`} className="w-full h-auto block" />
                                             
                                             <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-1">
-                                                <div style={getPreviewStyle()}>
+                                                <div style={getPreviewStyle(i)}>
                                                     {format
                                                         .replace('{page}', formatWithStyle(i + 1, numberStyle))
                                                         .replace('{total}', formatWithStyle(totalPagesPreview, numberStyle))}
                                                 </div>
                                             </div>
                                             
-                                            <div className="absolute top-2 right-2 opacity-20 flex items-center gap-1.5">
-                                                <Badge variant="outline" className="text-[7px] font-black uppercase border-black">PAGE {i+1} PREVIEW</Badge>
+                                            <div className="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                                                <Badge className={cn(
+                                                    "text-[8px] font-black uppercase px-3 py-1 shadow-lg border-2 border-white",
+                                                    selectedPageIdx === i ? "bg-primary text-white" : "bg-black/60 text-white opacity-40 group-hover:opacity-100"
+                                                )}>
+                                                    {selectedPageIdx === i ? 'EDITING' : `PAGE ${i+1}`}
+                                                </Badge>
+                                                {pageOverrides[i] && (
+                                                    <Badge className="bg-orange-500 text-white text-[7px] font-black uppercase px-2 py-0.5 shadow-md">OVERRIDE</Badge>
+                                                )}
                                             </div>
+
+                                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                     ))
                                 ) : (
-                                    <div className="flex flex-col items-center justify-center py-40 opacity-20 gap-6">
-                                        <SearchCode className="size-32" />
-                                        <div className="space-y-1 text-center">
-                                            <p className="text-xl font-black uppercase tracking-widest">Waiting for Document</p>
-                                            <p className="text-[10px] font-bold">Select a file to unlock visual numbering studio</p>
+                                    <div className="flex flex-col items-center justify-center py-48 opacity-10 gap-8">
+                                        <SearchCode className="size-40" />
+                                        <div className="space-y-2 text-center">
+                                            <p className="text-3xl font-black uppercase tracking-tighter">Waiting for Input</p>
+                                            <p className="text-xs font-bold uppercase tracking-widest">Select a PDF file to start positioning.</p>
                                         </div>
                                     </div>
                                 )}
@@ -669,14 +762,15 @@ export default function PdfPageNumberer() {
                         </ScrollArea>
                         
                         {previewPages.length > 0 && (
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
-                                <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Studio Mapping Active
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 px-10 py-3.5 bg-black/80 backdrop-blur-xl rounded-full text-white text-[11px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-[100] hover:scale-105 transition-transform cursor-default">
+                                <MousePointer2 className="size-4 text-primary animate-pulse" /> Click a page to change its position individually
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
+                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 shrink-0">
                          <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
                         <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 300 DPI RENDER</div>
+                        <div className="flex items-center gap-2"><Settings2 className="size-4 text-primary" /> PER-PAGE LOGIC</div>
                     </CardFooter>
                 </Card>
             </div>
