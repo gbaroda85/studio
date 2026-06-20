@@ -65,7 +65,8 @@ import {
   CalendarDays,
   Menu,
   Palette,
-  Sparkles
+  Sparkles,
+  LayoutGrid
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
