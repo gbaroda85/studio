@@ -202,7 +202,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-4 pb-10 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
+      <section className="relative w-full pt-4 pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
@@ -227,16 +227,16 @@ export default function Page() {
         </div>
 
         <div className="w-full px-6 md:px-12 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up">
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-3 shadow-sm animate-fade-in-up">
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-2 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-1 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta">
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <div className="space-y-1 mb-6 animate-fade-in-up">
+          <div className="space-y-1 mb-4 animate-fade-in-up">
             <p className="text-sm md:text-xl text-slate-500 dark:text-slate-300 max-w-3xl mx-auto font-bold leading-relaxed">
               Everything happens locally in your device RAM, 100% private.
             </p>
@@ -245,7 +245,7 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up">
+          <div className="flex flex-wrap justify-center gap-4 mb-6 animate-fade-in-up">
             <Link href="/tools?tab=image" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner flex items-center gap-2 px-6">
