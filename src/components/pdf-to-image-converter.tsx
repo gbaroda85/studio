@@ -265,7 +265,6 @@ export default function PdfToImageConverter() {
         if (!ctx) return item.previewSrc;
 
         if (item.fitMode === 'original') {
-            // A4 Aspect 1:1.414
             const targetW = Math.floor(viewport.width);
             const targetH = Math.round(targetW * 1.414);
             canvas.width = targetW;
@@ -384,7 +383,7 @@ export default function PdfToImageConverter() {
                             <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 md:p-12">
-                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-4 bg-muted/30 group">
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-4 bg-muted/30 group">
                                 <div className="relative">
                                     <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
@@ -399,7 +398,7 @@ export default function PdfToImageConverter() {
                         <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                             <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> 300 DPI HD</div>
-                            <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> PNG/JPG</div>
+                            <div className="flex items-center gap-1.5"><FileDigit className="size-3 text-primary" /> PRO BUNDLING</div>
                         </CardFooter>
                     </Card>
                 </div>
@@ -591,17 +590,15 @@ export default function PdfToImageConverter() {
                                 )}
                             </div>
                         </div>
-                    </div>
-                )}
-            </CardContent>
-            
-            <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
-                <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
-                <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 300 DPI HD</div>
-                <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> PNG/JPG</div>
-            </CardFooter>
-            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
-        </Card>
+                    </CardContent>
+                    
+                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
+                        <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
+                        <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 300 DPI HD</div>
+                        <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> PNG/JPG</div>
+                    </CardFooter>
+                    <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
+                </Card>
             )}
         </div>
     );
