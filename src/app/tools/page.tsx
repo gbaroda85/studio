@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import placeholderData from '@/app/lib/placeholder-images.json';
 import {FeatureCard} from '@/components/feature-card';
@@ -62,8 +62,6 @@ import {
   Barcode,
   QrCode,
   ChevronUp,
-  ScanLine as ScanLineIcon,
-  Wand2 as Wand2Icon,
   IndianRupee,
   TrendingUp,
   PiggyBank,
@@ -74,7 +72,8 @@ import {
   CalendarDays,
   Menu,
   Palette,
-  CreditCard
+  CreditCard,
+  PlayCircle
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -577,12 +576,14 @@ function ToolsPageContent() {
     { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Infinity, color: 'text-emerald-500' },
   ];
 
-  const searchResults = allFeatureGroups
-    .map(group => ({
-        ...group,
-        features: filterFeatures(group.features)
-    }))
-    .filter(group => group.features.length > 0);
+  const searchResults = useMemo(() => {
+    return allFeatureGroups
+        .map(group => ({
+            ...group,
+            features: filterFeatures(group.features)
+        }))
+        .filter(group => group.features.length > 0);
+  }, [searchQuery, allFeatureGroups, filterFeatures]);
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
