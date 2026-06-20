@@ -106,6 +106,14 @@ function ToolsPageContent() {
       lightBg: 'bg-[#f5f3ff]'
     },
     {
+      href: '/ai-upscaler',
+      labelKey: 'ai_upscaler_label',
+      descriptionKey: 'ai_upscaler_description',
+      icon: Sparkles,
+      color: 'bg-blue-500',
+      lightBg: 'bg-blue-50'
+    },
+    {
       href: '/signature-resizer',
       labelKey: 'signature_resizer_label',
       descriptionKey: 'signature_resizer_description',
@@ -327,6 +335,14 @@ function ToolsPageContent() {
   ];
 
   const videoFeatures = [
+    {
+      href: '/instagram-downloader',
+      labelKey: 'instagram_downloader_label',
+      descriptionKey: 'instagram_downloader_description',
+      icon: PlayCircle,
+      color: 'bg-pink-600',
+      lightBg: 'bg-pink-50'
+    },
     {
       href: '/video-to-mp3',
       labelKey: 'video_to_mp3_label',
@@ -602,7 +618,7 @@ function ToolsPageContent() {
             Everything happens locally in your browser for 100% privacy.
           </p>
 
-          <div className="relative max-w-xl mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="relative max-w-lg mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
               <div className="relative">
                 <input
