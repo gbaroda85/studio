@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -103,6 +104,7 @@ export default function PdfWatermarker() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGeneratingPreview, setIsGeneratingPreview] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const [renderingProgress, setRenderingProgress] = useState(0);
   
   const [wType, setWType] = useState<WatermarkType>('text');
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
@@ -120,7 +122,6 @@ export default function PdfWatermarker() {
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [previewPages, setPreviewPages] = useState<string[]>([]);
-  const [renderingProgress, setRenderingProgress] = useState(0);
   const [pageSize, setPageSize] = useState({ width: 595, height: 842 });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -258,30 +259,42 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
+            // Calculate anchor relative to visual frame (0,0 is bottom-left of VISUAL frame)
             let vcx, vcy;
             switch (position) {
-                case 'top-left': vcx = curMargin + tw/2; vcy = curMargin + th/2; break;
-                case 'top-center': vcx = vw / 2; vcy = curMargin + th/2; break;
-                case 'top-right': vcx = vw - curMargin - tw/2; vcy = curMargin + th/2; break;
+                case 'top-left': vcx = curMargin + tw/2; vcy = vh - curMargin - th/2; break;
+                case 'top-center': vcx = vw / 2; vcy = vh - curMargin - th/2; break;
+                case 'top-right': vcx = vw - curMargin - tw/2; vcy = vh - curMargin - th/2; break;
                 case 'center-left': vcx = curMargin + tw/2; vcy = vh / 2; break;
                 case 'center-center': vcx = vw / 2; vcy = vh / 2; break;
                 case 'center-right': vcx = vw - curMargin - tw/2; vcy = vh / 2; break;
-                case 'bottom-left': vcx = curMargin + tw/2; vcy = vh - curMargin - th/2; break;
-                case 'bottom-center': vcx = vw / 2; vcy = vh - curMargin - th/2; break;
-                case 'bottom-right': vcx = vw - curMargin - tw/2; vcy = vh - curMargin - th/2; break;
+                case 'bottom-left': vcx = curMargin + tw/2; vcy = curMargin + th/2; break;
+                case 'bottom-center': vcx = vw / 2; vcy = curMargin + th/2; break;
+                case 'bottom-right': vcx = vw - curMargin - tw/2; vcy = curMargin + th/2; break;
                 default: vcx = vw/2; vcy = vh/2;
             }
 
+            // Translation to PDF internal coordinates
             let finalX = 0, finalY = 0;
-            if (pageRot === 0) { finalX = vcx; finalY = vh - vcy; } 
-            else if (pageRot === 90) { finalX = vcy; finalY = vcx; } 
-            else if (pageRot === 180) { finalX = vw - vcx; finalY = vcy; } 
-            else if (pageRot === 270) { finalX = vh - vcy; finalY = vw - vcx; }
+            if (pageRot === 0) { finalX = vcx; finalY = vcy; } 
+            else if (pageRot === 90) { finalX = height - vcy; finalY = vcx; } 
+            else if (pageRot === 180) { finalX = width - vcx; finalY = height - vcy; } 
+            else if (pageRot === 270) { finalX = vcy; finalY = width - vcx; }
+
+            // To center correctly while rotating, we adjust the pivot math
+            // degrees(rotDeg) in drawText rotates around (x,y).
+            // We need to shift (x,y) so that the center of the rotated block stays at finalX, finalY
+            const rad = (rotDeg * Math.PI) / 180;
+            const offsetX = (tw / 2) * Math.cos(rad) - (th / 2) * Math.sin(rad);
+            const offsetY = (tw / 2) * Math.sin(rad) + (th / 2) * Math.cos(rad);
+
+            const drawX = finalX - offsetX;
+            const drawY = finalY - offsetY;
 
             if (wType === 'text') {
                 page.drawText(watermarkText, {
-                    x: finalX - tw/2,
-                    y: finalY - th/2,
+                    x: drawX,
+                    y: drawY,
                     font,
                     size: fontSize,
                     color: rgb(rgbColor.r, rgbColor.g, rgbColor.b),
@@ -290,8 +303,8 @@ export default function PdfWatermarker() {
                 });
             } else if (embeddedImage) {
                 page.drawImage(embeddedImage, {
-                    x: finalX - tw/2,
-                    y: finalY - th/2,
+                    x: drawX,
+                    y: drawY,
                     width: tw,
                     height: th,
                     opacity: op,
