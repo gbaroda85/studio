@@ -86,7 +86,7 @@ function formatBytes(bytes: number, decimals = 2): string {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
 function hexToRgb(hex: string) {
@@ -142,7 +142,6 @@ export default function PdfWatermarker() {
   const [rotation, setRotation] = useState([45]);
   const [margin, setMargin] = useState([40]);
   
-  // Page Range Selection
   const [pageRangeMode, setPageRangeMode] = useState<'all' | 'custom'>('all');
   const [customRange, setCustomRange] = useState('');
   
@@ -472,7 +471,6 @@ export default function PdfWatermarker() {
         </Card>
       ) : (
         <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in duration-500">
-            {/* Sidebar: Controls */}
             <div className="lg:col-span-5 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
                     <CardHeader className="bg-primary/5 border-b p-4 md:p-6 text-left">
@@ -594,7 +592,6 @@ export default function PdfWatermarker() {
                             </div>
                         </div>
 
-                        {/* Page Range Selection Area */}
                         <div className="space-y-4 pt-6 border-t-2 border-dashed text-left">
                             <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
                                 <ListFilter className="size-3" /> Page Selection
@@ -668,7 +665,6 @@ export default function PdfWatermarker() {
                 </Card>
             </div>
 
-            {/* RIGHT: HD VIEWPORT */}
             <div className="lg:col-span-7 h-full flex flex-col no-print">
                 <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[3rem] h-[650px] lg:h-[850px] flex flex-col">
                     <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
@@ -744,5 +740,7 @@ export default function PdfWatermarker() {
                 </Card>
             </div>
         </div>
-    );
+      )}
+    </div>
+  );
 }

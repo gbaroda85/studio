@@ -143,28 +143,28 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
-    <div className="h-full bg-[#fdfdfd] dark:bg-[#0a040d] rounded-[2rem] p-0.5 shadow-[0_12px_30px_-12px_rgba(0,0,0,0.1),0_4px_8px_-5px_rgba(0,0,0,0.05)] dark:shadow-[0_15px_40px_-12px_rgba(0,0,0,0.5)] hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_40px_80px_-20px_hsl(var(--primary)/0.4)] transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-100/60 dark:border-primary/20 flex flex-col transform-gpu shadow-[inset_0_1px_1px_rgba(255,255,255,1)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] ring-1 ring-black/[0.02] min-h-[280px]">
-      <div className={cn("flex-1 rounded-[1.8rem] overflow-hidden flex flex-col p-6 shadow-[inset_0_1px_4px_rgba(0,0,0,0.01)]", lightBg, "dark:bg-[#0a040d]/60")}>
+    <div className="h-full bg-slate-100 dark:bg-slate-900 rounded-[2rem] shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden">
+      <div className={cn("flex-1 flex flex-col p-8", lightBg, "dark:bg-slate-900/60")}>
         <div className={cn(
-          `size-12 md:size-13 rounded-[1.1rem] flex items-center justify-center mb-5 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
-          "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_8px_15px_-5px_rgba(0,0,0,0.3)]",
+          `size-14 rounded-[1.2rem] flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
+          "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_10px_20px_-5px_rgba(0,0,0,0.3)]",
           colorClass
         )}>
-          <Icon className="size-6 drop-shadow-[1.5px_1.5px_3px_rgba(0,0,0,0.3)]" />
+          <Icon className="size-7 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-lg md:text-xl font-bold mb-1.5 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
-          <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-2">{description}</p>
+          <h3 className="text-xl md:text-2xl font-black mb-2 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
+          <p className="text-[12px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-3">{description}</p>
           
-          <div className="flex flex-wrap gap-1.5 mt-auto pt-5">
-             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6.5px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Professional</Badge>
-             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6.5px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Local RAM</Badge>
+          <div className="flex flex-wrap gap-2 mt-auto pt-6">
+             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Industrial</Badge>
+             <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Secured</Badge>
           </div>
         </div>
       </div>
       
-      <div className="bg-transparent py-1.5 px-6 flex items-center justify-between rounded-b-[2rem]">
-        <span className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-800 dark:text-slate-400 opacity-60">Launch Tool</span>
+      <div className="bg-white/20 dark:bg-black/20 py-2.5 px-8 flex items-center justify-between">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400 opacity-60">Launch Tool</span>
         <div className="launch-arrow-btn scale-75 origin-right -mr-2">
           <div className="button-box">
             <span className="button-elem">
@@ -201,7 +201,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-6 pb-6 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] transition-colors duration-500 z-10">
+      <section className="relative w-full pt-10 pb-16 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
@@ -226,50 +226,26 @@ export default function Page() {
         </div>
 
         <div className="w-full px-6 md:px-12 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-4 shadow-sm animate-fade-in-up">
-            <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
+          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-6 shadow-sm animate-fade-in-up">
+            <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> THE ULTIMATE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-7xl font-extrabold mb-2 tracking-tighter leading-[1.05] animate-fade-in-up font-jakarta">
-            Professional Tools for <br className="hidden md:block" />
-            <span className="text-gradient-hero">Images & PDFs</span>
+          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-4 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta uppercase">
+            Professional <br className="hidden md:block" />
+            <span className="text-gradient-hero">Image & PDF Hub</span>
           </h1>
           
-          <p className="text-sm md:text-lg text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-6 font-semibold leading-relaxed animate-fade-in-up">
-            Everything happens locally in your device RAM, 100% private. <br className="hidden md:block" /> Fast, secure, and ready for official submissions.
+          <p className="text-base md:text-xl text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-10 font-bold leading-relaxed animate-fade-in-up">
+            Sanitize, Compress and Convert locally in your browser. <br className="hidden md:block" /> 100% Privacy for official government portal submissions.
           </p>
 
-          <div className="flex flex-wrap justify-center gap-4 md:gap-6 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner">
-                  <span>Image Tools</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner">
-                  <span>PDF Tools</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner">
-                  <span>Calculators</span>
-                </div>
-              </div>
-            </Link>
-          </div>
-
           <div className="max-w-3xl mx-auto relative group animate-fade-in-up">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-3xl blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-[2rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search tools... (e.g. 'upscale', 'scan', 'barcode')"
-                className="w-full pl-14 pr-6 h-14 text-lg rounded-3xl bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm"
+                placeholder="Search 40+ professional tools... (e.g. 'compress', 'scanner', 'gst')"
+                className="w-full pl-14 pr-6 h-16 text-lg rounded-[2rem] bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-black font-jakarta backdrop-blur-sm uppercase tracking-tight"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -279,107 +255,62 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="pt-8 pb-12 bg-background w-full">
+      <section className="pt-12 pb-24 bg-background w-full">
         <div className="w-full px-6 md:px-12">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest mb-12 font-body">
-                  <div className="w-12 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
+                <div className="flex items-center gap-3 text-primary font-black text-xs uppercase tracking-widest mb-12 font-body">
+                  <div className="w-16 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
                     {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} />)}
                 </div>
                 {filteredTools.length === 0 && (
-                   <div className="text-center py-20 opacity-30 font-body">
-                      <Search className="size-20 mx-auto mb-4" />
-                      <p className="font-bold uppercase tracking-widest">No matching tools found.</p>
+                   <div className="text-center py-32 opacity-20 font-body flex flex-col items-center">
+                      <Search className="size-24 mb-6" />
+                      <p className="font-black text-2xl uppercase tracking-[0.3em]">No tools found.</p>
                    </div>
                 )}
             </div>
           ) : (
             <>
                 {/* IMAGE SOLUTION - STRICT 8 TOOLS */}
-                <div className="mb-12">
-                    <div className="flex items-center gap-2 text-primary font-bold text-[10px] uppercase tracking-[0.3em] mb-3 font-body">
-                        <div className="w-12 h-1.5 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE SOLUTION</span>
+                <div className="mb-20">
+                    <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
+                        <div className="w-16 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE ENGINE</span>
                     </div>
-                    <div className="flex items-center justify-between gap-4 mb-10">
-                        <h2 className="text-2xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
+                    <div className="flex items-center justify-between gap-4 mb-12">
+                        <h2 className="text-3xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
                         <Link href="/tools?tab=all" className="hidden sm:flex">
-                          <button className="learn-more">
+                          <button className="learn-more scale-110">
                             <span className="font-black tracking-widest uppercase">Explore All</span>
                           </button>
                         </Link>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
                 {/* PDF TOOLKIT - STRICT 8 TOOLS */}
-                <div className="mb-12">
-                    <div className="flex items-center gap-2 text-rose-500 font-bold text-[10px] uppercase tracking-[0.3em] mb-3 font-body">
-                        <div className="w-12 h-1.5 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT ENGINE</span>
+                <div className="mb-20">
+                    <div className="flex items-center gap-3 text-rose-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
+                        <div className="w-16 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT STUDIO</span>
                     </div>
-                    <h2 className="text-2xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">PDF Toolkit</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
+                    <h2 className="text-3xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">PDF Toolkit</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
                 {/* FINANCE CENTER - LIMIT 10 */}
-                <div className="mb-24">
-                    <div className="flex items-center gap-2 text-indigo-500 font-bold text-[10px] uppercase tracking-[0.2em] mb-3 font-body">
-                        <div className="w-12 h-1.5 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE CENTER</span>
+                <div className="mb-32">
+                    <div className="flex items-center gap-3 text-indigo-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
+                        <div className="w-16 h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE HUB</span>
                     </div>
-                    <h2 className="text-2xl md:text-5xl font-bold text-slate-900 dark:text-white tracking-tighter mb-10 font-body uppercase">Smart Calculators</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
+                    <h2 className="text-3xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">Calculators</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
-                    </div>
-                </div>
-
-                <div className="mb-32 py-20 px-6 md:px-12 bg-[#fdf8f9] dark:bg-slate-900/40 rounded-[4rem] border-2 border-primary/10 dark:border-white/5 shadow-inner overflow-hidden relative">
-                    <div className="absolute top-0 right-0 size-96 bg-primary/10 blur-[100px] rounded-full" />
-                    <div className="absolute bottom-0 left-0 size-96 bg-accent/10 blur-[100px] rounded-full" />
-                    
-                    <div className="relative z-10 text-center space-y-16">
-                        <div className="space-y-4">
-                            <Badge variant="outline" className="px-6 py-1.5 rounded-full border-primary/20 text-primary font-bold uppercase text-[10px] tracking-widest shadow-sm font-body">CORE PRINCIPLES</Badge>
-                            <h2 className="text-2xl md:text-6xl font-bold tracking-tighter font-body">Why Choose <span className="text-gradient-hero">GR7 Tools?</span></h2>
-                            <p className="text-xs md:text-xl text-slate-700 dark:text-slate-300 font-bold max-w-2xl mx-auto uppercase opacity-80 font-body">The only professional studio built entirely on privacy-first architecture.</p>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-12 md:gap-20 px-4">
-                            <div className="space-y-6 group">
-                                <div className="size-24 mx-auto rounded-[2.5rem] bg-background dark:bg-slate-800 shadow-2xl flex items-center justify-center border-2 border-transparent group-hover:border-green-500/30 group-hover:-translate-y-2 transition-all duration-300">
-                                    <ShieldCheck className="size-12 text-green-500" />
-                                </div>
-                                <div className="space-y-3 font-body">
-                                    <h3 className="text-xl font-bold tracking-tight">100% Private</h3>
-                                    <p className="text-sm text-muted-foreground leading-relaxed font-semibold">Your images and documents never leave your device. All processing happens 100% locally in your browser's temporary memory (RAM).</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 group">
-                                <div className="size-24 mx-auto rounded-[2.5rem] bg-background dark:bg-slate-800 shadow-2xl flex items-center justify-center border-2 border-transparent group-hover:border-blue-500/30 group-hover:-translate-y-2 transition-all duration-300">
-                                    <Zap className="size-12 text-blue-500" />
-                                </div>
-                                <div className="space-y-3 font-body">
-                                    <h3 className="text-xl font-bold tracking-tight">Native Performance</h3>
-                                    <p className="text-sm text-muted-foreground leading-relaxed font-semibold">Using advanced WASM technology, we process files at your device's native hardware speed. No server queues, no waiting, no limits.</p>
-                                </div>
-                            </div>
-
-                            <div className="space-y-6 group">
-                                <div className="size-24 mx-auto rounded-[2.5rem] bg-background dark:bg-slate-800 shadow-2xl flex items-center justify-center border-2 border-transparent group-hover:border-primary/30 group-hover:-translate-y-2 transition-all duration-300">
-                                    <Trophy className="size-12 text-primary" />
-                                </div>
-                                <div className="space-y-3 font-body">
-                                    <h3 className="text-xl font-bold tracking-tight">Studio Quality</h3>
-                                    <p className="text-sm text-muted-foreground leading-relaxed font-semibold">Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent) for crystal clear printing.</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </>

@@ -502,7 +502,7 @@ export default function PdfPageNumberer() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed text-left">
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Type className="size-3" /> System</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-gap-2"><Type className="size-3" /> System</Label>
                                 <Select value={numberStyle} onValueChange={(v) => setNumberStyle(v as NumberStyle)}>
                                     <SelectTrigger className="h-9 border-2 font-black rounded-lg bg-background text-[10px]"><SelectValue /></SelectTrigger>
                                     <SelectContent className="rounded-lg border-2 shadow-2xl">
@@ -513,7 +513,7 @@ export default function PdfPageNumberer() {
                                 </Select>
                             </div>
                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Layers className="size-3" /> Format</Label>
+                                <Label className="text-[10px] font-black uppercase opacity-60 flex items-gap-2"><Layers className="size-3" /> Format</Label>
                                 <Select value={format} onValueChange={(v) => setFormat(v)}>
                                     <SelectTrigger className="h-9 border-2 font-black rounded-lg bg-background text-[10px]"><SelectValue /></SelectTrigger>
                                     <SelectContent className="rounded-lg border-2 shadow-2xl">
