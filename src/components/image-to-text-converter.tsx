@@ -100,7 +100,7 @@ export default function ImageToTextConverter() {
       
       const reader = new FileReader();
       if (file.type === 'application/pdf') {
-          setOriginalImageSrc(null); // Will render pages during processing
+          setOriginalImageSrc(null); 
       } else {
           reader.onload = (e) => setOriginalImageSrc(e.target?.result as string);
           reader.readAsDataURL(file);
@@ -113,17 +113,39 @@ export default function ImageToTextConverter() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
+  /**
+   * ADVANCED IMAGE PRE-PROCESSING
+   * Critical for Tesseract.js accuracy.
+   * Converts to grayscale, enhances contrast, and applies thresholding.
+   */
   const preprocessImage = (canvas: HTMLCanvasElement) => {
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (!ctx) return;
+      
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
+      
+      // Calculate average luminance to determine dynamic threshold
+      let totalLuma = 0;
       for (let i = 0; i < data.length; i += 4) {
-          const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-          // Grayscale + Contrast Boost
-          const val = avg > 128 ? 255 : (avg * 0.8);
+          totalLuma += (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
+      }
+      const avgLuma = totalLuma / (data.length / 4);
+      
+      // Tighten threshold around the average for better character isolation
+      const threshold = avgLuma > 180 ? 190 : avgLuma < 80 ? 70 : 128;
+
+      for (let i = 0; i < data.length; i += 4) {
+          const r = data[i], g = data[i + 1], b = data[i + 2];
+          // Grayscale conversion using luminance formula
+          const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+          
+          // Binarization (Strict Black & White)
+          const val = luma > threshold ? 255 : 0;
+          
           data[i] = data[i + 1] = data[i + 2] = val;
       }
+      
       ctx.putImageData(imageData, 0, 0);
   };
 
@@ -135,13 +157,13 @@ export default function ImageToTextConverter() {
     setProgress(0);
     startTimeRef.current = Date.now();
 
+    // Initialize worker with all required languages
     const worker = await createWorker('eng+hin+guj+mar', 1, {
         logger: (m) => {
             if (m.status === 'recognizing text') {
                 const p = Math.round(m.progress * 100);
                 setProgress(p);
                 
-                // Estimate time
                 const elapsed = (Date.now() - startTimeRef.current) / 1000;
                 if (p > 5) {
                     const totalEst = elapsed / (p / 100);
@@ -170,34 +192,62 @@ export default function ImageToTextConverter() {
                 setStatusText(`Scanning Page ${i} of ${pdf.numPages}...`);
                 
                 const page = await pdf.getPage(i);
-                const viewport = page.getViewport({ scale: 2.0 }); // Higher res for better OCR
+                // Bumping scale to 2.5x for superior character recognition
+                const viewport = page.getViewport({ scale: 2.5 }); 
                 const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
+                const context = canvas.getContext('2d', { willReadFrequently: true });
                 if (context) {
                     canvas.height = viewport.height;
                     canvas.width = viewport.width;
+                    context.fillStyle = '#FFFFFF';
+                    context.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: context, viewport }).promise;
+                    
+                    // High-quality cleanup before OCR
                     preprocessImage(canvas);
                     
                     const { data: { text } } = await worker.recognize(canvas);
                     finalOutput += `--- PAGE ${i} ---\n\n${text}\n\n`;
+                    
+                    // Clear memory
+                    canvas.width = 0; canvas.height = 0;
                 }
             }
         } else {
             setTotalPages(1);
             setCurrentPage(1);
-            setStatusText("Analyzing Image Pixels...");
-            const { data: { text } } = await worker.recognize(file);
-            finalOutput = text;
+            setStatusText("Optimizing Pixels...");
+            
+            // For images, we also draw to canvas to apply pre-processing
+            const img = new window.Image();
+            img.src = originalImageSrc!;
+            await new Promise(r => img.onload = r);
+            
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            if (ctx) {
+                // Upscale if image is small to improve accuracy
+                const scale = Math.max(1, 2000 / Math.max(img.width, img.height));
+                canvas.width = img.width * scale;
+                canvas.height = img.height * scale;
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                
+                preprocessImage(canvas);
+                setStatusText("Reading Characters...");
+                const { data: { text } } = await worker.recognize(canvas);
+                finalOutput = text;
+            }
         }
 
         setExtractedText(finalOutput);
         setProgress(100);
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        toast({ title: "Extraction Success", description: "All text captured locally." });
+        toast({ title: "Extraction Success", description: "Text captured with optimized fidelity." });
     } catch (error: any) {
         console.error(error);
-        toast({ variant: "destructive", title: "OCR Error", description: "Failed to process document. Worker might have crashed." });
+        toast({ variant: "destructive", title: "OCR Error", description: "Worker failed to read this document." });
     } finally {
         await worker.terminate();
         setIsProcessing(false);
@@ -285,7 +335,7 @@ export default function ImageToTextConverter() {
                     <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-6 md:p-12 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                         <div className="relative">
                             <UploadCloud className="size-14 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
+                            <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
                         </div>
                         <div className="text-center px-4">
                             <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop File or Image here</p>
@@ -482,4 +532,3 @@ export default function ImageToTextConverter() {
     </div>
   );
 }
-
