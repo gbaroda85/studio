@@ -202,7 +202,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-10 pb-16 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
+      <section className="relative w-full pt-8 pb-12 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
