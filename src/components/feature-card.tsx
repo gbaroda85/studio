@@ -29,8 +29,8 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block h-full">
-      <div className="h-full bg-slate-100 dark:bg-slate-900 rounded-[2rem] shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden">
-        <div className={cn("flex-1 flex flex-col p-8", lightBg, "dark:bg-slate-900/60")}>
+      <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden">
+        <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-6 shadow-inner", lightBg, "dark:bg-slate-900/60")}>
           {/* COMPACT 3D ICON CONTAINER */}
           <div className={cn(
             "grid size-14 place-items-center rounded-[1.2rem] transition-transform duration-200 group-hover:scale-110 shrink-0 transform-gpu",

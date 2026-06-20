@@ -143,8 +143,8 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
-    <div className="h-full bg-slate-100 dark:bg-slate-900 rounded-[2rem] shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden">
-      <div className={cn("flex-1 flex flex-col p-8", lightBg, "dark:bg-slate-900/60")}>
+    <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden">
+      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-6 shadow-inner", lightBg, "dark:bg-slate-900/60")}>
         <div className={cn(
           `size-14 rounded-[1.2rem] flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
           "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_10px_20px_-5px_rgba(0,0,0,0.3)]",
