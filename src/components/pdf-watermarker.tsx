@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -36,7 +35,8 @@ import {
     Loader2,
     ChevronLeft,
     ChevronRight,
-    Smartphone
+    Smartphone,
+    ListFilter
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -98,6 +98,32 @@ function hexToRgb(hex: string) {
     } : { r: 0.5, g: 0.5, b: 0.5 };
 }
 
+function parsePageRanges(ranges: string, maxPage: number): number[] {
+    const result = new Set<number>();
+    if (!ranges) return [];
+
+    const parts = ranges.split(',');
+    for (const part of parts) {
+        const trimmedPart = part.trim();
+        if (trimmedPart.includes('-')) {
+            const [startStr, endStr] = trimmedPart.split('-');
+            const start = parseInt(startStr, 10);
+            const end = parseInt(endStr, 10);
+            if (!isNaN(start) && !isNaN(end) && start <= end && start > 0 && end <= maxPage) {
+                for (let i = start; i <= end; i++) {
+                    result.add(i);
+                }
+            }
+        } else {
+            const page = parseInt(trimmedPart, 10);
+            if (!isNaN(page) && page > 0 && page <= maxPage) {
+                result.add(page);
+            }
+        }
+    }
+    return Array.from(result).sort((a, b) => a - b);
+}
+
 export default function PdfWatermarker() {
   const { toast } = useToast();
   const [pdfFile, setPdfFile] = useState<File | null>(null);
@@ -115,6 +141,10 @@ export default function PdfWatermarker() {
   const [imageScale, setImageScale] = useState([30]);
   const [rotation, setRotation] = useState([45]);
   const [margin, setMargin] = useState([40]);
+  
+  // Page Range Selection
+  const [pageRangeMode, setPageRangeMode] = useState<'all' | 'custom'>('all');
+  const [customRange, setCustomRange] = useState('');
   
   const [textColor, setTextColor] = useState("#808080");
   const [isBold, setIsBold] = useState(true);
@@ -240,8 +270,24 @@ export default function PdfWatermarker() {
         const op = opacity[0] / 100;
         const curMargin = margin[0];
 
-        const pages = pdfDoc.getPages();
-        for (const page of pages) {
+        const allPages = pdfDoc.getPages();
+        const totalPages = allPages.length;
+        
+        let targetIndices: number[];
+        if (pageRangeMode === 'all') {
+            targetIndices = Array.from({ length: totalPages }, (_, i) => i);
+        } else {
+            const ranges = parsePageRanges(customRange, totalPages);
+            if (ranges.length === 0) {
+                toast({ variant: 'destructive', title: 'Invalid Range', description: 'Please check your page range input.' });
+                setIsProcessing(false);
+                return;
+            }
+            targetIndices = ranges.map(r => r - 1);
+        }
+
+        for (const index of targetIndices) {
+            const page = allPages[index];
             const { width, height } = page.getSize();
             const pageRot = page.getRotation().angle;
             
@@ -259,7 +305,6 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
-            // Calculate anchor relative to visual frame (0,0 is bottom-left of VISUAL frame)
             let vcx, vcy;
             switch (position) {
                 case 'top-left': vcx = curMargin + tw/2; vcy = vh - curMargin - th/2; break;
@@ -274,16 +319,12 @@ export default function PdfWatermarker() {
                 default: vcx = vw/2; vcy = vh/2;
             }
 
-            // Translation to PDF internal coordinates
             let finalX = 0, finalY = 0;
             if (pageRot === 0) { finalX = vcx; finalY = vcy; } 
             else if (pageRot === 90) { finalX = height - vcy; finalY = vcx; } 
             else if (pageRot === 180) { finalX = width - vcx; finalY = height - vcy; } 
             else if (pageRot === 270) { finalX = vcy; finalY = width - vcx; }
 
-            // To center correctly while rotating, we adjust the pivot math
-            // degrees(rotDeg) in drawText rotates around (x,y).
-            // We need to shift (x,y) so that the center of the rotated block stays at finalX, finalY
             const rad = (rotDeg * Math.PI) / 180;
             const offsetX = (tw / 2) * Math.cos(rad) - (th / 2) * Math.sin(rad);
             const offsetY = (tw / 2) * Math.sin(rad) + (th / 2) * Math.cos(rad);
@@ -327,7 +368,7 @@ export default function PdfWatermarker() {
         setWatermarkedPdfUrl(URL.createObjectURL(blob));
         
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        toast({ title: "Success", description: "Watermark applied to all pages." });
+        toast({ title: "Success", description: `Watermark applied to ${targetIndices.length} pages.` });
     } catch (error) {
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to process PDF.' });
     } finally {
@@ -356,6 +397,8 @@ export default function PdfWatermarker() {
       setFontSize(60);
       setRotation([45]);
       setMargin([40]);
+      setPageRangeMode('all');
+      setCustomRange('');
       if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -394,46 +437,41 @@ export default function PdfWatermarker() {
       return styles;
   };
 
-  if (!pdfFile) {
-    return (
-        <div className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
-            <Card
-                className={cn(
-                    "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
-                    isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
-                )}
-                onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                onClick={() => fileInputRef.current?.click()}
-            >
-                <CardHeader className="bg-muted/30 border-b p-6 text-center">
-                    <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
-                </CardHeader>
-                <CardContent className="p-10 md:p-12">
-                    <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
-                        <div className="relative">
-                            <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
-                            <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
-                        </div>
-                        <div className="text-center px-4">
-                            <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to begin</p>
-                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
-                        </div>
-                    </div>
-                    <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
-                </CardContent>
-                <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                    <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                    <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
-                    <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> PRO OVERLAYS</div>
-                </CardFooter>
-            </Card>
-        </div>
-    );
-  }
-
   return (
     <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24">
-      <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in duration-500">
+      {!pdfFile ? (
+        <Card
+            className={cn(
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
+                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+            )}
+            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+            onClick={() => fileInputRef.current?.click()}
+        >
+            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+            </CardHeader>
+            <CardContent className="p-10 md:p-12">
+                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
+                    <div className="relative">
+                        <UploadCloud className="size-14 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Zap className="absolute -top-1 -right-1 size-5 md:size-6 text-yellow-500 animate-pulse" />
+                    </div>
+                    <div className="text-center px-4">
+                        <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to begin</p>
+                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local processing.</p>
+                    </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
+            </CardContent>
+            <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
+                <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> PRO OVERLAYS</div>
+            </CardFooter>
+        </Card>
+      ) : (
+        <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in duration-500">
             {/* Sidebar: Controls */}
             <div className="lg:col-span-5 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
@@ -554,6 +592,30 @@ export default function PdfWatermarker() {
                                 </div>
                                 <Slider value={margin} min={0} max={200} step={1} onValueChange={setMargin} />
                             </div>
+                        </div>
+
+                        {/* Page Range Selection Area */}
+                        <div className="space-y-4 pt-6 border-t-2 border-dashed text-left">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
+                                <ListFilter className="size-3" /> Page Selection
+                            </Label>
+                            <Tabs value={pageRangeMode} onValueChange={(v) => setPageRangeMode(v as any)} className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/20 border-2 rounded-xl">
+                                    <TabsTrigger value="all" className="text-[9px] font-black uppercase">All Pages</TabsTrigger>
+                                    <TabsTrigger value="custom" className="text-[9px] font-black uppercase">Custom Range</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                            {pageRangeMode === 'custom' && (
+                                <div className="space-y-2 animate-in slide-in-from-top-2">
+                                    <Input 
+                                        value={customRange} 
+                                        onChange={(e) => setCustomRange(e.target.value)} 
+                                        placeholder="e.g. 1, 3-5, 8" 
+                                        className="h-10 border-2 font-bold text-center rounded-xl shadow-inner text-xs" 
+                                    />
+                                    <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 text-center">Use commas for specific pages, dashes for ranges.</p>
+                                </div>
+                            )}
                         </div>
 
                         <div className="p-4 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 shadow-sm mt-4 text-left">
@@ -682,6 +744,5 @@ export default function PdfWatermarker() {
                 </Card>
             </div>
         </div>
-    </div>
-  );
+    );
 }

@@ -28,7 +28,8 @@ import {
     Bold,
     Italic,
     Move,
-    Loader2
+    Loader2,
+    ListFilter
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -38,6 +39,7 @@ import { Badge } from './ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from './ui/progress';
 import { Slider } from './ui/slider';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -174,7 +176,7 @@ export default function PdfPageNumberer() {
   const [isBold, setIsBold] = useState(true);
   const [isItalic, setIsItalic] = useState(false);
   const [textColor, setTextColor] = useState("#000000");
-  const [pageRange, setPageRange] = useState('all');
+  const [pageRange, setPageRange] = useState<'all' | 'custom'>('all');
   const [customRange, setCustomRange] = useState('');
   
   const [numberedPdfUrl, setNumberedPdfUrl] = useState<string | null>(null);
@@ -267,8 +269,8 @@ export default function PdfPageNumberer() {
         const font = await pdfDoc.embedFont(fontVariant);
         const rgbColor = hexToRgb(textColor);
         
-        const pages = pdfDoc.getPages();
-        const totalPages = pages.length;
+        const pdfPages = pdfDoc.getPages();
+        const totalPages = pdfPages.length;
         const currentMargin = margin[0];
 
         let pagesToNumber: number[];
@@ -287,7 +289,7 @@ export default function PdfPageNumberer() {
 
         for (const pageNum of pagesToNumber) {
             const pageIndex = pageNum - 1;
-            const page = pages[pageIndex];
+            const page = pdfPages[pageIndex];
             const { width, height } = page.getSize();
             
             const formattedPageNum = formatWithStyle(pageNum, numberStyle);
@@ -341,7 +343,7 @@ export default function PdfPageNumberer() {
             colors: ['#3b82f6', '#10b981', '#ffffff']
         });
 
-        toast({title: "Success!", description: `Page numbers added with custom styling.`});
+        toast({title: "Success!", description: `Page numbers added to ${pagesToNumber.length} pages.`});
     } catch (error) {
         console.error(error);
         toast({variant: 'destructive', title: 'Error', description: 'Failed to process document.'});
@@ -523,38 +525,44 @@ export default function PdfPageNumberer() {
                             </div>
                         </div>
 
+                        {/* Page Selection Area */}
+                        <div className="space-y-4 pt-4 border-t border-dashed text-left">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
+                                <ListFilter className="size-3" /> Page Selection
+                            </Label>
+                            <Tabs value={pageRange} onValueChange={(v) => setPageRange(v as any)} className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 h-10 bg-muted/20 border-2 rounded-xl">
+                                    <TabsTrigger value="all" className="text-[9px] font-black uppercase">All Pages</TabsTrigger>
+                                    <TabsTrigger value="custom" className="text-[9px] font-black uppercase">Custom Range</TabsTrigger>
+                                </TabsList>
+                            </Tabs>
+                            {pageRange === 'custom' && (
+                                <div className="space-y-2 animate-in slide-in-from-top-2">
+                                    <Input 
+                                        value={customRange} 
+                                        onChange={(e) => setCustomRange(e.target.value)} 
+                                        placeholder="e.g. 1, 3-5, 8" 
+                                        className="h-10 border-2 font-bold text-center rounded-xl shadow-inner text-xs" 
+                                    />
+                                    <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 text-center">Example: 1, 3-5, 8</p>
+                                </div>
+                            )}
+                        </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-dashed text-left">
-                             <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase opacity-60">Range</Label>
-                                <Select value={pageRange} onValueChange={(v) => setPageRange(v)}>
-                                    <SelectTrigger className="h-9 border-2 font-bold rounded-lg text-[10px]"><SelectValue /></SelectTrigger>
-                                    <SelectContent className="rounded-lg border-2">
-                                        <SelectItem value="all" className="font-bold text-[10px]">All Pages</SelectItem>
-                                        <SelectItem value="custom" className="font-bold text-[10px]">Custom Range</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
                             <div className="space-y-2">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Size (pt)</Label>
                                 <Input type="number" value={fontSize} onChange={(e) => setFontSize(Math.max(6, Number(e.target.value)))} className="h-9 border-2 font-bold rounded-lg text-[10px] text-center" />
                             </div>
-                        </div>
-
-                        {pageRange === 'custom' && (
-                            <div className="space-y-1.5 animate-in slide-in-from-top-2 text-left">
-                                <Label className="text-[8px] font-black uppercase opacity-40 tracking-widest ml-1">Example: 1, 3-5, 8</Label>
-                                <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="Enter range..." className="h-9 border-2 font-bold rounded-lg text-[10px] text-center" />
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center px-1">
+                                    <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-1.5">
+                                        <Move className="size-3" /> Margins
+                                    </Label>
+                                    <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
+                                </div>
+                                <Slider value={margin} min={10} max={100} step={1} onValueChange={(v) => setMargin(v)} />
                             </div>
-                        )}
-
-                        <div className="space-y-4 pt-4 border-t border-dashed text-left">
-                            <div className="flex justify-between items-center px-1">
-                                <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60 flex items-center gap-1.5">
-                                    <Move className="size-3" /> Margins
-                                </Label>
-                                <Badge variant="secondary" className="font-mono text-[9px] h-5">{margin[0]}pt</Badge>
-                            </div>
-                            <Slider value={margin} min={10} max={100} step={1} onValueChange={(v) => setMargin(v)} />
                         </div>
 
                         <div className="p-4 bg-green-500/5 rounded-xl border-2 border-green-500/10 flex gap-4 text-left">
