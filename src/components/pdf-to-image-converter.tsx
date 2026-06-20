@@ -83,7 +83,7 @@ function formatBytes(bytes: number, decimals = 2): string {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
 function parsePageRanges(ranges: string, maxPage: number): number[] {
@@ -260,6 +260,7 @@ export default function PdfToImageConverter() {
         if (!ctx) return item.previewSrc;
 
         if (item.fitMode === 'original') {
+            // A4 Aspect 1:1.414
             const targetW = Math.floor(viewport.width);
             const targetH = Math.round(targetW * 1.414);
             canvas.width = targetW;
@@ -267,18 +268,27 @@ export default function PdfToImageConverter() {
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = Math.floor(viewport.width);
+            tempCanvas.height = Math.floor(viewport.height);
+            const tempCtx = tempCanvas.getContext('2d');
+            if (tempCtx) {
+                tempCtx.fillStyle = '#FFFFFF';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                await page.render({ canvasContext: tempCtx, viewport }).promise;
+            }
+
             const scaleFactor = 0.95;
-            const dw = viewport.width * scaleFactor;
-            const dh = viewport.height * scaleFactor;
+            const dw = tempCanvas.width * scaleFactor;
+            const dh = tempCanvas.height * scaleFactor;
             const dx = (canvas.width - dw) / 2;
             let dy;
+            
             if (item.vAlign === 'top') dy = 0;
             else if (item.vAlign === 'bottom') dy = canvas.height - dh;
             else dy = (canvas.height - dh) / 2;
 
-            ctx.imageSmoothingEnabled = true;
-            ctx.imageSmoothingQuality = 'high';
-            await page.render({ canvasContext: ctx, viewport: page.getViewport({ scale: scale * scaleFactor, rotation: item.rotation }), transform: [1, 0, 0, 1, dx, dy] }).promise;
+            ctx.drawImage(tempCanvas, dx, dy, dw, dh);
         } else {
             canvas.width = Math.floor(viewport.width);
             canvas.height = Math.floor(viewport.height);
@@ -373,10 +383,15 @@ export default function PdfToImageConverter() {
             <CardContent className="p-0">
                 <div className="grid lg:grid-cols-12">
                     <div className="lg:col-span-4 border-r border-border bg-muted/20 p-6 space-y-8 no-print flex flex-col h-full">
-                        {!selectedId ? (
+                        {!selectedId && pages.length > 0 ? (
                             <div className="flex-1 flex flex-col items-center justify-center py-20 text-center opacity-30 gap-4">
                                 <MousePointer2 className="size-12 animate-bounce" />
                                 <p className="text-[10px] font-black uppercase tracking-widest max-w-[200px]">Select a page to unlock studio controls</p>
+                            </div>
+                        ) : pages.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center py-20 text-center opacity-30 gap-4">
+                                <FileDigit className="size-12" />
+                                <p className="text-[10px] font-black uppercase tracking-widest max-w-[200px]">Upload a PDF to begin</p>
                             </div>
                         ) : (
                             <div className="space-y-8 animate-in slide-in-from-left duration-300 text-left">
@@ -397,9 +412,9 @@ export default function PdfToImageConverter() {
                                         <Layout className="size-3" /> Absolute Alignment
                                     </Label>
                                     <div className="grid grid-cols-1 gap-2">
-                                        <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'top' && "active-uiverse")} data-label="      Top" onClick={() => updateSelectedPage({ vAlign: 'top' })}><AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
-                                        <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'center' && "active-uiverse")} data-label="      Center" onClick={() => updateSelectedPage({ vAlign: 'center' })}><AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
-                                        <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'bottom' && "active-uiverse")} data-label="      Bottom" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}><AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                        <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'top' && "active-uiverse")} data-label="      Top" onClick={() => updateAlignment('top')}><AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                        <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'center' && "active-uiverse")} data-label="      Center" onClick={() => updateAlignment('center')}><AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                        <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'bottom' && "active-uiverse")} data-label="      Bottom" onClick={() => updateAlignment('bottom')}><AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
                                     </div>
                                 </div>
 
@@ -463,56 +478,82 @@ export default function PdfToImageConverter() {
                     {/* RIGHT VIEWPORT: GRID */}
                     <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] lg:h-[850px] relative shadow-inner">
                         <ScrollArea className="flex-1 w-full h-full p-6 md:p-10">
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-24">
-                                <AnimatePresence>
-                                    {pages.map((p) => (
-                                        <motion.div 
-                                            initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                            key={p.id} 
-                                            onClick={() => setSelectedId(p.id)}
-                                            className={cn(
-                                                "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-xl",
-                                                selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
-                                            )}
-                                        >
-                                            <div className="absolute inset-0 flex flex-col w-full h-full p-1 pb-10 transition-all duration-300 justify-center">
-                                                <div className="relative size-full flex items-center justify-center overflow-hidden" style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                                    <img 
-                                                        src={p.previewSrc} 
-                                                        alt={`P${p.globalIndex}`} 
-                                                        className={cn(
-                                                            "w-full object-contain pointer-events-none mx-auto block shadow-sm",
-                                                            p.fitMode === 'original' ? "max-h-[85%]" : "max-h-full"
-                                                        )}
-                                                    />
+                            {pages.length === 0 ? (
+                                <div className="h-full flex flex-col items-center justify-center">
+                                    <div 
+                                        className={cn(
+                                            "w-full max-w-xl border-4 border-dashed border-primary/20 rounded-[3rem] p-16 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-white/50 dark:bg-slate-800/50",
+                                            isDragOver && "border-primary bg-primary/5 ring-8 ring-primary/10"
+                                        )}
+                                        onClick={() => fileInputRef.current?.click()}
+                                        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                                    >
+                                        <div className="relative">
+                                            <UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" />
+                                            <Zap className="absolute -top-1 -right-1 size-8 text-yellow-500 animate-pulse" />
+                                        </div>
+                                        <div className="text-center">
+                                            <p className="text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop PDF to Extractor</p>
+                                            <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-24">
+                                    <AnimatePresence>
+                                        {pages.map((p) => (
+                                            <motion.div 
+                                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                                key={p.id} 
+                                                onClick={() => setSelectedId(p.id)}
+                                                className={cn(
+                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white flex flex-col p-0 shadow-xl",
+                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
+                                                )}
+                                            >
+                                                <div className="absolute inset-0 flex flex-col w-full h-full p-1 pb-10 transition-all duration-300 justify-center">
+                                                    <div className={cn(
+                                                        "relative size-full flex flex-col overflow-hidden transition-all duration-300",
+                                                        p.fitMode === 'original' ? (
+                                                            p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                        ) : 'justify-center'
+                                                    )} style={{ transform: `rotate(${p.rotation}deg)` }}>
+                                                        <img 
+                                                            src={p.previewSrc} 
+                                                            alt={`P${p.globalIndex}`} 
+                                                            className={cn(
+                                                                "w-full object-contain pointer-events-none mx-auto block shadow-sm",
+                                                                p.fitMode === 'original' ? "max-h-[85%]" : "max-h-full"
+                                                            )}
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10 z-20">{p.globalIndex}</div>
-                                            <Button size="icon" variant="ghost" className="absolute top-2 right-2 size-7 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-lg shadow-lg z-30" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}><Trash2 className="size-4" /></Button>
-                                            
-                                            {/* IMAGE FOOTER: INDIVIDUAL DOWNLOAD BUTTON */}
-                                            <div className="absolute bottom-0 left-0 right-0 h-10 bg-muted/80 backdrop-blur-md border-t flex items-center justify-between px-2 z-30">
-                                                <span className="text-[8px] font-black uppercase text-muted-foreground">P{p.globalIndex}</span>
-                                                <Button 
-                                                    size="sm" 
-                                                    variant="secondary" 
-                                                    className="h-7 px-2 font-black text-[8px] uppercase bg-primary text-white hover:bg-primary/90 rounded-md"
-                                                    onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p); }}
-                                                    disabled={downloadingId === p.id}
-                                                >
-                                                    {downloadingId === p.id ? <Loader2 className="size-2.5 animate-spin mr-1" /> : <Download className="size-2.5 mr-1" />}
-                                                    Download
-                                                </Button>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </AnimatePresence>
-                                
-                                <button className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-inner group" onClick={() => fileInputRef.current?.click()}>
-                                    <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform"><Plus className="size-6 text-primary" /></div>
-                                    <span className="text-[10px] font-black uppercase text-primary tracking-widest">ADD PDF</span>
-                                </button>
-                            </div>
+                                                <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10 z-20">{p.globalIndex}</div>
+                                                <Button size="icon" variant="ghost" className="absolute top-2 right-2 size-7 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-lg shadow-lg z-30" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}><Trash2 className="size-4" /></Button>
+                                                
+                                                <div className="absolute bottom-0 left-0 right-0 h-10 bg-muted/80 backdrop-blur-md border-t flex items-center justify-between px-2 z-30">
+                                                    <span className="text-[8px] font-black uppercase text-muted-foreground">P{p.globalIndex}</span>
+                                                    <Button 
+                                                        size="sm" 
+                                                        variant="secondary" 
+                                                        className="h-7 px-2 font-black text-[8px] uppercase bg-primary text-white hover:bg-primary/90 rounded-md"
+                                                        onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p); }}
+                                                        disabled={downloadingId === p.id}
+                                                    >
+                                                        {downloadingId === p.id ? <Loader2 className="size-2.5 animate-spin mr-1" /> : <Download className="size-2.5 mr-1" />}
+                                                        Download
+                                                    </Button>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+                                    
+                                    <button className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-inner group" onClick={() => fileInputRef.current?.click()}>
+                                        <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform"><Plus className="size-6 text-primary" /></div>
+                                        <span className="text-[10px] font-black uppercase text-primary tracking-widest">ADD PDF</span>
+                                    </button>
+                                </div>
+                            )}
                             <ScrollBar />
                         </ScrollArea>
                         
