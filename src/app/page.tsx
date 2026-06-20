@@ -67,7 +67,8 @@ import {
   CalendarDays,
   Banknote,
   Palette,
-  CreditCard
+  CreditCard,
+  Menu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -227,25 +228,57 @@ export default function Page() {
 
         <div className="w-full px-6 md:px-12 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/40 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-6 shadow-sm animate-fade-in-up">
-            <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> THE ULTIMATE GR7 TOOLKIT
+            <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-8xl font-black mb-4 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta uppercase">
-            Professional <br className="hidden md:block" />
-            <span className="text-gradient-hero">Image & PDF Hub</span>
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-4 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta">
+            Professional Tools for <br className="hidden md:block" />
+            <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <p className="text-base md:text-xl text-slate-500 dark:text-slate-300 max-w-3xl mx-auto mb-10 font-bold leading-relaxed animate-fade-in-up">
-            Sanitize, Compress and Convert locally in your browser. <br className="hidden md:block" /> 100% Privacy for official government portal submissions.
-          </p>
+          <div className="space-y-1 mb-10 animate-fade-in-up">
+            <p className="text-sm md:text-xl text-slate-500 dark:text-slate-300 max-w-3xl mx-auto font-bold leading-relaxed">
+              Everything happens locally in your device RAM, 100% private.
+            </p>
+            <p className="text-sm md:text-xl text-slate-500 dark:text-slate-300 max-w-3xl mx-auto font-bold leading-relaxed">
+              Fast, secure, and ready for official submissions.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-fade-in-up">
+            <Link href="/tools?tab=image" className="uiverse-clay-btn">
+              <div className="button-outer">
+                <div className="button-inner flex items-center gap-2 px-6">
+                  <ImageIcon className="size-4 text-blue-500" />
+                  <span>IMAGE TOOLS</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
+              <div className="button-outer">
+                <div className="button-inner flex items-center gap-2 px-6">
+                  <FileText className="size-4 text-rose-500" />
+                  <span>PDF TOOLS</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
+              <div className="button-outer">
+                <div className="button-inner flex items-center gap-2 px-6">
+                  <Calculator className="size-4 text-emerald-500" />
+                  <span>CALCULATORS</span>
+                </div>
+              </div>
+            </Link>
+          </div>
 
           <div className="max-w-3xl mx-auto relative group animate-fade-in-up">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-[2rem] blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search 40+ professional tools... (e.g. 'compress', 'scanner', 'gst')"
-                className="w-full pl-14 pr-6 h-16 text-lg rounded-[2rem] bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-black font-jakarta backdrop-blur-sm uppercase tracking-tight"
+                placeholder="Search tools... (e.g. 'upscale', 'scan', 'barcode')"
+                className="w-full pl-14 pr-6 h-16 text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
