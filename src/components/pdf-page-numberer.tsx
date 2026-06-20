@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from 'react';
@@ -43,6 +42,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from './ui/progress';
 import { Slider } from './ui/slider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -260,7 +260,7 @@ export default function PdfPageNumberer() {
   const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+  const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.target.files?.[0] || null); };
 
   const handlePositionChange = (pos: PageNumberPosition) => {
     if (selectedPageIdx !== null) {
