@@ -47,7 +47,7 @@ export function FeatureCard({
               {description}
             </CardDescription>
 
-            <div className="flex flex-wrap gap-1 mt-auto pt-2">
+            <div className="flex flex-wrap gap-1 mt-auto pt-4">
                 <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Premium</Badge>
                 <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Secured</Badge>
             </div>

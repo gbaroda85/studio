@@ -57,7 +57,8 @@ import {
     Hash,
     Lock,
     CreditCard,
-    IndianRupee
+    IndianRupee,
+    Loader2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -437,7 +438,7 @@ export default function QrCodeGenerator() {
                                                     <Label className="text-[10px] font-black uppercase">Currency</Label>
                                                     <Select value={upiData.cu} onValueChange={(v) => setUpiData(p => ({...p, cu: v}))}>
                                                         <SelectTrigger className="h-10 border-2 font-bold"><SelectValue /></SelectTrigger>
-                                                        <SelectContent className="rounded-xl border-2">
+                                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
                                                             <SelectItem value="INR" className="font-bold">INR (₹)</SelectItem>
                                                             <SelectItem value="USD" className="font-bold">USD ($)</SelectItem>
                                                         </SelectContent>
@@ -486,7 +487,7 @@ export default function QrCodeGenerator() {
                                                 <Label className="text-[10px] font-black uppercase">Encryption</Label>
                                                 <Select value={wifiData.encryption} onValueChange={(v) => setWifiData(p => ({...p, encryption: v}))}>
                                                     <SelectTrigger className="h-10 border-2 font-bold"><SelectValue /></SelectTrigger>
-                                                    <SelectContent className="rounded-xl border-2">
+                                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
                                                         <SelectItem value="WPA" className="font-bold">WPA/WPA2</SelectItem>
                                                         <SelectItem value="WEP" className="font-bold">WEP</SelectItem>
                                                         <SelectItem value="nopass" className="font-bold">None (Open)</SelectItem>
@@ -602,13 +603,17 @@ export default function QrCodeGenerator() {
                         </CardContent>
                         <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-4">
                             <Button 
-                                className="magic-button w-full h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 group flex items-center justify-center gap-4"
-                                onClick={() => handleDownload('png')}
+                                size="lg" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                onClick={() => handleDownload('png')} 
                                 disabled={isProcessing}
                             >
-                                <StarIcons />
-                                <Download className="size-8 text-white group-hover:translate-y-1 transition-transform" />
-                                <span className="uppercase tracking-tighter text-xl font-black">GENERATE HD QR</span>
+                                <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD HD QR</span>
+                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                    {isProcessing ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-8 group-hover:scale-110 transition-transform" />}
+                                    <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
+                                </div>
                             </Button>
                             
                             <div className="flex items-center justify-center gap-8 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">

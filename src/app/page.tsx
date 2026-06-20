@@ -156,7 +156,7 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
           <h3 className="text-lg md:text-xl font-bold mb-1 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight">{title}</h3>
           <p className="text-[11px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-2">{description}</p>
           
-          <div className="flex flex-wrap gap-1.5 mt-auto pt-2.5">
+          <div className="flex flex-wrap gap-1.5 mt-auto pt-4">
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6.5px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Professional</Badge>
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[6.5px] font-black uppercase text-slate-700 dark:text-primary border-none px-1.5 py-0.5 tracking-widest shadow-sm">Local RAM</Badge>
           </div>
