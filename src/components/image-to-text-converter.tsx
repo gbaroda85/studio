@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useMemo } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useMemo, useCallback } from "react";
 import Image from "next/image";
 import { createWorker } from 'tesseract.js';
 import * as pdfjs from 'pdfjs-dist';
@@ -67,21 +67,13 @@ const StarIcons = () => (
     </>
 );
 
-function formatBytes(bytes: number, decimals = 2): string {
-  if (bytes === 0) return "0 Bytes";
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
-}
-
 /**
  * ADVANCED LOCAL CORRECTION ENGINE
+ * Fixes common OCR mistakes and protects important data like Emails/GSTIN.
  */
 const correctOcrText = (text: string): string => {
     if (!text) return "";
 
-    // 1. Protect Special Patterns (Email, Phone, GST, PAN, etc.)
     const placeholders: { [key: string]: string } = {};
     let counter = 0;
     
@@ -96,7 +88,6 @@ const correctOcrText = (text: string): string => {
 
     let cleaned = text;
     
-    // Replace valid patterns with placeholders to prevent corruption
     Object.values(patterns).forEach(regex => {
         cleaned = cleaned.replace(regex, (match) => {
             const id = `__TOKEN_${counter++}__`;
@@ -105,33 +96,25 @@ const correctOcrText = (text: string): string => {
         });
     });
 
-    // 2. OCR Character Confusion Fixes
     cleaned = cleaned
-        // Fix O vs 0
         .replace(/([0-9])O([0-9])/g, '$10$2')
         .replace(/([A-Za-z])0([A-Za-z])/g, '$1O$2')
-        // Fix I/l vs 1
         .replace(/([0-9])[Il]([0-9])/g, '$11$2')
         .replace(/([A-Za-z])1([A-Za-z])/g, '$1l$2')
-        // Fix S vs 5
         .replace(/([0-9])S([0-9])/g, '$15$2')
         .replace(/([A-Za-z])5([A-Za-z])/g, '$1S$2')
-        // Fix B vs 8
         .replace(/([0-9])B([0-9])/g, '$18$2')
         .replace(/([A-Za-z])8([A-Za-z])/g, '$1B$2');
 
-    // 3. Punctuation & Spacing
     cleaned = cleaned
-        .replace(/\s+/g, ' ')               // Remove multiple spaces
-        .replace(/\s([.,!?;:])/g, '$1')      // Remove space before punctuation
-        .replace(/([.,!?;:])(?=[A-Za-z])/g, '$1 ') // Ensure space after punctuation
-        .replace(/([.,!?;:])\1+/g, '$1')     // Remove duplicate symbols (.... -> .)
-        .replace(/(\n\s*){2,}/g, '\n\n');    // Preserve paragraph spacing
+        .replace(/\s+/g, ' ')               
+        .replace(/\s([.,!?;:])/g, '$1')      
+        .replace(/([.,!?;:])(?=[A-Za-z])/g, '$1 ') 
+        .replace(/([.,!?;:])\1+/g, '$1')     
+        .replace(/(\n\s*){2,}/g, '\n\n');    
 
-    // 4. Case Correction (Start of sentences)
     cleaned = cleaned.replace(/(^\s*|[.!?]\s+)([a-z])/g, (m) => m.toUpperCase());
 
-    // 5. Restore Placeholders
     Object.keys(placeholders).forEach(id => {
         cleaned = cleaned.replace(id, placeholders[id]);
     });
@@ -304,6 +287,17 @@ export default function ImageToTextConverter() {
     }
   };
 
+  const handleReset = () => {
+      setFile(null);
+      setOriginalImageSrc(null);
+      setRawText(null);
+      setCorrectedText(null);
+      setProgress(0);
+      setStatusText("");
+      setAvgConfidence(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
   const activeText = activeView === 'corrected' ? correctedText : rawText;
 
   const handleCopyToClipboard = () => {
@@ -363,7 +357,7 @@ export default function ImageToTextConverter() {
       {!file ? (
           <div className="w-full max-w-4xl py-10 flex flex-col items-center justify-center gap-6 mx-auto text-left">
             <Card className={cn(
-                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50 cursor-pointer select-none",
+                "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
                 isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
             )}
                 onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
@@ -599,4 +593,3 @@ export default function ImageToTextConverter() {
     </div>
   );
 }
-
