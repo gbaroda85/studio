@@ -382,10 +382,10 @@ export default function PdfToImageConverter() {
 
             <CardContent className="p-0">
                 {pages.length === 0 ? (
-                    <div className="p-10 md:p-16 lg:p-24 flex items-center justify-center">
+                    <div className="p-8 md:p-12 flex items-center justify-center">
                         <div 
                             className={cn(
-                                "w-full max-w-2xl border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-16 md:p-24 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-white dark:bg-slate-800/50 shadow-inner",
+                                "w-full max-w-2xl border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-white dark:bg-slate-800/50 shadow-inner",
                                 isDragOver && "border-primary bg-primary/5 ring-8 ring-primary/10"
                             )}
                             onClick={() => fileInputRef.current?.click()}
@@ -428,9 +428,9 @@ export default function PdfToImageConverter() {
                                             <Layout className="size-3" /> Absolute Alignment
                                         </Label>
                                         <div className="grid grid-cols-1 gap-2">
-                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'top' && "active-uiverse")} data-label="      Top" onClick={() => updateSelectedPage({ vAlign: 'top' })}><AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
-                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'center' && "active-uiverse")} data-label="      Center" onClick={() => updateSelectedPage({ vAlign: 'center' })}><AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
-                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'bottom' && "active-uiverse")} data-label="      Bottom" onClick={() => updateSelectedPage({ vAlign: 'bottom' })}><AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'top' && "active-uiverse")} data-label="      Top" onClick={() => updateAlignment('top')}><AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'center' && "active-uiverse")} data-label="      Center" onClick={() => updateAlignment('center')}><AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'bottom' && "active-uiverse")} data-label="      Bottom" onClick={() => updateAlignment('bottom')}><AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
                                         </div>
                                     </div>
 
@@ -572,7 +572,7 @@ export default function PdfToImageConverter() {
             </CardContent>
             
             <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
-                <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
                 <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 300 DPI HD</div>
                 <div className="flex items-center gap-2"><ImageIcon className="size-4 text-primary" /> PNG/JPG</div>
             </CardFooter>
@@ -580,3 +580,4 @@ export default function PdfToImageConverter() {
         </Card>
     );
 }
+
