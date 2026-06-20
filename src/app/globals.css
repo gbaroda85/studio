@@ -68,6 +68,9 @@
     max-width: 100% !important;
     position: relative;
     overflow-x: hidden !important;
+    /* Hardware acceleration for global body during zoom */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
   }
 
   /* Fix for Radix Dialogs/Sheets adding padding that causes jumping */
@@ -100,15 +103,17 @@
       radial-gradient(at 100% 100%, hsla(333, 70%, 50%, 0.1) 0px, transparent 70%);
   }
 
-  a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse {
+  a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
     cursor: pointer !important;
     touch-action: manipulation;
   }
 }
 
-.glass-card, .btn-pos-uiverse, .magic-button, header, footer {
+/* STABILITY FIXES FOR ZOOM/SCROLL */
+.glass-card, .btn-pos-uiverse, .magic-button, header, footer, .uiverse-clay-btn {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
+  perspective: 1000px;
   will-change: transform;
 }
 
@@ -128,7 +133,8 @@ section {
 
 .glass-panel {
   @apply bg-white/40 dark:bg-black/40 backdrop-blur-xl border border-white/20 dark:border-white/5;
-  transform: translateZ(0);
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .glass-card {
@@ -368,6 +374,7 @@ section {
   align-items: center;
   justify-content: center;
   transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
 }
 
 .dark .btn-pos-uiverse {
@@ -423,7 +430,7 @@ section {
 }
 
 .btn-pos-uiverse:active {
-  transform: scale(0.95) translateZ(0);
+  transform: scale(0.95) translate3d(0, 0, 0);
 }
 
 .uiverse-clay-btn {
@@ -438,7 +445,10 @@ section {
     -0.15em -0.15em 0.15em -0.075em rgba(5, 5, 5, 0.25),
     0.0375em 0.0375em 0.0675em 0 rgba(5, 5, 5, 0.1);
   display: inline-block;
-  transform: translateZ(0);
+  /* Anti-flicker fix for zoom */
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
 .uiverse-clay-btn::after {
@@ -459,6 +469,7 @@ section {
   filter: blur(0.0125em);
   opacity: 0.25;
   mix-blend-mode: multiply;
+  pointer-events: none;
 }
 
 .uiverse-clay-btn .button-outer {
@@ -467,6 +478,8 @@ section {
   border-radius: inherit;
   transition: box-shadow 300ms cubic-bezier(0.23, 1, 0.32, 1);
   will-change: box-shadow;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   box-shadow:
     0 0.05em 0.05em -0.01em rgba(5, 5, 5, 1),
     0 0.01em 0.01em -0.01em rgba(5, 5, 5, 0.5),
@@ -497,7 +510,9 @@ section {
     clip-path 250ms ease,
     background-image 250ms ease,
     transform 250ms ease;
-  will-change: box-shadow, clip-path, transform;
+  will-change: box-shadow, clip-path, transform, opacity;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   overflow: clip;
   clip-path: inset(0 0 0 0 round 100em);
   box-shadow:
@@ -558,7 +573,7 @@ section {
 }
 
 .uiverse-clay-btn:active .button-inner {
-  transform: scale(0.975);
+  transform: scale(0.975) translate3d(0, 0, 0);
 }
 
 .support-uiverse {
@@ -580,6 +595,8 @@ section {
   cursor: pointer;
   transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55), background 0.3s ease;
   border: 1.5px solid rgba(0, 0, 0, 0.05);
+  transform: translate3d(0,0,0);
+  backface-visibility: hidden;
 }
 
 .dark .support-uiverse {
