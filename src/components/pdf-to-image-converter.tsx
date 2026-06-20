@@ -370,207 +370,226 @@ export default function PdfToImageConverter() {
     };
 
     return (
-        <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem] mx-auto animate-in fade-in duration-700">
-            <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
-                <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-5" /></div>
-                    <CardTitle className="text-xl font-black uppercase tracking-tighter">STUDIO WORKSPACE</CardTitle>
-                </div>
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                        {isProcessing && <Loader2 className="size-4 animate-spin text-primary" />}
-                        {pages.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">{pages.length} PAGES READY</Badge>}
-                    </div>
-                    {pages.length > 0 && <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-destructive/5 text-destructive" onClick={handleReset}><X className="size-4"/></Button>}
-                </div>
-            </CardHeader>
-
-            <CardContent className="p-0">
-                {pages.length === 0 ? (
-                    <div className="p-8 md:p-12 flex items-center justify-center">
-                        <div 
-                            className={cn(
-                                "w-full max-w-xl border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-10 md:p-16 flex flex-col items-center justify-center space-y-6 cursor-pointer hover:bg-primary/5 transition-all group bg-white dark:bg-slate-800/50 shadow-inner",
-                                isDragOver && "border-primary bg-primary/5 ring-8 ring-primary/10"
-                            )}
-                            onClick={() => fileInputRef.current?.click()}
-                            onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
-                        >
-                            <div className="relative">
-                                <UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                <Zap className="absolute -top-1 -right-1 size-8 text-yellow-500 animate-pulse" />
-                            </div>
-                            <div className="text-center">
-                                <p className="text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">DROP PDF HERE</p>
-                                <p className="text-[11px] font-bold text-muted-foreground mt-1 uppercase tracking-widest">EXTRACTION HAPPENS LOCALLY.</p>
-                            </div>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="grid lg:grid-cols-12">
-                        <div className="lg:col-span-4 border-r border-border bg-muted/20 p-6 space-y-8 no-print flex flex-col h-full">
-                            {!selectedId && pages.length > 0 ? (
-                                <div className="flex-1 flex flex-col items-center justify-center py-20 text-center opacity-30 gap-4">
-                                    <MousePointer2 className="size-12 animate-bounce" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest max-w-[200px]">Select a page to unlock studio controls</p>
+        <div className="w-full flex flex-col items-center">
+            {pages.length === 0 ? (
+                <div className="w-full max-w-2xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
+                    <Card className={cn(
+                        "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
+                        isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
+                    )}
+                        onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <CardHeader className="bg-muted/30 border-b p-4 md:p-6 text-center">
+                            <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-6 md:p-12">
+                            <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-8 md:p-12 flex flex-col items-center justify-center space-y-4 bg-muted/30 group">
+                                <div className="relative">
+                                    <UploadCloud className="size-12 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                    <Zap className="absolute -top-1 -right-1 size-5 md:size-8 text-yellow-500 animate-pulse" />
                                 </div>
-                            ) : (
-                                <div className="space-y-8 animate-in slide-in-from-left duration-300 text-left">
-                                    <div className="space-y-4">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <Maximize className="size-3" /> Canvas Mode
-                                        </Label>
-                                        <Tabs value={selectedPage?.fitMode || 'fit'} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
-                                            <TabsList className="grid grid-cols-2 h-11 bg-background p-1 rounded-xl border-2">
-                                                <TabsTrigger value="fit" className="font-bold text-[9px] uppercase rounded-lg">Raw Page</TabsTrigger>
-                                                <TabsTrigger value="original" className="font-bold text-[9px] uppercase rounded-lg">A4 Frame</TabsTrigger>
-                                            </TabsList>
-                                        </Tabs>
-                                    </div>
+                                <div className="text-center px-4">
+                                    <p className="text-base md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">DROP PDF HERE</p>
+                                    <p className="text-[9px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">EXTRACTION HAPPENS LOCALLY.</p>
+                                </div>
+                            </div>
+                            <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
+                        </CardContent>
+                        <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
+                            <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> 300 DPI HD</div>
+                            <div className="flex items-center gap-1.5"><ImageIcon className="size-3 text-primary" /> PNG/JPG</div>
+                        </CardFooter>
+                    </Card>
+                </div>
+            ) : (
+                <Card className="w-full max-w-7xl shadow-3xl border-foreground/10 overflow-hidden bg-card/50 rounded-[2.5rem] mx-auto animate-in fade-in duration-700">
+                    <CardHeader className="bg-muted/30 border-b flex flex-col md:flex-row items-center justify-between p-4 md:p-6 gap-4">
+                        <div className="flex items-center gap-3">
+                            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-5" /></div>
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter">STUDIO WORKSPACE</CardTitle>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2">
+                                {isProcessing && <Loader2 className="size-4 animate-spin text-primary" />}
+                                {pages.length > 0 && <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">{pages.length} PAGES READY</Badge>}
+                            </div>
+                            <Button variant="ghost" size="icon" className="size-8 rounded-lg hover:bg-destructive/5 text-destructive" onClick={handleReset}><X className="size-4"/></Button>
+                        </div>
+                    </CardHeader>
 
-                                    <div className={cn("space-y-4 pt-4 border-t-2 border-dashed border-border transition-all", selectedPage?.fitMode === 'fit' ? "opacity-20 pointer-events-none grayscale" : "opacity-100")}>
-                                        <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
-                                            <Layout className="size-3" /> Absolute Alignment
-                                        </Label>
-                                        <div className="grid grid-cols-1 gap-2">
-                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'top' && "active-uiverse")} data-label="      Top" onClick={() => updateAlignment('top')}><AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
-                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'center' && "active-uiverse")} data-label="      Center" onClick={() => updateAlignment('center')}><AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
-                                            <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'bottom' && "active-uiverse")} data-label="      Bottom" onClick={() => updateAlignment('bottom')}><AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                    <CardContent className="p-0">
+                        <div className="grid lg:grid-cols-12">
+                            <div className="lg:col-span-4 border-r border-border bg-muted/20 p-6 space-y-8 no-print flex flex-col h-full">
+                                {!selectedId ? (
+                                    <div className="flex-1 flex flex-col items-center justify-center py-20 text-center opacity-30 gap-4">
+                                        <MousePointer2 className="size-12 animate-bounce" />
+                                        <p className="text-[10px] font-black uppercase tracking-widest max-w-[200px]">Select a page to unlock studio controls</p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-8 animate-in slide-in-from-left duration-300 text-left">
+                                        <div className="space-y-4">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                                <Maximize className="size-3" /> Canvas Mode
+                                            </Label>
+                                            <Tabs value={selectedPage?.fitMode || 'fit'} onValueChange={(v) => updateSelectedPage({ fitMode: v as FitMode })} className="w-full">
+                                                <TabsList className="grid grid-cols-2 h-11 bg-background p-1 rounded-xl border-2">
+                                                    <TabsTrigger value="fit" className="font-bold text-[9px] uppercase rounded-lg">Raw Page</TabsTrigger>
+                                                    <TabsTrigger value="original" className="font-bold text-[9px] uppercase rounded-lg">A4 Frame</TabsTrigger>
+                                                </TabsList>
+                                            </Tabs>
+                                        </div>
+
+                                        <div className={cn("space-y-4 pt-4 border-t-2 border-dashed border-border transition-all", selectedPage?.fitMode === 'fit' ? "opacity-20 pointer-events-none grayscale" : "opacity-100")}>
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.3em] text-primary flex items-center gap-2 mb-3">
+                                                <Layout className="size-3" /> Absolute Alignment
+                                            </Label>
+                                            <div className="grid grid-cols-1 gap-2">
+                                                <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'top' && "active-uiverse")} data-label="      Top" onClick={() => updateAlignment('top')}><AlignVerticalJustifyStart className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                                <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'center' && "active-uiverse")} data-label="      Center" onClick={() => updateAlignment('center')}><AlignVerticalJustifyCenter className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                                <button className={cn("btn-pos-uiverse h-14 relative group !ring-[3px] !ring-slate-950 dark:!ring-white", selectedPage?.vAlign === 'bottom' && "active-uiverse")} data-label="      Bottom" onClick={() => updateAlignment('bottom')}><AlignVerticalJustifyEnd className="absolute left-4 top-1/2 -translate-y-1/2 size-5 z-30 text-slate-900 group-hover:text-white transition-colors" /></button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 pt-4 border-t-2 border-dashed border-border">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
+                                                <RotateCw className="size-3" /> Orientation
+                                            </Label>
+                                            <div className="grid gap-3">
+                                                <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
+                                                    <RotateCw className="size-4 mr-2" /> Rotate Page 90°
+                                                </Button>
+                                                <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300" onClick={rotateAllPages} disabled={pages.length < 2 || isProcessing}>
+                                                    <Layers className="size-4 mr-2" /> Rotate All 90°
+                                                </Button>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-4 pt-4 border-t-2 border-dashed border-border">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
+                                                <ListFilter className="size-3" /> Extraction Range
+                                            </Label>
+                                            <Tabs value={pageRangeMode} onValueChange={(v) => setPageRangeMode(v as any)} className="w-full">
+                                                <TabsList className="grid grid-cols-2 h-11 bg-background p-1 rounded-xl border-2">
+                                                    <TabsTrigger value="all" className="font-bold text-[9px] uppercase">All Pages</TabsTrigger>
+                                                    <TabsTrigger value="custom" className="font-bold text-[9px] uppercase">Custom</TabsTrigger>
+                                                </TabsList>
+                                            </Tabs>
+                                            {pageRangeMode === 'custom' && (
+                                                <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="e.g. 1-5, 8, 10" className="h-11 font-bold border-2 rounded-xl text-center shadow-inner" />
+                                            )}
+                                        </div>
+
+                                        <div className="space-y-4 pt-4 border-t-2 border-dashed border-border">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Sync Control</Label>
+                                            <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground rounded-xl transition-all duration-300" onClick={applyToAll} disabled={pages.length < 2 || isProcessing}>
+                                                <RefreshCcw className="size-3.5 mr-2" /> Apply Settings to All
+                                            </Button>
                                         </div>
                                     </div>
+                                )}
 
-                                    <div className="space-y-4 pt-4 border-t-2 border-dashed border-border">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
-                                            <RotateCw className="size-3" /> Orientation
-                                        </Label>
-                                        <div className="grid gap-3">
-                                            <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm hover:bg-primary hover:text-primary-foreground transition-all duration-300" onClick={rotateSelectedPage} disabled={!selectedId || isProcessing}>
-                                                <RotateCw className="size-4 mr-2" /> Rotate Page 90°
-                                            </Button>
-                                            <Button variant="outline" className="w-full h-11 rounded-xl border-2 font-black text-xs uppercase shadow-sm text-primary border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all duration-300" onClick={rotateAllPages} disabled={pages.length < 2 || isProcessing}>
-                                                <Layers className="size-4 mr-2" /> Rotate All 90°
-                                            </Button>
+                                <div className="pt-6 border-t-2 border-dashed border-border mt-auto">
+                                    <Button 
+                                        size="lg" 
+                                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
+                                        onClick={handleDownloadAll} 
+                                        disabled={pages.length === 0 || isZipping || isProcessing}
+                                    >
+                                        <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                        <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-sm uppercase">
+                                            {isZipping ? "PACKING ZIP..." : "EXTRACT HD IMAGES"}
+                                        </span>
+                                        <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                            {isZipping ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-6 group-hover:scale-110 transition-transform" />}
+                                            <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                                         </div>
-                                    </div>
-
-                                    <div className="space-y-4 pt-4 border-t-2 border-dashed border-border">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-3">
-                                            <ListFilter className="size-3" /> Extraction Range
-                                        </Label>
-                                        <Tabs value={pageRangeMode} onValueChange={(v) => setPageRangeMode(v as any)} className="w-full">
-                                            <TabsList className="grid grid-cols-2 h-11 bg-background p-1 rounded-xl border-2">
-                                                <TabsTrigger value="all" className="font-bold text-[9px] uppercase">All Pages</TabsTrigger>
-                                                <TabsTrigger value="custom" className="font-bold text-[9px] uppercase">Custom</TabsTrigger>
-                                            </TabsList>
-                                        </Tabs>
-                                        {pageRangeMode === 'custom' && (
-                                            <Input value={customRange} onChange={(e) => setCustomRange(e.target.value)} placeholder="e.g. 1-5, 8, 10" className="h-11 font-bold border-2 rounded-xl text-center shadow-inner" />
-                                        )}
-                                    </div>
-
-                                    <div className="space-y-4 pt-4 border-t-2 border-dashed border-border">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Sync Control</Label>
-                                        <Button variant="outline" className="w-full h-10 border-2 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary hover:text-primary-foreground rounded-xl transition-all duration-300" onClick={applyToAll} disabled={pages.length < 2 || isProcessing}>
-                                            <RefreshCcw className="size-3.5 mr-2" /> Apply Settings to All
-                                        </Button>
-                                    </div>
+                                    </Button>
                                 </div>
-                            )}
-
-                            <div className="pt-6 border-t-2 border-dashed border-border mt-auto">
-                                <Button 
-                                    size="lg" 
-                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
-                                    onClick={handleDownloadAll} 
-                                    disabled={pages.length === 0 || isZipping || isProcessing}
-                                >
-                                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
-                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-sm uppercase">
-                                        {isZipping ? "PACKING ZIP..." : "EXTRACT HD IMAGES"}
-                                    </span>
-                                    <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                                        {isZipping ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-6 group-hover:scale-110 transition-transform" />}
-                                        <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
-                                    </div>
-                                </Button>
                             </div>
-                        </div>
 
-                        {/* RIGHT VIEWPORT: GRID */}
-                        <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] lg:h-[850px] relative shadow-inner">
-                            <ScrollArea className="flex-1 w-full h-full p-6 md:p-10">
-                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-24">
-                                    <AnimatePresence>
-                                        {pages.map((p) => (
-                                            <motion.div 
-                                                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
-                                                key={p.id} 
-                                                onClick={() => setSelectedId(p.id)}
-                                                className={cn(
-                                                    "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-xl",
-                                                    selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
-                                                )}
-                                            >
-                                                <div className="absolute inset-0 flex flex-col w-full h-full p-1 pb-10 transition-all duration-300 justify-center">
+                            {/* RIGHT VIEWPORT: GRID */}
+                            <div className="lg:col-span-8 bg-slate-200 dark:bg-slate-900 flex flex-col h-[700px] lg:h-[850px] relative shadow-inner">
+                                <ScrollArea className="flex-1 w-full h-full p-6 md:p-10">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 pb-24">
+                                        <AnimatePresence>
+                                            {pages.map((p) => (
+                                                <motion.div 
+                                                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+                                                    key={p.id} 
+                                                    onClick={() => setSelectedId(p.id)}
+                                                    className={cn(
+                                                        "group relative aspect-[1/1.414] rounded-xl overflow-hidden border-2 transition-all cursor-pointer transform active:scale-95 bg-white shadow-xl",
+                                                        selectedId === p.id ? "border-primary ring-4 ring-primary/20 scale-105 z-10 shadow-primary/30" : "hover:border-primary/40 border-transparent"
+                                                    )}
+                                                >
                                                     <div className={cn(
-                                                        "relative size-full flex flex-col overflow-hidden transition-all duration-300",
+                                                        "absolute inset-0 flex flex-col w-full h-full p-1 pb-10 transition-all duration-300",
                                                         p.fitMode === 'original' ? (
                                                             p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
                                                         ) : 'justify-center'
-                                                    )} style={{ transform: `rotate(${p.rotation}deg)` }}>
-                                                        <img 
-                                                            src={p.previewSrc} 
-                                                            alt={`P${p.globalIndex}`} 
-                                                            className={cn(
-                                                                "w-full object-contain pointer-events-none mx-auto block shadow-sm",
-                                                                p.fitMode === 'original' ? "max-h-[85%]" : "max-h-full"
-                                                            )}
-                                                        />
+                                                    )}>
+                                                        <div className={cn(
+                                                            "relative size-full flex flex-col overflow-hidden transition-all duration-300",
+                                                            p.fitMode === 'original' ? (
+                                                                p.vAlign === 'top' ? 'justify-start' : p.vAlign === 'bottom' ? 'justify-end' : 'justify-center'
+                                                            ) : 'justify-center'
+                                                        )} style={{ transform: `rotate(${p.rotation}deg)` }}>
+                                                            <img 
+                                                                src={p.previewSrc} 
+                                                                alt={`P${p.globalIndex}`} 
+                                                                className={cn(
+                                                                    "w-full object-contain pointer-events-none mx-auto block shadow-sm",
+                                                                    p.fitMode === 'original' ? "max-h-[85%]" : "max-h-full"
+                                                                )}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                </div>
-                                                <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10 z-20">{p.globalIndex}</div>
-                                                <Button size="icon" variant="ghost" className="absolute top-2 right-2 size-7 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-lg shadow-lg z-30" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}><Trash2 className="size-4" /></Button>
-                                                
-                                                <div className="absolute bottom-0 left-0 right-0 h-10 bg-muted/80 backdrop-blur-md border-t flex items-center justify-between px-2 z-30">
-                                                    <span className="text-[8px] font-black uppercase text-muted-foreground">P{p.globalIndex}</span>
-                                                    <Button 
-                                                        size="sm" 
-                                                        variant="secondary" 
-                                                        className="h-7 px-2 font-black text-[8px] uppercase bg-primary text-white hover:bg-primary/90 rounded-md"
-                                                        onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p); }}
-                                                        disabled={downloadingId === p.id}
-                                                    >
-                                                        {downloadingId === p.id ? <Loader2 className="size-2.5 animate-spin mr-1" /> : <Download className="size-2.5 mr-1" />}
-                                                        Download
-                                                    </Button>
-                                                </div>
-                                            </motion.div>
-                                        ))}
-                                    </AnimatePresence>
-                                    
-                                    <button className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-inner group" onClick={() => fileInputRef.current?.click()}>
-                                        <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform"><Plus className="size-6 text-primary" /></div>
-                                        <span className="text-[10px] font-black uppercase text-primary tracking-widest">ADD PDF</span>
-                                    </button>
-                                </div>
-                            </ScrollArea>
-                            
-                            {(pages.length > 0 || isProcessing || isZipping) && (
-                                <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 w-full max-w-sm px-8 z-40">
-                                    {(isProcessing || isZipping) && (
-                                        <div className="w-full space-y-1.5 animate-in slide-in-from-bottom-4">
-                                            <div className="flex justify-between items-center text-[8px] font-black uppercase text-primary">
-                                                <span>{isZipping ? "Packing Archive" : "Scanning PDF"}</span>
-                                                <span>{progress}%</span>
-                                            </div>
-                                            <Progress value={progress} className="h-1.5 shadow-xl border border-white/20" />
-                                        </div>
-                                    )}
-                                    <div className="flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl">
-                                         <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click pages to configure
+                                                    <div className="absolute top-2 left-2 size-7 rounded-lg bg-black/70 backdrop-blur-md flex items-center justify-center text-[10px] font-black text-white border border-white/10 z-20">{p.globalIndex}</div>
+                                                    <Button size="icon" variant="ghost" className="absolute top-2 right-2 size-7 text-rose-500 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 rounded-lg shadow-lg z-30" onClick={(e) => { e.stopPropagation(); handleRemovePage(p.id); }}><Trash2 className="size-4" /></Button>
+                                                    
+                                                    <div className="absolute bottom-0 left-0 right-0 h-10 bg-muted/80 backdrop-blur-md border-t flex items-center justify-between px-2 z-30">
+                                                        <span className="text-[8px] font-black uppercase text-muted-foreground">P{p.globalIndex}</span>
+                                                        <Button 
+                                                            size="sm" 
+                                                            variant="secondary" 
+                                                            className="h-7 px-2 font-black text-[8px] uppercase bg-primary text-white hover:bg-primary/90 rounded-md"
+                                                            onClick={(e) => { e.stopPropagation(); handleDownloadSingle(p); }}
+                                                            disabled={downloadingId === p.id}
+                                                        >
+                                                            {downloadingId === p.id ? <Loader2 className="size-2.5 animate-spin mr-1" /> : <Download className="size-2.5 mr-1" />}
+                                                            Download
+                                                        </Button>
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </AnimatePresence>
+                                        
+                                        <button className="aspect-[1/1.414] border-2 border-dashed border-primary/20 rounded-xl flex flex-col items-center justify-center gap-3 hover:bg-primary/5 hover:border-primary/50 transition-all shadow-inner group" onClick={() => fileInputRef.current?.click()}>
+                                            <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform"><Plus className="size-6 text-primary" /></div>
+                                            <span className="text-[10px] font-black uppercase text-primary tracking-widest">ADD PDF</span>
+                                        </button>
                                     </div>
-                                </div>
-                            )}
+                                </ScrollArea>
+                                
+                                {(pages.length > 0 || isProcessing || isZipping) && (
+                                    <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-4 w-full max-w-sm px-8 z-40">
+                                        {(isProcessing || isZipping) && (
+                                            <div className="w-full space-y-1.5 animate-in slide-in-from-bottom-4">
+                                                <div className="flex justify-between items-center text-[8px] font-black uppercase text-primary">
+                                                    <span>{isZipping ? "Packing Archive" : "Scanning PDF"}</span>
+                                                    <span>{progress}%</span>
+                                                </div>
+                                                <Progress value={progress} className="h-1.5 shadow-xl border border-white/20" />
+                                            </div>
+                                        )}
+                                        <div className="flex items-center gap-4 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 shadow-3xl">
+                                             <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Click pages to configure
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
@@ -583,5 +602,7 @@ export default function PdfToImageConverter() {
             </CardFooter>
             <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" multiple onChange={onFileChange} />
         </Card>
+            )}
+        </div>
     );
 }
