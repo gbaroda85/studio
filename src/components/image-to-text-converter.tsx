@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type DragEvent, type ChangeEvent, useEffect } from "react";
+import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useMemo } from "react";
 import Image from "next/image";
 import { createWorker } from 'tesseract.js';
 import * as pdfjs from 'pdfjs-dist';
