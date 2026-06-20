@@ -106,7 +106,7 @@
   }
 }
 
-.glass-card, .btn-pos-uiverse, .magic-button, header, footer {
+.glass-card, .btn-pos-uiverse, .magic-button, footer {
   transform: translate3d(0, 0, 0);
   backface-visibility: hidden;
   will-change: transform;
