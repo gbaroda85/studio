@@ -22,7 +22,6 @@ import {
   Image as ImageIcon,
   Crop,
   Lock,
-  Heart,
   Calculator,
   Camera,
   Printer,
@@ -44,14 +43,9 @@ import {
   Waves,
   Archive,
   ArchiveRestore,
-  MonitorCheck,
-  Trophy,
-  Music,
-  Video,
   RotateCw,
   Barcode,
   QrCode,
-  ChevronUp,
   ScanLine,
   Wand2,
   IndianRupee,
@@ -60,26 +54,20 @@ import {
   Layers,
   Home as HomeIcon,
   Scissors,
-  MonitorPlay,
-  PlayCircle,
+  Music,
   PenLine,
   PenTool,
   CalendarDays,
   Banknote,
-  Palette,
-  CreditCard,
-  Menu
+  Palette
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
-  // FEATURED / VISUAL PROCESSORS (8 Tools)
+  // FEATURED / VISUAL PROCESSORS
   { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-gradient-to-br from-blue-500 to-blue-700", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-gradient-to-br from-violet-500 to-violet-700", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-rose-50", category: "featured" },
@@ -89,7 +77,7 @@ const ALL_TOOLS = [
   { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-gradient-to-br from-emerald-500 to-emerald-700", lightBg: "bg-[#fefce8]", category: "featured" },
   { icon: PenTool, title: "SIGNATURE RESIZER", description: "Resize signature to exact CM/Pixel and KB size.", href: "/signature-resizer", colorClass: "bg-gradient-to-br from-orange-500 to-orange-700", lightBg: "bg-orange-50", category: "featured" },
   
-  // PDF TOOLKIT (8 Tools)
+  // PDF TOOLKIT
   { icon: Layers, title: "ORGANIZE PDF", description: "Delete, reorder and rotate pages visually.", href: "/organize-pdf", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "pdf-kit" },
   { icon: Merge, title: "MERGE PDF", description: "Combine multiple PDF files into one.", href: "/merge-pdf", colorClass: "bg-gradient-to-br from-emerald-500 to-emerald-700", lightBg: "bg-emerald-50", category: "pdf-kit" },
   { icon: RotateCw, title: "ROTATE PDF", description: "Rotate PDF pages permanently and save.", href: "/rotate-pdf", colorClass: "bg-gradient-to-br from-blue-400 to-blue-600", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
@@ -116,7 +104,6 @@ const ALL_TOOLS = [
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
   { icon: HomeIcon, title: "MORTGAGE CALCULATOR", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
-  { icon: PlayCircle, title: "INSTAGRAM DOWNLOADER", description: "Download Reels and Videos from Instagram privately.", href: "/instagram-downloader", colorClass: "bg-pink-600", lightBg: "bg-pink-50", category: "video" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-indigo-50", category: "video" },
   { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
   { icon: Crop, title: "CROP IMAGE", description: "Precisely crop and fix perspective on photos.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-cyan-50", category: "image" },
@@ -131,7 +118,7 @@ const ALL_TOOLS = [
   { icon: FileText, title: "TEXT TO PDF", description: "Convert plain text notes into a clean PDF.", href: "/text-to-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf" },
   { icon: Copyright, title: "ADD WATERMARK", description: "Protect your PDFs with custom text watermarks.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "pdf" },
   { icon: NotebookPen, title: "ADD PAGE NUMBERS", description: "Insert professional page numbers into PDFs.", href: "/add-page-numbers", colorClass: "bg-emerald-500", lightBg: "bg-[#f7fee7]", category: "pdf" },
-  { icon: Barcode, title: "BARCODE GENERATOR", description: "Create scannable industrial-grade barcodes.", href: "/barcode-generator", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "converters" },
+  { icon: Barcode, title: "BARCODE GENERATOR", description: "Create scannable industrial-grade barcodes.", href: "/barcode-generator", colorClass: "bg-amber-600", lightBg: "bg-[#fefce8]", category: "converters" },
   { icon: Gauge, title: "ACCELERATION CONVERTER", description: "Convert between various acceleration units.", href: "/acceleration-converter", colorClass: "bg-emerald-500", lightBg: "bg-[#f0fdf4]", category: "converters" },
   { icon: AreaChart, title: "AREA CONVERTER", description: "Convert international and local land area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "converters" },
   { icon: Fuel, title: "FUEL CONVERTER", description: "Convert between MPG and km/L efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "converters" },
@@ -140,7 +127,6 @@ const ALL_TOOLS = [
   { icon: Coins, title: "INTEREST CALCULATOR", description: "Calculate simple and compound interest returns.", href: "/interest-calculator", colorClass: "bg-yellow-600", lightBg: "bg-[#fefce8]", category: "calculator" },
   { icon: Receipt, title: "SALES TAX CALCULATOR", description: "Calculate bill tax and final price inclusive of tax.", href: "/sales-tax-calculator", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
   { icon: Percent, title: "PERCENTAGE CALCULATOR", description: "Find percentages for marks, ratios and discounts.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
-  { icon: Sparkles, title: "AI UPSCALER", description: "Upscale images to 2x and 4x using browser AI.", href: "/ai-upscaler", colorClass: "bg-blue-500", lightBg: "bg-blue-50", category: "featured" },
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
@@ -203,7 +189,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-4 pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
+      <section className="relative w-full pt-8 pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
@@ -232,21 +218,18 @@ export default function Page() {
             <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-1 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-1 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta">
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <div className="space-y-1 mb-4 animate-fade-in-up">
+          <div className="space-y-1 mb-6 animate-fade-in-up">
             <p className="text-sm md:text-xl text-slate-500 dark:text-slate-300 max-w-3xl mx-auto font-bold leading-relaxed">
               Everything happens locally in your device RAM, 100% private.
             </p>
-            <p className="text-sm md:text-xl text-slate-500 dark:text-slate-300 max-w-3xl mx-auto font-bold leading-relaxed">
-              Fast, secure, and ready for official submissions.
-            </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-6 animate-fade-in-up">
+          <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up">
             <Link href="/tools?tab=image" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner flex items-center gap-2 px-6">
@@ -273,12 +256,12 @@ export default function Page() {
             </Link>
           </div>
 
-          <div className="max-w-2xl mx-auto relative group animate-fade-in-up">
+          <div className="max-w-xl mx-auto relative group animate-fade-in-up">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search tools... (e.g. 'upscale', 'scan', 'barcode')"
+                placeholder="Search tools... (e.g. 'scan', 'barcode')"
                 className="w-full pl-14 pr-6 h-16 text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -314,7 +297,7 @@ export default function Page() {
                         <div className="w-16 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE ENGINE</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-12">
-                        <h2 className="text-2xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
+                        <h2 className="text-xl md:text-3xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
                         <Link href="/tools?tab=all" className="hidden sm:flex">
                           <button className="learn-more scale-110">
                             <span className="font-black tracking-widest uppercase">Explore All</span>
@@ -331,7 +314,7 @@ export default function Page() {
                     <div className="flex items-center gap-3 text-rose-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
                         <div className="w-16 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT STUDIO</span>
                     </div>
-                    <h2 className="text-2xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">PDF Toolkit</h2>
+                    <h2 className="text-xl md:text-3xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
@@ -342,7 +325,7 @@ export default function Page() {
                     <div className="flex items-center gap-3 text-indigo-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
                         <div className="w-16 h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE HUB</span>
                     </div>
-                    <h2 className="text-2xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">Calculators</h2>
+                    <h2 className="text-xl md:text-3xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">Calculators</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
