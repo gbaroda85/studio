@@ -75,13 +75,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/video-to-mp3',
   ];
 
-  // Defensive check to ensure routes is an array (though it is defined as such above)
+  // Defensive check to ensure routes is an array
   const safeRoutes = Array.isArray(routes) ? routes : [];
 
-  return safeRoutes.map((route) => ({
+  if (safeRoutes.length === 0) {
+    return [];
+  }
+
+  const sitemapEntries: MetadataRoute.Sitemap = safeRoutes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: route === '' ? 'daily' : 'monthly' as const,
+    changeFrequency: (route === '' ? 'daily' : 'monthly') as 'daily' | 'monthly',
     priority: route === '' ? 1 : 0.8,
   }));
+
+  // Ensure the return value is strictly an array to avoid "e.some" errors in Next.js 15
+  return Array.isArray(sitemapEntries) ? sitemapEntries : [];
 }
