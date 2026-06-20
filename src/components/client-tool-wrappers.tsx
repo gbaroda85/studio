@@ -38,4 +38,3 @@ export const PdfCropperClient = dynamic(() => import('@/components/pdf-cropper')
   ssr: false,
   loading: () => <LoadingState message="Initializing Crop Studio..." />
 });
-

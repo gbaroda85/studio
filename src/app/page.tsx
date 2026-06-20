@@ -23,7 +23,6 @@ import {
   Crop,
   Lock,
   Calculator,
-  Camera,
   Printer,
   FileArchive,
   Merge,
@@ -60,10 +59,12 @@ import {
   CalendarDays,
   Banknote,
   Palette,
-  CheckCircle2
+  CheckCircle2,
+  Menu,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -74,7 +75,7 @@ const ALL_TOOLS = [
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-gradient-to-br from-sky-400 to-sky-600", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "featured" },
-  { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic filters.", href: "/document-scan", colorClass: "bg-gradient-to-br from-emerald-400 to-emerald-600", lightBg: "bg-emerald-50", category: "featured" },
+  { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic Color filters.", href: "/document-scan", colorClass: "bg-gradient-to-br from-emerald-400 to-emerald-600", lightBg: "bg-emerald-50", category: "featured" },
   { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-gradient-to-br from-emerald-500 to-emerald-700", lightBg: "bg-[#fefce8]", category: "featured" },
   { icon: PenTool, title: "SIGNATURE RESIZER", description: "Resize signature to exact CM/Pixel and KB size.", href: "/signature-resizer", colorClass: "bg-gradient-to-br from-orange-500 to-orange-700", lightBg: "bg-orange-50", category: "featured" },
   
@@ -85,7 +86,7 @@ const ALL_TOOLS = [
   { icon: Lock, title: "PDF LOCKER", description: "Protect documents with secure AES encryption.", href: "/lock-pdf", colorClass: "bg-gradient-to-br from-slate-700 to-slate-900", lightBg: "bg-slate-50", category: "pdf-kit" },
   { icon: Unlock, title: "UNLOCK PDF", description: "Remove password protection from a PDF.", href: "/unlock-pdf", colorClass: "bg-gradient-to-br from-teal-400 to-teal-600", lightBg: "bg-[#f0fdfa]", category: "pdf-kit" },
   { icon: FileArchive, title: "PDF COMPRESS", description: "Reduce PDF file size without losing text clarity.", href: "/compress-pdf", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-[#fff1f2]", category: "pdf-kit" },
-  { icon: FilePenLine, title: "PDF EDITOR", description: "Edit text, images and pages in any PDF document.", href: "/edit-pdf", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "pdf-kit" },
+  { icon: FilePenLine, title: "PDF EDITOR", description: "Edit text, images and pages in any PDF document.", href: "/edit-pdf", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
   { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-gradient-to-br from-cyan-500 to-cyan-700", lightBg: "bg-cyan-50", category: "pdf-kit" },
 
   // FINANCE CENTER
@@ -116,7 +117,7 @@ const ALL_TOOLS = [
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
-  { icon: FileText, title: "TEXT TO PDF", description: "Convert plain text notes into a clean PDF.", href: "/text-to-pdf", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "pdf" },
+  { icon: FileText, title: "TEXT TO PDF", description: "Convert plain text notes into a clean PDF.", href: "/text-to-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#f8fafc]", category: "pdf" },
   { icon: Copyright, title: "ADD WATERMARK", description: "Protect your PDFs with custom text watermarks.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "pdf" },
   { icon: NotebookPen, title: "ADD PAGE NUMBERS", description: "Insert professional page numbers into PDFs.", href: "/add-page-numbers", colorClass: "bg-emerald-500", lightBg: "bg-[#f7fee7]", category: "pdf" },
   { icon: Barcode, title: "BARCODE GENERATOR", description: "Create scannable industrial-grade barcodes.", href: "/barcode-generator", colorClass: "bg-amber-600", lightBg: "bg-[#fefce8]", category: "converters" },
@@ -132,7 +133,7 @@ const ALL_TOOLS = [
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full">
-    <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden text-left">
+    <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl dark:shadow-primary/5 hover:shadow-2xl dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden text-left">
       <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-6 shadow-inner", lightBg, "dark:bg-slate-900/60")}>
         <div className={cn(
           `size-14 rounded-[1.2rem] flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
@@ -190,7 +191,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-8 pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10">
+      <section className="relative w-full pt-4 pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10 transform-gpu">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
@@ -260,7 +261,7 @@ export default function Page() {
             </Link>
           </div>
 
-          <div className="max-w-xl mx-auto relative group animate-fade-in-up">
+          <div className="max-w-2xl mx-auto relative group animate-fade-in-up">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Input
@@ -301,11 +302,9 @@ export default function Page() {
                         <div className="w-16 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE ENGINE</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-12">
-                        <h2 className="text-xl md:text-3xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
+                        <h2 className="text-2xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
                         <Link href="/tools?tab=all" className="hidden sm:flex">
-                          <button className="learn-more scale-110">
-                            <span className="font-black tracking-widest uppercase">Explore All</span>
-                          </button>
+                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[10px] h-10 px-6">Explore All</Button>
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
@@ -318,7 +317,7 @@ export default function Page() {
                     <div className="flex items-center gap-3 text-rose-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
                         <div className="w-16 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT STUDIO</span>
                     </div>
-                    <h2 className="text-xl md:text-3xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">PDF Toolkit</h2>
+                    <h2 className="text-2xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">PDF Toolkit</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
@@ -329,7 +328,7 @@ export default function Page() {
                     <div className="flex items-center gap-3 text-indigo-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
                         <div className="w-16 h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE HUB</span>
                     </div>
-                    <h2 className="text-xl md:text-3xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">Calculators</h2>
+                    <h2 className="text-2xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">Calculators</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>

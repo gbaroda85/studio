@@ -6,6 +6,7 @@ import { useState, useMemo } from 'react';
 import Image from 'next/image';
 import placeholderData from '@/app/lib/placeholder-images.json';
 import {FeatureCard} from '@/components/feature-card';
+import { Button } from '@/components/ui/button';
 import {
   Tabs,
   TabsContent,
@@ -66,7 +67,8 @@ import {
   Menu,
   Palette,
   Sparkles,
-  LayoutGrid
+  LayoutGrid,
+  CreditCard
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
