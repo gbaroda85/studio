@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useMemo } from "react";
@@ -32,7 +33,9 @@ import {
     ListFilter,
     Clock,
     FileJson,
-    Save
+    Save,
+    AlertCircle,
+    CheckCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -44,6 +47,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import confetti from 'canvas-confetti';
 
 const PDF_JS_VERSION = '4.2.67';
@@ -66,26 +70,91 @@ const StarIcons = () => (
 function formatBytes(bytes: number, decimals = 2): string {
   if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 }
+
+/**
+ * ADVANCED LOCAL CORRECTION ENGINE
+ */
+const correctOcrText = (text: string): string => {
+    if (!text) return "";
+
+    // 1. Protect Special Patterns (Email, Phone, GST, PAN, etc.)
+    const placeholders: { [key: string]: string } = {};
+    let counter = 0;
+    
+    const patterns = {
+        email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+        phone: /\b(\+?\d{1,3}[- ]?)?\d{10}\b/g,
+        gstin: /\b\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}[Z]{1}[A-Z\d]{1}\b/g,
+        pan: /\b[A-Z]{5}\d{4}[A-Z]{1}\b/g,
+        currency: /[₹$£€]\s?\d+(?:,\d{3})*(?:\.\d{2})?/g,
+        url: /\b(?:https?:\/\/|www\.)\S+\b/g
+    };
+
+    let cleaned = text;
+    
+    // Replace valid patterns with placeholders to prevent corruption
+    Object.values(patterns).forEach(regex => {
+        cleaned = cleaned.replace(regex, (match) => {
+            const id = `__TOKEN_${counter++}__`;
+            placeholders[id] = match;
+            return id;
+        });
+    });
+
+    // 2. OCR Character Confusion Fixes
+    cleaned = cleaned
+        // Fix O vs 0
+        .replace(/([0-9])O([0-9])/g, '$10$2')
+        .replace(/([A-Za-z])0([A-Za-z])/g, '$1O$2')
+        // Fix I/l vs 1
+        .replace(/([0-9])[Il]([0-9])/g, '$11$2')
+        .replace(/([A-Za-z])1([A-Za-z])/g, '$1l$2')
+        // Fix S vs 5
+        .replace(/([0-9])S([0-9])/g, '$15$2')
+        .replace(/([A-Za-z])5([A-Za-z])/g, '$1S$2')
+        // Fix B vs 8
+        .replace(/([0-9])B([0-9])/g, '$18$2')
+        .replace(/([A-Za-z])8([A-Za-z])/g, '$1B$2');
+
+    // 3. Punctuation & Spacing
+    cleaned = cleaned
+        .replace(/\s+/g, ' ')               // Remove multiple spaces
+        .replace(/\s([.,!?;:])/g, '$1')      // Remove space before punctuation
+        .replace(/([.,!?;:])(?=[A-Za-z])/g, '$1 ') // Ensure space after punctuation
+        .replace(/([.,!?;:])\1+/g, '$1')     // Remove duplicate symbols (.... -> .)
+        .replace(/(\n\s*){2,}/g, '\n\n');    // Preserve paragraph spacing
+
+    // 4. Case Correction (Start of sentences)
+    cleaned = cleaned.replace(/(^\s*|[.!?]\s+)([a-z])/g, (m) => m.toUpperCase());
+
+    // 5. Restore Placeholders
+    Object.keys(placeholders).forEach(id => {
+        cleaned = cleaned.replace(id, placeholders[id]);
+    });
+
+    return cleaned.trim();
+};
 
 export default function ImageToTextConverter() {
   const { toast } = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [originalImageSrc, setOriginalImageSrc] = useState<string | null>(null);
-  const [extractedText, setExtractedText] = useState<string | null>(null);
+  const [rawText, setRawText] = useState<string | null>(null);
+  const [correctedText, setCorrectedText] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const [hasCopied, setHasCopied] = useState(false);
+  const [activeView, setActiveView] = useState<'corrected' | 'raw'>('corrected');
   
-  // OCR Specific States
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [avgConfidence, setAvgConfidence] = useState<number | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<string | null>(null);
   const startTimeRef = useRef<number>(0);
 
@@ -94,9 +163,11 @@ export default function ImageToTextConverter() {
   const handleFileChange = (file: File | null) => {
     if (file) {
       setFile(file);
-      setExtractedText(null);
+      setRawText(null);
+      setCorrectedText(null);
       setProgress(0);
       setStatusText("");
+      setAvgConfidence(null);
       
       const reader = new FileReader();
       if (file.type === 'application/pdf') {
@@ -113,39 +184,23 @@ export default function ImageToTextConverter() {
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-  /**
-   * ADVANCED IMAGE PRE-PROCESSING
-   * Critical for Tesseract.js accuracy.
-   * Converts to grayscale, enhances contrast, and applies thresholding.
-   */
   const preprocessImage = (canvas: HTMLCanvasElement) => {
       const ctx = canvas.getContext('2d', { willReadFrequently: true });
       if (!ctx) return;
-      
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
-      
-      // Calculate average luminance to determine dynamic threshold
       let totalLuma = 0;
       for (let i = 0; i < data.length; i += 4) {
           totalLuma += (0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2]);
       }
       const avgLuma = totalLuma / (data.length / 4);
-      
-      // Tighten threshold around the average for better character isolation
       const threshold = avgLuma > 180 ? 190 : avgLuma < 80 ? 70 : 128;
-
       for (let i = 0; i < data.length; i += 4) {
           const r = data[i], g = data[i + 1], b = data[i + 2];
-          // Grayscale conversion using luminance formula
           const luma = 0.299 * r + 0.587 * g + 0.114 * b;
-          
-          // Binarization (Strict Black & White)
           const val = luma > threshold ? 255 : 0;
-          
           data[i] = data[i + 1] = data[i + 2] = val;
       }
-      
       ctx.putImageData(imageData, 0, 0);
   };
 
@@ -153,17 +208,16 @@ export default function ImageToTextConverter() {
     if (!file) return;
     
     setIsProcessing(true);
-    setExtractedText("");
+    setRawText("");
+    setCorrectedText("");
     setProgress(0);
     startTimeRef.current = Date.now();
 
-    // Initialize worker with all required languages
     const worker = await createWorker('eng+hin+guj+mar', 1, {
         logger: (m) => {
             if (m.status === 'recognizing text') {
                 const p = Math.round(m.progress * 100);
                 setProgress(p);
-                
                 const elapsed = (Date.now() - startTimeRef.current) / 1000;
                 if (p > 5) {
                     const totalEst = elapsed / (p / 100);
@@ -176,6 +230,8 @@ export default function ImageToTextConverter() {
 
     try {
         let finalOutput = "";
+        let totalConfidence = 0;
+        let confidenceCounts = 0;
 
         if (file.type === 'application/pdf') {
             const arrayBuffer = await file.arrayBuffer();
@@ -190,64 +246,56 @@ export default function ImageToTextConverter() {
             for (let i = 1; i <= pdf.numPages; i++) {
                 setCurrentPage(i);
                 setStatusText(`Scanning Page ${i} of ${pdf.numPages}...`);
-                
                 const page = await pdf.getPage(i);
-                // Bumping scale to 2.5x for superior character recognition
                 const viewport = page.getViewport({ scale: 2.5 }); 
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d', { willReadFrequently: true });
                 if (context) {
-                    canvas.height = viewport.height;
-                    canvas.width = viewport.width;
-                    context.fillStyle = '#FFFFFF';
-                    context.fillRect(0, 0, canvas.width, canvas.height);
+                    canvas.height = viewport.height; canvas.width = viewport.width;
+                    context.fillStyle = '#FFFFFF'; context.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: context, viewport }).promise;
-                    
-                    // High-quality cleanup before OCR
                     preprocessImage(canvas);
-                    
-                    const { data: { text } } = await worker.recognize(canvas);
+                    const { data: { text, confidence } } = await worker.recognize(canvas);
                     finalOutput += `--- PAGE ${i} ---\n\n${text}\n\n`;
-                    
-                    // Clear memory
+                    totalConfidence += confidence;
+                    confidenceCounts++;
                     canvas.width = 0; canvas.height = 0;
                 }
             }
+            setAvgConfidence(Math.round(totalConfidence / confidenceCounts));
         } else {
             setTotalPages(1);
             setCurrentPage(1);
-            setStatusText("Optimizing Pixels...");
-            
-            // For images, we also draw to canvas to apply pre-processing
+            setStatusText("Enhancing Resolution...");
             const img = new window.Image();
             img.src = originalImageSrc!;
             await new Promise(r => img.onload = r);
-            
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d', { willReadFrequently: true });
             if (ctx) {
-                // Upscale if image is small to improve accuracy
                 const scale = Math.max(1, 2000 / Math.max(img.width, img.height));
-                canvas.width = img.width * scale;
-                canvas.height = img.height * scale;
-                ctx.imageSmoothingEnabled = true;
-                ctx.imageSmoothingQuality = 'high';
+                canvas.width = img.width * scale; canvas.height = img.height * scale;
+                ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = 'high';
                 ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                
                 preprocessImage(canvas);
-                setStatusText("Reading Characters...");
-                const { data: { text } } = await worker.recognize(canvas);
+                setStatusText("Reading Text...");
+                const { data: { text, confidence } } = await worker.recognize(canvas);
                 finalOutput = text;
+                setAvgConfidence(confidence);
             }
         }
 
-        setExtractedText(finalOutput);
+        setRawText(finalOutput);
+        setStatusText("Applying Advanced Correction...");
+        const corrected = correctOcrText(finalOutput);
+        setCorrectedText(corrected);
+        
         setProgress(100);
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        toast({ title: "Extraction Success", description: "Text captured with optimized fidelity." });
+        toast({ title: "Clean Extraction Success" });
     } catch (error: any) {
         console.error(error);
-        toast({ variant: "destructive", title: "OCR Error", description: "Worker failed to read this document." });
+        toast({ variant: "destructive", title: "OCR Error" });
     } finally {
         await worker.terminate();
         setIsProcessing(false);
@@ -256,37 +304,39 @@ export default function ImageToTextConverter() {
     }
   };
 
+  const activeText = activeView === 'corrected' ? correctedText : rawText;
+
   const handleCopyToClipboard = () => {
-    if (!extractedText) return;
-    navigator.clipboard.writeText(extractedText);
+    if (!activeText) return;
+    navigator.clipboard.writeText(activeText);
     setHasCopied(true);
     toast({ title: 'Copied!' });
     setTimeout(() => setHasCopied(false), 2000);
   };
 
   const downloadTxt = () => {
-      if (!extractedText) return;
-      const blob = new Blob([extractedText], { type: 'text/plain' });
+      if (!activeText) return;
+      const blob = new Blob([activeText], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Extracted_Text_${Date.now()}.txt`;
+      link.download = `GR7-OCR-${activeView.toUpperCase()}-${Date.now()}.txt`;
       link.click();
   };
 
   const downloadPdf = () => {
-      if (!extractedText) return;
+      if (!activeText) return;
       const doc = new jsPDF();
-      const splitText = doc.splitTextToSize(extractedText, 180);
+      const splitText = doc.splitTextToSize(activeText, 180);
       doc.text(splitText, 15, 20);
-      doc.save(`OCR_Result_${Date.now()}.pdf`);
+      doc.save(`GR7-OCR-${activeView.toUpperCase()}-${Date.now()}.pdf`);
   };
 
   const downloadDocx = async () => {
-      if (!extractedText) return;
+      if (!activeText) return;
       const doc = new Document({
           sections: [{
-              children: extractedText.split('\n').map(line => new Paragraph({
+              children: activeText.split('\n').map(line => new Paragraph({
                   children: [new TextRun(line)]
               }))
           }]
@@ -294,27 +344,18 @@ export default function ImageToTextConverter() {
       const buffer = await Packer.toBlob(doc);
       const link = document.createElement('a');
       link.href = URL.createObjectURL(buffer);
-      link.download = `OCR_Export_${Date.now()}.docx`;
+      link.download = `GR7-OCR-Export-${Date.now()}.docx`;
       link.click();
   };
 
-  const handleReset = () => {
-    setFile(null);
-    setOriginalImageSrc(null);
-    setExtractedText(null);
-    setIsProcessing(false);
-    setProgress(0);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
   const stats = useMemo(() => {
-    if (!extractedText) return { chars: 0, words: 0, lines: 0 };
+    const target = activeText || "";
     return {
-        chars: extractedText.length,
-        words: extractedText.trim().split(/\s+/).filter(w => w.length > 0).length,
-        lines: extractedText.split('\n').filter(l => l.trim().length > 0).length
+        chars: target.length,
+        words: target.trim().split(/\s+/).filter(w => w.length > 0).length,
+        lines: target.split('\n').filter(l => l.trim().length > 0).length
     };
-  }, [extractedText]);
+  }, [activeText]);
 
   return (
     <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 mx-auto">
@@ -371,7 +412,7 @@ export default function ImageToTextConverter() {
                         size="lg" 
                         className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-[2] md:flex-none shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none" 
                         onClick={handleCopyToClipboard} 
-                        disabled={!extractedText}
+                        disabled={!activeText}
                     >
                         <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                         <span className="flex-1 px-10 text-center tracking-widest text-[10px] md:text-xs uppercase">{hasCopied ? "COPIED" : "COPY TEXT"}</span>
@@ -390,9 +431,7 @@ export default function ImageToTextConverter() {
                                 <Eye className="h-4 w-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">SCANNING VIEWPORT</CardTitle>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md">{file.name.toUpperCase()}</Badge>
-                            </div>
+                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md uppercase">{file.name}</Badge>
                         </CardHeader>
                         <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[500px] flex flex-col items-center justify-center relative">
                             {isProcessing ? (
@@ -446,21 +485,33 @@ export default function ImageToTextConverter() {
                 <div className="lg:col-span-5 space-y-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 text-left">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
-                                <Settings2 className="size-4 md:size-5 text-primary" /> Properties
-                            </CardTitle>
+                             <div className="flex items-center justify-between">
+                                <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                                    <Settings2 className="size-4 md:size-5 text-primary" /> Text Studio
+                                </CardTitle>
+                                {avgConfidence !== null && (
+                                    <div className={cn(
+                                        "px-3 py-1 rounded-full border-2 text-[8px] font-black uppercase flex items-center gap-1.5",
+                                        avgConfidence > 85 ? "bg-green-500/10 text-green-700 border-green-500/20" : 
+                                        avgConfidence > 65 ? "bg-yellow-500/10 text-yellow-700 border-yellow-500/20" : 
+                                        "bg-rose-500/10 text-rose-700 border-rose-500/20"
+                                    )}>
+                                        <ShieldCheck className="size-3" /> {avgConfidence}% Accuracy
+                                    </div>
+                                )}
+                             </div>
                         </CardHeader>
-                        <CardContent className="p-6 md:p-8 space-y-10">
+                        <CardContent className="p-6 md:p-8 space-y-8">
                             <div className="space-y-6">
                                 <div className="space-y-3">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Engine Actions</Label>
                                     <Button 
                                         className="magic-button w-full h-16 md:h-20 text-lg font-black bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary rounded-full transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 px-10 shadow-2xl" 
                                         onClick={performOcr}
-                                        disabled={isProcessing || !!extractedText}
+                                        disabled={isProcessing || !!rawText}
                                     >
                                         <StarIcons />
-                                        {isProcessing ? "SCANNING..." : (
+                                        {isProcessing ? "PROCESSING PIXELS..." : (
                                             <div className="flex items-center gap-3">
                                                 <Wand2 className="size-7 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
                                                 <span className="uppercase tracking-tighter text-lg md:text-2xl font-black">EXTRACT TEXT</span>
@@ -471,30 +522,46 @@ export default function ImageToTextConverter() {
 
                                 <div className="space-y-4 pt-4 border-t border-white/10 text-left">
                                     <div className="flex justify-between items-center px-1">
-                                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Extracted Content</Label>
-                                        {extractedText && <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] uppercase">{stats.words} WORDS</Badge>}
+                                        <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Result Content</Label>
+                                        {activeText && <Badge variant="secondary" className="bg-primary/10 text-primary font-black text-[8px] uppercase">{stats.words} WORDS</Badge>}
                                     </div>
-                                    <div className="relative group">
-                                        <Textarea 
-                                            value={extractedText || ""} 
-                                            onChange={(e) => setExtractedText(e.target.value)}
-                                            placeholder={isProcessing ? "AI is reading pixels..." : "Extracted text will appear here..."}
-                                            className="min-h-[300px] md:min-h-[450px] text-sm font-bold border-2 rounded-[1.5rem] bg-background/50 focus-visible:ring-primary/20 shadow-inner p-5 custom-scrollbar text-slate-800 dark:text-slate-100"
-                                        />
-                                        {extractedText && (
-                                            <div className="absolute bottom-4 right-4 flex flex-col gap-2 animate-in fade-in slide-in-from-right-2">
-                                                <Button size="icon" variant="secondary" className="h-10 w-10 rounded-xl shadow-xl bg-white dark:bg-slate-800 border-2" onClick={handleCopyToClipboard} title="Copy All">
-                                                    {hasCopied ? <CheckCircle2 className="size-5 text-green-600" /> : <Clipboard className="size-5" />}
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </div>
+                                    
+                                    <Tabs value={activeView} onValueChange={(v) => setActiveView(v as any)} className="w-full">
+                                        <TabsList className="grid w-full grid-cols-2 h-11 bg-muted/20 border-2 rounded-xl mb-4">
+                                            <TabsTrigger value="corrected" className="text-[9px] font-black uppercase flex items-center gap-2">
+                                                <CheckCircle className="size-3 text-green-500" /> CLEANED VIEW
+                                            </TabsTrigger>
+                                            <TabsTrigger value="raw" className="text-[9px] font-black uppercase flex items-center gap-2">
+                                                <FileText className="size-3 text-muted-foreground" /> RAW OUTPUT
+                                            </TabsTrigger>
+                                        </TabsList>
+                                        
+                                        <div className="relative group">
+                                            <Textarea 
+                                                value={activeText || ""} 
+                                                readOnly={!activeText || isProcessing}
+                                                onChange={(e) => activeView === 'corrected' ? setCorrectedText(e.target.value) : setRawText(e.target.value)}
+                                                placeholder={isProcessing ? "Optimizing characters..." : "Text will appear here after extraction..."}
+                                                className={cn(
+                                                    "min-h-[300px] md:min-h-[400px] text-sm font-bold border-2 rounded-[1.5rem] bg-background/50 focus-visible:ring-primary/20 shadow-inner p-5 custom-scrollbar text-slate-800 dark:text-slate-100",
+                                                    activeView === 'corrected' && "bg-green-500/[0.02]"
+                                                )}
+                                            />
+                                            {activeText && (
+                                                <div className="absolute bottom-4 right-4 flex flex-col gap-2 animate-in fade-in slide-in-from-right-2">
+                                                    <Button size="icon" variant="secondary" className="h-10 w-10 rounded-xl shadow-xl bg-white dark:bg-slate-800 border-2" onClick={handleCopyToClipboard}>
+                                                        {hasCopied ? <CheckCircle2 className="size-5 text-green-600" /> : <Clipboard className="size-5" />}
+                                                    </Button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </Tabs>
                                 </div>
                                 
-                                {extractedText && (
-                                    <div className="space-y-4 pt-4 border-t border-white/10 text-left">
+                                {activeText && (
+                                    <div className="space-y-4 pt-4 border-t border-white/10 text-left animate-in slide-in-from-bottom-2">
                                         <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                            <Download className="size-3" /> Export Options
+                                            <Download className="size-3" /> Export Cleaned File
                                         </Label>
                                         <div className="grid grid-cols-3 gap-2">
                                             <Button variant="outline" className="h-10 text-[9px] font-black uppercase rounded-lg border-2" onClick={downloadTxt}>TXT</Button>
@@ -508,9 +575,9 @@ export default function ImageToTextConverter() {
                             <div className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 text-left shadow-sm">
                                 <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
                                 <div>
-                                    <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">100% Secure RAM</p>
+                                    <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Active Cleanup Engine</p>
                                     <p className="text-[8px] text-green-600/80 font-medium leading-relaxed uppercase mt-1">
-                                        Every pixel is processed in your device's memory for total privacy. No external API calls.
+                                        Spelling, punctuation, and character confusion (O/0) are auto-corrected using local patterns.
                                     </p>
                                 </div>
                             </div>
@@ -521,7 +588,7 @@ export default function ImageToTextConverter() {
                                 <div><p className="text-[8px] font-black opacity-30 uppercase">Words</p><p className="text-xs font-black">{stats.words}</p></div>
                                 <div><p className="text-[8px] font-black opacity-30 uppercase">Lines</p><p className="text-xs font-black">{stats.lines}</p></div>
                              </div>
-                             <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center">Local Tesseract Engine Active</p>
+                             <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center">Local Neural Pipeline Active</p>
                         </CardFooter>
                     </Card>
                 </div>
@@ -532,3 +599,4 @@ export default function ImageToTextConverter() {
     </div>
   );
 }
+
