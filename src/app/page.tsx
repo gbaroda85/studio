@@ -24,7 +24,6 @@ import {
   Lock,
   Heart,
   Calculator,
-  Camera,
   Printer,
   FileArchive,
   Merge,
@@ -44,14 +43,9 @@ import {
   Waves,
   Archive,
   ArchiveRestore,
-  MonitorCheck,
-  Trophy,
-  Music,
-  Video,
   RotateCw,
   Barcode,
   QrCode,
-  ChevronUp,
   ScanLine,
   Wand2,
   IndianRupee,
@@ -60,14 +54,12 @@ import {
   Layers,
   Home as HomeIcon,
   Scissors,
-  MonitorPlay,
-  PlayCircle,
+  Music,
   PenLine,
   PenTool,
   CalendarDays,
   Banknote,
   Palette,
-  CreditCard,
   Menu
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -76,10 +68,9 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 
 const ALL_TOOLS = [
-  // FEATURED / VISUAL PROCESSORS (8 Tools)
+  // FEATURED / VISUAL PROCESSORS (7 Tools)
   { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-gradient-to-br from-blue-500 to-blue-700", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-gradient-to-br from-violet-500 to-violet-700", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-rose-50", category: "featured" },
@@ -116,7 +107,6 @@ const ALL_TOOLS = [
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-rose-50", category: "calculator" },
   { icon: HomeIcon, title: "MORTGAGE CALCULATOR", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
-  { icon: PlayCircle, title: "INSTAGRAM DOWNLOADER", description: "Download Reels and Videos from Instagram privately.", href: "/instagram-downloader", colorClass: "bg-pink-600", lightBg: "bg-pink-50", category: "video" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-indigo-50", category: "video" },
   { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
   { icon: Crop, title: "CROP IMAGE", description: "Precisely crop and fix perspective on photos.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-cyan-50", category: "image" },
@@ -140,7 +130,6 @@ const ALL_TOOLS = [
   { icon: Coins, title: "INTEREST CALCULATOR", description: "Calculate simple and compound interest returns.", href: "/interest-calculator", colorClass: "bg-yellow-600", lightBg: "bg-[#fefce8]", category: "calculator" },
   { icon: Receipt, title: "SALES TAX CALCULATOR", description: "Calculate bill tax and final price inclusive of tax.", href: "/sales-tax-calculator", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
   { icon: Percent, title: "PERCENTAGE CALCULATOR", description: "Find percentages for marks, ratios and discounts.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
-  { icon: Sparkles, title: "AI UPSCALER", description: "Upscale images to 2x and 4x using browser AI.", href: "/ai-upscaler", colorClass: "bg-blue-500", lightBg: "bg-blue-50", category: "featured" },
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
@@ -246,39 +235,12 @@ export default function Page() {
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-6 animate-fade-in-up transform-gpu">
-            <Link href="/tools?tab=image" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-6">
-                  <ImageIcon className="size-4 text-blue-500" />
-                  <span>IMAGE TOOLS</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-6">
-                  <FileText className="size-4 text-rose-500" />
-                  <span>PDF TOOLS</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-6">
-                  <Calculator className="size-4 text-emerald-500" />
-                  <span>CALCULATORS</span>
-                </div>
-              </div>
-            </Link>
-          </div>
-
           <div className="max-w-2xl mx-auto relative group animate-fade-in-up">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Input
                 type="text"
-                placeholder="Search tools... (e.g. 'upscale', 'scan', 'barcode')"
+                placeholder="Search tools... (e.g. 'scan', 'barcode')"
                 className="w-full pl-14 pr-6 h-16 text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -316,9 +278,7 @@ export default function Page() {
                     <div className="flex items-center justify-between gap-4 mb-12">
                         <h2 className="text-2xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
                         <Link href="/tools?tab=all" className="hidden sm:flex">
-                          <button className="learn-more scale-110">
-                            <span className="font-black tracking-widest uppercase">Explore All</span>
-                          </button>
+                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[10px] h-10 px-6">Explore All</Button>
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">

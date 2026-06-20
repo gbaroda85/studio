@@ -72,8 +72,7 @@ import {
   CalendarDays,
   Menu,
   Palette,
-  CreditCard,
-  PlayCircle
+  CreditCard
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -103,14 +102,6 @@ function ToolsPageContent() {
       icon: Wand2,
       color: 'bg-violet-600',
       lightBg: 'bg-[#f5f3ff]'
-    },
-    {
-      href: '/ai-upscaler',
-      labelKey: 'ai_upscaler_label',
-      descriptionKey: 'ai_upscaler_description',
-      icon: Sparkles,
-      color: 'bg-blue-500',
-      lightBg: 'bg-blue-50'
     },
     {
       href: '/signature-resizer',
@@ -334,14 +325,6 @@ function ToolsPageContent() {
   ];
 
   const videoFeatures = [
-    {
-      href: '/instagram-downloader',
-      labelKey: 'instagram_downloader_label',
-      descriptionKey: 'instagram_downloader_description',
-      icon: PlayCircle,
-      color: 'bg-pink-600',
-      lightBg: 'bg-pink-50'
-    },
     {
       href: '/video-to-mp3',
       labelKey: 'video_to_mp3_label',
