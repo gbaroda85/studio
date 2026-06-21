@@ -42,7 +42,8 @@ import {
     Lock,
     CreditCard,
     IndianRupee,
-    Loader2
+    Loader2,
+    FileDigit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -55,7 +56,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { Alert } from '@/components/ui/alert';
 import confetti from 'canvas-confetti';
 
 type QRType = 'url' | 'text' | 'wifi' | 'email' | 'phone' | 'sms' | 'whatsapp' | 'vcard' | 'location' | 'upi';
@@ -271,6 +271,8 @@ export default function QrCodeGenerator() {
             cornersDotOptions: { color: "#000000", type: "dot" }
         });
     };
+
+    const selectedItem = history.find(p => p.id === inputData); // Simplified check for highlight
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20">
