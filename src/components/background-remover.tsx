@@ -12,7 +12,7 @@ import {
     Zap, 
     ShieldCheck, 
     Sparkles, 
-    Image as ImageIcon,
+    ImageIcon,
     Settings2,
     RefreshCcw, 
     RotateCcw,
@@ -122,7 +122,7 @@ export default function BackgroundRemover() {
   }, [selectedSizeIndex]);
 
   // Function to initialize crop when image loads
-  function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     const aspect = getAspectRatio();
     
@@ -131,7 +131,16 @@ export default function BackgroundRemover() {
         : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
         
     setCrop(initialCrop);
-  }
+    
+    // Also initialize completedCrop so "Confirm" works immediately
+    setCompletedCrop({
+        unit: 'px',
+        x: (initialCrop.x / 100) * width,
+        y: (initialCrop.y / 100) * height,
+        width: (initialCrop.width / 100) * width,
+        height: (initialCrop.height / 100) * height
+    });
+  };
 
   // Handle automatic crop box updates when preset changes
   useEffect(() => {
@@ -144,6 +153,13 @@ export default function BackgroundRemover() {
             : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
             
         setCrop(newCrop);
+        setCompletedCrop({
+            unit: 'px',
+            x: (newCrop.x / 100) * width,
+            y: (newCrop.y / 100) * height,
+            width: (newCrop.width / 100) * width,
+            height: (newCrop.height / 100) * height
+        });
     }
   }, [selectedSizeIndex, stage, getAspectRatio]);
 
@@ -325,8 +341,10 @@ export default function BackgroundRemover() {
                 <CardTitle className="text-lg font-black uppercase tracking-tighter">Confirm Selection</CardTitle>
                 <Button variant="ghost" size="icon" onClick={handleReset} className="text-destructive h-8 w-8"><X /></Button>
               </CardHeader>
-              <CardContent className="p-10 flex justify-center bg-black/5">
-                <img src={originalImageSrc!} alt="Preview" className="max-h-[50vh] object-contain rounded-xl shadow-2xl border-4 border-white" />
+              <CardContent className="p-6 md:p-10 flex justify-center bg-black/5 min-h-[300px]">
+                <div className="max-w-full max-h-[50vh] overflow-hidden rounded-xl shadow-2xl border-4 border-white bg-white">
+                  <img src={originalImageSrc!} alt="Preview" className="max-w-full max-h-full object-contain" />
+                </div>
               </CardContent>
               <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
                     <Button variant="outline" className="font-black border-2 border-primary/20 text-primary h-12 rounded-xl text-[10px] uppercase px-6" onClick={() => setStage('crop')}><CropIcon className="mr-2 size-4" /> Define Area</Button>
@@ -361,17 +379,27 @@ export default function BackgroundRemover() {
                     </SelectContent>
                 </Select>
             </CardHeader>
-            <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200/50 min-h-[450px]">
-                <ScrollArea className="w-full h-full p-4 md:p-8">
-                    <div className="flex justify-center">
-                        <div className="max-h-[70vh] rounded-xl border-4 border-white shadow-2xl bg-white overflow-hidden">
+            <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200/50 h-[500px] md:h-[650px] relative overflow-hidden">
+                <ScrollArea className="w-full h-full p-4 md:p-12">
+                    <div className="flex justify-center min-h-full items-center">
+                        <div className="max-w-full rounded-xl border-4 border-white shadow-2xl bg-white overflow-hidden transform-gpu">
                             <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
-                                <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[70vh] w-auto block object-contain" onLoad={onImageLoad} />
+                                <img 
+                                  ref={imgRef} 
+                                  src={originalImageSrc!} 
+                                  alt="Crop source" 
+                                  className="max-h-[60vh] md:max-h-[70vh] w-auto block object-contain" 
+                                  onLoad={onImageLoad} 
+                                />
                             </ReactCrop>
                         </div>
                     </div>
+                    <ScrollBar orientation="vertical" />
                     <ScrollBar orientation="horizontal" />
                 </ScrollArea>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 px-4 py-1.5 bg-black/60 backdrop-blur-md rounded-full text-white text-[9px] font-black uppercase tracking-widest border border-white/10 shadow-2xl pointer-events-none z-20">
+                     <MousePointer2 className="size-3 text-primary animate-pulse" /> Drag handles or scroll to see more
+                </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
                 <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl transition-colors hover:bg-destructive/5"><ArrowLeft className="mr-2 size-4" /> Back</Button>
