@@ -193,14 +193,6 @@ function ToolsPageContent() {
 
   const pdfFeatures = [
     {
-      href: '/scan-to-pdf',
-      labelKey: 'scan_to_pdf_label',
-      descriptionKey: 'scan_to_pdf_description',
-      icon: ScanLine,
-      color: 'bg-blue-600',
-      lightBg: 'bg-[#eff6ff]'
-    },
-    {
       href: '/organize-pdf',
       labelKey: 'organize_pdf_label',
       descriptionKey: 'organize_pdf_description',

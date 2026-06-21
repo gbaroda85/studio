@@ -111,7 +111,6 @@ const CATEGORIES = [
     icon: FileText,
     color: "text-rose-500",
     tools: [
-      { href: '/scan-to-pdf', label: 'scan_to_pdf_label', icon: ScanLine },
       { href: '/organize-pdf', label: 'organize_pdf_label', icon: Layers },
       { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
       { href: '/rotate-pdf', label: 'rotate_pdf_label', icon: RotateCw },

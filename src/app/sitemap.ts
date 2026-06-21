@@ -30,7 +30,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/add-watermark',
     '/add-page-numbers',
     '/document-scan',
-    '/scan-to-pdf',
     // Image Tools
     '/passport-date-name',
     '/enhance-photo',
