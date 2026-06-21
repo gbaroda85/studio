@@ -57,11 +57,11 @@ const COLOR_PRESETS = [
 
 const SIZE_PRESETS = [
     { name: 'Free Hand (Manual)', width: 0, height: 0, unit: 'px' },
-    { name: 'Aadhaar Card (86x54mm)', width: 85.6, height: 54, unit: 'mm' },
-    { name: 'India Passport (35x45mm)', width: 35, height: 45, unit: 'mm' },
-    { name: 'PAN Card (25x35mm)', width: 25, height: 35, unit: 'mm' },
-    { name: 'Driving Licence (35x45mm)', width: 35, height: 45, unit: 'mm' },
-    { name: 'USA Passport (2x2in)', width: 2, height: 2, unit: 'inch' },
+    { name: 'Aadhaar Card (Landscape)', width: 85.6, height: 54, unit: 'mm' },
+    { name: 'Driving Licence (Landscape)', width: 85.6, height: 54, unit: 'mm' },
+    { name: 'PAN Card (Landscape)', width: 85.6, height: 54, unit: 'mm' },
+    { name: 'Passport Size (Portrait)', width: 35, height: 45, unit: 'mm' },
+    { name: 'US Visa (Square)', width: 2, height: 2, unit: 'inch' },
     { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
 ];
 
