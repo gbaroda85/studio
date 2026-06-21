@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -90,15 +91,12 @@ export default function BackgroundRemover() {
   const [progress, setProgress] = useState(0);
   const [statusText, setStatusText] = useState("");
   
-  // Studio Adjustments
   const [bgColor, setBgColor] = useState<string>("transparent");
   const [borderWidth, setBorderWidth] = useState([0]);
   const [borderColor, setBorderColor] = useState("#000000");
 
-  // Slider State
   const [sliderPosition, setSliderPosition] = useState(50);
 
-  // Crop States
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [selectedSizeIndex, setSelectedSizeIndex] = useState<string>("0");
@@ -482,7 +480,7 @@ export default function BackgroundRemover() {
                 </div>
 
                 <div className="lg:col-span-4 space-y-6 h-full flex flex-col">
-                    <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1">
+                    <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 text-left">
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
                                 <Palette className="size-4 md:size-5 text-primary" /> Finish Settings
