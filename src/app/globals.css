@@ -751,7 +751,7 @@ section {
 .dark .btn-view-all-uiverse {
   --neutral-1: #1e293b;
   --neutral-2: #0f172a;
-  color: #f8fafc;
+  color: #f8fafc !important;
 }
 
 @media (min-width: 768px) {
