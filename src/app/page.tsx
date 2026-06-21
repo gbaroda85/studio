@@ -304,7 +304,7 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Link href="/tools?tab=all" className="flex shrink-0">
+                        <Link href="/tools?tab=image" className="flex shrink-0">
                           <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[8px] md:text-[10px] h-8 md:h-10 px-4 md:px-6">View All</Button>
                         </Link>
                     </div>
@@ -318,7 +318,12 @@ export default function Page() {
                     <div className="flex items-center gap-3 text-rose-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body">
                         <div className="w-12 md:w-16 h-1 md:h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT STUDIO</span>
                     </div>
-                    <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-8 md:mb-12 font-body uppercase">PDF Toolkit</h2>
+                    <div className="flex items-center justify-between gap-4 mb-8 md:mb-12">
+                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">PDF Toolkit</h2>
+                        <Link href="/tools?tab=pdf" className="flex shrink-0">
+                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[8px] md:text-[10px] h-8 md:h-10 px-4 md:px-6">View All</Button>
+                        </Link>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 9).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
@@ -329,7 +334,12 @@ export default function Page() {
                     <div className="flex items-center gap-3 text-indigo-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body">
                         <div className="w-12 md:w-16 h-1 md:h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE HUB</span>
                     </div>
-                    <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-8 md:mb-12 font-body uppercase">Calculators</h2>
+                    <div className="flex items-center justify-between gap-4 mb-8 md:mb-12">
+                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Calculators</h2>
+                        <Link href="/tools?tab=calculator" className="flex shrink-0">
+                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[8px] md:text-[10px] h-8 md:h-10 px-4 md:px-6">View All</Button>
+                        </Link>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
