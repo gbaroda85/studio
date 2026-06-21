@@ -1,10 +1,23 @@
-import type {Metadata} from 'next';
+import type {Metadata, Viewport} from 'next';
 import './globals.css';
 import {ThemeProvider} from '@/components/theme-provider';
 import AppLayout from '@/components/app-layout';
 import {Toaster} from '@/components/ui/toaster';
 import {LanguageProvider} from '@/contexts/language-context';
 import Script from 'next/script';
+
+// Optimized Viewport for Mobile-First UX
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5, // Allow pinch-to-zoom for accessibility
+  userScalable: true,
+  viewportFit: 'cover', // Full-bleed content for notched phones
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#001D39' },
+  ],
+};
 
 export const metadata: Metadata = {
   title: {
@@ -108,7 +121,7 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" suppressHydrationWarning className="h-full w-full overflow-x-hidden">
+    <html lang="en" suppressHydrationWarning className="h-full w-full overflow-x-hidden overflow-y-scroll scrollbar-gutter-stable">
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
@@ -126,7 +139,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
         />
       </head>
-      <body className="font-body antialiased min-h-screen w-full flex flex-col m-0 p-0 overflow-x-hidden">
+      <body className="font-body antialiased min-h-screen w-full flex flex-col m-0 p-0 overflow-x-hidden selection:bg-primary/20">
         <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5160508482904207"

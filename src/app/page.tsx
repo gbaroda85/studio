@@ -133,30 +133,30 @@ const ALL_TOOLS = [
 ];
 
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
-  <Link href={href} className="group block h-full">
-    <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl dark:shadow-primary/5 hover:shadow-2xl dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[300px] overflow-hidden text-left">
-      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-6 shadow-inner", lightBg, "dark:bg-slate-900/60")}>
+  <Link href={href} className="group block h-full touch-manipulation">
+    <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl dark:shadow-primary/5 hover:shadow-2xl dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[280px] md:min-h-[300px] overflow-hidden text-left">
+      <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-5 md:p-6 shadow-inner", lightBg, "dark:bg-slate-900/60")}>
         <div className={cn(
-          `size-14 rounded-[1.2rem] flex items-center justify-center mb-6 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
+          `size-12 md:size-14 rounded-[1rem] md:rounded-[1.2rem] flex items-center justify-center mb-5 md:mb-6 text-white transition-transform group-hover:scale-110 shrink-0 transform-gpu`,
           "shadow-[inset_2px_2px_4px_rgba(255,255,255,0.4),inset_-2px_-2px_4px_rgba(0,0,0,0.2),0_10px_20px_-5px_rgba(0,0,0,0.3)]",
           colorClass
         )}>
-          <Icon className="size-7 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
+          <Icon className="size-6 md:size-7 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
         </div>
         <div className="flex-1 flex flex-col">
-          <h3 className="text-lg md:text-xl font-medium mb-2 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight whitespace-nowrap">{title}</h3>
-          <p className="text-[12px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-3">{description}</p>
+          <h3 className="text-base md:text-xl font-medium mb-2 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight whitespace-normal md:whitespace-nowrap">{title}</h3>
+          <p className="text-[10px] md:text-[12px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-3 md:line-clamp-2 lg:line-clamp-3">{description}</p>
           
-          <div className="flex flex-wrap gap-2 mt-auto pt-6">
+          <div className="flex flex-wrap gap-2 mt-auto pt-4 md:pt-6">
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Industrial</Badge>
              <Badge variant="secondary" className="bg-white/60 dark:bg-primary/10 text-[7px] font-black uppercase text-slate-700 dark:text-primary border-none px-2 py-0.5 tracking-widest shadow-sm">Secured</Badge>
           </div>
         </div>
       </div>
       
-      <div className="bg-white/20 dark:bg-black/20 py-2.5 px-8 flex items-center justify-between">
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400 opacity-60">Launch Tool</span>
-        <div className="launch-arrow-btn scale-75 origin-right -mr-2">
+      <div className="bg-white/20 dark:bg-black/20 py-2 md:py-2.5 px-6 md:px-8 flex items-center justify-between shrink-0">
+        <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400 opacity-60">Launch Tool</span>
+        <div className="launch-arrow-btn scale-[0.6] md:scale-75 origin-right -mr-2">
           <div className="button-box">
             <span className="button-elem">
               <ArrowRight />
@@ -192,7 +192,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-4 pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10 transform-gpu">
+      <section className="relative w-full pt-6 md:pt-4 pb-12 md:pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10 transform-gpu">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
           <div className="hidden dark:block absolute inset-0">
@@ -212,49 +212,49 @@ export default function Page() {
         </div>
 
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-48 -left-48 size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
-          <div className="absolute top-1/2 -right-48 size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
+          <div className="absolute -top-48 -left-48 size-[500px] md:size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
+          <div className="absolute top-1/2 -right-48 size-[500px] md:size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
         </div>
 
-        <div className="w-full px-6 md:px-12 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-3 shadow-sm animate-fade-in-up">
-            <Sparkles className="size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
+        <div className="w-full px-5 md:px-12 relative z-10 text-center">
+          <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-4 md:mb-3 shadow-sm animate-fade-in-up">
+            <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-1 tracking-tighter leading-[0.95] animate-fade-in-up font-jakarta">
+          <h1 className="text-2xl md:text-5xl lg:text-6xl font-black mb-2 md:mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta max-w-4xl mx-auto">
             Professional Tools for <br className="hidden md:block" />
             <span className="text-gradient-hero">Images & PDFs</span>
           </h1>
           
-          <div className="space-y-1 mb-6 animate-fade-in-up">
-            <p className="text-xs md:text-base text-slate-400 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80">
+          <div className="space-y-1 mb-8 md:mb-6 animate-fade-in-up px-4">
+            <p className="text-[10px] md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80 uppercase md:normal-case">
               Everything happens locally in your device RAM, 100% private.
             </p>
-            <p className="text-xs md:text-base text-slate-400 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80">
+            <p className="hidden md:block text-xs md:text-base text-slate-400 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80">
               Fast, secure, and ready for official submissions.
             </p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="uiverse-clay-btn">
+          <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-10 md:mb-8 animate-fade-in-up">
+            <Link href="/tools?tab=image" className="uiverse-clay-btn scale-[0.8] md:scale-100">
               <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-6">
+                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
                   <ImageIcon className="size-4 text-blue-500" />
                   <span>IMAGE TOOLS</span>
                 </div>
               </div>
             </Link>
-            <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
+            <Link href="/tools?tab=pdf" className="uiverse-clay-btn scale-[0.8] md:scale-100">
               <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-6">
+                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
                   <FileText className="size-4 text-rose-500" />
                   <span>PDF TOOLS</span>
                 </div>
               </div>
             </Link>
-            <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
+            <Link href="/tools?tab=calculator" className="uiverse-clay-btn scale-[0.8] md:scale-100">
               <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-6">
+                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
                   <Calculator className="size-4 text-emerald-500" />
                   <span>CALCULATORS</span>
                 </div>
@@ -262,75 +262,75 @@ export default function Page() {
             </Link>
           </div>
 
-          <div className="max-w-2xl mx-auto relative group animate-fade-in-up">
+          <div className="max-w-2xl mx-auto relative group animate-fade-in-up px-2 md:px-0">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
             <div className="relative">
               <Input
                 type="text"
                 placeholder="Search tools... (e.g. 'scan', 'barcode')"
-                className="w-full pl-14 pr-6 h-16 text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
+                className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 group-focus-within:text-primary z-10 pointer-events-none" />
+              <Search className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 size-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-primary z-10 pointer-events-none" />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="pt-12 pb-24 bg-background w-full">
-        <div className="w-full px-6 md:px-12">
+      <section className="pt-8 md:pt-12 pb-24 md:pb-24 bg-background w-full">
+        <div className="w-full px-5 md:px-12">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
-                <div className="flex items-center gap-3 text-primary font-black text-xs uppercase tracking-widest mb-12 font-body">
-                  <div className="w-16 h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
+                <div className="flex items-center gap-3 text-primary font-black text-[10px] md:text-xs uppercase tracking-widest mb-10 md:mb-12 font-body">
+                  <div className="w-12 md:w-16 h-1.5 md:h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
                     {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} />)}
                 </div>
                 {filteredTools.length === 0 && (
-                   <div className="text-center py-32 opacity-20 font-body flex flex-col items-center">
-                      <Search className="size-24 mb-6" />
-                      <p className="font-black text-2xl uppercase tracking-[0.3em]">No tools found.</p>
+                   <div className="text-center py-20 md:py-32 opacity-20 font-body flex flex-col items-center">
+                      <Search className="size-16 md:size-24 mb-6" />
+                      <p className="font-black text-xl md:text-2xl uppercase tracking-[0.3em]">No tools found.</p>
                    </div>
                 )}
             </div>
           ) : (
             <>
-                {/* IMAGE SOLUTION - STRICT 8 TOOLS */}
-                <div className="mb-20">
-                    <div className="flex items-center gap-3 text-primary font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
-                        <div className="w-16 h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE ENGINE</span>
+                {/* IMAGE SOLUTION */}
+                <div className="mb-16 md:mb-20">
+                    <div className="flex items-center gap-3 text-primary font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body">
+                        <div className="w-12 md:w-16 h-1 md:h-2 bg-primary rounded-full" /> <span className="text-gradient-hero">IMAGE ENGINE</span>
                     </div>
-                    <div className="flex items-center justify-between gap-4 mb-12">
-                        <h2 className="text-2xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Link href="/tools?tab=all" className="hidden sm:flex">
-                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[10px] h-10 px-6">Explore All</Button>
+                    <div className="flex items-center justify-between gap-4 mb-8 md:mb-12">
+                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
+                        <Link href="/tools?tab=all" className="flex shrink-0">
+                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[8px] md:text-[10px] h-8 md:h-10 px-4 md:px-6">View All</Button>
                         </Link>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
-                {/* PDF TOOLKIT - STRICT 9 TOOLS */}
-                <div className="mb-20">
-                    <div className="flex items-center gap-3 text-rose-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
-                        <div className="w-16 h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT STUDIO</span>
+                {/* PDF TOOLKIT */}
+                <div className="mb-16 md:mb-20">
+                    <div className="flex items-center gap-3 text-rose-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body">
+                        <div className="w-12 md:w-16 h-1 md:h-2 bg-rose-500 rounded-full" /> <span className="text-gradient-hero">DOCUMENT STUDIO</span>
                     </div>
-                    <h2 className="text-2xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">PDF Toolkit</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
+                    <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-8 md:mb-12 font-body uppercase">PDF Toolkit</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 9).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
 
-                {/* FINANCE CENTER - LIMIT 10 */}
-                <div className="mb-32">
-                    <div className="flex items-center gap-3 text-indigo-500 font-black text-[11px] uppercase tracking-[0.4em] mb-4 font-body">
-                        <div className="w-16 h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE HUB</span>
+                {/* FINANCE CENTER */}
+                <div className="mb-24 md:mb-32">
+                    <div className="flex items-center gap-3 text-indigo-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body">
+                        <div className="w-12 md:w-16 h-1 md:h-2 bg-indigo-500 rounded-full" /> <span className="text-gradient-hero">FINANCE HUB</span>
                     </div>
-                    <h2 className="text-2xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-12 font-body uppercase">Calculators</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8 md:gap-10">
+                    <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter mb-8 md:mb-12 font-body uppercase">Calculators</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
@@ -339,43 +339,43 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHY CHOOSE GR7 TOOLS - RESTORED SECTION */}
+      {/* WHY CHOOSE GR7 TOOLS */}
       {!isSearching && (
-        <section className="py-24 bg-slate-50 dark:bg-[#0a040d]/50 border-t-2 border-border/50 relative overflow-hidden w-full no-print">
+        <section className="py-16 md:py-24 bg-slate-50 dark:bg-[#0a040d]/50 border-t-2 border-border/50 relative overflow-hidden w-full no-print">
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
                 <div className="absolute -top-24 -left-24 size-96 bg-primary/10 rounded-full blur-[100px]" />
                 <div className="absolute -bottom-24 -right-24 size-96 bg-accent/10 rounded-full blur-[100px]" />
             </div>
 
             <div className="w-full px-6 md:px-12 relative z-10 max-w-7xl mx-auto text-center">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 shadow-sm">
+                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-4 shadow-sm">
                     <CheckCircle2 className="size-3" /> THE GR7 PROMISE
                 </div>
-                <h2 className="text-3xl md:text-5xl font-black mb-16 tracking-tighter uppercase font-jakarta">Why Professionals <br className="sm:hidden"/><span className="text-gradient-hero">Choose GR7 Studio</span></h2>
+                <h2 className="text-2xl md:text-5xl font-black mb-12 md:mb-16 tracking-tighter uppercase font-jakarta">Why Professionals <br className="sm:hidden"/><span className="text-gradient-hero">Choose GR7 Studio</span></h2>
                 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="group p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-primary/20 transition-all duration-500 hover:-translate-y-2">
-                        <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform shadow-inner border border-primary/20">
-                            <ShieldCheck className="size-8" />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+                    <div className="group p-6 md:p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-primary/20 transition-all duration-500 hover:-translate-y-2">
+                        <div className="size-14 md:size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform shadow-inner border border-primary/20 mx-auto md:mx-0">
+                            <ShieldCheck className="size-7 md:size-8" />
                         </div>
-                        <h3 className="text-xl font-black uppercase tracking-tight mb-4">100% Private</h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60">Your files never touch our servers. All processing happens locally in your device RAM for maximum security and data privacy.</p>
+                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-4 text-center md:text-left">100% Private</h3>
+                        <p className="text-[10px] md:text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 text-center md:text-left">Your files never touch our servers. All processing happens locally in your device RAM for maximum security and data privacy.</p>
                     </div>
 
-                    <div className="group p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-accent/20 transition-all duration-500 hover:-translate-y-2">
-                        <div className="size-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform shadow-inner border border-accent/20">
-                            <Zap className="size-8" />
+                    <div className="group p-6 md:p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-accent/20 transition-all duration-500 hover:-translate-y-2">
+                        <div className="size-14 md:size-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform shadow-inner border border-accent/20 mx-auto md:mx-0">
+                            <Zap className="size-7 md:size-8" />
                         </div>
-                        <h3 className="text-xl font-black uppercase tracking-tight mb-4">Ultra Fast</h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60">Zero upload wait times. Our WASM-powered engine delivers hardware-accelerated performance directly within your browser environment.</p>
+                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-4 text-center md:text-left">Ultra Fast</h3>
+                        <p className="text-[10px] md:text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 text-center md:text-left">Zero upload wait times. Our WASM-powered engine delivers hardware-accelerated performance directly within your browser environment.</p>
                     </div>
 
-                    <div className="group p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-emerald-500/20 transition-all duration-500 hover:-translate-y-2">
-                        <div className="size-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform shadow-inner border border-emerald-500/20">
-                            <Sparkles className="size-8" />
+                    <div className="group p-6 md:p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-emerald-500/20 transition-all duration-500 hover:-translate-y-2">
+                        <div className="size-14 md:size-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform shadow-inner border border-emerald-500/20 mx-auto md:mx-0">
+                            <Sparkles className="size-7 md:size-8" />
                         </div>
-                        <h3 className="text-xl font-black uppercase tracking-tight mb-4">HD Quality</h3>
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60">Get 300 DPI high-definition results perfectly calibrated for government job portals, banking applications, and official submissions.</p>
+                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-4 text-center md:text-left">HD Quality</h3>
+                        <p className="text-[10px] md:text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 text-center md:text-left">Get 300 DPI high-definition results perfectly calibrated for government job portals, banking applications, and official submissions.</p>
                     </div>
                 </div>
             </div>

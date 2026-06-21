@@ -55,9 +55,13 @@
     text-rendering: optimizeSpeed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
+    /* Prevent layout shift when scrollbar appears */
     scrollbar-gutter: stable;
     overflow-y: scroll;
+    /* Prevent horizontal bounce on some mobile browsers */
     overflow-x: hidden;
+    /* Safe Area support for notched phones */
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   
   body {
@@ -66,9 +70,11 @@
     max-width: 100% !important;
     position: relative;
     overflow-x: hidden !important;
+    /* Smooth touch scrolling */
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Prevent flickering during transitions */
+  /* Prevent flickering during transitions and hardware accelerate common items */
   * {
     @apply border-border outline-none;
     -webkit-tap-highlight-color: transparent;
@@ -92,24 +98,22 @@
       radial-gradient(at 100% 100%, hsla(333, 70%, 50%, 0.1) 0px, transparent 70%);
   }
 
+  /* Improved touch interaction for buttons and links */
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
     cursor: pointer !important;
     touch-action: manipulation;
   }
 }
 
-/* HARDWARE ACCELERATION TO PREVENT FLICKER */
-.glass-card, .btn-pos-uiverse, .magic-button, header, footer, .uiverse-clay-btn {
+/* HARDWARE ACCELERATION TO PREVENT FLICKER & JITTER */
+.glass-card, .btn-pos-uiverse, .magic-button, header, footer, .uiverse-clay-btn, .animate-in {
   transform: translateZ(0);
   backface-visibility: hidden;
   perspective: 1000px;
+  will-change: transform, opacity;
 }
 
-.animate-in {
-  animation-fill-mode: both;
-}
-
-/* PREVENT LAYOUT THRASHING */
+/* Prevent layout thrashing on complex grids */
 section {
   content-visibility: auto;
   contain-intrinsic-size: 1px 500px;
@@ -137,9 +141,10 @@ section {
   transition: opacity 0.3s ease, transform 0.2s ease;
 }
 
+/* Mobile Friendly Scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   @apply bg-transparent;

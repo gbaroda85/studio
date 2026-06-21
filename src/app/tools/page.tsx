@@ -73,6 +73,7 @@ import {
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 
 function ToolsPageContent() {
   const {t} = useLanguage();
@@ -567,7 +568,7 @@ function ToolsPageContent() {
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
       {/* 3D Elevated Header Section */}
-      <section className="relative w-full max-w-[2000px] pt-10 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10">
+      <section className="relative w-full max-w-[2000px] pt-10 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10 transform-gpu">
         <div className="absolute inset-0 z-0">
           <Image 
             src={placeholderData.hero_bg.url} 
@@ -585,7 +586,7 @@ function ToolsPageContent() {
           <div className="absolute top-1/2 -right-48 size-[600px] bg-accent/10 rounded-full blur-[160px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="w-full px-8 md:px-16 relative z-10 text-center">
+        <div className="w-full px-6 md:px-16 relative z-10 text-center">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-4 animate-fade-in-up shadow-sm font-jakarta">
             <LayoutGrid className="size-3" /> THE COMPLETE GR7 TOOLKIT
           </div>
@@ -594,7 +595,7 @@ function ToolsPageContent() {
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           
-          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-6 font-body" style={{ animationDelay: '0.1s' }}>
+          <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-8 font-body" style={{ animationDelay: '0.1s' }}>
             Everything happens locally in your browser for 100% privacy.
           </p>
 
@@ -604,7 +605,7 @@ function ToolsPageContent() {
                 <input
                     type="search"
                     placeholder={t('search_tools_placeholder')}
-                    className="w-full pl-14 h-14 text-base rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm font-bold outline-none font-body"
+                    className="w-full pl-14 h-14 text-base rounded-full shadow-2xl focus-visible:ring-primary/80 focus-visible:ring-4 border-2 border-foreground/10 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm font-bold outline-none font-body touch-manipulation"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -614,21 +615,21 @@ function ToolsPageContent() {
         </div>
       </section>
 
-      <div className="w-full max-w-[2000px] px-8 md:px-16 mt-4 pb-32">
+      <div className="w-full max-w-[2000px] px-5 md:px-16 mt-4 pb-32">
         {isSearching ? (
             <div className="space-y-20 font-body">
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
-                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu">
                     <div className="flex items-center gap-3 mb-10">
                       <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
                         <Icon className="size-6" />
                       </div>
-                      <h2 className="text-3xl font-semibold uppercase tracking-tighter">
+                      <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tighter">
                         {t(categoryKey)}
                       </h2>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
                     {features.map((feature) => (
                         <FeatureCard
                         key={feature.href}
@@ -653,52 +654,55 @@ function ToolsPageContent() {
             </div>
         ) : (
             <Tabs defaultValue={defaultTab} className="w-full font-body">
-            <div className="flex justify-center mb-16">
-              <TabsList className="flex h-auto flex-wrap justify-center gap-2 md:gap-4 bg-transparent border-none p-2 md:p-4 px-2 md:px-12">
-                  <TabsTrigger 
-                    value="all" 
-                    className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
-                  >
-                      <div className="uiverse-clay-btn">
-                        <div className="button-outer">
-                            <div className="button-inner flex items-center gap-3">
-                                <Menu className="size-4 text-primary" />
-                                <span>ALL TOOLS</span>
+            <div className="flex justify-center mb-12 md:mb-16">
+              <ScrollArea className="w-full h-auto flex justify-center pb-4">
+                  <TabsList className="flex h-auto justify-start md:justify-center gap-2 md:gap-4 bg-transparent border-none p-2 px-4 md:px-12 w-max mx-auto">
+                      <TabsTrigger 
+                        value="all" 
+                        className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
+                      >
+                          <div className="uiverse-clay-btn scale-[0.9] md:scale-100">
+                            <div className="button-outer">
+                                <div className="button-inner flex items-center gap-3">
+                                    <Menu className="size-4 text-primary" />
+                                    <span>ALL</span>
+                                </div>
                             </div>
-                        </div>
-                      </div>
-                  </TabsTrigger>
-                  {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
-                  <TabsTrigger 
-                    key={value} 
-                    value={value} 
-                    className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
-                  >
-                      <div className="uiverse-clay-btn">
-                        <div className="button-outer">
-                            <div className="button-inner flex items-center gap-3">
-                                <Icon className={cn("size-4 transition-transform", color)} />
-                                <span>{t(categoryKey)}</span>
+                          </div>
+                      </TabsTrigger>
+                      {allFeatureGroups.map(({ value, categoryKey, icon: Icon, color }) => (
+                      <TabsTrigger 
+                        key={value} 
+                        value={value} 
+                        className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
+                      >
+                          <div className="uiverse-clay-btn scale-[0.9] md:scale-100">
+                            <div className="button-outer">
+                                <div className="button-inner flex items-center gap-3">
+                                    <Icon className={cn("size-4 transition-transform", color)} />
+                                    <span>{t(categoryKey).split(' ')[0]}</span>
+                                </div>
                             </div>
-                        </div>
-                      </div>
-                  </TabsTrigger>
-                  ))}
-              </TabsList>
+                          </div>
+                      </TabsTrigger>
+                      ))}
+                  </TabsList>
+                  <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </div>
 
-            <TabsContent value="all" className="space-y-24 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
+            <TabsContent value="all" className="space-y-16 md:space-y-24 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none transform-gpu">
                 {allFeatureGroups.map(({ categoryKey, features, icon: Icon, color }) => (
-                    <section key={categoryKey} className="space-y-10">
+                    <section key={categoryKey} className="space-y-8 md:space-y-10">
                         <div className="flex items-center gap-3 mb-6">
                             <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
                                 <Icon className="size-6" />
                             </div>
-                            <h2 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
+                            <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
                                 {t(categoryKey)}
                             </h2>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
                             {features.map((feature) => (
                                 <FeatureCard
                                     key={feature.href}
@@ -716,8 +720,8 @@ function ToolsPageContent() {
             </TabsContent>
 
             {allFeatureGroups.map(({ value, features }) => (
-                <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                <TabsContent key={value} value={value} className="animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none transform-gpu">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
                     {features.map((feature) => (
                     <FeatureCard
                         key={feature.href}

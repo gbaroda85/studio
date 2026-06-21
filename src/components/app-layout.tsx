@@ -227,7 +227,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   };
 
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative">
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button 
@@ -242,7 +242,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
         <DropdownMenuContent 
           align="end" 
           sideOffset={12}
-          className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900 z-[110]"
+          className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900 z-[110] transform-gpu"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
@@ -253,7 +253,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
           {category.tools.map((tool) => (
             <DropdownMenuItem key={tool.href} asChild className="rounded-xl">
               <Link href={tool.href} className={cn(
-                "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors",
+                "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors min-h-[44px]", // Min-height for touch accessibility
                 pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
               )}>
                 <tool.icon className={cn("size-4", category.color)} />
@@ -273,17 +273,17 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10 border-none shadow-none">
+        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10 border-none shadow-none touch-manipulation">
           <Settings className="h-5 w-5 text-slate-800 dark:text-slate-200" />
           <span className="sr-only">Settings</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={12} className="w-48 p-2 rounded-2xl shadow-2xl border-2 z-[110]">
+      <DropdownMenuContent align="end" sideOffset={12} className="w-48 p-2 rounded-2xl shadow-2xl border-2 z-[110] transform-gpu">
         <DropdownMenuLabel className="font-headline text-[10px] tracking-widest uppercase text-muted-foreground pb-2">{t('language')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => setLanguage('en')} className="rounded-xl font-bold py-3">🇺🇸 {t('english')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('hi')} className="rounded-xl font-bold py-3">🇮🇳 {t('hindi')}</DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setLanguage('es')} className="rounded-xl font-bold py-3">🇪🇸 {t('spanish')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('en')} className="rounded-xl font-bold py-3 min-h-[44px]">🇺🇸 {t('english')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('hi')} className="rounded-xl font-bold py-3 min-h-[44px]">🇮🇳 {t('hindi')}</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLanguage('es')} className="rounded-xl font-bold py-3 min-h-[44px]">🇪🇸 {t('spanish')}</DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -297,27 +297,27 @@ function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl">
+        <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl touch-manipulation">
           <Menu className="size-6" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" className="w-[300px] p-0 border-r-2 z-[150]">
-        <SheetHeader className="p-6 border-b text-left">
+      <SheetContent side="left" className="w-[85vw] sm:w-[380px] p-0 border-r-2 z-[150] rounded-r-[2.5rem]">
+        <SheetHeader className="p-6 border-b text-left shrink-0">
           <SheetTitle>
-            <Link href="/" onClick={() => setOpen(false)}>
+            <Link href="/" onClick={() => setOpen(false)} className="inline-block">
               <GR7Logo />
             </Link>
           </SheetTitle>
         </SheetHeader>
-        <ScrollArea className="h-[calc(100vh-80px)] p-6">
-          <div className="space-y-8 pb-20">
+        <ScrollArea className="h-full px-6 py-4">
+          <div className="space-y-8 pb-32">
             <div className="space-y-2">
               <Link
                 href="/"
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center gap-3 p-3 rounded-xl font-black text-sm transition-all border border-transparent",
-                  pathname === '/' ? "bg-primary text-white" : "hover:bg-muted text-slate-800 dark:text-slate-200"
+                  "flex items-center gap-3 p-4 rounded-2xl font-black text-sm transition-all border border-transparent shadow-sm",
+                  pathname === '/' ? "bg-primary text-white shadow-primary/20" : "hover:bg-muted text-slate-800 dark:text-slate-200"
                 )}
               >
                 <Home className="size-4" />
@@ -326,8 +326,8 @@ function MobileNav() {
             </div>
 
             {CATEGORIES.map((cat) => (
-              <div key={cat.name} className="space-y-4">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+              <div key={cat.name} className="space-y-3">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 pl-2">
                   <cat.icon className="size-3" /> {t(cat.name)}
                 </h4>
                 <div className="grid grid-cols-1 gap-2">
@@ -337,7 +337,7 @@ function MobileNav() {
                       href={tool.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 p-3 rounded-xl font-bold text-sm transition-all border border-transparent hover:border-border",
+                        "flex items-center gap-3 p-3.5 rounded-xl font-bold text-xs transition-all border border-transparent hover:border-border min-h-[48px]",
                         pathname === tool.href ? "bg-primary/5 text-primary border-primary/20" : "hover:bg-muted"
                       )}
                     >
@@ -360,11 +360,11 @@ function AppHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
+    <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center transform-gpu">
       <div className="w-full h-full flex items-center justify-between px-3 md:px-8 lg:px-12">
         <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             <MobileNav />
-            <Link href="/" className="flex items-center group mr-1 md:mr-2">
+            <Link href="/" className="flex items-center group mr-1 md:mr-2 touch-manipulation">
               <GR7Logo />
             </Link>
             
@@ -392,11 +392,11 @@ function AppHeader() {
 
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
-            <div className="flex items-center gap-1">
-                <a href="mailto:grs.business29@gmail.com" className="support-uiverse px-2 md:px-4">
+            <div className="flex items-center gap-1 md:gap-2">
+                <a href="mailto:grs.business29@gmail.com" className="support-uiverse px-2 md:px-4 touch-manipulation h-10">
                     <span className="uiverse-tooltip hidden md:block">grs.business29@gmail.com</span>
                     <Mail className="size-4 md:mr-2" />
-                    <span className="hidden md:inline">Support</span>
+                    <span className="hidden md:inline text-xs font-black">Support</span>
                 </a>
                 
                 <SettingsMenu />
@@ -411,14 +411,14 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0">
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0 transform-gpu">
       <div className="w-full px-4 md:px-12 lg:px-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12">
             <div className="md:col-span-2 space-y-4 md:space-y-6">
-            <Link href="/" className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 inline-block">
                 <GR7Logo />
             </Link>
-            <p className="text-sm text-muted-foreground max-sm font-medium leading-relaxed">
+            <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
             </p>
             <div className="flex items-center gap-4 pt-4">
@@ -431,27 +431,29 @@ export function AppFooter() {
             </div>
             </div>
             
-            <div>
-            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Quick Links</h4>
-            <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
-                <li><Link href="/" className="hover:text-primary transition-colors">{t('home')}</Link></li>
-                <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
-                <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
-                <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
-            </ul>
-            </div>
+            <div className="grid grid-cols-2 md:grid-cols-1 gap-8 md:col-span-2">
+                <div>
+                    <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Quick Links</h4>
+                    <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
+                        <li><Link href="/" className="hover:text-primary transition-colors">{t('home')}</Link></li>
+                        <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
+                        <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
+                        <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
+                    </ul>
+                </div>
 
-            <div>
-            <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Connect</h4>
-            <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
-                <li><a href="mailto:grs.business29@gmail.com" className="hover:text-primary transition-colors">Email Support</a></li>
-                <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
-            </ul>
+                <div>
+                    <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Connect</h4>
+                    <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
+                        <li><a href="mailto:grs.business29@gmail.com" className="hover:text-primary transition-colors">Email Support</a></li>
+                        <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
+                    </ul>
+                </div>
             </div>
         </div>
         <div className="w-full mt-10 md:mt-12 pt-8 border-t border-border/50 text-center">
             <p className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] md:tracking-[0.3em]">
-                © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB • ALL RIGHTS RESERVED
+                © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB Studio
             </p>
         </div>
       </div>
@@ -461,61 +463,19 @@ export function AppFooter() {
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
   const [isMounted, setIsMounted] = useState(false);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const pathname = usePathname();
-  const prevPathRef = useRef(pathname);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
-
-  useEffect(() => {
-    if (!isMounted) return;
-    
-    const fromPath = prevPathRef.current;
-    const toPath = pathname;
-
-    // Only show global neural loader when transitioning to/from home to create a "portal" effect
-    const wasOnHome = fromPath === '/';
-    const isNowOnHome = toPath === '/';
-    
-    if ((wasOnHome && !isNowOnHome) || (!wasOnHome && isNowOnHome)) {
-        setIsNavigating(true);
-        const timer = setTimeout(() => {
-          setIsNavigating(false);
-        }, 500);
-        
-        prevPathRef.current = toPath;
-        return () => clearTimeout(timer);
-    }
-    
-    prevPathRef.current = toPath;
-  }, [pathname, isMounted]);
 
   if (!isMounted) return null;
   
   return (
     <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden pt-16 md:pt-20">
       <AppHeader />
-      
-      <AnimatePresence mode="wait">
-        {isNavigating && (
-          <motion.div 
-            key="global-loader"
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-[9999] pointer-events-auto"
-          >
-            <Loading />
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)] overflow-x-hidden">
          <div className="w-full flex-1 flex flex-col items-center px-0 p-0 m-0">
-            <div className="w-full flex-1 flex flex-col">
+            <div className="w-full flex-1 flex flex-col items-center">
               {children}
             </div>
             <AppFooter />
