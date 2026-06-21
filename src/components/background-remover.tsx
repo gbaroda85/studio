@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -58,7 +59,7 @@ const SIZE_PRESETS = [
     { name: 'Free Hand (Manual)', width: 0, height: 0, unit: 'px' },
     { name: 'Aadhaar Card (Landscape)', width: 85.6, height: 54, unit: 'mm' },
     { name: 'Driving Licence (Landscape)', width: 85.6, height: 54, unit: 'mm' },
-    { name: 'PAN Card (Landscape)', width: 85.6, height: 54, unit: 'mm' },
+    { name: 'PAN Card (Landscape)', width: 85.6, height: 35, unit: 'mm' }, // Standard PAN is smaller h
     { name: 'Passport Size (Portrait)', width: 35, height: 45, unit: 'mm' },
     { name: 'US Visa (Square)', width: 2, height: 2, unit: 'inch' },
     { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
@@ -305,11 +306,11 @@ export default function BackgroundRemover() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-6 px-4 pb-20">
+    <div className="w-full flex flex-col items-center gap-6 px-4 pb-20 mx-auto">
       
       {/* 1. UPLOAD STAGE */}
       {stage === 'upload' && (
-        <div className="w-full max-w-4xl py-10 flex flex-col items-center justify-center gap-6 text-left">
+        <div className="w-full max-w-4xl py-10 flex flex-col items-center justify-center gap-6 text-center">
           <Card className={cn(
             "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50 cursor-pointer",
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
@@ -332,20 +333,20 @@ export default function BackgroundRemover() {
 
       {/* 2. PREVIEW STAGE (Confirming selection) */}
       {stage === 'preview' && (
-          <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 rounded-[2.5rem] text-left">
+          <Card className="w-full max-w-3xl glass-card overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500 rounded-[2.5rem] mx-auto">
               <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                 <CardTitle className="text-lg font-black uppercase tracking-tighter">Confirm Selection</CardTitle>
                 <Button variant="ghost" size="icon" onClick={handleReset} className="text-destructive h-8 w-8"><X /></Button>
               </CardHeader>
-              <CardContent className="p-6 md:p-10 flex justify-center bg-black/5 min-h-[300px]">
-                <div className="max-w-full max-h-[50vh] overflow-hidden rounded-xl shadow-2xl border-4 border-white bg-white">
-                  <img src={originalImageSrc!} alt="Preview" className="max-w-full max-h-full object-contain" />
+              <CardContent className="p-6 md:p-10 flex flex-col items-center justify-center bg-black/5 min-h-[300px]">
+                <div className="max-w-full max-h-[50vh] overflow-hidden rounded-xl shadow-2xl border-4 border-white bg-white mx-auto flex items-center justify-center">
+                  <img src={originalImageSrc!} alt="Preview" className="max-w-full max-h-full object-contain block" />
                 </div>
               </CardContent>
-              <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
-                    <Button variant="outline" className="font-black border-2 border-primary/20 text-primary h-12 rounded-xl text-[10px] uppercase px-6" onClick={() => setStage('crop')}><CropIcon className="mr-2 size-4" /> Define Area</Button>
+              <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row justify-between gap-4">
+                    <Button variant="outline" className="font-black border-2 border-primary/20 text-primary h-12 rounded-xl text-[10px] uppercase px-6 w-full sm:w-auto" onClick={() => setStage('crop')}><CropIcon className="mr-2 size-4" /> Define Area</Button>
                     <Button 
-                        className="magic-button h-12 px-10 rounded-full bg-primary hover:bg-primary/90 text-white font-black transition-all active:scale-95 group flex items-center gap-3 border-none" 
+                        className="magic-button h-12 px-10 rounded-full bg-primary hover:bg-primary/90 text-white font-black transition-all active:scale-95 group flex items-center gap-3 border-none w-full sm:w-auto" 
                         onClick={() => { setCroppedImageSrc(originalImageSrc); setStage('process'); setTimeout(() => handleRemoveBackgroundAI(originalImageSrc!), 300); }}
                     >
                         <StarIcons />
@@ -357,10 +358,10 @@ export default function BackgroundRemover() {
       )}
 
       {/* 3. CROP STAGE */}
-      {stage === 'crop' && (
-        <Card className="w-full max-w-5xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem] text-left">
+      {stage === 'crop' && imgSrc && (
+        <Card className="w-full max-w-5xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem] mx-auto">
             <CardHeader className="bg-muted/30 border-b p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-                <div className="space-y-1">
+                <div className="space-y-1 text-left w-full md:w-auto">
                     <CardTitle className="text-xl font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
                     <CardDescription className="text-[10px] font-bold uppercase opacity-50">Select preset or adjust manually.</CardDescription>
                 </div>
@@ -375,16 +376,16 @@ export default function BackgroundRemover() {
                     </SelectContent>
                 </Select>
             </CardHeader>
-            <CardContent className="p-0 flex flex-col bg-slate-200/50 min-h-[400px] h-[60vh] md:h-[70vh] relative overflow-hidden">
+            <CardContent className="p-0 flex flex-col bg-slate-200/50 min-h-[400px] h-[60vh] md:h-[70vh] relative overflow-hidden items-center justify-center">
                 <ScrollArea className="w-full h-full p-4 md:p-12">
-                    <div className="flex justify-center min-h-full items-center p-4">
-                        <div className="max-w-full rounded-xl border-4 border-white shadow-2xl bg-white overflow-hidden transform-gpu">
+                    <div className="flex justify-center min-h-full items-center p-4 w-full">
+                        <div className="max-w-full w-fit mx-auto rounded-xl border-4 border-white shadow-2xl bg-white overflow-hidden transform-gpu">
                             <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
                                 <img 
                                   ref={imgRef} 
                                   src={originalImageSrc!} 
                                   alt="Crop source" 
-                                  className="max-w-full h-auto block object-contain" 
+                                  className="max-w-full h-auto block object-contain mx-auto" 
                                   onLoad={onImageLoad} 
                                 />
                             </ReactCrop>
@@ -397,9 +398,9 @@ export default function BackgroundRemover() {
                      <MousePointer2 className="size-3 text-primary animate-pulse" /> Drag handles or scroll to see more
                 </div>
             </CardContent>
-            <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
-                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl transition-colors hover:bg-destructive/5"><ArrowLeft className="mr-2 size-4" /> Back</Button>
-                <Button className="h-14 px-12 rounded-xl bg-primary text-white font-black transition-all active:scale-95 text-lg shadow-xl" onClick={handleApplyCrop}>
+            <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row justify-between gap-4">
+                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl transition-colors hover:bg-destructive/5 w-full sm:w-auto"><ArrowLeft className="mr-2 size-4" /> Back</Button>
+                <Button className="h-14 px-12 rounded-xl bg-primary text-white font-black transition-all active:scale-95 text-lg shadow-xl w-full sm:w-auto" onClick={handleApplyCrop}>
                     CONFIRM & PROCESS <ChevronRight className="ml-2 size-6" />
                 </Button>
             </CardFooter>
@@ -408,7 +409,7 @@ export default function BackgroundRemover() {
 
       {/* 4. PROCESSING STAGE */}
       {stage === 'process' && (
-          <div className="w-full max-w-2xl py-20 flex flex-col items-center justify-center gap-10 animate-in zoom-in-95 duration-500 text-left">
+          <div className="w-full max-w-2xl py-20 flex flex-col items-center justify-center gap-10 animate-in zoom-in-95 duration-500 text-center mx-auto">
               <div className="relative">
                   <div className="size-32 md:size-48 rounded-full border-[8px] border-primary/20 border-t-primary animate-spin" />
                   <div className="absolute inset-0 flex items-center justify-center">
@@ -425,7 +426,7 @@ export default function BackgroundRemover() {
 
       {/* 5. STUDIO STAGE (The main editor) */}
       {stage === 'studio' && previewImageSrc && (
-        <div className="w-full flex flex-col gap-6 animate-in slide-in-from-bottom-6 duration-500 text-left">
+        <div className="w-full flex flex-col gap-6 animate-in slide-in-from-bottom-6 duration-500 text-left mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20"><Settings2 className="size-6" /></div>
@@ -460,19 +461,19 @@ export default function BackgroundRemover() {
                             </div>
                         </CardHeader>
                         <CardContent className="p-6 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[500px] flex items-center justify-center relative overflow-hidden select-none">
-                            <div className="relative w-full h-full max-w-4xl aspect-[16/10] overflow-hidden rounded-3xl border-4 border-white dark:border-slate-800 shadow-2xl bg-white">
+                            <div className="relative w-full h-full max-w-4xl aspect-[16/10] overflow-hidden rounded-3xl border-4 border-white dark:border-slate-800 shadow-2xl bg-white mx-auto flex items-center justify-center">
                                 
                                 {/* PROCESSED (RESULT) - BOTTOM LAYER */}
-                                <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
-                                    <img src={previewImageSrc} alt="Result" className="max-w-full max-h-full object-contain drop-shadow-2xl" />
+                                <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8 mx-auto" style={bgColor === 'transparent' ? checkerboardStyle : { backgroundColor: bgColor }}>
+                                    <img src={previewImageSrc} alt="Result" className="max-w-full max-h-full object-contain drop-shadow-2xl mx-auto block" />
                                 </div>
                                 
                                 {/* ORIGINAL (BEFORE) - CLIPPED TOP LAYER */}
                                 <div 
-                                    className="absolute inset-0 flex items-center justify-center p-4 md:p-8 border-r-2 border-white pointer-events-none select-none overflow-hidden bg-slate-200" 
+                                    className="absolute inset-0 flex items-center justify-center p-4 md:p-8 border-r-2 border-white pointer-events-none select-none overflow-hidden bg-slate-200 mx-auto" 
                                     style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                                 >
-                                    <img src={croppedImageSrc || originalImageSrc!} alt="Original" className="max-w-full max-h-full object-contain" />
+                                    <img src={croppedImageSrc || originalImageSrc!} alt="Original" className="max-w-full max-h-full object-contain mx-auto block" />
                                 </div>
 
                                 {/* SLIDER HANDLE UI */}
@@ -507,7 +508,7 @@ export default function BackgroundRemover() {
 
                 <div className="lg:col-span-4 space-y-6 h-full flex flex-col">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1">
-                        <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
+                        <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 text-left">
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
                                 <Palette className="size-4 md:size-5 text-primary" /> Finish Settings
                             </CardTitle>
