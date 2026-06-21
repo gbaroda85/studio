@@ -398,7 +398,7 @@ export default function Page() {
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Calculators</h2>
                         <UiverseViewAllButton href="/tools?tab=calculator" />
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
+                    <div className="grid grid-cols-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
@@ -407,69 +407,64 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHY CHOOSE GR7 TOOLS - UPDATED DESIGN FROM IMAGE */}
+      {/* WHY CHOOSE GR7 TOOLS - PREMIUM FEATURE GRID STYLE */}
       {!isSearching && (
-        <section className="px-4 py-16 md:py-24 no-print w-full">
-          <div className="max-w-[1400px] mx-auto rounded-[3rem] md:rounded-[4.5rem] bg-[#f8f9ff] dark:bg-slate-900/40 border border-slate-100 dark:border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] relative overflow-hidden p-8 md:p-16 lg:p-24">
-            
-            {/* Background Accents */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-40">
-                <div className="absolute -top-24 -left-24 size-96 bg-primary/5 rounded-full blur-[100px]" />
-                <div className="absolute -bottom-24 -right-24 size-96 bg-accent/5 rounded-full blur-[100px]" />
+        <section className="px-4 py-20 md:py-32 no-print w-full bg-slate-50/50 dark:bg-transparent border-t">
+          <div className="max-w-7xl mx-auto space-y-16">
+            <div className="text-center space-y-4">
+                <div className="inline-flex items-center px-4 py-1 rounded-full bg-white dark:bg-slate-800 border shadow-sm">
+                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">CORE PRINCIPLES</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-slate-800 dark:text-white">
+                    Why Choose GR7 Tools?
+                </h2>
+                <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-base md:text-lg font-medium">
+                    The only professional studio built entirely on privacy-first architecture. 
+                    Your data never leaves your device.
+                </p>
             </div>
-
-            <div className="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto space-y-10">
-                <div className="space-y-4">
-                    <div className="inline-flex items-center px-4 py-1 rounded-full bg-white dark:bg-slate-800 border shadow-sm">
-                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">CORE PRINCIPLES</span>
-                    </div>
-                    
-                    <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white">
-                        Why Choose <span className="text-primary">GR7 Tools?</span>
-                    </h2>
-                    
-                    <p className="text-[10px] md:text-sm font-black uppercase tracking-[0.1em] text-slate-500 opacity-80 leading-relaxed max-w-2xl mx-auto">
-                        THE ONLY PROFESSIONAL STUDIO BUILT ENTIRELY ON PRIVACY-FIRST ARCHITECTURE.
-                    </p>
+            
+            <div className="relative">
+                {/* Connecting Lines (Desktop) */}
+                <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
+                    <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
+                        <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="6 6" className="opacity-20" />
+                        <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
+                        <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
+                    </svg>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 pt-8">
+                <div className="grid md:grid-cols-3 gap-8 relative z-10">
                     {/* Feature 1 */}
-                    <div className="flex flex-col items-center space-y-6">
-                        <div className="size-20 rounded-full bg-white dark:bg-slate-800 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 dark:border-white/5 transition-transform hover:scale-110 duration-500">
-                            <ShieldCheck className="size-10 text-green-500" />
-                        </div>
-                        <div className="space-y-3">
-                            <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-slate-100">100% Private</h3>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
-                                Your images and documents never leave your device. All processing happens 100% locally in your browser's temporary memory (RAM).
-                            </p>
+                    <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                        <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                            <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
+                                <ShieldCheck className="text-cyan-500 size-6" />
+                            </div>
+                            <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">100% PRIVATE</h3>
+                            <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your images and documents never leave your device. All processing happens 100% locally in your browser's RAM.</p>
                         </div>
                     </div>
 
                     {/* Feature 2 */}
-                    <div className="flex flex-col items-center space-y-6">
-                        <div className="size-20 rounded-full bg-white dark:bg-slate-800 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 dark:border-white/5 transition-transform hover:scale-110 duration-500">
-                            <Zap className="size-10 text-blue-500" />
-                        </div>
-                        <div className="space-y-3">
-                            <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-slate-100">Native Performance</h3>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
-                                Using advanced WASM technology, we process files at your device's native hardware speed. No server queues, no waiting, no limits.
-                            </p>
+                    <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                        <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                            <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
+                                <Zap className="text-indigo-500 size-6" />
+                            </div>
+                            <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">NATIVE SPEED</h3>
+                            <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Using advanced WASM technology, we process files at your device's native hardware speed. No server queues.</p>
                         </div>
                     </div>
 
                     {/* Feature 3 */}
-                    <div className="flex flex-col items-center space-y-6">
-                        <div className="size-20 rounded-full bg-white dark:bg-slate-800 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 dark:border-white/5 transition-transform hover:scale-110 duration-500">
-                            <Trophy className="size-10 text-blue-600" />
-                        </div>
-                        <div className="space-y-3">
-                            <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-slate-100">Studio Quality</h3>
-                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
-                                Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent) for crystal clear printing.
-                            </p>
+                    <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
+                        <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
+                            <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
+                                <Trophy className="text-purple-500 size-6" />
+                            </div>
+                            <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">STUDIO QUALITY</h3>
+                            <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent).</p>
                         </div>
                     </div>
                 </div>

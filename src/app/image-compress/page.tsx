@@ -65,12 +65,12 @@ export default function ImageCompressPage() {
         <div className="w-full max-w-5xl mx-auto space-y-16 px-4 pb-24">
             <HowToGuide title="Bulk Image Optimizer" steps={deepSteps} />
 
-            <section className="space-y-12 py-10 border-t">
+            <section className="space-y-10 py-10 border-t">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight flex items-center justify-center gap-3 text-slate-800 dark:text-white">
+                    <h2 className="text-2xl md:text-5xl font-black uppercase tracking-tight text-slate-800 dark:text-white">
                         Professional Grade Batch Optimization
                     </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto leading-relaxed text-lg font-medium">
+                    <p className="text-muted-foreground max-w-3xl mx-auto leading-relaxed text-base md:text-lg font-medium">
                         Standard online tools limit you to one photo at a time. Our <strong>Bulk Image Optimizer</strong> allows you to process entire batches for portals with 100% privacy.
                     </p>
                 </div>
@@ -79,7 +79,7 @@ export default function ImageCompressPage() {
                     {/* Connecting Lines (Desktop) */}
                     <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
                         <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
-                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
+                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="6 6" className="opacity-20" />
                             <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
                             <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
                         </svg>
