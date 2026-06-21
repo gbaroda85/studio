@@ -10,26 +10,21 @@ import {
     Download, 
     Loader2, 
     X, 
-    Plus, 
     Trash2, 
-    RotateCw, 
     Type, 
     ImageIcon, 
-    Move, 
     CheckCircle2, 
     ShieldCheck, 
     Zap, 
     Settings2,
-    Layers,
     ChevronUp,
     ChevronDown,
     ChevronLeft,
     ChevronRight,
     RefreshCcw,
     FilePenLine,
-    SearchCode,
     Sparkles,
-    Maximize,
+    Eye,
     Palette,
     MousePointer2,
     Undo2,
@@ -38,31 +33,10 @@ import {
     ZoomOut,
     Eraser,
     Highlighter,
-    ArrowUpRight,
     Pencil,
-    HandMetal,
-    Shapes,
-    Circle,
-    Square,
-    Triangle,
-    Star,
-    Hexagon,
-    ArrowRight,
-    ArrowLeft,
-    ArrowUp,
-    ArrowDown,
-    MoveHorizontal,
-    CornerDownRight,
-    Check,
-    AlertTriangle,
-    Info,
     Copy,
     BringToFront,
-    SendToBack,
-    MessageSquare,
-    MessageCircle,
-    SquareDashed,
-    Spline
+    SendToBack
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -75,19 +49,13 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover";
-import { Switch } from "@/components/ui/switch";
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -97,14 +65,7 @@ if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
 }
 
-type ElementType = 'text' | 'image' | 'mask' | 'highlight' | 'shape' | 'arrow';
-
-type ShapeType = 
-    | 'rectangle' | 'square' | 'circle' | 'ellipse' | 'triangle' | 'diamond' | 'pentagon' | 'hexagon' | 'star' 
-    | 'speech-bubble' | 'comment-bubble' | 'callout-box'
-    | 'check' | 'cross' | 'tick-circle' | 'warning' | 'info-circle';
-
-type ArrowType = 'straight' | 'double' | 'curved' | 'pointer';
+type ElementType = 'text' | 'image' | 'mask' | 'highlight';
 
 interface BaseElement {
     id: string;
@@ -131,8 +92,7 @@ interface OverlayImage extends BaseElement {
 }
 
 interface OverlayShape extends BaseElement {
-    type: 'mask' | 'shape' | 'highlight';
-    shapeType?: ShapeType;
+    type: 'mask' | 'highlight';
     width: number; // % of page visual width
     height: number; // % of page visual height
     color: string; // Fill color
@@ -143,19 +103,7 @@ interface OverlayShape extends BaseElement {
     rotation: number;
 }
 
-interface OverlayArrow extends BaseElement {
-    type: 'arrow';
-    arrowType: ArrowType;
-    width: number; // % length relative to visual width
-    height: number; // Visual handle thickness
-    color: string;
-    thickness: number;
-    headSize: number;
-    borderStyle: 'solid' | 'dashed' | 'dotted';
-    rotation: number;
-}
-
-type Element = OverlayText | OverlayImage | OverlayShape | OverlayArrow;
+type Element = OverlayText | OverlayImage | OverlayShape;
 
 interface PageState {
     id: string;
@@ -165,48 +113,6 @@ interface PageState {
     elements: Element[];
     previewSrc: string | null;
 }
-
-const SHAPES_LIB = [
-    { category: 'Basic', items: [
-        { type: 'rectangle', icon: Square },
-        { type: 'circle', icon: Circle },
-        { type: 'triangle', icon: Triangle },
-        { type: 'diamond', icon: ArrowUpRight },
-        { type: 'hexagon', icon: Hexagon },
-        { type: 'star', icon: Star },
-    ]},
-    { category: 'Callouts', items: [
-        { type: 'speech-bubble', icon: MessageSquare },
-        { type: 'comment-bubble', icon: MessageCircle },
-        { type: 'callout-box', icon: SquareDashed },
-    ]},
-    { category: 'Symbols', items: [
-        { type: 'check', icon: Check },
-        { type: 'cross', icon: X },
-        { type: 'tick-circle', icon: CheckCircle2 },
-        { type: 'warning', icon: AlertTriangle },
-        { type: 'info-circle', icon: Info },
-    ]}
-];
-
-const ARROWS_LIB = [
-    { type: 'straight', label: 'Straight Arrow', icon: ArrowRight },
-    { type: 'double', label: 'Double Arrow', icon: MoveHorizontal },
-    { type: 'curved', label: 'Curved Arrow', icon: CornerDownRight },
-    { type: 'pointer', label: 'Pointer Line', icon: Spline },
-];
-
-const SHAPE_PATHS: Record<string, string> = {
-    'triangle': 'M 50 0 L 100 100 L 0 100 Z',
-    'diamond': 'M 50 0 L 100 50 L 50 100 L 0 50 Z',
-    'hexagon': 'M 50 0 L 100 25 V 75 L 50 100 L 0 75 V 25 Z',
-    'star': 'M 50 0 L 61 35 L 98 35 L 70 57 L 81 91 L 50 70 L 19 91 L 30 57 L 2 35 L 39 35 Z',
-    'check': 'M 20 50 L 45 80 L 90 20',
-    'cross': 'M 20 20 L 80 80 M 80 20 L 20 80',
-    'speech-bubble': 'M 0 0 H 100 V 70 H 40 L 10 100 V 70 H 0 Z',
-    'comment-bubble': 'M 0 0 H 100 V 80 H 70 L 50 100 L 30 80 H 0 Z',
-    'callout-box': 'M 0 0 H 100 V 80 H 60 L 50 100 L 40 80 H 0 Z',
-};
 
 export default function PdfEditor() {
     const { toast } = useToast();
@@ -319,7 +225,7 @@ export default function PdfEditor() {
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
     const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
     const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
-    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.target.files?.[0] || null); };
 
     const addElement = (element: Element) => {
         if (selectedPageIndex === null) return;
@@ -354,41 +260,6 @@ export default function PdfEditor() {
             type: 'highlight',
             x: 30, y: 30, width: 30, height: 4, color: "#ffff00", fillType: 'solid', borderColor: '#000000', borderWidth: 0, borderStyle: 'solid', opacity: 40, rotation: 0
         } as OverlayShape);
-    };
-
-    const handleAddShape = (type: ShapeType) => {
-        addElement({
-            id: Math.random().toString(36).substr(2, 9),
-            type: 'shape',
-            shapeType: type,
-            x: 40, y: 40,
-            width: type.includes('circle') || type.includes('square') ? 10 : 20,
-            height: type.includes('circle') || type.includes('square') ? 10 : 10,
-            color: '#3B82F6',
-            fillType: 'none', 
-            borderColor: '#000000',
-            borderWidth: 2,
-            borderStyle: 'solid',
-            opacity: 100,
-            rotation: 0
-        } as OverlayShape);
-    };
-
-    const handleAddArrow = (type: ArrowType) => {
-        addElement({
-            id: Math.random().toString(36).substr(2, 9),
-            type: 'arrow',
-            arrowType: type,
-            x: 40, y: 40,
-            width: 25, 
-            height: 5, 
-            color: '#000000',
-            thickness: 2,
-            headSize: 10,
-            borderStyle: 'solid',
-            opacity: 100,
-            rotation: 0
-        } as OverlayArrow);
     };
 
     const duplicateElement = () => {
@@ -559,13 +430,6 @@ export default function PdfEditor() {
     };
 
     const getImageBytes = async (src: string): Promise<ArrayBuffer> => {
-        if (src.startsWith('data:')) {
-            const base64 = src.split(',')[1];
-            const binary = atob(base64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-            return bytes.buffer;
-        }
         const response = await fetch(src);
         return await response.arrayBuffer();
     }
@@ -607,11 +471,6 @@ export default function PdfEditor() {
                     let x_pdf = 0;
                     let y_pdf = 0;
 
-                    /**
-                     * PIXEL-PERFECT COORDINATE TRANSFORMATION
-                     * We map visual (HTML) coordinates to internal PDF coordinates 
-                     * based on the page's natural rotation metadata.
-                     */
                     if (pageRotation === 0) {
                         x_pdf = px;
                         y_pdf = pageHeight - py;
@@ -638,79 +497,19 @@ export default function PdfEditor() {
                             x, y: y - (el.size * 0.8), size: el.size, font, 
                             color: hexToRgbLib(el.color), opacity: el.opacity / 100, rotate: finalRotation
                         });
-                    } else if (el.type === 'shape' || el.type === 'mask' || el.type === 'highlight') {
+                    } else if (el.type === 'mask' || el.type === 'highlight') {
                         const sw = (el.width / 100) * visualW;
                         const sh = (el.height / 100) * visualH;
                         const color = hexToRgbLib(el.color);
                         const borderColor = el.borderColor ? hexToRgbLib(el.borderColor) : undefined;
                         const borderWidth = el.borderWidth || 0;
-                        const dashArray = el.borderStyle === 'dashed' ? [5, 5] : el.borderStyle === 'dotted' ? [2, 2] : undefined;
 
-                        const commonOptions = {
+                        pdfPage.drawRectangle({
                             x, y: y - sh, width: sw, height: sh, 
                             color: el.fillType === 'none' ? undefined : color, 
                             borderColor, borderWidth, 
-                            opacity: el.opacity / 100, rotate: finalRotation,
-                            dashArray
-                        };
-
-                        if (el.shapeType && SHAPE_PATHS[el.shapeType]) {
-                            pdfPage.drawSvgPath(SHAPE_PATHS[el.shapeType], {
-                                x, y: y - sh, scale: sw / 100, 
-                                color: el.fillType === 'none' ? undefined : color, 
-                                borderColor, borderWidth, 
-                                opacity: el.opacity / 100, rotate: finalRotation
-                            });
-                        } else if (el.shapeType === 'circle' || el.shapeType === 'ellipse') {
-                            pdfPage.drawEllipse({
-                                x: x + sw/2, y: y - sh/2, xRadius: sw/2, yRadius: sh/2, 
-                                color: el.fillType === 'none' ? undefined : color, 
-                                borderColor, borderWidth, 
-                                opacity: el.opacity / 100, rotate: finalRotation
-                            });
-                        } else {
-                            pdfPage.drawRectangle(commonOptions);
-                        }
-                    } else if (el.type === 'arrow') {
-                        const sw = (el.width / 100) * visualW;
-                        const rad = (el.rotation * Math.PI) / 180;
-                        const color = hexToRgbLib(el.color);
-                        const dashArray = el.borderStyle === 'dashed' ? [5, 5] : el.borderStyle === 'dotted' ? [2, 2] : undefined;
-                        
-                        const ex = x + sw * Math.cos(rad);
-                        const ey = y - sw * Math.sin(rad);
-                        
-                        pdfPage.drawLine({
-                            start: { x, y },
-                            end: { x: ex, y: ey },
-                            thickness: el.thickness,
-                            color,
-                            opacity: el.opacity / 100,
-                            dashArray
+                            opacity: el.opacity / 100, rotate: finalRotation
                         });
-
-                        const headSize = el.headSize;
-                        const angle = Math.atan2(y - ey, ex - x);
-                        
-                        const h1x = ex - headSize * Math.cos(angle - Math.PI / 6);
-                        const h1y = ey + headSize * Math.sin(angle - Math.PI / 6);
-                        const h2x = ex - headSize * Math.cos(angle + Math.PI / 6);
-                        const h2y = ey + headSize * Math.sin(angle + Math.PI / 6);
-
-                        pdfPage.drawSvgPath(`M ${ex} ${ey} L ${h1x} ${h1y} L ${h2x} ${h2y} Z`, {
-                            color, opacity: el.opacity / 100
-                        });
-
-                        if (el.arrowType === 'double') {
-                             const a2 = angle + Math.PI;
-                             const s1x = x - headSize * Math.cos(a2 - Math.PI / 6);
-                             const s1y = y + headSize * Math.sin(a2 - Math.PI / 6);
-                             const s2x = x - headSize * Math.cos(a2 + Math.PI / 6);
-                             const s2y = y + headSize * Math.sin(a2 + Math.PI / 6);
-                             pdfPage.drawSvgPath(`M ${x} ${y} L ${s1x} ${s1y} L ${s2x} ${s2y} Z`, {
-                                color, opacity: el.opacity / 100
-                             });
-                        }
                     } else if (el.type === 'image') {
                         const imgBuffer = await getImageBytes(el.src);
                         const isPng = el.src.startsWith('data:image/png') || el.src.toLowerCase().endsWith('.png');
@@ -760,59 +559,6 @@ export default function PdfEditor() {
                         <div className="flex items-center gap-1 md:gap-2">
                             <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> TEXT</Button>
                             
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5">
-                                        <Shapes className="size-3.5 mr-1.5"/> SHAPES
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-80 p-0 rounded-2xl border-2 shadow-3xl bg-white dark:bg-slate-950 z-[120]">
-                                    <ScrollArea className="h-96">
-                                        <div className="p-4 space-y-6">
-                                            {SHAPES_LIB.map(cat => (
-                                                <div key={cat.category} className="space-y-3">
-                                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary opacity-50">{cat.category}</Label>
-                                                    <div className="grid grid-cols-4 gap-2">
-                                                        {cat.items.map(s => (
-                                                            <button 
-                                                                key={s.type} 
-                                                                onClick={() => handleAddShape(s.type as ShapeType)}
-                                                                className="flex items-center justify-center p-3 rounded-xl hover:bg-primary/10 transition-colors border border-transparent hover:border-primary/20 bg-muted/20"
-                                                            >
-                                                                <s.icon className="size-5" />
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </ScrollArea>
-                                </PopoverContent>
-                            </Popover>
-
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5">
-                                        <ArrowRight className="size-3.5 mr-1.5"/> ARROWS
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-64 p-2 rounded-2xl border-2 shadow-3xl bg-white dark:bg-slate-950 z-[120]">
-                                    <div className="grid gap-1">
-                                        {ARROWS_LIB.map(arr => (
-                                            <Button 
-                                                key={arr.type} 
-                                                variant="ghost" 
-                                                className="justify-start font-bold text-[10px] uppercase h-10 px-4 rounded-xl"
-                                                onClick={() => handleAddArrow(arr.type as ArrowType)}
-                                            >
-                                                <arr.icon className="size-4 mr-3 text-primary" />
-                                                {arr.label}
-                                            </Button>
-                                        ))}
-                                    </div>
-                                </PopoverContent>
-                            </Popover>
-
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
                             
@@ -822,7 +568,7 @@ export default function PdfEditor() {
                                         <Pencil className="size-3.5 mr-1.5"/> SIGN
                                     </Button>
                                 </DropdownMenuTrigger>
-                                <DropdownMenuContent align="start" className="w-56 p-2 rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900 z-[110]">
+                                <DropdownMenuContent align="start" className="w-56 p-2 rounded-xl border-2 shadow-2xl bg-white dark:bg-slate-900 z-110">
                                     <DropdownMenuItem onClick={() => overlayImgInputRef.current?.click()} className="flex items-center gap-2 py-3 px-4 cursor-pointer rounded-lg hover:bg-muted font-bold text-xs uppercase">
                                         <ImageIcon className="size-4 text-blue-500" />
                                         upload signature
@@ -940,7 +686,7 @@ export default function PdfEditor() {
                                                         <div style={{ fontSize: `${el.size}px`, fontWeight: '900', color: el.color, fontFamily: el.font, whiteSpace: 'nowrap', padding: '4px', opacity: el.opacity/100 }}>{el.text}</div>
                                                     )}
                                                 </div>
-                                            ) : (el.type === 'mask' || el.type === 'highlight' || el.type === 'shape') ? (
+                                            ) : (el.type === 'mask' || el.type === 'highlight') ? (
                                                 <div 
                                                     style={{ 
                                                         width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
@@ -948,28 +694,9 @@ export default function PdfEditor() {
                                                         backgroundColor: el.fillType === 'none' ? 'transparent' : el.color, 
                                                         opacity: el.opacity / 100, 
                                                         border: `${el.borderWidth}px ${el.borderStyle} ${el.borderColor}`,
-                                                        borderRadius: el.shapeType === 'circle' ? '50%' : '0',
-                                                        clipPath: el.shapeType === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : 'none',
                                                         transform: `rotate(${el.rotation || 0}deg)`
                                                     }} 
                                                 />
-                                            ) : el.type === 'arrow' ? (
-                                                <div 
-                                                    style={{ 
-                                                        width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
-                                                        height: `${el.thickness * 4}px`, 
-                                                        opacity: el.opacity / 100,
-                                                        transform: `rotate(${el.rotation}deg)`,
-                                                        transformOrigin: 'left center',
-                                                        position: 'relative'
-                                                    }} 
-                                                >
-                                                    <div style={{ position: 'absolute', left: 0, right: 0, top: '50%', height: `${el.thickness}px`, backgroundColor: el.color, transform: 'translateY(-50%)', borderTop: el.borderStyle === 'dashed' ? '2px dashed transparent' : 'none' }} />
-                                                    <div style={{ position: 'absolute', right: -2, top: '50%', width: el.headSize, height: el.headSize, backgroundColor: el.color, clipPath: 'polygon(0% 0%, 100% 50%, 0% 100%)', transform: 'translateY(-50%)' }} />
-                                                    {el.arrowType === 'double' && (
-                                                        <div style={{ position: 'absolute', left: -2, top: '50%', width: el.headSize, height: el.headSize, backgroundColor: el.color, clipPath: 'polygon(100% 0%, 0% 50%, 100% 100%)', transform: 'translateY(-50%)' }} />
-                                                    )}
-                                                </div>
                                             ) : (
                                                 <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}><img src={el.src} className="size-full" alt="img" /></div>
                                             )}
@@ -1018,7 +745,7 @@ export default function PdfEditor() {
                                         </div>
                                     )}
 
-                                    {(selectedElement.type === 'mask' || selectedElement.type === 'highlight' || selectedElement.type === 'shape') && (
+                                    {(selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
                                         <div className="space-y-6">
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height (%)</Label></div><Slider min={1} max={100} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
@@ -1049,22 +776,6 @@ export default function PdfEditor() {
                                         </div>
                                     )}
 
-                                    {selectedElement.type === 'arrow' && (
-                                        <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Length (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Thickness</Label></div><Slider min={1} max={10} value={[selectedElement.thickness]} onValueChange={v => updateElement({ thickness: v[0] })} onValueCommit={commitChange} /></div>
-                                            <div className="space-y-4 pt-2 border-t border-white/5">
-                                                <Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Line Style</Label>
-                                                <div className="grid grid-cols-3 gap-2">
-                                                    {['solid', 'dashed', 'dotted'].map(s => (
-                                                        <button key={s} onClick={() => updateElement({ borderStyle: s as any })} className={cn("h-8 rounded-lg border-2 text-[8px] font-black uppercase", selectedElement.borderStyle === s ? "border-primary bg-primary/5" : "border-border")}>{s}</button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#000000', '#FF0000', '#0000FF', '#FFFFFF', '#22c55e'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
-                                        </div>
-                                    )}
-
                                     <div className="grid grid-cols-2 gap-3 pt-6 border-t border-white/5">
                                         <Button variant="outline" size="sm" className="h-10 text-[9px] font-black uppercase rounded-xl" onClick={duplicateElement}><Copy className="size-3.5 mr-1.5 text-primary" /> Duplicate</Button>
                                         <div className="flex gap-1">
@@ -1085,4 +796,3 @@ export default function PdfEditor() {
         </div>
     );
 }
-
