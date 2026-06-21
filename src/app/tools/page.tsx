@@ -661,7 +661,7 @@ function ToolsPageContent() {
                         value="all" 
                         className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
                       >
-                          <div className="uiverse-clay-btn scale-[0.9] md:scale-100">
+                          <div className="uiverse-clay-btn">
                             <div className="button-outer">
                                 <div className="button-inner flex items-center gap-3">
                                     <Menu className="size-4 text-primary" />
@@ -676,7 +676,7 @@ function ToolsPageContent() {
                         value={value} 
                         className="p-0 h-auto bg-transparent border-none shadow-none data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:ring-0 rounded-full transition-all duration-300"
                       >
-                          <div className="uiverse-clay-btn scale-[0.9] md:scale-100">
+                          <div className="uiverse-clay-btn">
                             <div className="button-outer">
                                 <div className="button-inner flex items-center gap-3">
                                     <Icon className={cn("size-4 transition-transform", color)} />

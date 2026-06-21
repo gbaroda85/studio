@@ -236,7 +236,7 @@ export default function Page() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-10 md:mb-8 animate-fade-in-up">
-            <Link href="/tools?tab=image" className="uiverse-clay-btn scale-[0.8] md:scale-100">
+            <Link href="/tools?tab=image" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner flex items-center gap-2 px-4 md:px-6">
                   <ImageIcon className="size-4 text-blue-500" />
@@ -244,7 +244,7 @@ export default function Page() {
                 </div>
               </div>
             </Link>
-            <Link href="/tools?tab=pdf" className="uiverse-clay-btn scale-[0.8] md:scale-100">
+            <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner flex items-center gap-2 px-4 md:px-6">
                   <FileText className="size-4 text-rose-500" />
@@ -252,7 +252,7 @@ export default function Page() {
                 </div>
               </div>
             </Link>
-            <Link href="/tools?tab=calculator" className="uiverse-clay-btn scale-[0.8] md:scale-100">
+            <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner flex items-center gap-2 px-4 md:px-6">
                   <Calculator className="size-4 text-emerald-500" />
