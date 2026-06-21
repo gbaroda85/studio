@@ -109,8 +109,8 @@ type ArrowType = 'straight' | 'double' | 'curved' | 'pointer';
 interface BaseElement {
     id: string;
     type: ElementType;
-    x: number; // % from left
-    y: number; // % from top
+    x: number; // % from visual left
+    y: number; // % from visual top
     opacity: number;
 }
 
@@ -126,15 +126,15 @@ interface OverlayText extends BaseElement {
 interface OverlayImage extends BaseElement {
     type: 'image';
     src: string;
-    width: number; // % of page width
+    width: number; // % of page visual width
     rotation: number;
 }
 
 interface OverlayShape extends BaseElement {
     type: 'mask' | 'shape' | 'highlight';
     shapeType?: ShapeType;
-    width: number; 
-    height: number;
+    width: number; // % of page visual width
+    height: number; // % of page visual height
     color: string; // Fill color
     fillType: 'solid' | 'none';
     borderColor: string;
@@ -146,8 +146,8 @@ interface OverlayShape extends BaseElement {
 interface OverlayArrow extends BaseElement {
     type: 'arrow';
     arrowType: ArrowType;
-    width: number; // % length
-    height: number; // % thickness for display
+    width: number; // % length relative to visual width
+    height: number; // Visual handle thickness
     color: string;
     thickness: number;
     headSize: number;
@@ -207,18 +207,6 @@ const SHAPE_PATHS: Record<string, string> = {
     'comment-bubble': 'M 0 0 H 100 V 80 H 70 L 50 100 L 30 80 H 0 Z',
     'callout-box': 'M 0 0 H 100 V 80 H 60 L 50 100 L 40 80 H 0 Z',
 };
-
-const StarIcons = () => (
-    <>
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`star-${i} pointer-events-none`}>
-                <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-                </svg>
-            </div>
-        ))}
-    </>
-);
 
 export default function PdfEditor() {
     const { toast } = useToast();
@@ -377,7 +365,7 @@ export default function PdfEditor() {
             width: type.includes('circle') || type.includes('square') ? 10 : 20,
             height: type.includes('circle') || type.includes('square') ? 10 : 10,
             color: '#3B82F6',
-            fillType: 'none', // STRIKT DEFAULT: NO FILL
+            fillType: 'none', 
             borderColor: '#000000',
             borderWidth: 2,
             borderStyle: 'solid',
@@ -392,8 +380,8 @@ export default function PdfEditor() {
             type: 'arrow',
             arrowType: type,
             x: 40, y: 40,
-            width: 25, // Initial length
-            height: 5, // Just for handle visual
+            width: 25, 
+            height: 5, 
             color: '#000000',
             thickness: 2,
             headSize: 10,
@@ -619,7 +607,11 @@ export default function PdfEditor() {
                     let x_pdf = 0;
                     let y_pdf = 0;
 
-                    // STRICT COORDINATE TRANSFORMATION BASED ON ROTATION (1:1 WYSIWYG FIX)
+                    /**
+                     * PIXEL-PERFECT COORDINATE TRANSFORMATION
+                     * We map visual (HTML) coordinates to internal PDF coordinates 
+                     * based on the page's natural rotation metadata.
+                     */
                     if (pageRotation === 0) {
                         x_pdf = px;
                         y_pdf = pageHeight - py;
@@ -630,8 +622,8 @@ export default function PdfEditor() {
                         x_pdf = pageWidth - px;
                         y_pdf = py;
                     } else if (pageRotation === 270) {
-                        x_pdf = pageWidth - py;
-                        y_pdf = pageHeight - px;
+                        x_pdf = pageHeight - py;
+                        y_pdf = pageWidth - px;
                     }
 
                     const x = ox + x_pdf;
@@ -685,7 +677,6 @@ export default function PdfEditor() {
                         const color = hexToRgbLib(el.color);
                         const dashArray = el.borderStyle === 'dashed' ? [5, 5] : el.borderStyle === 'dotted' ? [2, 2] : undefined;
                         
-                        // DRAW ARROW VECTOR
                         const ex = x + sw * Math.cos(rad);
                         const ey = y - sw * Math.sin(rad);
                         
@@ -698,7 +689,6 @@ export default function PdfEditor() {
                             dashArray
                         });
 
-                        // Draw Head (Triangle)
                         const headSize = el.headSize;
                         const angle = Math.atan2(y - ey, ex - x);
                         
@@ -967,7 +957,7 @@ export default function PdfEditor() {
                                                 <div 
                                                     style={{ 
                                                         width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
-                                                        height: `${el.thickness * 4}px`, // Thickness display
+                                                        height: `${el.thickness * 4}px`, 
                                                         opacity: el.opacity / 100,
                                                         transform: `rotate(${el.rotation}deg)`,
                                                         transformOrigin: 'left center',
