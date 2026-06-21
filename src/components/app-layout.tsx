@@ -59,7 +59,8 @@ import {
   TrendingUp,
   PiggyBank,
   Layers,
-  CalendarDays
+  CalendarDays,
+  ScanLine
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -110,6 +111,7 @@ const CATEGORIES = [
     icon: FileText,
     color: "text-rose-500",
     tools: [
+      { href: '/scan-to-pdf', label: 'scan_to_pdf_label', icon: ScanLine },
       { href: '/organize-pdf', label: 'organize_pdf_label', icon: Layers },
       { href: '/merge-pdf', label: 'merge_pdf_label', icon: Merge },
       { href: '/rotate-pdf', label: 'rotate_pdf_label', icon: RotateCw },
@@ -421,7 +423,7 @@ export function AppFooter() {
             </p>
             <div className="flex items-center gap-4 pt-4">
                 <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
-                    <ShieldCheck className="size-3" /> 100% Client-Side
+                    <ShieldCheck className="size-3" /> Client-Side
                 </div>
                 <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
                     <Zap className="size-3" /> No Server Storage

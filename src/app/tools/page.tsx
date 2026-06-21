@@ -68,7 +68,8 @@ import {
   Palette,
   Sparkles,
   LayoutGrid,
-  CreditCard
+  CreditCard,
+  ScanLine
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -190,6 +191,14 @@ function ToolsPageContent() {
   ];
 
   const pdfFeatures = [
+    {
+      href: '/scan-to-pdf',
+      labelKey: 'scan_to_pdf_label',
+      descriptionKey: 'scan_to_pdf_description',
+      icon: ScanLine,
+      color: 'bg-blue-600',
+      lightBg: 'bg-[#eff6ff]'
+    },
     {
       href: '/organize-pdf',
       labelKey: 'organize_pdf_label',
