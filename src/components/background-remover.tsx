@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -365,7 +364,7 @@ export default function BackgroundRemover() {
                     <CardTitle className="text-xl font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
                     <CardDescription className="text-[10px] font-bold uppercase opacity-50">Select preset or adjust manually.</CardDescription>
                 </div>
-                <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
+                <Select value={selectedSizeIndex} onValueChange={(v) => setSelectedSizeIndex(v)}>
                     <SelectTrigger className="h-10 w-full md:w-64 font-black border-2 rounded-xl text-[10px] uppercase bg-background shadow-sm"><SelectValue /></SelectTrigger>
                     <SelectContent className="rounded-xl border-2 shadow-2xl z-[1000]">
                         {SIZE_PRESETS.map((p, i) => (
@@ -376,7 +375,6 @@ export default function BackgroundRemover() {
                     </SelectContent>
                 </Select>
             </CardHeader>
-            {/* FIX: Removed fixed heights, used vh instead and optimized scroll area */}
             <CardContent className="p-0 flex flex-col bg-slate-200/50 min-h-[400px] h-[60vh] md:h-[70vh] relative overflow-hidden">
                 <ScrollArea className="w-full h-full p-4 md:p-12">
                     <div className="flex justify-center min-h-full items-center p-4">
