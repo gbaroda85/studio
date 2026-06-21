@@ -19,7 +19,7 @@ import {
     FileDigit,
     Pipette,
     History,
-    ArrowRightLeft,
+    ArrowLeftRight,
     Layers,
     Share2,
     Check,
@@ -287,7 +287,7 @@ export default function ColorPicker() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-7 flex flex-col gap-6">
+                <div className="lg:col-span-7 flex flex-col gap-6 h-full">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -298,7 +298,7 @@ export default function ColorPicker() {
                             </div>
                             <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">HD RENDERING</Badge>
                         </CardHeader>
-                        <CardContent className="p-6 md:p-10 lg:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex flex-col items-center justify-center relative select-none">
+                        <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] md:min-h-[600px] flex flex-col items-center justify-center relative select-none overflow-hidden">
                             <AnimatePresence mode="wait">
                                 {samplerImage ? (
                                     <motion.div 
@@ -306,24 +306,30 @@ export default function ColorPicker() {
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         exit={{ opacity: 0, scale: 0.95 }}
-                                        className="relative w-full h-full flex flex-col items-center justify-center gap-6"
+                                        className="relative w-full h-full flex flex-col overflow-hidden"
                                     >
-                                        <div 
-                                            className="relative max-w-full max-h-[500px] overflow-hidden rounded-3xl border-4 border-white shadow-2xl group transition-all"
-                                            onMouseDown={handleSamplerClick}
-                                            onTouchStart={handleSamplerClick}
-                                            style={{ cursor: dropperCursor }}
-                                        >
-                                            <img 
-                                                ref={samplerImgRef} 
-                                                src={samplerImage} 
-                                                alt="sampler" 
-                                                className="max-w-full max-h-full object-contain pointer-events-none" 
-                                            />
-                                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                                        </div>
-                                        <div className="flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl">
-                                             <Pipette className="size-3.5 text-primary animate-pulse" /> CLICK IMAGE TO SAMPLE COLOR
+                                        <ScrollArea className="flex-1 w-full h-full p-4 md:p-12">
+                                            <div className="flex justify-center min-h-full items-center p-4">
+                                                <div 
+                                                    className="relative max-w-full rounded-3xl border-4 border-white shadow-2xl overflow-hidden bg-white transform-gpu"
+                                                    onMouseDown={handleSamplerClick}
+                                                    onTouchStart={handleSamplerClick}
+                                                    style={{ cursor: dropperCursor, touchAction: 'none' }}
+                                                >
+                                                    <img 
+                                                        ref={samplerImgRef} 
+                                                        src={samplerImage} 
+                                                        alt="sampler" 
+                                                        className="max-w-full h-auto block pointer-events-none" 
+                                                    />
+                                                    <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                                                </div>
+                                            </div>
+                                            <ScrollBar orientation="horizontal" />
+                                            <ScrollBar orientation="vertical" />
+                                        </ScrollArea>
+                                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-6 py-2 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 whitespace-nowrap">
+                                             <Pipette className="size-3.5 text-primary animate-pulse" /> CLICK ANYWHERE ON IMAGE TO PICK COLOR
                                         </div>
                                         <canvas ref={samplerCanvasRef} className="hidden" />
                                     </motion.div>
@@ -332,7 +338,7 @@ export default function ColorPicker() {
                                         key="swatch"
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
-                                        className="w-full max-w-md flex flex-col gap-10"
+                                        className="w-full max-w-md flex flex-col gap-10 p-6"
                                     >
                                         <div 
                                             className="w-full aspect-video rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.3)] border-8 border-white flex flex-col items-center justify-center relative overflow-hidden group transition-all duration-500"
@@ -364,7 +370,7 @@ export default function ColorPicker() {
                         </CardContent>
                     </Card>
 
-                    <Card className="border-2 shadow-xl bg-card/40 rounded-[2rem] overflow-hidden no-print">
+                    <Card className="border-2 shadow-xl bg-card/40 rounded-[2rem] overflow-hidden no-print shrink-0">
                         <CardHeader className="p-4 bg-muted/30 border-b">
                             <div className="flex items-center gap-2">
                                 <History className="size-3 text-primary" />
@@ -398,7 +404,7 @@ export default function ColorPicker() {
                 <div className="lg:col-span-5 space-y-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[3rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
                                 <Settings2 className="size-4 md:size-5 text-primary" /> Studio Config
                             </CardTitle>
                         </CardHeader>
@@ -441,7 +447,7 @@ export default function ColorPicker() {
                                 </div>
 
                                 <div className="space-y-4 pt-4 border-t border-dashed text-left">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
                                         <Contrast className="size-3" /> Accessibility Check
                                     </Label>
                                     <div className="grid grid-cols-2 gap-3">
