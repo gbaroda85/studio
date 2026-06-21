@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -94,19 +95,22 @@ export default function QrCodeGenerator() {
     const [emailData, setEmailData] = useState({ to: '', subject: '', body: '' });
     const [upiData, setUpiData] = useState({ pa: '', pn: '', am: '', tn: '', cu: 'INR' });
 
-    // Design states (Flat state to ensure smooth reactivity)
+    // Design states
     const [dotColor, setDotColor] = useState("#000000");
     const [bgColor, setBgColor] = useState("#ffffff");
     const [dotType, setDotType] = useState<DotType>("rounded");
     const [cornerType, setCornerType] = useState<CornerSquareType>("extra-rounded");
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
+    // Debounced Visual State (to prevent slider lag)
+    const [debouncedVisuals, setDebouncedVisuals] = useState({ dotColor, bgColor, dotType, cornerType, logoUrl });
+
     const qrContainerRef = useRef<HTMLDivElement>(null);
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
     const [history, setHistory] = useState<{ id: string, data: string, date: string, type: QRType }[]>([]);
 
-    // 1. Data Debounce (250ms delay for heavy typing)
+    // 1. Data Debounce (typing delay)
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedData(inputData);
@@ -114,7 +118,15 @@ export default function QrCodeGenerator() {
         return () => clearTimeout(handler);
     }, [inputData]);
 
-    // 2. Type-to-Data Mapper
+    // 2. Visuals Debounce (slider lag fix)
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedVisuals({ dotColor, bgColor, dotType, cornerType, logoUrl });
+        }, 60); // 60ms is fast enough to feel real-time but slow enough to stop CPU overload
+        return () => clearTimeout(handler);
+    }, [dotColor, bgColor, dotType, cornerType, logoUrl]);
+
+    // 3. Type-to-Data Mapper
     useEffect(() => {
         let dataStr = inputData;
         if (qrType === 'wifi') {
@@ -134,7 +146,7 @@ export default function QrCodeGenerator() {
         if (dataStr !== inputData) setInputData(dataStr);
     }, [qrType, wifiData, whatsappData, emailData, upiData]);
 
-    // 3. Engine Initialization
+    // 4. Engine Initialization
     useEffect(() => {
         if (typeof window !== 'undefined' && !qrCodeRef.current) {
             qrCodeRef.current = new QRCodeStyling({
@@ -151,24 +163,38 @@ export default function QrCodeGenerator() {
         }
     }, []);
 
-    // 4. Smooth Sync Effect (Throttled update)
+    // 5. Consolidated Smooth Sync Effect
     useEffect(() => {
         if (qrCodeRef.current) {
-            // We use requestAnimationFrame to ensure the browser is ready and prevent "stuck" feeling
             const frame = requestAnimationFrame(() => {
                 qrCodeRef.current?.update({
                     data: debouncedData || " ",
-                    image: logoUrl || undefined,
-                    dotsOptions: { color: dotColor, type: dotType },
-                    backgroundOptions: { color: bgColor },
-                    cornersSquareOptions: { color: dotColor, type: cornerType },
-                    cornersDotOptions: { color: dotColor, type: 'dot' },
-                    imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 5 }
+                    image: debouncedVisuals.logoUrl || undefined,
+                    dotsOptions: { 
+                        color: debouncedVisuals.dotColor, 
+                        type: debouncedVisuals.dotType 
+                    },
+                    backgroundOptions: { 
+                        color: debouncedVisuals.bgColor 
+                    },
+                    cornersSquareOptions: { 
+                        color: debouncedVisuals.dotColor, 
+                        type: debouncedVisuals.cornerType 
+                    },
+                    cornersDotOptions: { 
+                        color: debouncedVisuals.dotColor, 
+                        type: 'dot' 
+                    },
+                    imageOptions: { 
+                        hideBackgroundDots: true, 
+                        imageSize: 0.4, 
+                        margin: 5 
+                    }
                 });
             });
             return () => cancelAnimationFrame(frame);
         }
-    }, [debouncedData, logoUrl, dotColor, bgColor, dotType, cornerType]);
+    }, [debouncedData, debouncedVisuals]);
 
     const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -183,7 +209,7 @@ export default function QrCodeGenerator() {
         if (!qrCodeRef.current) return;
         setIsProcessing(true);
         try {
-            // CRITICAL: Force a final sync to current colors to avoid the "Maroon/Stale" bug
+            // CRITICAL: Final sync force to ensure maroon bug is fixed before file generation
             qrCodeRef.current.update({
                 dotsOptions: { color: dotColor, type: dotType },
                 backgroundOptions: { color: bgColor },
@@ -248,6 +274,7 @@ export default function QrCodeGenerator() {
                     </div>
                     <div className="text-left">
                         <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Panel</span></h2>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 mt-1">Industrial Scanner Engine</p>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
@@ -408,3 +435,4 @@ export default function QrCodeGenerator() {
         </div>
     );
 }
+
