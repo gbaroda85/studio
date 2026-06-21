@@ -12,7 +12,6 @@ import QRCodeStyling, {
     type CornerDotType
 } from 'qr-code-styling';
 import jsPDF from 'jspdf';
-import JSZip from 'jszip';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -30,31 +29,16 @@ import {
     Layers, 
     Trash2, 
     Plus, 
-    Search,
     X,
     LayoutGrid,
     Printer,
-    Monitor,
-    Copy,
-    AlertCircle,
-    Info,
-    Smartphone,
-    FileDigit,
-    ArrowDownToLine,
-    Archive,
     ImageIcon,
     Globe,
     Wifi,
     Mail,
-    Phone,
     MessageSquare,
-    MapPin,
-    Calendar,
-    Share2,
     Palette,
     History,
-    FileSpreadsheet,
-    Hash,
     Lock,
     CreditCard,
     IndianRupee,
@@ -67,8 +51,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -103,6 +85,7 @@ export default function QrCodeGenerator() {
     const { toast } = useToast();
     const [qrType, setQrType] = useState<QRType>('url');
     const [inputData, setInputData] = useState("https://www.gr7imagepdf.com");
+    const [debouncedData, setDebouncedData] = useState(inputData);
     const [isProcessing, setIsProcessing] = useState(false);
     
     // Sub-states for specific types
@@ -154,47 +137,57 @@ export default function QrCodeGenerator() {
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
 
-    // Effect to update inputData based on type-specific sub-states
+    // Performance Optimization: Debounce data updates to prevent lag during typing
     useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedData(inputData);
+        }, 250);
+        return () => clearTimeout(handler);
+    }, [inputData]);
+
+    // Type-specific data construction
+    useEffect(() => {
+        let dataStr = inputData;
         if (qrType === 'wifi') {
-            const data = `WIFI:T:${wifiData.encryption};S:${wifiData.ssid};P:${wifiData.password};;`;
-            setInputData(data);
+            dataStr = `WIFI:T:${wifiData.encryption};S:${wifiData.ssid};P:${wifiData.password};;`;
         } else if (qrType === 'whatsapp') {
-            const data = `https://wa.me/${whatsappData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappData.message)}`;
-            setInputData(data);
+            dataStr = `https://wa.me/${whatsappData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappData.message)}`;
         } else if (qrType === 'email') {
-            const data = `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
-            setInputData(data);
+            dataStr = `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
         } else if (qrType === 'upi') {
-            // Standard UPI URI format: upi://pay?pa=upiid@bank&pn=PayeeName&am=Amount&cu=INR&tn=Note
-            let data = `upi://pay?pa=${upiData.pa}`;
-            if (upiData.pn) data += `&pn=${encodeURIComponent(upiData.pn)}`;
-            if (upiData.am) data += `&am=${upiData.am}`;
-            if (upiData.cu) data += `&cu=${upiData.cu}`;
-            if (upiData.tn) data += `&tn=${encodeURIComponent(upiData.tn)}`;
-            setInputData(data);
+            let upi = `upi://pay?pa=${upiData.pa}`;
+            if (upiData.pn) upi += `&pn=${encodeURIComponent(upiData.pn)}`;
+            if (upiData.am) upi += `&am=${upiData.am}`;
+            if (upiData.cu) upi += `&cu=${upiData.cu}`;
+            if (upiData.tn) upi += `&tn=${encodeURIComponent(upiData.tn)}`;
+            dataStr = upi;
+        }
+        
+        if (dataStr !== inputData) {
+            setInputData(dataStr);
         }
     }, [qrType, wifiData, whatsappData, emailData, upiData]);
 
-    // Initialize QR Code engine
+    // Initialize QR Code engine strictly on client mount
     useEffect(() => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== 'undefined' && !qrCodeRef.current) {
             qrCodeRef.current = new QRCodeStyling(options);
             if (qrContainerRef.current) {
+                qrContainerRef.current.innerHTML = ""; // Clean existing
                 qrCodeRef.current.append(qrContainerRef.current);
             }
         }
     }, []);
 
-    // Update QR Code when options change
+    // Sync instance with state changes
     useEffect(() => {
         if (qrCodeRef.current) {
             qrCodeRef.current.update({
                 ...options,
-                data: inputData || " " // Ensure non-empty string
+                data: debouncedData || " "
             });
         }
-    }, [options, inputData]);
+    }, [options, debouncedData]);
 
     const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -203,11 +196,8 @@ export default function QrCodeGenerator() {
             reader.onload = (event) => {
                 const src = event.target?.result as string;
                 setLogoUrl(src);
-                setOptions(prev => ({
-                    ...prev,
-                    image: src
-                }));
-                toast({ title: "Logo Uploaded", description: "Positioned at center of QR code." });
+                setOptions(prev => ({ ...prev, image: src }));
+                toast({ title: "Logo Uploaded" });
             };
             reader.readAsDataURL(file);
         }
@@ -217,6 +207,9 @@ export default function QrCodeGenerator() {
         if (!qrCodeRef.current) return;
         setIsProcessing(true);
         try {
+            // Re-sync options before download to prevent "Maroon" or stale color bug
+            qrCodeRef.current.update(options);
+
             if (ext === 'pdf') {
                 const blob = await qrCodeRef.current.getRawData('png');
                 if (blob) {
@@ -233,17 +226,9 @@ export default function QrCodeGenerator() {
                 });
             }
             
-            // Save to history
-            const newHistoryItem = {
-                id: Math.random().toString(36).substr(2, 9),
-                data: inputData,
-                date: new Date().toLocaleTimeString(),
-                type: qrType
-            };
-            setHistory(prev => [newHistoryItem, ...prev].slice(0, 10));
-            
+            setHistory(prev => [{ id: Math.random().toString(36).substr(2, 9), data: inputData, date: new Date().toLocaleTimeString(), type: qrType }, ...prev].slice(0, 10));
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-            toast({ title: "Download Successful", description: `File saved as ${ext.toUpperCase()}.` });
+            toast({ title: "Saved Successfully" });
         } catch (e) {
             toast({ variant: 'destructive', title: "Export Error" });
         } finally {
@@ -253,34 +238,21 @@ export default function QrCodeGenerator() {
 
     const handlePrint = async () => {
         if (!qrCodeRef.current) return;
-        
-        // Open blank tab immediately to satisfy mobile browser heuristic
         const printWindow = window.open('', '_blank');
         if (!printWindow) {
-            toast({ variant: 'destructive', title: "Printer Blocked", description: "Please allow popups to print." });
+            toast({ variant: 'destructive', title: "Printer Blocked" });
             return;
         }
 
-        printWindow.document.write('<html><head><title>Print QR Code</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:white;"><div style="font-family:sans-serif;text-align:center;"><p>Preparing High-Res Buffer...</p></div></body></html>');
+        printWindow.document.write('<html><head><title>Print QR</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:white;"><p>Loading...</p></body></html>');
 
         try {
-            // Get high-res PNG for better print quality than direct SVG innerHTML
             const blob = await qrCodeRef.current.getRawData('png');
             if (blob) {
                 const url = URL.createObjectURL(blob);
-                printWindow.document.body.innerHTML = `
-                    <div style="text-align:center;">
-                        <img src="${url}" style="max-width:90%; max-height:90%; object-fit: contain;">
-                        <p style="margin-top:20px; font-family:sans-serif; font-size:12px; color:#999; text-transform:uppercase; letter-spacing:1px;">Generated by GR7 Tools</p>
-                    </div>
-                `;
+                printWindow.document.body.innerHTML = `<div style="text-align:center;"><img src="${url}" style="max-width:90%;"><p style="font-size:12px;color:#999;">GR7 Tools Hub Studio</p></div>`;
                 printWindow.document.close();
-                
-                // Allow a small delay for mobile rendering
-                setTimeout(() => {
-                    printWindow.focus();
-                    printWindow.print();
-                }, 500);
+                setTimeout(() => { printWindow.focus(); printWindow.print(); }, 500);
             }
         } catch (e) {
             printWindow.close();
@@ -291,14 +263,13 @@ export default function QrCodeGenerator() {
     const handleReset = () => {
         setInputData("https://www.gr7imagepdf.com");
         setLogoUrl(null);
-        setOptions(prev => ({
-            ...prev,
-            image: undefined,
+        setOptions({
+            width: 300, height: 300, data: "https://www.gr7imagepdf.com",
             dotsOptions: { color: "#000000", type: "rounded" },
             backgroundOptions: { color: "#ffffff" },
             cornersSquareOptions: { color: "#000000", type: "extra-rounded" },
             cornersDotOptions: { color: "#000000", type: "dot" }
-        }));
+        });
     };
 
     return (
@@ -313,7 +284,7 @@ export default function QrCodeGenerator() {
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive">
+                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 transition-all">
                         <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Reset Design
                     </Button>
                 </div>
@@ -321,7 +292,6 @@ export default function QrCodeGenerator() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* Main Viewport */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
@@ -329,7 +299,7 @@ export default function QrCodeGenerator() {
                                 <Eye className="h-4 w-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Studio Viewport</CardTitle>
                             </div>
-                            <Badge className="bg-green-500 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">REAL-TIME SYNC</Badge>
+                            <Badge className="bg-green-500 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">SMOOTH SYNC</Badge>
                         </CardHeader>
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex items-center justify-center relative select-none">
                             <div className="flex flex-col items-center gap-10 w-full">
@@ -339,11 +309,11 @@ export default function QrCodeGenerator() {
                                 </div>
 
                                 <div className="flex flex-wrap items-center justify-center gap-3 no-print">
-                                    <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('png')}><ImageIcon className="size-3.5 mr-1.5" /> PNG</Button>
-                                    <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('svg')}><LayoutGrid className="size-3.5 mr-1.5" /> SVG</Button>
-                                    <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary transition-all" onClick={() => handleDownload('pdf')}><FileDigit className="size-3.5 mr-1.5" /> PDF</Button>
+                                    <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary" onClick={() => handleDownload('png')}><ImageIcon className="size-3.5 mr-1.5" /> PNG</Button>
+                                    <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary" onClick={() => handleDownload('svg')}><LayoutGrid className="size-3.5 mr-1.5" /> SVG</Button>
+                                    <Button variant="outline" className="h-10 border-2 rounded-xl font-black text-[9px] uppercase px-4 hover:border-primary" onClick={() => handleDownload('pdf')}><FileDigit className="size-3.5 mr-1.5" /> PDF</Button>
                                     <Separator orientation="vertical" className="h-6 opacity-20 mx-2" />
-                                    <Button className="h-10 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105 transition-all" onClick={handlePrint}><Printer className="size-3.5 mr-1.5" /> PRINT</Button>
+                                    <Button className="h-10 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase shadow-lg hover:scale-105" onClick={handlePrint}><Printer className="size-3.5 mr-1.5" /> PRINT</Button>
                                 </div>
                             </div>
                         </CardContent>
@@ -361,11 +331,7 @@ export default function QrCodeGenerator() {
                                 <ScrollArea className="w-full whitespace-nowrap">
                                     <div className="flex gap-4 pb-4 px-1">
                                         {history.map((item) => (
-                                            <div 
-                                                key={item.id} 
-                                                onClick={() => setInputData(item.data)}
-                                                className="inline-flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm hover:border-primary/40 cursor-pointer active:scale-95 transition-all min-w-[180px]"
-                                            >
+                                            <div key={item.id} onClick={() => setInputData(item.data)} className="inline-flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm hover:border-primary/40 cursor-pointer active:scale-95 transition-all min-w-[180px]">
                                                 <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0"><QrCode className="size-4" /></div>
                                                 <div className="truncate flex-1">
                                                     <p className="text-[10px] font-black uppercase truncate">{item.data}</p>
@@ -381,7 +347,6 @@ export default function QrCodeGenerator() {
                     )}
                 </div>
 
-                {/* Sidebar: Config */}
                 <div className="lg:col-span-5 space-y-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[3rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
@@ -403,198 +368,87 @@ export default function QrCodeGenerator() {
                                     <ScrollBar orientation="horizontal" />
                                 </ScrollArea>
 
-                                <div className="space-y-6">
-                                    <TabsContent value="url" className="space-y-4 m-0">
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Website URL</Label>
-                                            <Input 
-                                                value={inputData} 
-                                                onChange={(e) => setInputData(e.target.value)}
-                                                className="h-12 border-2 rounded-xl bg-background/50 font-bold"
-                                                placeholder="https://example.com"
-                                            />
+                                <div className="space-y-6 text-left">
+                                    <TabsContent value="url" className="m-0"><div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground">Website URL</Label><Input value={inputData} onChange={(e) => setInputData(e.target.value)} className="h-12 border-2 rounded-xl bg-background/50 font-bold" /></div></TabsContent>
+                                    <TabsContent value="upi" className="m-0 space-y-4">
+                                        <Input value={upiData.pn} onChange={(e) => setUpiData(p => ({...p, pn: e.target.value}))} placeholder="Payee Name" className="h-10 border-2" />
+                                        <Input value={upiData.pa} onChange={(e) => setUpiData(p => ({...p, pa: e.target.value}))} placeholder="UPI ID (e.g. user@bank)" className="h-10 border-2" />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <Input type="number" value={upiData.am} onChange={(e) => setUpiData(p => ({...p, am: e.target.value}))} placeholder="Amount (Optional)" className="h-10 border-2" />
+                                            <Select value={upiData.cu} onValueChange={(v) => setUpiData(p => ({...p, cu: v}))}><SelectTrigger className="h-10 border-2 font-bold"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl border-2"><SelectItem value="INR">INR (₹)</SelectItem><SelectItem value="USD">USD ($)</SelectItem></SelectContent></Select>
                                         </div>
                                     </TabsContent>
-
-                                    <TabsContent value="upi" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
-                                        <div className="grid gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Payee Name</Label>
-                                                <Input value={upiData.pn} onChange={(e) => setUpiData(p => ({...p, pn: e.target.value}))} placeholder="e.g. John Doe" className="h-10 border-2 font-bold" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">UPI ID (VPA)</Label>
-                                                <Input value={upiData.pa} onChange={(e) => setUpiData(p => ({...p, pa: e.target.value}))} placeholder="username@okaxis" className="h-10 border-2 font-bold" />
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] font-black uppercase">Amount (Optional)</Label>
-                                                    <div className="relative">
-                                                        <Input type="number" value={upiData.am} onChange={(e) => setUpiData(p => ({...p, am: e.target.value}))} placeholder="0.00" className="h-10 border-2 pl-8" />
-                                                        <IndianRupee className="absolute left-2 top-1/2 -translate-y-1/2 size-3.5 opacity-40" />
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[10px] font-black uppercase">Currency</Label>
-                                                    <Select value={upiData.cu} onValueChange={(v) => setUpiData(p => ({...p, cu: v}))}>
-                                                        <SelectTrigger className="h-10 border-2 font-bold"><SelectValue /></SelectTrigger>
-                                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                            <SelectItem value="INR" className="font-bold">INR (₹)</SelectItem>
-                                                            <SelectItem value="USD" className="font-bold">USD ($)</SelectItem>
-                                                        </SelectContent>
-                                                    </Select>
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Transaction Note</Label>
-                                                <Input value={upiData.tn} onChange={(e) => setUpiData(p => ({...p, tn: e.target.value}))} placeholder="Rent, Coffee, etc." className="h-10 border-2" />
-                                            </div>
-                                            <Alert className="bg-emerald-50 border-emerald-100 rounded-xl py-2 px-3">
-                                                <div className="flex gap-2">
-                                                    <CreditCard className="size-4 text-emerald-600 shrink-0" />
-                                                    <p className="text-[9px] font-bold text-emerald-700 leading-tight">Universal Payment QR: Works with GPay, PhonePe, and Paytm.</p>
-                                                </div>
-                                            </Alert>
-                                        </div>
+                                    <TabsContent value="text" className="m-0"><Textarea value={inputData} onChange={(e) => setInputData(e.target.value)} className="min-h-[100px] border-2 rounded-xl" /></TabsContent>
+                                    <TabsContent value="wifi" className="m-0 space-y-4">
+                                        <Input value={wifiData.ssid} onChange={(e) => setWifiData(p => ({...p, ssid: e.target.value}))} placeholder="Wifi Name" className="h-10 border-2" />
+                                        <Input value={wifiData.password} onChange={(e) => setWifiData(p => ({...p, password: e.target.value}))} placeholder="Password" className="h-10 border-2" />
+                                    </TabsContent>
+                                    <TabsContent value="whatsapp" className="m-0 space-y-4">
+                                        <Input value={whatsappData.phone} onChange={(e) => setWhatsappData(p => ({...p, phone: e.target.value}))} placeholder="Phone (e.g. 919876543210)" className="h-10 border-2" />
+                                        <Textarea value={whatsappData.message} onChange={(e) => setWhatsappData(p => ({...p, message: e.target.value}))} placeholder="Message" className="min-h-[80px] border-2" />
+                                    </TabsContent>
+                                    <TabsContent value="email" className="m-0 space-y-4">
+                                        <Input value={emailData.to} onChange={(e) => setEmailData(p => ({...p, to: e.target.value}))} placeholder="Recipient Email" className="h-10 border-2" />
+                                        <Input value={emailData.subject} onChange={(e) => setEmailData(p => ({...p, subject: e.target.value}))} placeholder="Subject" className="h-10 border-2" />
+                                        <Textarea value={emailData.body} onChange={(e) => setEmailData(p => ({...p, body: e.target.value}))} placeholder="Message" className="min-h-[80px] border-2" />
                                     </TabsContent>
 
-                                    <TabsContent value="text" className="space-y-4 m-0">
-                                        <div className="space-y-2">
-                                            <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Plain Text</Label>
-                                            <Textarea 
-                                                value={inputData} 
-                                                onChange={(e) => setInputData(e.target.value)}
-                                                className="min-h-[100px] border-2 rounded-xl bg-background/50 font-bold"
-                                                placeholder="Enter text data..."
-                                            />
-                                        </div>
-                                    </TabsContent>
-
-                                    <TabsContent value="wifi" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
-                                        <div className="grid gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Network Name (SSID)</Label>
-                                                <Input value={wifiData.ssid} onChange={(e) => setWifiData(p => ({...p, ssid: e.target.value}))} placeholder="My Home Wifi" className="h-10 border-2" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Password</Label>
-                                                <div className="relative">
-                                                    <Input type="text" value={wifiData.password} onChange={(e) => setWifiData(p => ({...p, password: e.target.value}))} placeholder="Network Password" className="h-10 border-2 pr-10" />
-                                                    <Lock className="absolute right-3 top-1/2 -translate-y-1/2 size-4 opacity-20" />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Encryption</Label>
-                                                <Select value={wifiData.encryption} onValueChange={(v) => setWifiData(p => ({...p, encryption: v}))}>
-                                                    <SelectTrigger className="h-10 border-2 font-bold"><SelectValue /></SelectTrigger>
-                                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                        <SelectItem value="WPA" className="font-bold">WPA/WPA2</SelectItem>
-                                                        <SelectItem value="WEP" className="font-bold">WEP</SelectItem>
-                                                        <SelectItem value="nopass" className="font-bold">None (Open)</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-                                    </TabsContent>
-
-                                    <TabsContent value="whatsapp" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
-                                        <div className="grid gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Phone Number (with Country Code)</Label>
-                                                <Input value={whatsappData.phone} onChange={(e) => setWhatsappData(p => ({...p, phone: e.target.value}))} placeholder="e.g. 919876543210" className="h-10 border-2" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Default Message</Label>
-                                                <Textarea value={whatsappData.message} onChange={(e) => setWhatsappData(p => ({...p, message: e.target.value}))} placeholder="Hello! I found your QR code..." className="min-h-[80px] border-2" />
-                                            </div>
-                                        </div>
-                                    </TabsContent>
-
-                                    <TabsContent value="email" className="space-y-4 m-0 animate-in fade-in slide-in-from-top-2">
-                                        <div className="grid gap-4">
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Recipient Email</Label>
-                                                <Input value={emailData.to} onChange={(e) => setEmailData(p => ({...p, to: e.target.value}))} placeholder="example@gmail.com" className="h-10 border-2" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Subject</Label>
-                                                <Input value={emailData.subject} onChange={(e) => setEmailData(p => ({...p, subject: e.target.value}))} placeholder="Contact from QR" className="h-10 border-2" />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label className="text-[10px] font-black uppercase">Message Body</Label>
-                                                <Textarea value={emailData.body} onChange={(e) => setEmailData(p => ({...p, body: e.target.value}))} placeholder="Write your email content..." className="min-h-[80px] border-2" />
-                                            </div>
-                                        </div>
-                                    </TabsContent>
-
-                                    {/* Design Options Area */}
                                     <div className="space-y-8 pt-6 border-t border-dashed">
-                                        <div className="space-y-6">
-                                            <div className="space-y-4">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                                    <LayoutGrid className="size-3" /> Dot Pattern
-                                                </Label>
-                                                <div className="grid grid-cols-2 gap-2">
-                                                    {DOT_TYPES.map(d => (
-                                                        <button 
-                                                            key={d.id}
-                                                            className={cn(
-                                                                "btn-pos-uiverse h-10",
-                                                                options.dotsOptions?.type === d.id && "active-uiverse"
-                                                            )}
-                                                            onClick={() => setOptions(prev => ({ ...prev, dotsOptions: { ...prev.dotsOptions, type: d.id } }))}
-                                                            data-label={d.label}
-                                                        />
-                                                    ))}
+                                        <div className="space-y-4">
+                                            <Label className="text-[10px] font-black uppercase text-primary tracking-widest flex items-center gap-2">
+                                                <LayoutGrid className="size-3" /> Dot Pattern
+                                            </Label>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {DOT_TYPES.map(d => (
+                                                    <button key={d.id} className={cn("btn-pos-uiverse h-10", options.dotsOptions?.type === d.id && "active-uiverse")} onClick={() => setOptions(prev => ({ ...prev, dotsOptions: { ...prev.dotsOptions, type: d.id } }))} data-label={d.label} />
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Main Color</Label>
+                                                <div className="flex gap-2 items-center">
+                                                    <input 
+                                                        type="color" 
+                                                        value={options.dotsOptions?.color} 
+                                                        onChange={(e) => {
+                                                            const c = e.target.value;
+                                                            setOptions(prev => ({ 
+                                                                ...prev, 
+                                                                dotsOptions: { ...prev.dotsOptions, color: c },
+                                                                cornersSquareOptions: { ...prev.cornersSquareOptions, color: c },
+                                                                cornersDotOptions: { ...prev.cornersDotOptions, color: c }
+                                                            }));
+                                                        }}
+                                                        className="size-10 p-1 rounded-lg border-2 cursor-pointer bg-white"
+                                                    />
+                                                    <span className="text-[10px] font-mono font-bold uppercase">{options.dotsOptions?.color}</span>
                                                 </div>
                                             </div>
-
-                                            <div className="grid grid-cols-2 gap-4 pt-2">
-                                                <div className="space-y-2">
-                                                    <Label className="text-[9px] font-black uppercase opacity-60">Foreground</Label>
-                                                    <div className="flex gap-2 items-center">
-                                                        <input 
-                                                            type="color" 
-                                                            value={options.dotsOptions?.color} 
-                                                            onChange={(e) => setOptions(prev => ({ ...prev, dotsOptions: { ...prev.dotsOptions, color: e.target.value }, cornersSquareOptions: { ...prev.cornersSquareOptions, color: e.target.value }, cornersDotOptions: { ...prev.cornersDotOptions, color: e.target.value } }))}
-                                                            className="size-10 p-1 rounded-lg border-2 cursor-pointer bg-white"
-                                                        />
-                                                        <span className="text-[10px] font-mono font-bold uppercase">{options.dotsOptions?.color}</span>
-                                                    </div>
-                                                </div>
-                                                <div className="space-y-2">
-                                                    <Label className="text-[9px] font-black uppercase opacity-60">Background</Label>
-                                                    <div className="flex gap-2 items-center">
-                                                        <input 
-                                                            type="color" 
-                                                            value={options.backgroundOptions?.color} 
-                                                            onChange={(e) => setOptions(prev => ({ ...prev, backgroundOptions: { ...prev.backgroundOptions, color: e.target.value } }))}
-                                                            className="size-10 p-1 rounded-lg border-2 cursor-pointer bg-white"
-                                                        />
-                                                        <span className="text-[10px] font-mono font-bold uppercase">{options.backgroundOptions?.color}</span>
-                                                    </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Background</Label>
+                                                <div className="flex gap-2 items-center">
+                                                    <input 
+                                                        type="color" 
+                                                        value={options.backgroundOptions?.color} 
+                                                        onChange={(e) => setOptions(prev => ({ ...prev, backgroundOptions: { ...prev.backgroundOptions, color: e.target.value } }))}
+                                                        className="size-10 p-1 rounded-lg border-2 cursor-pointer bg-white"
+                                                    />
+                                                    <span className="text-[10px] font-mono font-bold uppercase">{options.backgroundOptions?.color}</span>
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            <div className="space-y-4 pt-4 border-t border-dashed">
-                                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
-                                                    <ImageIcon className="size-3" /> Brand Logo
-                                                </Label>
-                                                <div className="flex flex-col gap-3">
-                                                    <Button variant="outline" className="h-12 border-2 border-dashed rounded-xl font-black text-[10px] uppercase group" onClick={() => logoInputRef.current?.click()}>
-                                                        <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> {logoUrl ? "CHANGE LOGO" : "UPLOAD CENTER LOGO"}
-                                                    </Button>
-                                                    <input ref={logoInputRef} type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
-                                                    {logoUrl && (
-                                                        <div className="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10">
-                                                            <div className="flex items-center gap-3">
-                                                                <img src={logoUrl} className="size-8 rounded-md object-contain border bg-white" alt="logo" />
-                                                                <span className="text-[9px] font-black uppercase opacity-60">Embedded</span>
-                                                            </div>
-                                                            <Button size="icon" variant="ghost" className="size-7 rounded-full text-destructive" onClick={() => { setLogoUrl(null); setOptions(prev => ({ ...prev, image: undefined })); }}><Trash2 className="size-3.5" /></Button>
-                                                        </div>
-                                                    )}
-                                                </div>
+                                        <div className="space-y-4 pt-4 border-t border-dashed">
+                                            <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                                <ImageIcon className="size-3" /> Brand Logo
+                                            </Label>
+                                            <div className="flex flex-col gap-3">
+                                                <Button variant="outline" className="h-12 border-2 border-dashed rounded-xl font-black text-[10px] uppercase group" onClick={() => logoInputRef.current?.click()}>
+                                                    <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" /> {logoUrl ? "CHANGE LOGO" : "UPLOAD LOGO"}
+                                                </Button>
+                                                <input ref={logoInputRef} type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
                                             </div>
                                         </div>
                                     </div>
@@ -604,23 +458,17 @@ export default function QrCodeGenerator() {
                         <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-4">
                             <Button 
                                 size="lg" 
-                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none" 
+                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none" 
                                 onClick={() => handleDownload('png')} 
                                 disabled={isProcessing}
                             >
                                 <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                                 <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD HD QR</span>
                                 <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                                    {isProcessing ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-8 group-hover:scale-110 transition-transform" />}
+                                    {isProcessing ? <Loader2 className="size-6 animate-spin" /> : <Download className="size-6 group-hover:scale-110 transition-transform" />}
                                     <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                                 </div>
                             </Button>
-                            
-                            <div className="flex items-center justify-center gap-8 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">
-                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE RAM</div>
-                                <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> INSTANT SYNC</div>
-                                <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-primary" /> BRAND READY</div>
-                            </div>
                         </CardFooter>
                     </Card>
                 </div>
