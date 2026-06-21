@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import {usePathname, useSearchParams} from 'next/navigation';
+import {usePathname} from 'next/navigation';
 import { useState, useEffect, useRef } from 'react';
 import {
   Crop,
@@ -10,7 +10,6 @@ import {
   FileOutput,
   Image as ImageIcon,
   Merge,
-  ScanLine,
   Shrink,
   Unlock,
   Scissors,
@@ -53,11 +52,9 @@ import {
   Sparkles,
   FilePenLine,
   Music,
-  Video,
   RotateCw,
   Barcode,
   QrCode,
-  ChevronUp,
   IndianRupee,
   TrendingUp,
   PiggyBank,
@@ -476,16 +473,15 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
     const fromPath = prevPathRef.current;
     const toPath = pathname;
 
+    // Only show global neural loader when transitioning to/from home to create a "portal" effect
     const wasOnHome = fromPath === '/';
     const isNowOnHome = toPath === '/';
     
-    const shouldShowLoader = (wasOnHome && !isNowOnHome) || (!wasOnHome && isNowOnHome);
-    
-    if (shouldShowLoader) {
+    if ((wasOnHome && !isNowOnHome) || (!wasOnHome && isNowOnHome)) {
         setIsNavigating(true);
         const timer = setTimeout(() => {
           setIsNavigating(false);
-        }, 400);
+        }, 500);
         
         prevPathRef.current = toPath;
         return () => clearTimeout(timer);
@@ -507,7 +503,7 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
             initial={{ opacity: 0 }} 
             animate={{ opacity: 1 }} 
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
+            transition={{ duration: 0.2 }}
             className="fixed inset-0 z-[9999] pointer-events-auto"
           >
             <Loading />
