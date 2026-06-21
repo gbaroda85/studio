@@ -121,9 +121,21 @@ export default function BackgroundRemover() {
     return p.width > 0 ? p.width / p.height : undefined;
   }, [selectedSizeIndex]);
 
+  // Function to initialize crop when image loads
+  function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    const { width, height } = e.currentTarget;
+    const aspect = getAspectRatio();
+    
+    const initialCrop = aspect 
+        ? centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height), width, height)
+        : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+        
+    setCrop(initialCrop);
+  }
+
   // Handle automatic crop box updates when preset changes
   useEffect(() => {
-    if (stage === 'crop' && imgRef.current && imgRef.current.complete) {
+    if (stage === 'crop' && imgRef.current) {
         const { width, height } = imgRef.current;
         const aspect = getAspectRatio();
         
@@ -527,4 +539,3 @@ export default function BackgroundRemover() {
     </div>
   );
 }
-
