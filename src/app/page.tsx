@@ -132,6 +132,69 @@ const ALL_TOOLS = [
   { icon: Percent, title: "PERCENTAGE CALCULATOR", description: "Find percentages for marks, ratios and discounts.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
 ];
 
+const UiverseViewAllButton = ({ href }: { href: string }) => {
+  return (
+    <Link href={href} className="scale-[0.6] sm:scale-75 md:scale-100 origin-right transition-transform">
+      <button className="btn-view-all-uiverse">
+        <div className="uiverse-outline"></div>
+        <div className="state state--default">
+          <div className="icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </div>
+          <p>
+            <span style={{ "--i": 0 } as any}>V</span>
+            <span style={{ "--i": 1 } as any}>I</span>
+            <span style={{ "--i": 2 } as any}>E</span>
+            <span style={{ "--i": 3 } as any}>W</span>
+            <span style={{ "--i": 4 } as any}>&nbsp;</span>
+            <span style={{ "--i": 5 } as any}>A</span>
+            <span style={{ "--i": 6 } as any}>L</span>
+            <span style={{ "--i": 7 } as any}>L</span>
+          </p>
+        </div>
+        <div className="state state--sent">
+          <div className="icon">
+            <svg
+              viewBox="0 0 24 24"
+              width="24"
+              height="24"
+              stroke="currentColor"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </div>
+          <p>
+            <span style={{ "--i": 0 } as any}>G</span>
+            <span style={{ "--i": 1 } as any}>O</span>
+            <span style={{ "--i": 2 } as any}>I</span>
+            <span style={{ "--i": 3 } as any}>N</span>
+            <span style={{ "--i": 4 } as any}>G</span>
+            <span style={{ "--i": 5 } as any}>.</span>
+            <span style={{ "--i": 6 } as any}>.</span>
+            <span style={{ "--i": 7 } as any}>.</span>
+          </p>
+        </div>
+      </button>
+    </Link>
+  );
+};
+
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full touch-manipulation">
     <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl dark:shadow-primary/5 hover:shadow-2xl dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[280px] md:min-h-[300px] overflow-hidden text-left">
@@ -304,9 +367,7 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
-                        <Link href="/tools?tab=image" className="flex shrink-0">
-                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[8px] md:text-[10px] h-8 md:h-10 px-4 md:px-6">View All</Button>
-                        </Link>
+                        <UiverseViewAllButton href="/tools?tab=image" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'featured').slice(0, 8).map((tool, i) => <ToolCard key={i} {...tool} />)}
@@ -320,9 +381,7 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">PDF Toolkit</h2>
-                        <Link href="/tools?tab=pdf" className="flex shrink-0">
-                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[8px] md:text-[10px] h-8 md:h-10 px-4 md:px-6">View All</Button>
-                        </Link>
+                        <UiverseViewAllButton href="/tools?tab=pdf" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 9).map((tool, i) => <ToolCard key={i} {...tool} />)}
@@ -336,9 +395,7 @@ export default function Page() {
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Calculators</h2>
-                        <Link href="/tools?tab=calculator" className="flex shrink-0">
-                          <Button variant="outline" className="rounded-full border-2 font-black uppercase tracking-widest text-[8px] md:text-[10px] h-8 md:h-10 px-4 md:px-6">View All</Button>
-                        </Link>
+                        <UiverseViewAllButton href="/tools?tab=calculator" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
