@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -34,7 +35,11 @@ import {
     Loader2,
     FileDigit,
     Square,
-    AlignJustify
+    AlignJustify,
+    Plus,
+    Trash2,
+    Archive,
+    MousePointer2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -121,7 +126,9 @@ export default function QrCodeGenerator() {
         return inputData;
     }, [inputData, qrType, wifiData, whatsappData, emailData, upiData]);
 
-    const activeLabel = customLabel || (qrType === 'url' ? inputData.replace(/^https?:\/\//i, '') : inputData.substring(0, 20));
+    const activeLabel = useMemo(() => {
+        return customLabel || (qrType === 'url' ? inputData.replace(/^https?:\/\//i, '') : inputData.substring(0, 20));
+    }, [customLabel, qrType, inputData]);
 
     // --- ZERO-BLINK ENGINE ---
     const updateQR = useCallback(() => {
@@ -348,7 +355,7 @@ export default function QrCodeGenerator() {
                 <div className="lg:col-span-5 space-y-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[3rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
                                 <Palette className="size-4 md:size-5 text-primary" /> Configuration
                             </CardTitle>
                         </CardHeader>
