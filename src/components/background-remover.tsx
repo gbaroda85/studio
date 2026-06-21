@@ -23,7 +23,8 @@ import {
     Palette,
     Layers,
     Crop as CropIcon,
-    ChevronRight
+    ChevronRight,
+    ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -323,13 +324,17 @@ export default function BackgroundRemover() {
                     <SelectContent className="rounded-xl border-2 shadow-2xl">{SIZE_PRESETS.map((p, i) => (<SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase py-3">{p.name}</SelectItem>))}</SelectContent>
                 </Select>
             </CardHeader>
-            <CardContent className="p-4 md:p-8 flex items-center justify-center bg-slate-200/50 min-h-[450px] overflow-auto custom-scrollbar">
-                <div className="max-h-[70vh] overflow-auto rounded-xl border-4 border-white shadow-2xl custom-scrollbar">
-                    <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
-                        <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[70vh] w-auto block object-contain" />
-                    </ReactCrop>
-                    <ScrollBar />
-                </div>
+            <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200/50 min-h-[450px]">
+                <ScrollArea className="w-full h-full p-4 md:p-8">
+                    <div className="flex justify-center">
+                        <div className="max-h-[70vh] rounded-xl border-4 border-white shadow-2xl bg-white overflow-hidden">
+                            <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
+                                <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[70vh] w-auto block object-contain" />
+                            </ReactCrop>
+                        </div>
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                </ScrollArea>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
                 <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl"><RotateCcw className="mr-2 size-4" /> Back</Button>
@@ -497,3 +502,4 @@ export default function BackgroundRemover() {
     </div>
   );
 }
+
