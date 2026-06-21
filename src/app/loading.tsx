@@ -16,7 +16,7 @@ export default function Loading() {
         <div className="absolute bottom-1/4 right-1/4 size-64 bg-accent/20 rounded-full blur-[100px] animate-pulse transform-gpu translate3d-0" style={{ animationDelay: '1s' }} />
       </div>
 
-      <div className="relative flex flex-col items-center transform-gpu">
+      <div className="relative flex flex-col items-center transform-gpu will-change-transform">
         {/* COMPACT STUDIO BOX - NEURAL STYLE */}
         <div className="relative size-24 md:size-28 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-primary/30 rounded-[2.5rem] shadow-2xl flex items-center justify-center group overflow-hidden animate-breathing transform-gpu">
             

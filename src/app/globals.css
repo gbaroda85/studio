@@ -68,6 +68,7 @@
     overflow-x: hidden !important;
   }
 
+  /* Prevent flickering during transitions */
   * {
     @apply border-border outline-none;
     -webkit-tap-highlight-color: transparent;
@@ -97,6 +98,7 @@
   }
 }
 
+/* HARDWARE ACCELERATION TO PREVENT FLICKER */
 .glass-card, .btn-pos-uiverse, .magic-button, header, footer, .uiverse-clay-btn {
   transform: translateZ(0);
   backface-visibility: hidden;
@@ -107,6 +109,7 @@
   animation-fill-mode: both;
 }
 
+/* PREVENT LAYOUT THRASHING */
 section {
   content-visibility: auto;
   contain-intrinsic-size: 1px 500px;
@@ -145,6 +148,7 @@ section {
   @apply bg-primary/20 rounded-full hover:bg-primary/40 transition-colors;
 }
 
+/* CUSTOM BUTTON ANIMATIONS */
 .magic-button {
   position: relative;
   cursor: pointer;
@@ -196,6 +200,7 @@ section {
 .magic-button:hover .star-5 { top: 65%; left: 110%; width: 15px; }
 .magic-button:hover .star-6 { top: -30%; left: 60%; width: 10px; }
 
+/* LAUNCH ARROW BUTTON (UIVERSE) */
 .launch-arrow-btn {
   display: block;
   position: relative;
@@ -281,6 +286,7 @@ section {
   @apply text-primary;
 }
 
+/* POS BUTTON (UIVERSE) */
 .btn-pos-uiverse {
   position: relative;
   background-color: transparent;
@@ -357,6 +363,7 @@ section {
   transform: scale(0.95);
 }
 
+/* CLAY BUTTON (UIVERSE) */
 .uiverse-clay-btn {
   all: unset;
   cursor: pointer;
@@ -485,6 +492,7 @@ section {
   transform: scale(0.975);
 }
 
+/* SUPPORT BUTTON */
 .support-uiverse {
   position: relative;
   background: #ffffff;
@@ -539,6 +547,7 @@ section {
   color: #ffffff;
 }
 
+/* THEME SWITCH (UIVERSE) */
 .theme-switch {
   --toggle-size: 14px;
   --container-width: 5.625em;
