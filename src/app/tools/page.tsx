@@ -665,7 +665,7 @@ function ToolsPageContent() {
                             <div className="button-outer">
                                 <div className="button-inner flex items-center gap-3">
                                     <Menu className="size-4 text-primary" />
-                                    <span>ALL</span>
+                                    <span>ALL TOOLS</span>
                                 </div>
                             </div>
                           </div>
@@ -680,7 +680,7 @@ function ToolsPageContent() {
                             <div className="button-outer">
                                 <div className="button-inner flex items-center gap-3">
                                     <Icon className={cn("size-4 transition-transform", color)} />
-                                    <span>{t(categoryKey).split(' ')[0]}</span>
+                                    <span>{t(categoryKey)}</span>
                                 </div>
                             </div>
                           </div>
