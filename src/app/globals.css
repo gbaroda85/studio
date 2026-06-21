@@ -745,14 +745,21 @@ section {
   text-transform: uppercase;
   background: transparent;
   z-index: 10;
+  color: #1e293b;
+}
+
+.dark .btn-view-all-uiverse {
+  --neutral-1: #1e293b;
+  --neutral-2: #0f172a;
+  color: #f8fafc;
 }
 
 @media (min-width: 768px) {
   .btn-view-all-uiverse {
-    min-width: 200px;
-    height: 68px;
-    font-size: 18px;
-    padding: 20px;
+    min-width: 180px;
+    height: 64px;
+    font-size: 16px;
+    padding: 18px;
   }
 }
 
@@ -804,11 +811,11 @@ section {
 
 .btn-view-all-uiverse .state .icon {
   position: absolute;
-  left: 0;
+  left: -8px;
   top: 0;
   bottom: 0;
   margin: auto;
-  transform: scale(1.25);
+  transform: scale(1.15);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -944,7 +951,7 @@ section {
 
 /* States */
 .btn-view-all-uiverse .state {
-  padding-left: 29px;
+  padding-left: 20px;
   z-index: 5;
   display: flex;
   position: relative;
