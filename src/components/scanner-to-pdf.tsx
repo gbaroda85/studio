@@ -1,4 +1,3 @@
-
 "use client";
 
 import 'react-image-crop/dist/ReactCrop.css';
@@ -119,7 +118,7 @@ const StarIcons = () => (
     </>
 );
 
-export default function DocumentScanner() {
+export default function ScannerToPdf() {
   const { toast } = useToast();
   const [stage, setStage] = useState<Stage>('viewfinder');
   
@@ -319,7 +318,7 @@ export default function DocumentScanner() {
         const h1 = Math.hypot(corners[3].x - corners[0].x, corners[3].y - corners[0].y);
         const h2 = Math.hypot(corners[2].x - corners[1].x, corners[2].y - corners[1].y);
         const tw = Math.max(10, Math.floor(Math.max(w1, w2)));
-        const th = Math.max(10, Math.floor(Math.max(h1, h2)));
+        const th = Math.max(10, Math.floor(h1, h2));
         cropCanvas.width = tw; cropCanvas.height = th;
         const dstPoints = [{ x: 0, y: 0 }, { x: tw, y: 0 }, { x: tw, y: th }, { x: 0, y: th }];
         const h = solvePerspective(dstPoints, corners);
@@ -773,7 +772,7 @@ export default function DocumentScanner() {
                             ) : (
                                 <div className="relative">
                                     <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto pointer-events-none block" onLoad={onImageLoad} />
-                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 100" preserveAspectRatio="none">
+                                    <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
                                         <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${points[3].x},${points[3].y} ${points[4].x},${points[4].y} ${points[5].x},${points[5].y} ${points[6].x},${points[6].y} ${points[7].x},${points[7].y}`} className="fill-primary/10 stroke-primary stroke-[0.8]" strokeDasharray="5,5" />
                                     </svg>
                                     {points.map((p, i) => (
