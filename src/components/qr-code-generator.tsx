@@ -39,7 +39,8 @@ import {
     Plus,
     Trash2,
     Archive,
-    MousePointer2
+    MousePointer2,
+    Phone
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -290,7 +291,7 @@ export default function QrCodeGenerator() {
                         <Settings2 className="size-5 md:size-6" />
                     </div>
                     <div className="text-left">
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Panel</span></h2>
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Studio <span className="text-primary">Panel</span></h2>
                         <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 mt-1">Industrial High-Speed Engine</p>
                     </div>
                 </div>
@@ -365,15 +366,17 @@ export default function QrCodeGenerator() {
                                     <TabsList className="flex h-auto w-max p-1.5 bg-muted/40 rounded-2xl border-2">
                                         <TabsTrigger value="url" className="text-[9px] font-black px-4"><Globe className="size-3 mr-1.5" /> URL</TabsTrigger>
                                         <TabsTrigger value="upi" className="text-[9px] font-black px-4 text-emerald-600"><CreditCard className="size-3 mr-1.5" /> PAYMENT</TabsTrigger>
-                                        <TabsTrigger value="text" className="text-[9px] font-black px-4"><Type className="size-3 mr-1.5" /> TEXT</TabsTrigger>
-                                        <TabsTrigger value="wifi" className="text-[9px] font-black px-4"><MessageSquare className="size-3 mr-1.5" /> WIFI</TabsTrigger>
+                                        <TabsTrigger value="whatsapp" className="text-[9px] font-black px-4 text-green-600"><MessageSquare className="size-3 mr-1.5" /> WHATSAPP</TabsTrigger>
+                                        <TabsTrigger value="wifi" className="text-[9px] font-black px-4"><Wifi className="size-3 mr-1.5" /> WIFI</TabsTrigger>
                                         <TabsTrigger value="email" className="text-[9px] font-black px-4"><Mail className="size-3 mr-1.5" /> EMAIL</TabsTrigger>
+                                        <TabsTrigger value="text" className="text-[9px] font-black px-4"><Type className="size-3 mr-1.5" /> TEXT</TabsTrigger>
                                     </TabsList>
                                     <ScrollBar orientation="horizontal" />
                                 </ScrollArea>
 
                                 <div className="space-y-6 text-left">
                                     <TabsContent value="url" className="m-0 animate-in fade-in"><div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground">Website URL</Label><Input value={inputData} onChange={(e) => setInputData(e.target.value)} className="h-12 border-2 rounded-xl bg-background/50 font-bold" /></div></TabsContent>
+                                    
                                     <TabsContent value="upi" className="m-0 space-y-4 animate-in fade-in">
                                         <Input value={upiData.pn} onChange={(e) => setUpiData(p => ({...p, pn: e.target.value}))} placeholder="Payee Name" className="h-10 border-2 rounded-xl" />
                                         <Input value={upiData.pa} onChange={(e) => setUpiData(p => ({...p, pa: e.target.value}))} placeholder="UPI ID (e.g. user@bank)" className="h-10 border-2 rounded-xl" />
@@ -382,16 +385,50 @@ export default function QrCodeGenerator() {
                                             <Select value={upiData.cu} onValueChange={(v) => setUpiData(p => ({...p, cu: v}))}><SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl border-2"><SelectItem value="INR">INR (₹)</SelectItem><SelectItem value="USD">USD ($)</SelectItem></SelectContent></Select>
                                         </div>
                                     </TabsContent>
-                                    <TabsContent value="text" className="m-0 animate-in fade-in"><Textarea value={inputData} onChange={(e) => setInputData(e.target.value)} className="min-h-[100px] border-2 rounded-2xl p-4 font-bold" placeholder="Enter custom text..." /></TabsContent>
-                                    <TabsContent value="wifi" className="m-0 space-y-4 animate-in fade-in">
-                                        <Input value={wifiData.ssid} onChange={(e) => setWifiData(p => ({...p, ssid: e.target.value}))} placeholder="Wifi Name (SSID)" className="h-10 border-2 rounded-xl" />
-                                        <Input value={wifiData.password} onChange={(e) => setWifiData(p => ({...p, password: e.target.value}))} placeholder="Password" className="h-10 border-2 rounded-xl" />
+
+                                    <TabsContent value="whatsapp" className="m-0 space-y-4 animate-in fade-in">
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground">Phone Number (with Country Code)</Label>
+                                            <div className="relative">
+                                                <Input value={whatsappData.phone} onChange={(e) => setWhatsappData(p => ({...p, phone: e.target.value}))} placeholder="e.g. 919876543210" className="h-12 pl-10 border-2 rounded-xl bg-background/50 font-bold" />
+                                                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground">Pre-filled Message</Label>
+                                            <Textarea value={whatsappData.message} onChange={(e) => setWhatsappData(p => ({...p, message: e.target.value}))} placeholder="Hello! I'm interested in..." className="min-h-[80px] border-2 rounded-xl" />
+                                        </div>
                                     </TabsContent>
+
+                                    <TabsContent value="wifi" className="m-0 space-y-4 animate-in fade-in">
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground">WiFi SSID (Name)</Label>
+                                            <Input value={wifiData.ssid} onChange={(e) => setWifiData(p => ({...p, ssid: e.target.value}))} placeholder="Network Name" className="h-10 border-2 rounded-xl" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground">Password</Label>
+                                            <Input type="password" value={wifiData.password} onChange={(e) => setWifiData(p => ({...p, password: e.target.value}))} placeholder="Network Password" className="h-10 border-2 rounded-xl" />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-[10px] font-black uppercase text-muted-foreground">Security Mode</Label>
+                                            <Select value={wifiData.encryption} onValueChange={(v) => setWifiData(p => ({...p, encryption: v}))}>
+                                                <SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger>
+                                                <SelectContent className="rounded-xl border-2">
+                                                    <SelectItem value="WPA">WPA/WPA2 (Recommended)</SelectItem>
+                                                    <SelectItem value="WEP">WEP (Legacy)</SelectItem>
+                                                    <SelectItem value="nopass">None (Open)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    </TabsContent>
+
                                     <TabsContent value="email" className="m-0 space-y-4 animate-in fade-in">
                                         <Input value={emailData.to} onChange={(e) => setEmailData(p => ({...p, to: e.target.value}))} placeholder="Recipient Email" className="h-10 border-2 rounded-xl" />
                                         <Input value={emailData.subject} onChange={(e) => setEmailData(p => ({...p, subject: e.target.value}))} placeholder="Subject" className="h-10 border-2 rounded-xl" />
                                         <Textarea value={emailData.body} onChange={(e) => setEmailData(p => ({...p, body: e.target.value}))} placeholder="Message body..." className="min-h-[80px] border-2 rounded-xl" />
                                     </TabsContent>
+
+                                    <TabsContent value="text" className="m-0 animate-in fade-in"><Textarea value={inputData} onChange={(e) => setInputData(e.target.value)} className="min-h-[100px] border-2 rounded-2xl p-4 font-bold" placeholder="Enter custom text..." /></TabsContent>
 
                                     <div className="space-y-8 pt-8 border-t border-dashed">
                                         <div className="space-y-4">
