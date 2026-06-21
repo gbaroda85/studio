@@ -60,7 +60,9 @@ import {
   PiggyBank,
   Layers,
   CalendarDays,
-  ScanLine
+  ScanLine,
+  Palette,
+  Banknote
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -83,7 +85,6 @@ import {
 } from "@/components/ui/sheet";
 import { useLanguage } from '@/contexts/language-context';
 import { ScrollArea } from './ui/scroll-area';
-import Loading from '@/app/loading';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const CATEGORIES = [
@@ -94,6 +95,7 @@ const CATEGORIES = [
     tools: [
       { href: '/passport-date-name', label: 'passport_date_name_label', icon: CalendarDays },
       { href: '/enhance-photo', label: 'enhance_photo_label', icon: Wand2 },
+      { href: '/ai-upscaler', label: 'ai_upscaler_label', icon: Sparkles },
       { href: '/image-to-pdf', label: 'image_to_pdf_label', icon: FileDigit },
       { href: '/image-compress', label: 'image_compress_label', icon: Shrink },
       { href: '/crop-image', label: 'crop_image_label', icon: Crop },
@@ -101,6 +103,7 @@ const CATEGORIES = [
       { href: '/remove-background', label: 'remove_background_label', icon: Eraser },
       { href: '/remove-signature', label: 'remove_signature_label', icon: PenLine },
       { href: '/passport-photo', label: 'passport_photo_label', icon: UserCircle },
+      { href: '/marriage-biodata', label: 'marriage_biodata_label', icon: Heart },
       { href: '/image-to-jpg', label: 'image_to_jpg_label', icon: FileOutput },
       { href: '/image-to-png', label: 'image_to_png_label', icon: FileOutput },
       { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
@@ -125,6 +128,7 @@ const CATEGORIES = [
       { href: '/text-to-pdf', label: 'text_to_pdf_label', icon: FileText },
       { href: '/add-watermark', label: 'add_watermark_label', icon: Copyright },
       { href: '/add-page-numbers', label: 'add_page_numbers_label', icon: NotebookPen },
+      { href: '/document-scan', label: 'document_scan_label', icon: ScanLine },
     ]
   },
   {
@@ -132,6 +136,8 @@ const CATEGORIES = [
     icon: Calculator,
     color: "text-emerald-500",
     tools: [
+      { href: '/salary-slip', label: 'salary_slip_label', icon: Banknote },
+      { href: '/gst-invoice', label: 'gst_invoice_label', icon: Receipt },
       { href: '/gst-calculator', label: 'gst_calculator_label', icon: IndianRupee },
       { href: '/sip-calculator', label: 'sip_calculator_label', icon: TrendingUp },
       { href: '/fd-rd-calculator', label: 'fd_rd_calculator_label', icon: PiggyBank },
@@ -143,6 +149,7 @@ const CATEGORIES = [
       { href: '/fuel-cost-calculator', label: 'fuel_cost_calculator_label', icon: Route },
       { href: '/interest-calculator', label: 'interest_calculator_label', icon: Coins },
       { href: '/sales-tax-calculator', label: 'sales_tax_calculator_label', icon: Receipt },
+      { href: '/mortgage-calculator', label: 'mortgage_calculator_label', icon: Home },
     ]
   },
   {
@@ -150,12 +157,21 @@ const CATEGORIES = [
     icon: Infinity,
     color: "text-amber-500",
     tools: [
+      { href: '/color-picker', label: 'color_picker_label', icon: Palette },
       { href: '/qr-code-generator', label: 'qr_code_generator_label', icon: QrCode },
       { href: '/barcode-generator', label: 'barcode_generator_label', icon: Barcode },
       { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
       { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
       { href: '/fuel-converter', label: 'fuel_converter_label', icon: Fuel },
       { href: '/pressure-converter', label: 'pressure_converter_label', icon: Waves },
+    ]
+  },
+  {
+    name: "video_tools",
+    icon: Music,
+    color: "text-indigo-500",
+    tools: [
+      { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
     ]
   },
   {
@@ -252,7 +268,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
           {category.tools.map((tool) => (
             <DropdownMenuItem key={tool.href} asChild className="rounded-xl">
               <Link href={tool.href} className={cn(
-                "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors min-h-[44px]", // Min-height for touch accessibility
+                "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors min-h-[44px]", 
                 pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
               )}>
                 <tool.icon className={cn("size-4", category.color)} />

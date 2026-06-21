@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type DragEvent, type ChangeEvent, useEffect, useCallback } from "react";
@@ -59,7 +58,7 @@ const SIZE_PRESETS = [
     { name: 'Free Hand (Manual)', width: 0, height: 0, unit: 'px' },
     { name: 'Aadhaar Card (Landscape)', width: 85.6, height: 54, unit: 'mm' },
     { name: 'Driving Licence (Landscape)', width: 85.6, height: 54, unit: 'mm' },
-    { name: 'PAN Card (Landscape)', width: 85.6, height: 35, unit: 'mm' }, 
+    { name: 'PAN Card (Landscape)', width: 85.6, height: 54, unit: 'mm' }, 
     { name: 'Passport Size (Portrait)', width: 35, height: 45, unit: 'mm' },
     { name: 'US Visa (Square)', width: 2, height: 2, unit: 'inch' },
     { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
@@ -339,7 +338,7 @@ export default function BackgroundRemover() {
               </CardHeader>
               <CardContent className="p-6 md:p-10 flex flex-col items-center justify-center bg-black/5 min-h-[300px]">
                 <div className="max-w-full max-h-[50vh] overflow-hidden rounded-xl shadow-2xl border-4 border-white bg-white mx-auto flex items-center justify-center">
-                  <img src={originalImageSrc} alt="Preview" className="max-w-full max-h-full object-contain block" />
+                  <img src={originalImageSrc} alt="Preview" className="max-w-full max-h-full object-contain block mx-auto" />
                 </div>
               </CardContent>
               <CardFooter className="bg-muted/10 border-t p-6 flex flex-col sm:flex-row justify-between gap-4">
@@ -528,4 +527,3 @@ export default function BackgroundRemover() {
     </div>
   );
 }
-
