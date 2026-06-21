@@ -61,6 +61,7 @@ import {
   Palette,
   CheckCircle2,
   Menu,
+  Trophy,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -406,46 +407,74 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHY CHOOSE GR7 TOOLS */}
+      {/* WHY CHOOSE GR7 TOOLS - UPDATED DESIGN FROM IMAGE */}
       {!isSearching && (
-        <section className="py-16 md:py-24 bg-slate-50 dark:bg-[#0a040d]/50 border-t-2 border-border/50 relative overflow-hidden w-full no-print">
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-20">
-                <div className="absolute -top-24 -left-24 size-96 bg-primary/10 rounded-full blur-[100px]" />
-                <div className="absolute -bottom-24 -right-24 size-96 bg-accent/10 rounded-full blur-[100px]" />
+        <section className="px-4 py-16 md:py-24 no-print w-full">
+          <div className="max-w-[1400px] mx-auto rounded-[3rem] md:rounded-[4.5rem] bg-[#f8f9ff] dark:bg-slate-900/40 border border-slate-100 dark:border-white/5 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.08)] relative overflow-hidden p-8 md:p-16 lg:p-24">
+            
+            {/* Background Accents */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none opacity-40">
+                <div className="absolute -top-24 -left-24 size-96 bg-primary/5 rounded-full blur-[100px]" />
+                <div className="absolute -bottom-24 -right-24 size-96 bg-accent/5 rounded-full blur-[100px]" />
             </div>
 
-            <div className="w-full px-6 md:px-12 relative z-10 max-w-7xl mx-auto text-center">
-                <div className="inline-flex items-center gap-2 px-6 py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] mb-6 md:mb-4 shadow-sm">
-                    <CheckCircle2 className="size-3" /> THE GR7 PROMISE
+            <div className="relative z-10 flex flex-col items-center text-center max-w-5xl mx-auto space-y-10">
+                <div className="space-y-4">
+                    <div className="inline-flex items-center px-4 py-1 rounded-full bg-white dark:bg-slate-800 border shadow-sm">
+                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">CORE PRINCIPLES</span>
+                    </div>
+                    
+                    <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 dark:text-white">
+                        Why Choose <span className="text-primary">GR7 Tools?</span>
+                    </h2>
+                    
+                    <p className="text-[10px] md:text-sm font-black uppercase tracking-[0.1em] text-slate-500 opacity-80 leading-relaxed max-w-2xl mx-auto">
+                        THE ONLY PROFESSIONAL STUDIO BUILT ENTIRELY ON PRIVACY-FIRST ARCHITECTURE.
+                    </p>
                 </div>
-                <h2 className="text-2xl md:text-5xl font-black mb-12 md:mb-16 tracking-tighter uppercase font-jakarta">Why Professionals <br className="sm:hidden"/><span className="text-gradient-hero">Choose GR7 Studio</span></h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-                    <div className="group p-6 md:p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-primary/20 transition-all duration-500 hover:-translate-y-2">
-                        <div className="size-14 md:size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 transition-transform shadow-inner border border-primary/20 mx-auto md:mx-0">
-                            <ShieldCheck className="size-7 md:size-8" />
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-16 pt-8">
+                    {/* Feature 1 */}
+                    <div className="flex flex-col items-center space-y-6">
+                        <div className="size-20 rounded-full bg-white dark:bg-slate-800 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 dark:border-white/5 transition-transform hover:scale-110 duration-500">
+                            <ShieldCheck className="size-10 text-green-500" />
                         </div>
-                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-4 text-center md:text-left">100% Private</h3>
-                        <p className="text-[10px] md:text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 text-center md:text-left">Your files never touch our servers. All processing happens locally in your device RAM for maximum security and data privacy.</p>
+                        <div className="space-y-3">
+                            <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-slate-100">100% Private</h3>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
+                                Your images and documents never leave your device. All processing happens 100% locally in your browser's temporary memory (RAM).
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="group p-6 md:p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-accent/20 transition-all duration-500 hover:-translate-y-2">
-                        <div className="size-14 md:size-16 rounded-2xl bg-accent/10 flex items-center justify-center text-accent mb-6 group-hover:scale-110 transition-transform shadow-inner border border-accent/20 mx-auto md:mx-0">
-                            <Zap className="size-7 md:size-8" />
+                    {/* Feature 2 */}
+                    <div className="flex flex-col items-center space-y-6">
+                        <div className="size-20 rounded-full bg-white dark:bg-slate-800 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 dark:border-white/5 transition-transform hover:scale-110 duration-500">
+                            <Zap className="size-10 text-blue-500" />
                         </div>
-                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-4 text-center md:text-left">Ultra Fast</h3>
-                        <p className="text-[10px] md:text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 text-center md:text-left">Zero upload wait times. Our WASM-powered engine delivers hardware-accelerated performance directly within your browser environment.</p>
+                        <div className="space-y-3">
+                            <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-slate-100">Native Performance</h3>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
+                                Using advanced WASM technology, we process files at your device's native hardware speed. No server queues, no waiting, no limits.
+                            </p>
+                        </div>
                     </div>
 
-                    <div className="group p-6 md:p-8 rounded-[2.5rem] bg-white dark:bg-slate-900 shadow-xl border-2 border-transparent hover:border-emerald-500/20 transition-all duration-500 hover:-translate-y-2">
-                        <div className="size-14 md:size-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 mb-6 group-hover:scale-110 transition-transform shadow-inner border border-emerald-500/20 mx-auto md:mx-0">
-                            <Sparkles className="size-7 md:size-8" />
+                    {/* Feature 3 */}
+                    <div className="flex flex-col items-center space-y-6">
+                        <div className="size-20 rounded-full bg-white dark:bg-slate-800 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.1)] flex items-center justify-center border border-slate-100 dark:border-white/5 transition-transform hover:scale-110 duration-500">
+                            <Trophy className="size-10 text-blue-600" />
                         </div>
-                        <h3 className="text-lg md:text-xl font-black uppercase tracking-tight mb-4 text-center md:text-left">HD Quality</h3>
-                        <p className="text-[10px] md:text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed uppercase opacity-60 text-center md:text-left">Get 300 DPI high-definition results perfectly calibrated for government job portals, banking applications, and official submissions.</p>
+                        <div className="space-y-3">
+                            <h3 className="text-lg font-black uppercase tracking-tight text-slate-800 dark:text-slate-100">Studio Quality</h3>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-bold leading-relaxed">
+                                Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent) for crystal clear printing.
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
+          </div>
         </section>
       )}
     </div>
