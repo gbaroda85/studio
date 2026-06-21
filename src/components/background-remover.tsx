@@ -121,7 +121,6 @@ export default function BackgroundRemover() {
     return p.width > 0 ? p.width / p.height : undefined;
   }, [selectedSizeIndex]);
 
-  // Function to initialize crop when image loads
   const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const { width, height } = e.currentTarget;
     const aspect = getAspectRatio();
@@ -132,7 +131,6 @@ export default function BackgroundRemover() {
         
     setCrop(initialCrop);
     
-    // Also initialize completedCrop so "Confirm" works immediately
     setCompletedCrop({
         unit: 'px',
         x: (initialCrop.x / 100) * width,
@@ -142,7 +140,6 @@ export default function BackgroundRemover() {
     });
   };
 
-  // Handle automatic crop box updates when preset changes
   useEffect(() => {
     if (stage === 'crop' && imgRef.current) {
         const { width, height } = imgRef.current;
@@ -362,7 +359,7 @@ export default function BackgroundRemover() {
 
       {/* 3. CROP STAGE */}
       {stage === 'crop' && (
-        <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem] text-left">
+        <Card className="w-full max-w-5xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem] text-left">
             <CardHeader className="bg-muted/30 border-b p-6 flex flex-col md:flex-row items-center justify-between gap-4">
                 <div className="space-y-1">
                     <CardTitle className="text-xl font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
@@ -379,16 +376,17 @@ export default function BackgroundRemover() {
                     </SelectContent>
                 </Select>
             </CardHeader>
-            <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200/50 h-[500px] md:h-[650px] relative overflow-hidden">
+            {/* FIX: Removed fixed heights, used vh instead and optimized scroll area */}
+            <CardContent className="p-0 flex flex-col bg-slate-200/50 min-h-[400px] h-[60vh] md:h-[70vh] relative overflow-hidden">
                 <ScrollArea className="w-full h-full p-4 md:p-12">
-                    <div className="flex justify-center min-h-full items-center">
+                    <div className="flex justify-center min-h-full items-center p-4">
                         <div className="max-w-full rounded-xl border-4 border-white shadow-2xl bg-white overflow-hidden transform-gpu">
                             <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
                                 <img 
                                   ref={imgRef} 
                                   src={originalImageSrc!} 
                                   alt="Crop source" 
-                                  className="max-h-[60vh] md:max-h-[70vh] w-auto block object-contain" 
+                                  className="max-w-full h-auto block object-contain" 
                                   onLoad={onImageLoad} 
                                 />
                             </ReactCrop>
