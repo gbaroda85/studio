@@ -102,7 +102,6 @@ const CATEGORIES = [
       { href: '/remove-background', label: 'remove_background_label', icon: Eraser },
       { href: '/remove-signature', label: 'remove_signature_label', icon: PenLine },
       { href: '/passport-photo', label: 'passport_photo_label', icon: UserCircle },
-      { href: '/marriage-biodata', label: 'marriage_biodata_label', icon: Heart },
       { href: '/image-to-jpg', label: 'image_to_jpg_label', icon: FileOutput },
       { href: '/image-to-png', label: 'image_to_png_label', icon: FileOutput },
       { href: '/image-to-text', label: 'image_to_text_label', icon: FileScan },
@@ -189,7 +188,7 @@ function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden">
-        <svg viewBox="0 0 100 100" className="w-full h-full p-0.5 md:p-1">
+        <svg viewBox="0 0 1000 100" className="w-full h-full p-0.5 md:p-1">
           <text 
             x="4" 
             y="70" 
@@ -376,7 +375,7 @@ function AppHeader() {
   return (
     <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center transform-gpu">
       <div className="w-full h-full flex items-center justify-between px-3 md:px-8 lg:px-12">
-        <div className="flex items-center gap-1 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center group mr-1 md:mr-2 touch-manipulation">
               <GR7Logo />
