@@ -43,7 +43,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { useFileStore } from '@/lib/file-store';
 
-// STABLE WORKER CONFIG FOR PRODUCTION (Vercel Fix)
+// STABLE WORKER CONFIG FOR PRODUCTION
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/build/pdf.worker.min.mjs`;
@@ -53,7 +53,7 @@ const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className={`star-${i} pointer-events-none`}>
-                <svg viewBox="0 0 784.11 815.53" style={{ shapeRendering: 'geometricPrecision', textRendering: 'geometricPrecision', imageRendering: 'optimizeQuality', fillRule: 'evenodd', clipRule: 'evenodd' }}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
             </div>
@@ -187,13 +187,13 @@ export default function PdfUnlocker() {
             const imgs: string[] = [];
             const pagesToRender = Math.min(pdf.numPages, 3); 
 
-            for (let i = 1; i <= totalPages; i++) {
+            for (let i = 1; i <= pagesToRender; i++) {
                 const page = await pdf.getPage(i);
                 const viewport = page.getViewport({ scale: 0.8 });
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    canvas.height = viewport.height; canvas.width = viewport.width;
+                    canvas.height = Math.floor(viewport.height); canvas.width = Math.floor(viewport.width);
                     ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                     await page.render({ canvasContext: ctx, viewport }).promise;
                     imgs.push(canvas.toDataURL('image/jpeg', 0.8));
@@ -206,7 +206,6 @@ export default function PdfUnlocker() {
     const handleUnlockProcess = async () => {
         if (!pdfFile) return;
         
-        // If it's already unprotected, we just sanitize it to provide a "new" file or metadata cleanup
         const needsPassword = isProtected === true;
         if (needsPassword && !password) {
             toast({ variant: 'destructive', title: "Password Required", description: "Please enter the PDF password." });
@@ -222,7 +221,6 @@ export default function PdfUnlocker() {
         try {
             const pdfBuffer = await pdfFile.arrayBuffer();
 
-            // --- METHOD A: DIRECT VECTOR UNLOCK ---
             try {
                 const pdfDoc = await PDFDocument.load(pdfBuffer, { 
                     password: needsPassword ? password : undefined,
@@ -255,13 +253,12 @@ export default function PdfUnlocker() {
                 console.warn("pdf-lib direct unlock failed, falling back to sanitization.");
             }
 
-            // --- METHOD B: SANITIZATION FALLBACK ---
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(pdfBuffer),
                 password: needsPassword ? password : undefined,
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts//`,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
                 isEvalSupported: true,
                 stopAtErrors: false
             });
@@ -396,7 +393,7 @@ export default function PdfUnlocker() {
                                             </div>
                                         </div>
                                         <Button variant="ghost" size="icon" onClick={resetState} className="text-muted-foreground hover:text-destructive h-8 w-8">
-                                            <X size(16)/>
+                                            <X size={16}/>
                                         </Button>
                                     </div>
                                 </CardHeader>
@@ -505,7 +502,7 @@ export default function PdfUnlocker() {
                                     ) : (
                                         <Button 
                                             size="lg" 
-                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95 flex-[2] min-w-[200px]" 
+                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95 flex-[2] min-w-[200px]" 
                                             onClick={handleDownload}
                                         >
                                             <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
@@ -531,7 +528,6 @@ export default function PdfUnlocker() {
                                 </CardFooter>
                             </Card>
 
-                            {/* RIGHT: PREVIEW AREA */}
                             <Card className="lg:col-span-7 border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-900 border-primary/10">
                                 <CardHeader className="bg-muted/30 border-b p-4 text-center">
                                     <CardTitle className="text-[10px] font-black uppercase tracking-widest opacity-40 flex items-center justify-center gap-2">
