@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import QRCodeStyling, { 
     type DotType,
     type CornerSquareType,
@@ -93,7 +93,7 @@ export default function QrCodeGenerator() {
     const [cornerType, setCornerType] = useState<CornerSquareType>("extra-rounded");
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
-    // New: Border and Label
+    // New Features: Border and Label
     const [borderWidth, setBorderWidth] = useState([0]);
     const [borderColor, setBorderColor] = useState("#000000");
     const [showLabel, setShowLabel] = useState(false);
@@ -149,7 +149,7 @@ export default function QrCodeGenerator() {
     useEffect(() => {
         if (typeof window !== 'undefined' && !qrCodeRef.current) {
             qrCodeRef.current = new QRCodeStyling({
-                width: 600, // High-res internal
+                width: 600, 
                 height: 600,
                 type: 'svg',
                 dotsOptions: { type: 'rounded', color: '#000000' },
@@ -176,10 +176,6 @@ export default function QrCodeGenerator() {
         }
     };
 
-    /**
-     * COMPOSITE DOWNLOAD ENGINE
-     * Merges QR + Border + Label into one high-quality canvas
-     */
     const getCompositeCanvas = async (): Promise<HTMLCanvasElement | null> => {
         if (!qrCodeRef.current) return null;
         
@@ -312,7 +308,6 @@ export default function QrCodeGenerator() {
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[500px] flex flex-col items-center justify-center relative select-none">
                             <div className="flex flex-col items-center gap-10 w-full max-w-lg">
                                 
-                                {/* DYNAMIC PREVIEW BOX */}
                                 <div 
                                     className="p-4 md:p-8 rounded-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] border-4 border-white flex flex-col items-center justify-center relative group overflow-hidden transition-all duration-300"
                                     style={{ 
@@ -420,7 +415,6 @@ export default function QrCodeGenerator() {
                                             </div>
                                         </div>
 
-                                        {/* NEW: BORDER & LABEL CONTROLS */}
                                         <div className="space-y-6 pt-6 border-t border-dashed">
                                             <div className="space-y-4">
                                                 <div className="flex justify-between items-center">
@@ -487,7 +481,7 @@ export default function QrCodeGenerator() {
                                 <span className="flex-1 px-10 text-center tracking-widest text-lg md:text-xl font-black uppercase">
                                     {isProcessing ? "SAVING..." : "DOWNLOAD HD QR"}
                                 </span>
-                                <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                     {isProcessing ? <Loader2 className="size-8 animate-spin" /> : <Download className="size-8 group-hover:scale-110 transition-transform" />}
                                     <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
                                 </div>
