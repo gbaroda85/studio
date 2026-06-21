@@ -187,7 +187,7 @@ export default function PdfUnlocker() {
             const imgs: string[] = [];
             const pagesToRender = Math.min(pdf.numPages, 3); 
 
-            for (let i = 1; i <= pagesToRender; i++) {
+            for (let i = 1; i <= totalPages; i++) {
                 const page = await pdf.getPage(i);
                 const viewport = page.getViewport({ scale: 0.8 });
                 const canvas = document.createElement('canvas');
@@ -396,7 +396,7 @@ export default function PdfUnlocker() {
                                             </div>
                                         </div>
                                         <Button variant="ghost" size="icon" onClick={resetState} className="text-muted-foreground hover:text-destructive h-8 w-8">
-                                            <X size={16}/>
+                                            <X size(16)/>
                                         </Button>
                                     </div>
                                 </CardHeader>
@@ -491,7 +491,7 @@ export default function PdfUnlocker() {
                                             <Button 
                                                 onClick={handleUnlockProcess} 
                                                 disabled={isUnlocking || !password || isChecking} 
-                                                className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary text-white hover:bg-primary/90 border-none transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 shadow-xl"
+                                                className="magic-button w-full h-14 md:h-16 text-sm md:text-lg font-black bg-primary text-white hover:bg-primary/90 border-none transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10"
                                             >
                                                 <StarIcons />
                                                 {isUnlocking ? "DECODING..." : (
@@ -505,11 +505,11 @@ export default function PdfUnlocker() {
                                     ) : (
                                         <Button 
                                             size="lg" 
-                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95 flex-[2] min-w-[240px]" 
+                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95 flex-[2] min-w-[200px]" 
                                             onClick={handleDownload}
                                         >
-                                            <div className="absolute left-4 w-0.5 h-10 bg-white/40 rounded-full" />
-                                            <span className="flex-1 px-10 text-center tracking-widest text-sm md:text-lg uppercase">SAVE PDF</span>
+                                            <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
+                                            <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">SAVE PDF</span>
                                             <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                                 <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
                                                 <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
