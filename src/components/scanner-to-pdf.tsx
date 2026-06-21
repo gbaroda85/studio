@@ -243,15 +243,6 @@ export default function ScannerToPdf() {
       toast({ title: "Applied to All" });
   };
 
-  const ensureImageLoaded = (src: string): Promise<HTMLImageElement> => {
-      return new Promise((resolve, reject) => {
-          const img = new window.Image();
-          img.onload = () => resolve(img);
-          img.onerror = reject;
-          img.src = src;
-      });
-  };
-
   const generatePDFPreview = async () => {
       if (pages.length === 0) return;
       setIsRenderingPreview(true);
@@ -268,16 +259,17 @@ export default function ScannerToPdf() {
               
               try {
                   const img = await ensureImageLoaded(pData.src);
-                  const margin = 10;
-                  const safeW = pageWidth - (margin * 2);
-                  const safeH = pageHeight - (margin * 2);
+                  // Fixed 0.9 scale factor to ensure there's room to move Top/Bottom
+                  const scaleFactor = 0.9;
+                  const safeW = pageWidth * scaleFactor;
+                  const safeH = pageHeight * scaleFactor;
                   const ratio = Math.min(safeW / img.naturalWidth, safeH / img.naturalHeight);
                   const fw = img.naturalWidth * ratio;
                   const fh = img.naturalHeight * ratio;
                   const x = (pageWidth - fw) / 2;
                   let y;
-                  if (pData.vAlign === 'top') y = margin;
-                  else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
+                  if (pData.vAlign === 'top') y = 0;
+                  else if (pData.vAlign === 'bottom') y = pageHeight - fh;
                   else y = (pageHeight - fh) / 2;
                   
                   pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
@@ -300,7 +292,7 @@ export default function ScannerToPdf() {
               if (ctx) {
                   canvas.height = vp.height; canvas.width = vp.width;
                   ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                  await pg.render({ canvasContext: ctx, viewport: vp }).promise;
+                  await page.render({ canvasContext: ctx, viewport: vp }).promise;
                   imgs.push(canvas.toDataURL('image/jpeg', 0.8));
               }
           }
@@ -326,16 +318,17 @@ export default function ScannerToPdf() {
             
             try {
                 const img = await ensureImageLoaded(pData.src);
-                const margin = 10;
-                const safeW = pageWidth - (margin * 2);
-                const safeH = pageHeight - (margin * 2);
+                // Fixed 0.9 scale factor to ensure there's room to move Top/Bottom
+                const scaleFactor = 0.9;
+                const safeW = pageWidth * scaleFactor;
+                const safeH = pageHeight * scaleFactor;
                 const ratio = Math.min(safeW / img.naturalWidth, safeH / img.naturalHeight);
                 const fw = img.naturalWidth * ratio;
                 const fh = img.naturalHeight * ratio;
                 const x = (pageWidth - fw) / 2;
                 let y;
-                if (pData.vAlign === 'top') y = margin;
-                else if (pData.vAlign === 'bottom') y = pageHeight - fh - margin;
+                if (pData.vAlign === 'top') y = 0;
+                else if (pData.vAlign === 'bottom') y = pageHeight - fh;
                 else y = (pageHeight - fh) / 2;
                 
                 pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
@@ -364,13 +357,14 @@ export default function ScannerToPdf() {
               if (i > 0) pdf.addPage();
               const pData = pages[i];
               const img = await ensureImageLoaded(pData.src);
-              const ratio = Math.min((pageWidth - 20) / img.naturalWidth, (pageHeight - 20) / img.naturalHeight);
+              const scaleFactor = 0.9;
+              const ratio = Math.min((pageWidth * scaleFactor) / img.naturalWidth, (pageHeight * scaleFactor) / img.naturalHeight);
               const fw = img.naturalWidth * ratio;
               const fh = img.naturalHeight * ratio;
               const x = (pageWidth - fw) / 2;
               let y;
-              if (pData.vAlign === 'top') y = 10;
-              else if (pData.vAlign === 'bottom') y = pageHeight - fh - 10;
+              if (pData.vAlign === 'top') y = 0;
+              else if (pData.vAlign === 'bottom') y = pageHeight - fh;
               else y = (pageHeight - fh) / 2;
               pdf.addImage(img, 'JPEG', x, y, fw, fh, undefined, 'FAST');
           }
@@ -650,7 +644,7 @@ export default function ScannerToPdf() {
         </div>
         
         <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
-        <input ref={fileInputRef} type="file" className="hidden" accept="image/*" multiple onChange={handleFilesUpload} />
+        <input ref={fileInputRef} type="file" className="hidden" accept="image/*,application/pdf" multiple onChange={handleFilesUpload} />
     </div>
   );
 }

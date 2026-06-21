@@ -39,6 +39,7 @@ import ReactCrop, { type Crop, type PixelCrop, centerCrop, makeAspectCrop } from
 import 'react-image-crop/dist/ReactCrop.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 type Stage = 'upload' | 'preview' | 'crop' | 'process' | 'studio';
 
@@ -322,11 +323,12 @@ export default function BackgroundRemover() {
                     <SelectContent className="rounded-xl border-2 shadow-2xl">{SIZE_PRESETS.map((p, i) => (<SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase py-3">{p.name}</SelectItem>))}</SelectContent>
                 </Select>
             </CardHeader>
-            <CardContent className="p-8 md:p-12 flex items-center justify-center bg-slate-200/50 min-h-[450px]">
-                <div className="max-h-[55vh] overflow-hidden rounded-xl border-4 border-white shadow-2xl">
+            <CardContent className="p-4 md:p-8 flex items-center justify-center bg-slate-200/50 min-h-[450px] overflow-auto custom-scrollbar">
+                <div className="max-h-[70vh] overflow-auto rounded-xl border-4 border-white shadow-2xl custom-scrollbar">
                     <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
-                        <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[55vh] w-auto block object-contain" />
+                        <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[70vh] w-auto block object-contain" />
                     </ReactCrop>
+                    <ScrollBar />
                 </div>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
@@ -364,7 +366,7 @@ export default function BackgroundRemover() {
                     <h2 className="text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
                 </div>
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-2 size-4" /> Change Photo</Button>
+                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-12 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 hover:text-destructive"><RotateCcw className="mr-2 size-4" /> Change Photo</Button>
                     <Button 
                         size="lg" 
                         className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-12 flex-[2] md:flex-none shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none" 
