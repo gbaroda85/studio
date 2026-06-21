@@ -56,10 +56,12 @@ const COLOR_PRESETS = [
 ];
 
 const SIZE_PRESETS = [
-    { name: 'Original Ratio', width: 0, height: 0, unit: 'px' },
+    { name: 'Free Hand (Manual)', width: 0, height: 0, unit: 'px' },
+    { name: 'Aadhaar Card (86x54mm)', width: 85.6, height: 54, unit: 'mm' },
     { name: 'India Passport (35x45mm)', width: 35, height: 45, unit: 'mm' },
-    { name: 'USA Passport (2x2in)', width: 2, height: 2, unit: 'inch' },
     { name: 'PAN Card (25x35mm)', width: 25, height: 35, unit: 'mm' },
+    { name: 'Driving Licence (35x45mm)', width: 35, height: 45, unit: 'mm' },
+    { name: 'USA Passport (2x2in)', width: 2, height: 2, unit: 'inch' },
     { name: 'SSC Photo (200x230px)', width: 200, height: 230, unit: 'px' },
 ];
 
@@ -113,6 +115,25 @@ export default function BackgroundRemover() {
     backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px",
     backgroundColor: "#ffffff"
   };
+
+  const getAspectRatio = useCallback(() => {
+    const p = SIZE_PRESETS[parseInt(selectedSizeIndex)];
+    return p.width > 0 ? p.width / p.height : undefined;
+  }, [selectedSizeIndex]);
+
+  // Handle automatic crop box updates when preset changes
+  useEffect(() => {
+    if (stage === 'crop' && imgRef.current && imgRef.current.complete) {
+        const { width, height } = imgRef.current;
+        const aspect = getAspectRatio();
+        
+        const newCrop = aspect 
+            ? centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height), width, height)
+            : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+            
+        setCrop(newCrop);
+    }
+  }, [selectedSizeIndex, stage, getAspectRatio]);
 
   const handleFileChange = (file: File | null) => {
     if (file && file.type.startsWith("image/")) {
@@ -259,11 +280,6 @@ export default function BackgroundRemover() {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const getAspectRatio = () => {
-    const p = SIZE_PRESETS[parseInt(selectedSizeIndex)];
-    return p.width > 0 ? p.width / p.height : undefined;
-  };
-
   return (
     <div className="w-full flex flex-col items-center gap-6 px-4 pb-20">
       
@@ -317,11 +333,20 @@ export default function BackgroundRemover() {
       {/* 3. CROP STAGE */}
       {stage === 'crop' && (
         <Card className="w-full max-w-4xl glass-card shadow-2xl animate-in zoom-in-95 duration-500 overflow-hidden rounded-[2.5rem] text-left">
-            <CardHeader className="bg-muted/30 border-b p-6 flex items-center justify-between">
-                <CardTitle className="text-xl font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
+            <CardHeader className="bg-muted/30 border-b p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="space-y-1">
+                    <CardTitle className="text-xl font-black uppercase tracking-tighter">Define Subject Area</CardTitle>
+                    <CardDescription className="text-[10px] font-bold uppercase opacity-50">Select preset or adjust manually.</CardDescription>
+                </div>
                 <Select value={selectedSizeIndex} onValueChange={setSelectedSizeIndex}>
-                    <SelectTrigger className="h-10 w-56 font-black border-2 rounded-xl text-[10px] uppercase bg-background"><SelectValue /></SelectTrigger>
-                    <SelectContent className="rounded-xl border-2 shadow-2xl">{SIZE_PRESETS.map((p, i) => (<SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase py-3">{p.name}</SelectItem>))}</SelectContent>
+                    <SelectTrigger className="h-10 w-full md:w-64 font-black border-2 rounded-xl text-[10px] uppercase bg-background shadow-sm"><SelectValue /></SelectTrigger>
+                    <SelectContent className="rounded-xl border-2 shadow-2xl z-[1000]">
+                        {SIZE_PRESETS.map((p, i) => (
+                            <SelectItem key={i} value={String(i)} className="font-bold text-[10px] uppercase py-3 cursor-pointer">
+                                {p.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
                 </Select>
             </CardHeader>
             <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200/50 min-h-[450px]">
@@ -329,7 +354,7 @@ export default function BackgroundRemover() {
                     <div className="flex justify-center">
                         <div className="max-h-[70vh] rounded-xl border-4 border-white shadow-2xl bg-white overflow-hidden">
                             <ReactCrop crop={crop} onChange={setCrop} onComplete={setCompletedCrop} aspect={getAspectRatio()}>
-                                <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[70vh] w-auto block object-contain" />
+                                <img ref={imgRef} src={originalImageSrc!} alt="Crop source" className="max-h-[70vh] w-auto block object-contain" onLoad={onImageLoad} />
                             </ReactCrop>
                         </div>
                     </div>
@@ -337,8 +362,8 @@ export default function BackgroundRemover() {
                 </ScrollArea>
             </CardContent>
             <CardFooter className="bg-muted/10 border-t p-6 flex justify-between gap-4">
-                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl"><RotateCcw className="mr-2 size-4" /> Back</Button>
-                <Button className="h-14 px-12 rounded-xl bg-primary text-white font-black transition-all active:scale-95 text-lg" onClick={handleApplyCrop}>
+                <Button variant="ghost" onClick={() => setStage('preview')} className="font-black text-[10px] uppercase h-12 px-6 rounded-xl transition-colors hover:bg-destructive/5"><ArrowLeft className="mr-2 size-4" /> Back</Button>
+                <Button className="h-14 px-12 rounded-xl bg-primary text-white font-black transition-all active:scale-95 text-lg shadow-xl" onClick={handleApplyCrop}>
                     CONFIRM & PROCESS <ChevronRight className="ml-2 size-6" />
                 </Button>
             </CardFooter>
@@ -444,7 +469,7 @@ export default function BackgroundRemover() {
                     </Card>
                 </div>
 
-                <div className="lg:col-span-4 space-y-6 h-full">
+                <div className="lg:col-span-4 space-y-6 h-full flex flex-col">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
@@ -480,7 +505,7 @@ export default function BackgroundRemover() {
                                 </div>
                             </div>
 
-                            <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 shadow-sm text-left">
+                            <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 text-left shadow-sm">
                                 <div className="size-10 rounded-full bg-green-500/10 border-2 border-green-500/20 flex items-center justify-center shrink-0">
                                     <CheckCircle2 className="size-6 text-green-600" />
                                 </div>
