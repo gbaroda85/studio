@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import QRCodeStyling, { 
     type Options, 
     type DrawType, 
@@ -88,56 +88,25 @@ export default function QrCodeGenerator() {
     const [debouncedData, setDebouncedData] = useState(inputData);
     const [isProcessing, setIsProcessing] = useState(false);
     
-    // Sub-states for specific types
+    // Type-specific states
     const [wifiData, setWifiData] = useState({ ssid: '', password: '', encryption: 'WPA' });
     const [whatsappData, setWhatsappData] = useState({ phone: '', message: '' });
     const [emailData, setEmailData] = useState({ to: '', subject: '', body: '' });
     const [upiData, setUpiData] = useState({ pa: '', pn: '', am: '', tn: '', cu: 'INR' });
 
-    // QR Styling Options
-    const [options, setOptions] = useState<Options>({
-        width: 300,
-        height: 300,
-        type: 'svg' as DrawType,
-        data: inputData,
-        image: undefined,
-        margin: 10,
-        qrOptions: {
-            typeNumber: 0 as TypeNumber,
-            mode: 'Byte' as Mode,
-            errorCorrectionLevel: 'Q' as ErrorCorrectionLevel
-        },
-        imageOptions: {
-            hideBackgroundDots: true,
-            imageSize: 0.4,
-            margin: 5,
-            crossOrigin: 'anonymous',
-        },
-        dotsOptions: {
-            color: "#000000",
-            type: "rounded" as DotType
-        },
-        backgroundOptions: {
-            color: "#ffffff",
-        },
-        cornersSquareOptions: {
-            color: "#000000",
-            type: "extra-rounded" as CornerSquareType
-        },
-        cornersDotOptions: {
-            color: "#000000",
-            type: "dot" as CornerDotType
-        }
-    });
-
+    // Design states (Flat state to ensure smooth reactivity)
+    const [dotColor, setDotColor] = useState("#000000");
+    const [bgColor, setBgColor] = useState("#ffffff");
+    const [dotType, setDotType] = useState<DotType>("rounded");
+    const [cornerType, setCornerType] = useState<CornerSquareType>("extra-rounded");
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
-    const [history, setHistory] = useState<{ id: string, data: string, date: string, type: QRType }[]>([]);
-    
+
     const qrContainerRef = useRef<HTMLDivElement>(null);
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
+    const [history, setHistory] = useState<{ id: string, data: string, date: string, type: QRType }[]>([]);
 
-    // Performance Optimization: Debounce data updates to prevent lag during typing
+    // 1. Data Debounce (250ms delay for heavy typing)
     useEffect(() => {
         const handler = setTimeout(() => {
             setDebouncedData(inputData);
@@ -145,7 +114,7 @@ export default function QrCodeGenerator() {
         return () => clearTimeout(handler);
     }, [inputData]);
 
-    // Type-specific data construction
+    // 2. Type-to-Data Mapper
     useEffect(() => {
         let dataStr = inputData;
         if (qrType === 'wifi') {
@@ -162,43 +131,50 @@ export default function QrCodeGenerator() {
             if (upiData.tn) upi += `&tn=${encodeURIComponent(upiData.tn)}`;
             dataStr = upi;
         }
-        
-        if (dataStr !== inputData) {
-            setInputData(dataStr);
-        }
+        if (dataStr !== inputData) setInputData(dataStr);
     }, [qrType, wifiData, whatsappData, emailData, upiData]);
 
-    // Initialize QR Code engine strictly on client mount
+    // 3. Engine Initialization
     useEffect(() => {
         if (typeof window !== 'undefined' && !qrCodeRef.current) {
-            qrCodeRef.current = new QRCodeStyling(options);
+            qrCodeRef.current = new QRCodeStyling({
+                width: 300,
+                height: 300,
+                type: 'svg',
+                dotsOptions: { type: 'rounded', color: '#000000' },
+                backgroundOptions: { color: '#ffffff' }
+            });
             if (qrContainerRef.current) {
-                qrContainerRef.current.innerHTML = ""; // Clean existing
+                qrContainerRef.current.innerHTML = "";
                 qrCodeRef.current.append(qrContainerRef.current);
             }
         }
     }, []);
 
-    // Sync instance with state changes
+    // 4. Smooth Sync Effect (Throttled update)
     useEffect(() => {
         if (qrCodeRef.current) {
-            qrCodeRef.current.update({
-                ...options,
-                data: debouncedData || " "
+            // We use requestAnimationFrame to ensure the browser is ready and prevent "stuck" feeling
+            const frame = requestAnimationFrame(() => {
+                qrCodeRef.current?.update({
+                    data: debouncedData || " ",
+                    image: logoUrl || undefined,
+                    dotsOptions: { color: dotColor, type: dotType },
+                    backgroundOptions: { color: bgColor },
+                    cornersSquareOptions: { color: dotColor, type: cornerType },
+                    cornersDotOptions: { color: dotColor, type: 'dot' },
+                    imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 5 }
+                });
             });
+            return () => cancelAnimationFrame(frame);
         }
-    }, [options, debouncedData]);
+    }, [debouncedData, logoUrl, dotColor, bgColor, dotType, cornerType]);
 
     const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (event) => {
-                const src = event.target?.result as string;
-                setLogoUrl(src);
-                setOptions(prev => ({ ...prev, image: src }));
-                toast({ title: "Logo Uploaded" });
-            };
+            reader.onload = (event) => setLogoUrl(event.target?.result as string);
             reader.readAsDataURL(file);
         }
     };
@@ -207,8 +183,13 @@ export default function QrCodeGenerator() {
         if (!qrCodeRef.current) return;
         setIsProcessing(true);
         try {
-            // Re-sync options before download to prevent "Maroon" or stale color bug
-            qrCodeRef.current.update(options);
+            // CRITICAL: Force a final sync to current colors to avoid the "Maroon/Stale" bug
+            qrCodeRef.current.update({
+                dotsOptions: { color: dotColor, type: dotType },
+                backgroundOptions: { color: bgColor },
+                cornersSquareOptions: { color: dotColor, type: cornerType },
+                cornersDotOptions: { color: dotColor, type: 'dot' }
+            });
 
             if (ext === 'pdf') {
                 const blob = await qrCodeRef.current.getRawData('png');
@@ -220,10 +201,7 @@ export default function QrCodeGenerator() {
                     URL.revokeObjectURL(url);
                 }
             } else {
-                await qrCodeRef.current.download({
-                    name: `GR7-QR-${Date.now()}`,
-                    extension: ext
-                });
+                await qrCodeRef.current.download({ name: `GR7-QR-${Date.now()}`, extension: ext });
             }
             
             setHistory(prev => [{ id: Math.random().toString(36).substr(2, 9), data: inputData, date: new Date().toLocaleTimeString(), type: qrType }, ...prev].slice(0, 10));
@@ -239,13 +217,8 @@ export default function QrCodeGenerator() {
     const handlePrint = async () => {
         if (!qrCodeRef.current) return;
         const printWindow = window.open('', '_blank');
-        if (!printWindow) {
-            toast({ variant: 'destructive', title: "Printer Blocked" });
-            return;
-        }
-
+        if (!printWindow) { toast({ variant: 'destructive', title: "Printer Blocked" }); return; }
         printWindow.document.write('<html><head><title>Print QR</title></head><body style="margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:white;"><p>Loading...</p></body></html>');
-
         try {
             const blob = await qrCodeRef.current.getRawData('png');
             if (blob) {
@@ -254,35 +227,27 @@ export default function QrCodeGenerator() {
                 printWindow.document.close();
                 setTimeout(() => { printWindow.focus(); printWindow.print(); }, 500);
             }
-        } catch (e) {
-            printWindow.close();
-            toast({ variant: 'destructive', title: "Print Error" });
-        }
+        } catch (e) { printWindow.close(); }
     };
 
     const handleReset = () => {
         setInputData("https://www.gr7imagepdf.com");
         setLogoUrl(null);
-        setOptions({
-            width: 300, height: 300, data: "https://www.gr7imagepdf.com",
-            dotsOptions: { color: "#000000", type: "rounded" },
-            backgroundOptions: { color: "#ffffff" },
-            cornersSquareOptions: { color: "#000000", type: "extra-rounded" },
-            cornersDotOptions: { color: "#000000", type: "dot" }
-        });
+        setDotColor("#000000");
+        setBgColor("#ffffff");
+        setDotType("rounded");
+        setCornerType("extra-rounded");
     };
 
-    const selectedItem = history.find(p => p.id === inputData); // Simplified check for highlight
-
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20">
+        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20 mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
                 <div className="flex items-center gap-3">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
                         <Settings2 className="size-5 md:size-6" />
                     </div>
-                    <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+                    <div className="text-left">
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Panel</span></h2>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
@@ -301,7 +266,7 @@ export default function QrCodeGenerator() {
                                 <Eye className="h-4 w-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Studio Viewport</CardTitle>
                             </div>
-                            <Badge className="bg-green-500 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">SMOOTH SYNC</Badge>
+                            <Badge className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">HD SYNC</Badge>
                         </CardHeader>
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex items-center justify-center relative select-none">
                             <div className="flex flex-col items-center gap-10 w-full">
@@ -320,33 +285,6 @@ export default function QrCodeGenerator() {
                             </div>
                         </CardContent>
                     </Card>
-
-                    {history.length > 0 && (
-                        <Card className="border-2 shadow-xl bg-card/40 rounded-[2rem] overflow-hidden no-print">
-                            <CardHeader className="p-4 bg-muted/30 border-b">
-                                <div className="flex items-center gap-2">
-                                    <History className="size-3 text-primary" />
-                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-60">Session History</span>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-4">
-                                <ScrollArea className="w-full whitespace-nowrap">
-                                    <div className="flex gap-4 pb-4 px-1">
-                                        {history.map((item) => (
-                                            <div key={item.id} onClick={() => setInputData(item.data)} className="inline-flex items-center gap-3 p-3 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm hover:border-primary/40 cursor-pointer active:scale-95 transition-all min-w-[180px]">
-                                                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0"><QrCode className="size-4" /></div>
-                                                <div className="truncate flex-1">
-                                                    <p className="text-[10px] font-black uppercase truncate">{item.data}</p>
-                                                    <p className="text-[8px] font-bold opacity-40 uppercase">{item.date}</p>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <ScrollBar orientation="horizontal" />
-                                </ScrollArea>
-                            </CardContent>
-                        </Card>
-                    )}
                 </div>
 
                 <div className="lg:col-span-5 space-y-6">
@@ -402,7 +340,7 @@ export default function QrCodeGenerator() {
                                             </Label>
                                             <div className="grid grid-cols-2 gap-2">
                                                 {DOT_TYPES.map(d => (
-                                                    <button key={d.id} className={cn("btn-pos-uiverse h-10", options.dotsOptions?.type === d.id && "active-uiverse")} onClick={() => setOptions(prev => ({ ...prev, dotsOptions: { ...prev.dotsOptions, type: d.id } }))} data-label={d.label} />
+                                                    <button key={d.id} className={cn("btn-pos-uiverse h-10", dotType === d.id && "active-uiverse")} onClick={() => setDotType(d.id)} data-label={d.label} />
                                                 ))}
                                             </div>
                                         </div>
@@ -413,19 +351,11 @@ export default function QrCodeGenerator() {
                                                 <div className="flex gap-2 items-center">
                                                     <input 
                                                         type="color" 
-                                                        value={options.dotsOptions?.color} 
-                                                        onChange={(e) => {
-                                                            const c = e.target.value;
-                                                            setOptions(prev => ({ 
-                                                                ...prev, 
-                                                                dotsOptions: { ...prev.dotsOptions, color: c },
-                                                                cornersSquareOptions: { ...prev.cornersSquareOptions, color: c },
-                                                                cornersDotOptions: { ...prev.cornersDotOptions, color: c }
-                                                            }));
-                                                        }}
+                                                        value={dotColor} 
+                                                        onChange={(e) => setDotColor(e.target.value)}
                                                         className="size-10 p-1 rounded-lg border-2 cursor-pointer bg-white"
                                                     />
-                                                    <span className="text-[10px] font-mono font-bold uppercase">{options.dotsOptions?.color}</span>
+                                                    <span className="text-[10px] font-mono font-bold uppercase">{dotColor}</span>
                                                 </div>
                                             </div>
                                             <div className="space-y-2">
@@ -433,11 +363,11 @@ export default function QrCodeGenerator() {
                                                 <div className="flex gap-2 items-center">
                                                     <input 
                                                         type="color" 
-                                                        value={options.backgroundOptions?.color} 
-                                                        onChange={(e) => setOptions(prev => ({ ...prev, backgroundOptions: { ...prev.backgroundOptions, color: e.target.value } }))}
+                                                        value={bgColor} 
+                                                        onChange={(e) => setBgColor(e.target.value)}
                                                         className="size-10 p-1 rounded-lg border-2 cursor-pointer bg-white"
                                                     />
-                                                    <span className="text-[10px] font-mono font-bold uppercase">{options.backgroundOptions?.color}</span>
+                                                    <span className="text-[10px] font-mono font-bold uppercase">{bgColor}</span>
                                                 </div>
                                             </div>
                                         </div>
