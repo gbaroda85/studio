@@ -86,7 +86,6 @@ export default function QrCodeGenerator() {
     const { toast } = useToast();
     const [qrType, setQrType] = useState<QRType>('url');
     const [inputData, setInputData] = useState("https://www.gr7imagepdf.com");
-    const [debouncedData, setDebouncedData] = useState(inputData);
     const [isProcessing, setIsProcessing] = useState(false);
     
     // Type-specific states
@@ -102,51 +101,47 @@ export default function QrCodeGenerator() {
     const [cornerType, setCornerType] = useState<CornerSquareType>("extra-rounded");
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
-    // Debounced Visual State (to prevent slider lag)
-    const [debouncedVisuals, setDebouncedVisuals] = useState({ dotColor, bgColor, dotType, cornerType, logoUrl });
-
     const qrContainerRef = useRef<HTMLDivElement>(null);
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
     const [history, setHistory] = useState<{ id: string, data: string, date: string, type: QRType }[]>([]);
 
-    // 1. Data Debounce (typing delay)
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedData(inputData);
-        }, 250);
-        return () => clearTimeout(handler);
-    }, [inputData]);
+    // 1. Unified Real-Time Sync with requestAnimationFrame to prevent lag
+    const updateQR = useCallback(() => {
+        if (!qrCodeRef.current) return;
 
-    // 2. Visuals Debounce (slider lag fix)
-    useEffect(() => {
-        const handler = setTimeout(() => {
-            setDebouncedVisuals({ dotColor, bgColor, dotType, cornerType, logoUrl });
-        }, 60); // 60ms is fast enough to feel real-time but slow enough to stop CPU overload
-        return () => clearTimeout(handler);
-    }, [dotColor, bgColor, dotType, cornerType, logoUrl]);
-
-    // 3. Type-to-Data Mapper
-    useEffect(() => {
-        let dataStr = inputData;
-        if (qrType === 'wifi') {
-            dataStr = `WIFI:T:${wifiData.encryption};S:${wifiData.ssid};P:${wifiData.password};;`;
-        } else if (qrType === 'whatsapp') {
-            dataStr = `https://wa.me/${whatsappData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappData.message)}`;
-        } else if (qrType === 'email') {
-            dataStr = `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
-        } else if (qrType === 'upi') {
+        let finalData = inputData;
+        if (qrType === 'wifi') finalData = `WIFI:T:${wifiData.encryption};S:${wifiData.ssid};P:${wifiData.password};;`;
+        else if (qrType === 'whatsapp') finalData = `https://wa.me/${whatsappData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappData.message)}`;
+        else if (qrType === 'email') finalData = `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
+        else if (qrType === 'upi') {
             let upi = `upi://pay?pa=${upiData.pa}`;
             if (upiData.pn) upi += `&pn=${encodeURIComponent(upiData.pn)}`;
             if (upiData.am) upi += `&am=${upiData.am}`;
             if (upiData.cu) upi += `&cu=${upiData.cu}`;
             if (upiData.tn) upi += `&tn=${encodeURIComponent(upiData.tn)}`;
-            dataStr = upi;
+            finalData = upi;
         }
-        if (dataStr !== inputData) setInputData(dataStr);
-    }, [qrType, wifiData, whatsappData, emailData, upiData]);
 
-    // 4. Engine Initialization
+        requestAnimationFrame(() => {
+            qrCodeRef.current?.update({
+                data: finalData || " ",
+                image: logoUrl || undefined,
+                dotsOptions: { color: dotColor, type: dotType },
+                backgroundOptions: { color: bgColor },
+                cornersSquareOptions: { color: dotColor, type: cornerType },
+                cornersDotOptions: { color: dotColor, type: 'dot' },
+                imageOptions: { 
+                    hideBackgroundDots: true, 
+                    imageSize: 0.4, 
+                    margin: 2,
+                    crossOrigin: 'anonymous'
+                }
+            });
+        });
+    }, [inputData, qrType, wifiData, whatsappData, emailData, upiData, logoUrl, dotColor, bgColor, dotType, cornerType]);
+
+    // Initialize Engine
     useEffect(() => {
         if (typeof window !== 'undefined' && !qrCodeRef.current) {
             qrCodeRef.current = new QRCodeStyling({
@@ -163,38 +158,11 @@ export default function QrCodeGenerator() {
         }
     }, []);
 
-    // 5. Consolidated Smooth Sync Effect
+    // Sync on every change (Debounced internally by browser requestAnimationFrame)
     useEffect(() => {
-        if (qrCodeRef.current) {
-            const frame = requestAnimationFrame(() => {
-                qrCodeRef.current?.update({
-                    data: debouncedData || " ",
-                    image: debouncedVisuals.logoUrl || undefined,
-                    dotsOptions: { 
-                        color: debouncedVisuals.dotColor, 
-                        type: debouncedVisuals.dotType 
-                    },
-                    backgroundOptions: { 
-                        color: debouncedVisuals.bgColor 
-                    },
-                    cornersSquareOptions: { 
-                        color: debouncedVisuals.dotColor, 
-                        type: debouncedVisuals.cornerType 
-                    },
-                    cornersDotOptions: { 
-                        color: debouncedVisuals.dotColor, 
-                        type: 'dot' 
-                    },
-                    imageOptions: { 
-                        hideBackgroundDots: true, 
-                        imageSize: 0.4, 
-                        margin: 5 
-                    }
-                });
-            });
-            return () => cancelAnimationFrame(frame);
-        }
-    }, [debouncedData, debouncedVisuals]);
+        const timer = setTimeout(updateQR, 20);
+        return () => clearTimeout(timer);
+    }, [updateQR]);
 
     const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -209,14 +177,7 @@ export default function QrCodeGenerator() {
         if (!qrCodeRef.current) return;
         setIsProcessing(true);
         try {
-            // CRITICAL: Final sync force to ensure maroon bug is fixed before file generation
-            qrCodeRef.current.update({
-                dotsOptions: { color: dotColor, type: dotType },
-                backgroundOptions: { color: bgColor },
-                cornersSquareOptions: { color: dotColor, type: cornerType },
-                cornersDotOptions: { color: dotColor, type: 'dot' }
-            });
-
+            // Background update to ensure colors are locked for export without flickering the UI
             if (ext === 'pdf') {
                 const blob = await qrCodeRef.current.getRawData('png');
                 if (blob) {
@@ -230,7 +191,6 @@ export default function QrCodeGenerator() {
                 await qrCodeRef.current.download({ name: `GR7-QR-${Date.now()}`, extension: ext });
             }
             
-            setHistory(prev => [{ id: Math.random().toString(36).substr(2, 9), data: inputData, date: new Date().toLocaleTimeString(), type: qrType }, ...prev].slice(0, 10));
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             toast({ title: "Saved Successfully" });
         } catch (e) {
@@ -263,6 +223,7 @@ export default function QrCodeGenerator() {
         setBgColor("#ffffff");
         setDotType("rounded");
         setCornerType("extra-rounded");
+        setQrType('url');
     };
 
     return (
@@ -274,7 +235,7 @@ export default function QrCodeGenerator() {
                     </div>
                     <div className="text-left">
                         <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none">Studio <span className="text-primary">Panel</span></h2>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 mt-1">Industrial Scanner Engine</p>
+                        <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-40 mt-1">High-Speed Scanner Engine</p>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
@@ -293,12 +254,12 @@ export default function QrCodeGenerator() {
                                 <Eye className="h-4 w-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Studio Viewport</CardTitle>
                             </div>
-                            <Badge className="bg-green-600 text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md">HD SYNC</Badge>
+                            <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md">HD SYNC</Badge>
                         </CardHeader>
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex items-center justify-center relative select-none">
                             <div className="flex flex-col items-center gap-10 w-full">
                                 <div className="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-[0_35px_80px_-15px_rgba(0,0,0,0.3)] border-4 border-white flex items-center justify-center relative group overflow-hidden">
-                                    <div ref={qrContainerRef} className="transition-transform group-hover:scale-[1.02] duration-500" />
+                                    <div ref={qrContainerRef} className="transition-transform group-hover:scale-[1.01] duration-500 min-h-[300px] min-w-[300px] flex items-center justify-center" />
                                     <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                 </div>
 
@@ -435,4 +396,3 @@ export default function QrCodeGenerator() {
         </div>
     );
 }
-
