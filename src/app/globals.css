@@ -4,25 +4,25 @@
 
 @layer base {
   :root {
-    --background: 227 100% 98%;
-    --foreground: 222 47% 11%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 218 89% 53%;
+    --background: 15 5% 88%;      /* #E3E2DF - Soft Off-white */
+    --foreground: 341 100% 18%;   /* #5D001E - Deep Maroon */
+    --card: 15 5% 92%;           /* Slightly varied bg for cards */
+    --card-foreground: 341 100% 18%;
+    --popover: 15 5% 88%;
+    --popover-foreground: 341 100% 18%;
+    --primary: 334 74% 35%;       /* #9A1750 - Deep Magenta */
     --primary-foreground: 0 0% 100%;
-    --secondary: 227 100% 94%;
-    --secondary-foreground: 218 89% 30%;
-    --muted: 227 30% 95%;
-    --muted-foreground: 220 15% 45%;
-    --accent: 258 90% 66%;
+    --secondary: 345 49% 79%;     /* #E3AFBC - Light Pink */
+    --secondary-foreground: 341 100% 18%;
+    --muted: 345 20% 85%;
+    --muted-foreground: 341 40% 35%;
+    --accent: 342 83% 62%;        /* #EE4C7C - Bright Pink/Coral */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 227 100% 90%;
-    --input: 227 100% 92%;
-    --ring: 218 89% 53%;
+    --border: 345 49% 75%;
+    --input: 345 49% 82%;
+    --ring: 334 74% 35%;
     --radius: 1.5rem;
   }
   
@@ -80,8 +80,8 @@
     inset: 0;
     z-index: -20;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(218, 89%, 53%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(258, 90%, 66%, 0.03) 0px, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(334, 74%, 35%, 0.05) 0px, transparent 50%),
+      radial-gradient(at 100% 100%, hsla(342, 83%, 62%, 0.03) 0px, transparent 50%);
     pointer-events: none;
   }
 
