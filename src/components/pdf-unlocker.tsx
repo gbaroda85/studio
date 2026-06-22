@@ -222,6 +222,7 @@ export default function PdfUnlocker() {
             const pdfBuffer = await pdfFile.arrayBuffer();
 
             try {
+                // Try direct unlock with pdf-lib
                 const pdfDoc = await PDFDocument.load(pdfBuffer, { 
                     password: needsPassword ? password : undefined,
                     ignoreEncryption: !needsPassword 
@@ -253,6 +254,7 @@ export default function PdfUnlocker() {
                 console.warn("pdf-lib direct unlock failed, falling back to sanitization.");
             }
 
+            // Fallback: Use pdf.js to render and re-create (Sanitization)
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(pdfBuffer),
                 password: needsPassword ? password : undefined,
