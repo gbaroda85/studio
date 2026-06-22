@@ -217,7 +217,7 @@ export default function PdfUnlocker() {
         try {
             const pdfBuffer = await pdfFile.arrayBuffer();
 
-            // STEP 1: Attempt Direct Unlock (Preserves text and metadata)
+            // STEP 1: Attempt Direct Unlock (Fastest)
             try {
                 const pdfDoc = await PDFDocument.load(pdfBuffer, { 
                     password: needsPassword ? password : undefined,
@@ -248,20 +248,18 @@ export default function PdfUnlocker() {
                 return;
             } catch (libError: any) {
                 console.warn("Direct unlock failed, attempting sanitization fallback...", libError.message);
-                // If it's a wrong password error, don't fallback to expensive sanitization yet
                 if (libError.message.includes('Password') || libError.message.includes('password')) {
                     throw libError;
                 }
             }
 
-            // STEP 2: Fallback - Sanitization (foolproof for all encrypted PDFs)
+            // STEP 2: Fallback - Sanitization (High Compatibility Mode)
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(pdfBuffer),
                 password: needsPassword ? password : undefined,
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
                 cMapPacked: true,
-                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`,
-                isEvalSupported: false
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/standard_fonts/`
             });
             
             const pdf = await loadingTask.promise;
@@ -269,7 +267,7 @@ export default function PdfUnlocker() {
             const finalPdfDoc = await PDFDocument.create();
 
             for (let i = 1; i <= totalPages; i++) {
-                setStatusText(`Re-building P${i}/${totalPages}...`);
+                setStatusText(`Re-building Page ${i}/${totalPages}...`);
                 const page = await pdf.getPage(i);
                 
                 const renderScale = 2.0; 
@@ -355,8 +353,8 @@ export default function PdfUnlocker() {
                             <CardHeader className="bg-muted/30 border-b p-4 md:p-6 text-center">
                                 <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-6 md:p-12">
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-8 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
+                            <CardContent className="p-6 md:p-8">
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-6 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                                     <div className="relative">
                                         <UploadCloud className="size-10 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-4 md:size-6 text-yellow-500 animate-pulse" />
@@ -382,7 +380,7 @@ export default function PdfUnlocker() {
                         className="w-full max-w-5xl px-2 md:px-4"
                     >
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                            <Card className="lg:col-span-5 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50 flex flex-col min-h-[300px]">
+                            <Card className="lg:col-span-5 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50 flex flex-col min-h-[250px]">
                                 <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3 truncate pr-2 text-left">
@@ -400,7 +398,7 @@ export default function PdfUnlocker() {
                                     </div>
                                 </CardHeader>
 
-                                <CardContent className="p-5 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
+                                <CardContent className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                                     {isChecking ? (
                                         <div className="py-10 flex flex-col items-center justify-center gap-3">
                                             <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
@@ -414,7 +412,7 @@ export default function PdfUnlocker() {
                                                 <p className="text-[10px] text-green-600 font-bold leading-tight uppercase text-center">This document is already unprotected.</p>
                                             </div>
                                             {!unlockedPdfUrl && (
-                                                <Button onClick={handleUnlockProcess} disabled={isUnlocking} className="w-full h-16 md:h-20 bg-primary text-white font-black rounded-2xl text-base shadow-xl active:scale-95 transition-all">
+                                                <Button onClick={handleUnlockProcess} disabled={isUnlocking} className="w-full h-14 md:h-16 bg-primary text-white font-black rounded-2xl text-base shadow-xl active:scale-95 transition-all">
                                                     {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} SANITIZE & SAVE
                                                 </Button>
                                             )}
@@ -471,7 +469,7 @@ export default function PdfUnlocker() {
                                             )}
                                         </div>
                                     ) : (
-                                        <div className="p-6 md:p-8 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[2rem] md:rounded-[2.5rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
+                                        <div className="p-6 md:p-8 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[2rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
                                             <div className="size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
                                                 <CheckCircle2 className="size-10" />
                                                 <div className="absolute -top-1 -right-1 text-yellow-400 size-6"><Sparkles className="size-full" /></div>
@@ -490,7 +488,7 @@ export default function PdfUnlocker() {
                                             <Button 
                                                 onClick={handleUnlockProcess} 
                                                 disabled={isUnlocking || !password || isChecking} 
-                                                className="magic-button w-full h-16 md:h-20 text-lg md:text-xl font-black bg-primary text-white hover:bg-primary/90 border-none transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10 rounded-2xl shadow-2xl"
+                                                className="magic-button w-full h-14 md:h-16 text-lg font-black bg-primary text-white hover:bg-primary/90 border-none transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-4 px-6 md:px-10 rounded-2xl shadow-2xl"
                                             >
                                                 <StarIcons />
                                                 {isUnlocking ? "DECODING..." : (
@@ -530,14 +528,14 @@ export default function PdfUnlocker() {
                                 </CardFooter>
                             </Card>
 
-                            <Card className="lg:col-span-7 border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-900 border-primary/10 h-[400px] lg:h-[550px]">
+                            <Card className="lg:col-span-7 border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-900 border-primary/10 h-[350px] lg:h-[450px]">
                                 <CardHeader className="bg-muted/30 border-b p-4 text-center">
                                     <CardTitle className="text-[10px] font-black uppercase tracking-widest opacity-40 flex items-center justify-center gap-2">
                                         <Eye className="size-3.5" /> Visual Feedback
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-0 flex flex-col h-full">
-                                    <ScrollArea className="flex-1 w-full p-8 md:p-12">
+                                    <ScrollArea className="flex-1 w-full p-8 md:p-10">
                                         <div className="flex flex-col items-center gap-12 pb-20">
                                             {previewPages.length > 0 ? (
                                                 previewPages.map((src, i) => (
@@ -552,9 +550,9 @@ export default function PdfUnlocker() {
                                                     <p className="text-[10px] font-black uppercase opacity-20 tracking-widest">Direct Access Ready</p>
                                                 </div>
                                             ) : (
-                                                <div className="flex flex-col items-center justify-center py-20 text-center opacity-10 gap-6">
-                                                    <Monitor className="size-32" />
-                                                    <p className="text-xl md:text-3xl font-black uppercase tracking-[0.3em] text-center">Awaiting Decode</p>
+                                                <div className="flex flex-col items-center justify-center py-10 text-center opacity-10 gap-6">
+                                                    <Monitor className="size-24" />
+                                                    <p className="text-xl font-black uppercase tracking-[0.3em] text-center">Awaiting Decode</p>
                                                 </div>
                                             )}
                                         </div>
