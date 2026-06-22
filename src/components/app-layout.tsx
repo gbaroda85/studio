@@ -190,11 +190,11 @@ function GR7Logo({ className }: { className?: string }) {
       <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden">
         <svg viewBox="0 0 100 100" className="w-full h-full p-0.5 md:p-1">
           <text 
-            x="2" 
-            y="70" 
+            x="8" 
+            y="72" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '52px', 
+              fontSize: '44px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
             }}
@@ -202,11 +202,11 @@ function GR7Logo({ className }: { className?: string }) {
             GR
           </text>
           <text 
-            x="56" 
-            y="75" 
+            x="62" 
+            y="76" 
             style={{ 
               fill: '#ef4444', 
-              fontSize: '75px', 
+              fontSize: '64px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
             }}

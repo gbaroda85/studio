@@ -518,11 +518,10 @@ export default function PdfEditor() {
                         const thickness = (el as any).height || 3;
                         const color = hexToRgbLib(el.color);
                         
-                        // Pivot around center to match CSS transform-origin: center
-                        // Negate rotation for CCW to CW conversion
                         const rad = (-elRotDeg * Math.PI) / 180;
                         const centerX = x + length / 2;
-                        const centerY = y;
+                        // Align to vertical center of UI element (which is 2 * thickness offset from top)
+                        const centerY = y - (thickness * 2);
 
                         const x1_rel = -length / 2;
                         const y1_rel = 0;
@@ -540,7 +539,6 @@ export default function PdfEditor() {
                             thickness, color, opacity: op
                         });
                         
-                        // Arrowhead
                         const headSize = thickness * 4;
                         const headAngle = Math.PI / 6;
                         const h1x = endX - headSize * Math.cos(rad - headAngle);
