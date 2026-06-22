@@ -98,7 +98,7 @@ interface OverlayImage extends BaseElement {
 interface OverlayShape extends BaseElement {
     type: 'mask' | 'highlight' | 'arrow';
     width: number; // % of page visual width
-    height: number; // % of page visual height
+    height: number; // % of page visual height (used for thickness in arrow)
     color: string; // Fill color
     fillType: 'solid' | 'none';
     borderColor: string;
@@ -496,14 +496,15 @@ export default function PdfEditor() {
                     const x = ox + x_pdf;
                     const y = oy + y_pdf;
                     const elRotDeg = (el as any).rotation || 0;
-                    const finalRotation = degrees(elRotDeg - pageRotation);
+                    // Standardize: PDF rotation is counter-clockwise, CSS is clockwise.
+                    const finalRotation = degrees(-elRotDeg - pageRotation);
 
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
                         const font = await newPdfDoc.embedFont(fontName);
                         pdfPage.drawText(el.text, { 
                             x, y: y - (el.size * 0.8), size: el.size, font, 
-                            color: hexToRgbLib(el.color), opacity: el.opacity / 100, rotate: finalRotation
+                            color: hexToRgbLib(el.color), opacity: el.opacity / 100, rotate: degrees(-elRotDeg)
                         });
                     } else if (el.type === 'mask' || el.type === 'highlight') {
                         const sw = (el.width / 100) * visualW;
@@ -511,19 +512,20 @@ export default function PdfEditor() {
                         pdfPage.drawRectangle({
                             x, y: y - sh, width: sw, height: sh, 
                             color: hexToRgbLib(el.color), 
-                            opacity: el.opacity / 100, rotate: finalRotation
+                            opacity: el.opacity / 100, rotate: degrees(-elRotDeg)
                         });
                     } else if (el.type === 'arrow') {
                         const length = (el.width / 100) * visualW;
                         const thickness = (el as any).height || 3;
                         const color = hexToRgbLib(el.color);
-                        const angleRad = (elRotDeg * Math.PI) / 180;
+                        // Correct trigonometry for PDF Y-up system
+                        // Clockwise rotation in CSS needs to be negated for math standard
+                        const angleRad = (-(elRotDeg) * Math.PI) / 180;
                         const op = el.opacity / 100;
 
                         const endX = x + length * Math.cos(angleRad);
-                        const endY = y - length * Math.sin(angleRad);
+                        const endY = y + length * Math.sin(angleRad);
 
-                        // Main Line
                         pdfPage.drawLine({
                             start: { x, y },
                             end: { x: endX, y: endY },
@@ -532,14 +534,13 @@ export default function PdfEditor() {
                             opacity: op
                         });
                         
-                        // Arrow Head (Manual lines instead of drawSVGPath to avoid TypeError)
                         const headSize = thickness * 4;
                         const headAngle = Math.PI / 7;
                         
                         const h1x = endX - headSize * Math.cos(angleRad - headAngle);
-                        const h1y = endY + headSize * Math.sin(angleRad - headAngle);
+                        const h1y = endY - headSize * Math.sin(angleRad - headAngle);
                         const h2x = endX - headSize * Math.cos(angleRad + headAngle);
-                        const h2y = endY + headSize * Math.sin(angleRad + headAngle);
+                        const h2y = endY - headSize * Math.sin(angleRad + headAngle);
 
                         pdfPage.drawLine({ start: { x: endX, y: endY }, end: { x: h1x, y: h1y }, thickness, color, opacity: op });
                         pdfPage.drawLine({ start: { x: endX, y: endY }, end: { x: h2x, y: h2y }, thickness, color, opacity: op });
@@ -549,7 +550,7 @@ export default function PdfEditor() {
                         const embeddedImg = isPng ? await newPdfDoc.embedPng(imgBuffer) : await newPdfDoc.embedJpg(imgBuffer);
                         const imgW = (el.width / 100) * visualW;
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
-                        pdfPage.drawImage(embeddedImg, { x, y: y - imgH, width: imgW, height: imgH, rotate: finalRotation, opacity: el.opacity / 100 });
+                        pdfPage.drawImage(embeddedImg, { x, y: y - imgH, width: imgW, height: imgH, rotate: degrees(-elRotDeg), opacity: el.opacity / 100 });
                     }
                 }
             }
