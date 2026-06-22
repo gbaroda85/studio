@@ -37,7 +37,9 @@ import {
     Copy,
     BringToFront,
     SendToBack,
-    SearchCode
+    SearchCode,
+    MoveHorizontal,
+    MoveRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -63,10 +65,10 @@ import confetti from 'canvas-confetti';
 // PDF.js Worker Configuration
 const PDF_JS_VERSION = '4.2.67';
 if (typeof window !== 'undefined') {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/build/pdf.worker.min.mjs`;
 }
 
-type ElementType = 'text' | 'image' | 'mask' | 'highlight';
+type ElementType = 'text' | 'image' | 'mask' | 'highlight' | 'arrow';
 
 interface BaseElement {
     id: string;
@@ -93,7 +95,7 @@ interface OverlayImage extends BaseElement {
 }
 
 interface OverlayShape extends BaseElement {
-    type: 'mask' | 'highlight';
+    type: 'mask' | 'highlight' | 'arrow';
     width: number; // % of page visual width
     height: number; // % of page visual height
     color: string; // Fill color
@@ -260,6 +262,14 @@ export default function PdfEditor() {
             id: Math.random().toString(36).substr(2, 9),
             type: 'highlight',
             x: 30, y: 30, width: 30, height: 4, color: "#ffff00", fillType: 'solid', borderColor: '#000000', borderWidth: 0, borderStyle: 'solid', opacity: 40, rotation: 0
+        } as OverlayShape);
+    };
+
+    const handleAddArrow = () => {
+        addElement({
+            id: Math.random().toString(36).substr(2, 9),
+            type: 'arrow',
+            x: 40, y: 40, width: 15, height: 3, color: "#ef4444", fillType: 'solid', borderColor: '#ef4444', borderWidth: 0, borderStyle: 'solid', opacity: 100, rotation: 0
         } as OverlayShape);
     };
 
@@ -473,17 +483,13 @@ export default function PdfEditor() {
                     let y_pdf = 0;
 
                     if (pageRotation === 0) {
-                        x_pdf = px;
-                        y_pdf = pageHeight - py;
+                        x_pdf = px; y_pdf = pageHeight - py;
                     } else if (pageRotation === 90) {
-                        x_pdf = py;
-                        y_pdf = px;
+                        x_pdf = py; y_pdf = px;
                     } else if (pageRotation === 180) {
-                        x_pdf = pageWidth - px;
-                        y_pdf = py;
+                        x_pdf = pageWidth - px; y_pdf = py;
                     } else if (pageRotation === 270) {
-                        x_pdf = pageHeight - py;
-                        y_pdf = pageWidth - px;
+                        x_pdf = pageHeight - py; y_pdf = pageWidth - px;
                     }
 
                     const x = ox + x_pdf;
@@ -501,15 +507,37 @@ export default function PdfEditor() {
                     } else if (el.type === 'mask' || el.type === 'highlight') {
                         const sw = (el.width / 100) * visualW;
                         const sh = (el.height / 100) * visualH;
-                        const color = hexToRgbLib(el.color);
-                        const borderColor = el.borderColor ? hexToRgbLib(el.borderColor) : undefined;
-                        const borderWidth = el.borderWidth || 0;
-
                         pdfPage.drawRectangle({
                             x, y: y - sh, width: sw, height: sh, 
-                            color: el.fillType === 'none' ? undefined : color, 
-                            borderColor, borderWidth, 
+                            color: hexToRgbLib(el.color), 
                             opacity: el.opacity / 100, rotate: finalRotation
+                        });
+                    } else if (el.type === 'arrow') {
+                        const length = (el.width / 100) * visualW;
+                        const thickness = el.height || 2;
+                        const color = hexToRgbLib(el.color);
+                        const angleRad = (elRotDeg * Math.PI) / 180;
+                        
+                        // Main Line
+                        pdfPage.drawLine({
+                            start: { x, y },
+                            end: { x: x + length * Math.cos(angleRad), y: y - length * Math.sin(angleRad) },
+                            thickness,
+                            color,
+                            opacity: el.opacity / 100
+                        });
+                        
+                        // Arrow Head
+                        const headSize = thickness * 4;
+                        const endX = x + length * Math.cos(angleRad);
+                        const endY = y - length * Math.sin(angleRad);
+                        
+                        pdfPage.drawSVGPath(`M 0 0 L ${-headSize} ${headSize/2} L ${-headSize} ${-headSize/2} Z`, {
+                            x: endX,
+                            y: endY,
+                            color,
+                            rotate: finalRotation,
+                            opacity: el.opacity / 100
                         });
                     } else if (el.type === 'image') {
                         const imgBuffer = await getImageBytes(el.src);
@@ -559,7 +587,7 @@ export default function PdfEditor() {
                         <Separator orientation="vertical" className="h-6 opacity-10 mx-2" />
                         <div className="flex items-center gap-1 md:gap-2">
                             <Button size="sm" className="bg-primary text-black font-black uppercase text-[10px] h-9 px-4 rounded-lg shadow-lg" onClick={handleAddText}><Type className="size-3.5 mr-1.5"/> TEXT</Button>
-                            
+                            <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddArrow}><MoveRight className="size-3.5 mr-1.5"/> ARROW</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddWhiteout}><Eraser className="size-3.5 mr-1.5"/> WHITEOUT</Button>
                             <Button size="sm" variant="outline" className="text-white border-white/20 hover:bg-primary hover:text-primary-foreground font-black uppercase text-[10px] h-9 px-4 rounded-lg bg-white/5" onClick={handleAddHighlight}><Highlighter className="size-3.5 mr-1.5"/> HIGHLIGHT</Button>
                             
@@ -667,8 +695,8 @@ export default function PdfEditor() {
                                     <img src={selectedPage.previewSrc!} alt="edit" className="max-h-[85vh] w-auto block select-none pointer-events-none" />
                                     {selectedPage.elements.map(el => (
                                         <motion.div key={el.id} onMouseDown={(e) => handleElementMouseDown(e, selectedPageIndex!, el)}
-                                            className={cn("absolute z-10 cursor-move transition-shadow", selectedElementId === el.id ? "ring-2 ring-primary ring-offset-1 rounded-sm shadow-2xl" : "hover:ring-1 hover:ring-primary/20")}
-                                            style={{ left: `${el.x}%`, top: `${el.y}%`, transform: `rotate(${-selectedPage.rotation}deg)` }}>
+                                            className={cn("absolute z-10 cursor-move transition-shadow flex items-center justify-center", selectedElementId === el.id ? "ring-2 ring-primary ring-offset-1 rounded-sm shadow-2xl" : "hover:ring-1 hover:ring-primary/20")}
+                                            style={{ left: `${el.x}%`, top: `${el.y}%`, transform: `rotate(${-selectedPage.rotation + (el.type === 'text' || el.type === 'image' || el.type === 'arrow' ? (el as any).rotation || 0 : 0)}deg)` }}>
                                             {el.type === 'text' ? (
                                                 <div className="group relative">
                                                     {selectedElementId === el.id ? (
@@ -692,14 +720,28 @@ export default function PdfEditor() {
                                                     style={{ 
                                                         width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, 
                                                         height: `${el.height * (containerRef.current?.clientHeight || 0) / 100}px`, 
-                                                        backgroundColor: el.fillType === 'none' ? 'transparent' : el.color, 
+                                                        backgroundColor: el.color, 
                                                         opacity: el.opacity / 100, 
-                                                        border: `${el.borderWidth}px ${el.borderStyle} ${el.borderColor}`,
-                                                        transform: `rotate(${el.rotation || 0}deg)`
+                                                        border: el.borderWidth > 0 ? `${el.borderWidth}px ${el.borderStyle} ${el.borderColor}` : 'none'
                                                     }} 
                                                 />
+                                            ) : el.type === 'arrow' ? (
+                                                <div className="relative flex items-center" style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, opacity: el.opacity / 100 }}>
+                                                    <div className="w-full bg-current h-px" style={{ height: `${el.height || 2}px`, backgroundColor: el.color }} />
+                                                    <div className="absolute right-0 w-0 h-0 border-y-transparent border-l-current" 
+                                                         style={{ 
+                                                             borderTopWidth: `${(el.height || 2) * 2}px`, 
+                                                             borderBottomWidth: `${(el.height || 2) * 2}px`, 
+                                                             borderLeftWidth: `${(el.height || 2) * 4}px`,
+                                                             borderLeftColor: el.color,
+                                                             borderTopColor: 'transparent',
+                                                             borderBottomColor: 'transparent',
+                                                             marginRight: `-${(el.height || 2) * 0.5}px`
+                                                         }} 
+                                                    />
+                                                </div>
                                             ) : (
-                                                <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, opacity: el.opacity / 100, transform: `rotate(${el.rotation}deg)` }}><img src={el.src} className="size-full" alt="img" /></div>
+                                                <div style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, opacity: el.opacity / 100 }}><img src={el.src} className="size-full" alt="img" /></div>
                                             )}
                                             {selectedElementId === el.id && (
                                                 <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 border border-white/20 rounded-full px-3 py-1.5 flex items-center gap-1.5 shadow-3xl z-50 scale-90 md:scale-100">
@@ -731,9 +773,16 @@ export default function PdfEditor() {
                                     </div>
                                     
                                     <div className="space-y-4">
-                                        <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Rotation</Label><span className="text-primary text-[10px] font-bold">{selectedElement.rotation}°</span></div>
-                                        <Slider min={0} max={360} value={[selectedElement.rotation]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} />
+                                        <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Rotation</Label><span className="text-primary text-[10px] font-bold">{(selectedElement as any).rotation || 0}°</span></div>
+                                        <Slider min={0} max={360} value={[(selectedElement as any).rotation || 0]} onValueChange={v => updateElement({ rotation: v[0] })} onValueCommit={commitChange} />
                                     </div>
+
+                                    {(selectedElement.type === 'image' || selectedElement.type === 'arrow' || selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width / Length (%)</Label><span className="text-primary text-[10px] font-bold">{selectedElement.width}%</span></div>
+                                            <Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} />
+                                        </div>
+                                    )}
 
                                     {selectedElement.type === 'text' && (
                                         <div className="space-y-6">
@@ -746,34 +795,17 @@ export default function PdfEditor() {
                                         </div>
                                     )}
 
+                                    {selectedElement.type === 'arrow' && (
+                                        <div className="space-y-6">
+                                            <div className="space-y-2"><div className="flex justify-between"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Thickness</Label><span className="text-[10px] font-black">{selectedElement.height}px</span></div><Slider min={1} max={15} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#ef4444', '#3B82F6', '#22c55e', '#000000', '#FFFFFF'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110 shadow-lg" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
+                                        </div>
+                                    )}
+
                                     {(selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width (%)</Label></div><Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height (%)</Label></div><Slider min={1} max={100} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
-                                            
-                                            <div className="space-y-4">
-                                                <div className="flex items-center justify-between">
-                                                    <Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Fill Mode</Label>
-                                                    <div className="flex bg-muted p-1 rounded-lg">
-                                                        <button onClick={() => updateElement({ fillType: 'none' })} className={cn("px-3 py-1 rounded-md text-[8px] font-black", selectedElement.fillType === 'none' ? "bg-white shadow text-primary" : "opacity-40")}>NONE</button>
-                                                        <button onClick={() => updateElement({ fillType: 'solid' })} className={cn("px-3 py-1 rounded-md text-[8px] font-black", selectedElement.fillType === 'solid' ? "bg-white shadow text-primary" : "opacity-40")}>SOLID</button>
-                                                    </div>
-                                                </div>
-                                                {selectedElement.fillType === 'solid' && (
-                                                    <div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#3B82F6', '#ef4444'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div>
-                                                )}
-                                            </div>
-
-                                            <div className="space-y-4 pt-2 border-t border-white/5">
-                                                <Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">Border Style</Label>
-                                                <div className="grid grid-cols-3 gap-2">
-                                                    {['solid', 'dashed', 'dotted'].map(s => (
-                                                        <button key={s} onClick={() => updateElement({ borderStyle: s as any })} className={cn("h-8 rounded-lg border-2 text-[8px] font-black uppercase", selectedElement.borderStyle === s ? "border-primary bg-primary/5" : "border-border")}>{s}</button>
-                                                    ))}
-                                                </div>
-                                                <div className="space-y-2"><div className="flex justify-between"><span className="text-[8px] font-bold opacity-40 uppercase">Thickness</span><span className="text-[8px] font-bold">{selectedElement.borderWidth}px</span></div><Slider min={0} max={20} step={1} value={[selectedElement.borderWidth]} onValueChange={v => updateElement({ borderWidth: v[0] })} onValueCommit={commitChange} /></div>
-                                                <div className="flex gap-2"> {['#000000', '#FFFFFF', '#3B82F6', '#22c55e'].map(c => <button key={c} onClick={() => { updateElement({ borderColor: c }); commitChange(); }} className={cn("size-6 rounded-md border-2", selectedElement.borderColor === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div>
-                                            </div>
+                                            <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#3B82F6', '#ef4444'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
 
