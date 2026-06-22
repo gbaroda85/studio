@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -517,28 +516,31 @@ export default function PdfEditor() {
                         const thickness = el.height || 2;
                         const color = hexToRgbLib(el.color);
                         const angleRad = (elRotDeg * Math.PI) / 180;
-                        
+                        const op = el.opacity / 100;
+
+                        const endX = x + length * Math.cos(angleRad);
+                        const endY = y - length * Math.sin(angleRad);
+
                         // Main Line
                         pdfPage.drawLine({
                             start: { x, y },
-                            end: { x: x + length * Math.cos(angleRad), y: y - length * Math.sin(angleRad) },
+                            end: { x: endX, y: endY },
                             thickness,
                             color,
-                            opacity: el.opacity / 100
+                            opacity: op
                         });
                         
-                        // Arrow Head
+                        // Arrow Head (Triangle formed by two lines)
                         const headSize = thickness * 4;
-                        const endX = x + length * Math.cos(angleRad);
-                        const endY = y - length * Math.sin(angleRad);
+                        const headAngle = Math.PI / 7;
                         
-                        pdfPage.drawSVGPath(`M 0 0 L ${-headSize} ${headSize/2} L ${-headSize} ${-headSize/2} Z`, {
-                            x: endX,
-                            y: endY,
-                            color,
-                            rotate: finalRotation,
-                            opacity: el.opacity / 100
-                        });
+                        const h1x = endX - headSize * Math.cos(angleRad - headAngle);
+                        const h1y = endY + headSize * Math.sin(angleRad - headAngle);
+                        const h2x = endX - headSize * Math.cos(angleRad + headAngle);
+                        const h2y = endY + headSize * Math.sin(angleRad + headAngle);
+
+                        pdfPage.drawLine({ start: { x: endX, y: endY }, end: { x: h1x, y: h1y }, thickness, color, opacity: op });
+                        pdfPage.drawLine({ start: { x: endX, y: endY }, end: { x: h2x, y: h2y }, thickness, color, opacity: op });
                     } else if (el.type === 'image') {
                         const imgBuffer = await getImageBytes(el.src);
                         const isPng = el.src.startsWith('data:image/png') || el.src.toLowerCase().endsWith('.png');
@@ -821,7 +823,12 @@ export default function PdfEditor() {
                                 <div className="py-24 text-center opacity-10 flex flex-col items-center gap-4"><MousePointer2 className="size-16 text-foreground"/><p className="text-[11px] font-black uppercase tracking-widest text-foreground leading-relaxed">Select any item on<br/>the page to modify</p></div>
                             )}
                         </ScrollArea>
-                        <CardFooter className="bg-primary/5 p-4 border-t"><div className="flex gap-3 items-center"><ShieldCheck className="size-4 text-primary" /><p className="text-[9px] font-black uppercase text-primary/60 tracking-tight">Active Secured Studio</p></div></CardFooter>
+                        <CardFooter className="bg-primary/5 p-4 border-t shrink-0">
+                            <div className="flex gap-3 items-center">
+                                <ShieldCheck className="size-4 text-primary" />
+                                <p className="text-[9px] font-black uppercase text-primary/60 tracking-tight">Active Secured Studio</p>
+                            </div>
+                        </CardFooter>
                     </div>
                 </div>
             )}
