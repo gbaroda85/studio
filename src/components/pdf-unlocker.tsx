@@ -353,8 +353,8 @@ export default function PdfUnlocker() {
                             <CardHeader className="bg-muted/30 border-b p-4 md:p-6 text-center">
                                 <CardTitle className="text-[10px] md:text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO WORKSPACE</CardTitle>
                             </CardHeader>
-                            <CardContent className="p-6 md:p-8">
-                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-6 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
+                            <CardContent className="p-4 md:p-6">
+                                <div className="border-4 border-dashed border-muted-foreground/20 rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 flex flex-col items-center justify-center space-y-4 bg-muted/30 group relative">
                                     <div className="relative">
                                         <UploadCloud className="size-10 md:size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-4 md:size-6 text-yellow-500 animate-pulse" />
@@ -366,7 +366,7 @@ export default function PdfUnlocker() {
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
                             </CardContent>
-                            <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
+                            <CardFooter className="justify-center gap-4 md:gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-6 md:pb-8 bg-muted/10 pt-4 md:pt-6 px-4">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><SearchCode className="size-3 text-primary" /> INDEX SCAN</div>
                                 <div className="flex items-center gap-1.5"><Info className="size-3 text-blue-500" /> AADHAAR OK</div>
@@ -381,7 +381,7 @@ export default function PdfUnlocker() {
                     >
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                             <Card className="lg:col-span-5 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-card/50 flex flex-col min-h-[250px]">
-                                <CardHeader className="bg-muted/30 border-b p-4 md:p-6">
+                                <CardHeader className="bg-muted/30 border-b p-4 md:p-5">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-3 truncate pr-2 text-left">
                                             <div className="size-8 md:size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -398,7 +398,7 @@ export default function PdfUnlocker() {
                                     </div>
                                 </CardHeader>
 
-                                <CardContent className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
+                                <CardContent className="p-4 md:p-6 space-y-5 flex-1 overflow-y-auto custom-scrollbar">
                                     {isChecking ? (
                                         <div className="py-10 flex flex-col items-center justify-center gap-3">
                                             <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
@@ -412,7 +412,7 @@ export default function PdfUnlocker() {
                                                 <p className="text-[10px] text-green-600 font-bold leading-tight uppercase text-center">This document is already unprotected.</p>
                                             </div>
                                             {!unlockedPdfUrl && (
-                                                <Button onClick={handleUnlockProcess} disabled={isUnlocking} className="w-full h-14 md:h-16 bg-primary text-white font-black rounded-2xl text-base shadow-xl active:scale-95 transition-all">
+                                                <Button onClick={handleUnlockProcess} disabled={isUnlocking} className="w-full h-14 bg-primary text-white font-black rounded-2xl text-base shadow-xl active:scale-95 transition-all">
                                                     {isUnlocking ? <Loader2 className="animate-spin mr-2"/> : <Zap className="mr-2 h-5 w-5 text-yellow-400 fill-yellow-400" />} SANITIZE & SAVE
                                                 </Button>
                                             )}
@@ -425,7 +425,7 @@ export default function PdfUnlocker() {
                                                     <input 
                                                         id="pass" type={showPassword ? "text" : "password"} value={password} 
                                                         onChange={(e) => { setPassword(e.target.value); setErrorDetails(null); }}
-                                                        className="flex h-12 md:h-14 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl md:text-2xl font-black tracking-[0.2em] text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
+                                                        className="flex h-11 md:h-12 w-full rounded-xl border-2 bg-background pl-4 pr-12 py-2 text-xl md:text-2xl font-black tracking-[0.2em] text-center focus-visible:ring-2 focus-visible:ring-primary outline-none shadow-inner"
                                                         placeholder="••••••••" autoFocus disabled={isUnlocking}
                                                         onKeyDown={(e) => e.key === 'Enter' && handleUnlockProcess()}
                                                     />
@@ -440,9 +440,9 @@ export default function PdfUnlocker() {
                                             </div>
 
                                             {isAadhaarFile && (
-                                                <div className="bg-blue-50 border-2 border-blue-100 rounded-xl p-4 text-left flex gap-3 shadow-inner">
+                                                <div className="bg-blue-50 border-2 border-blue-100 rounded-xl p-3 text-left flex gap-3 shadow-inner">
                                                     <Info className="size-4 text-blue-500 shrink-0" />
-                                                    <p className="text-[10px] font-bold text-blue-600 leading-tight uppercase">
+                                                    <p className="text-[9px] font-bold text-blue-600 leading-tight uppercase">
                                                         Aadhaar Hint: First 4 letters of NAME (CAPS) + Year of Birth.
                                                     </p>
                                                 </div>
@@ -470,7 +470,7 @@ export default function PdfUnlocker() {
                                         </div>
                                     ) : (
                                         <div className="p-6 md:p-8 bg-green-500/5 border-2 border-dashed border-green-500/20 rounded-[2rem] flex flex-col items-center gap-4 text-center animate-in zoom-in-95">
-                                            <div className="size-20 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
+                                            <div className="size-16 rounded-3xl bg-green-500 text-white flex items-center justify-center shadow-2xl relative">
                                                 <CheckCircle2 className="size-10" />
                                                 <div className="absolute -top-1 -right-1 text-yellow-400 size-6"><Sparkles className="size-full" /></div>
                                             </div>
@@ -482,7 +482,7 @@ export default function PdfUnlocker() {
                                     )}
                                 </CardContent>
 
-                                <CardFooter className="flex flex-col gap-4 p-6 md:p-8 bg-muted/10 border-t mt-auto shrink-0">
+                                <CardFooter className="flex flex-col gap-4 p-5 md:p-6 bg-muted/10 border-t mt-auto shrink-0">
                                     {!unlockedPdfUrl ? (
                                         isProtected === true && (
                                             <Button 
@@ -528,14 +528,14 @@ export default function PdfUnlocker() {
                                 </CardFooter>
                             </Card>
 
-                            <Card className="lg:col-span-7 border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-900 border-primary/10 h-[350px] lg:h-[450px]">
+                            <Card className="lg:col-span-7 border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-slate-200 dark:bg-slate-900 border-primary/10 h-[400px] lg:h-[550px]">
                                 <CardHeader className="bg-muted/30 border-b p-4 text-center">
                                     <CardTitle className="text-[10px] font-black uppercase tracking-widest opacity-40 flex items-center justify-center gap-2">
                                         <Eye className="size-3.5" /> Visual Feedback
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-0 flex flex-col h-full">
-                                    <ScrollArea className="flex-1 w-full p-8 md:p-10">
+                                    <ScrollArea className="flex-1 w-full p-6 md:p-8">
                                         <div className="flex flex-col items-center gap-12 pb-20">
                                             {previewPages.length > 0 ? (
                                                 previewPages.map((src, i) => (
