@@ -157,7 +157,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsDataBuffer(file);
+            reader.readAsArrayBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -451,7 +451,7 @@ export default function PdfUnlocker() {
                                             {isUnlocking && (
                                                 <div className="space-y-4 text-center py-2">
                                                     <div className="relative inline-block">
-                                                        <Loader2 className="h-10 w-10 animate-spin text-primary opacity-20 stroke-[3]" />
+                                                        <Loader2 className="h-10 m-10 animate-spin text-primary opacity-20 stroke-[3]" />
                                                         <Zap className="absolute inset-0 m-auto h-5 w-5 text-primary animate-pulse" />
                                                     </div>
                                                     <div className="space-y-1">
