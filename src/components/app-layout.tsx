@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -187,20 +188,30 @@ function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden">
-        <svg viewBox="0 0 100 100" className="w-full h-full p-0.5 md:p-1">
+        <svg viewBox="0 0 100 100" className="w-full h-full p-1.5 md:p-2">
           <text 
-            x="50%" 
-            y="55%" 
-            dominantBaseline="middle"
-            textAnchor="middle"
+            x="5" 
+            y="70" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '40px', 
+              fontSize: '44px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
             }}
           >
-            GR7
+            GR
+          </text>
+          <text 
+            x="60" 
+            y="74" 
+            style={{ 
+              fill: '#ef4444', 
+              fontSize: '60px', 
+              fontWeight: 900, 
+              fontFamily: 'Arial Black, sans-serif'
+            }}
+          >
+            7
           </text>
         </svg>
       </div>

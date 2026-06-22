@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, type ChangeEvent, type DragEvent } from 'react';
@@ -38,7 +39,8 @@ import {
     SendToBack,
     SearchCode,
     MoveHorizontal,
-    MoveRight
+    MoveRight,
+    Printer
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -513,7 +515,7 @@ export default function PdfEditor() {
                         });
                     } else if (el.type === 'arrow') {
                         const length = (el.width / 100) * visualW;
-                        const thickness = el.height || 2;
+                        const thickness = (el as any).height || 3;
                         const color = hexToRgbLib(el.color);
                         const angleRad = (elRotDeg * Math.PI) / 180;
                         const op = el.opacity / 100;
@@ -530,7 +532,7 @@ export default function PdfEditor() {
                             opacity: op
                         });
                         
-                        // Arrow Head (Triangle formed by two lines)
+                        // Arrow Head (Manual lines instead of drawSVGPath to avoid TypeError)
                         const headSize = thickness * 4;
                         const headAngle = Math.PI / 7;
                         
@@ -634,7 +636,7 @@ export default function PdfEditor() {
                             <Button variant="ghost" size="icon" className="h-6 w-6 text-white/60 hover:text-white" onClick={() => setZoom(z => Math.min(300, z + 10))}><ZoomIn className="size-3.5"/></Button>
                         </div>
                         <Button className="bg-green-600 hover:bg-green-700 text-white font-black uppercase text-xs h-10 px-6 rounded-xl shadow-xl active:scale-95 transition-all border-none" onClick={handleExport} disabled={isExporting}>
-                            {isExporting ? <Loader2 className="animate-spin mr-2 size-4" /> : <Download className="mr-2 size-4" />} EXPORT PDF
+                            {isExporting ? <Loader2 className="animate-spin mr-2 size-4" /> : <Printer className="mr-2 size-4" />} EXPORT PDF
                         </Button>
                     </div>
                 </div>
@@ -729,16 +731,16 @@ export default function PdfEditor() {
                                                 />
                                             ) : el.type === 'arrow' ? (
                                                 <div className="relative flex items-center" style={{ width: `${el.width * (containerRef.current?.clientWidth || 0) / 100}px`, opacity: el.opacity / 100 }}>
-                                                    <div className="w-full bg-current h-px" style={{ height: `${el.height || 2}px`, backgroundColor: el.color }} />
+                                                    <div className="w-full bg-current h-px" style={{ height: `${el.height || 3}px`, backgroundColor: el.color }} />
                                                     <div className="absolute right-0 w-0 h-0 border-y-transparent border-l-current" 
                                                          style={{ 
-                                                             borderTopWidth: `${(el.height || 2) * 2}px`, 
-                                                             borderBottomWidth: `${(el.height || 2) * 2}px`, 
-                                                             borderLeftWidth: `${(el.height || 2) * 4}px`,
+                                                             borderTopWidth: `${((el as any).height || 3) * 2}px`, 
+                                                             borderBottomWidth: `${((el as any).height || 3) * 2}px`, 
+                                                             borderLeftWidth: `${((el as any).height || 3) * 4}px`,
                                                              borderLeftColor: el.color,
                                                              borderTopColor: 'transparent',
                                                              borderBottomColor: 'transparent',
-                                                             marginRight: `-${(el.height || 2) * 0.5}px`
+                                                             marginRight: `-${((el as any).height || 3) * 0.5}px`
                                                          }} 
                                                     />
                                                 </div>
@@ -781,8 +783,8 @@ export default function PdfEditor() {
 
                                     {(selectedElement.type === 'image' || selectedElement.type === 'arrow' || selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
                                         <div className="space-y-4">
-                                            <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width / Length (%)</Label><span className="text-primary text-[10px] font-bold">{selectedElement.width}%</span></div>
-                                            <Slider min={1} max={100} value={[selectedElement.width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} />
+                                            <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Width / Length (%)</Label><span className="text-primary text-[10px] font-bold">{(selectedElement as any).width}%</span></div>
+                                            <Slider min={1} max={100} value={[(selectedElement as any).width]} onValueChange={v => updateElement({ width: v[0] })} onValueCommit={commitChange} />
                                         </div>
                                     )}
 
@@ -799,14 +801,14 @@ export default function PdfEditor() {
 
                                     {selectedElement.type === 'arrow' && (
                                         <div className="space-y-6">
-                                            <div className="space-y-2"><div className="flex justify-between"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Thickness</Label><span className="text-[10px] font-black">{selectedElement.height}px</span></div><Slider min={1} max={15} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-2"><div className="flex justify-between"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Thickness</Label><span className="text-[10px] font-black">{(selectedElement as any).height}px</span></div><Slider min={1} max={15} value={[(selectedElement as any).height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#ef4444', '#3B82F6', '#22c55e', '#000000', '#FFFFFF'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-7 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110 shadow-lg" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
 
                                     {(selectedElement.type === 'mask' || selectedElement.type === 'highlight') && (
                                         <div className="space-y-6">
-                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height (%)</Label></div><Slider min={1} max={100} value={[selectedElement.height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
+                                            <div className="space-y-4"><div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase text-muted-foreground opacity-60">Height (%)</Label></div><Slider min={1} max={100} value={[(selectedElement as any).height]} onValueChange={v => updateElement({ height: v[0] })} onValueCommit={commitChange} /></div>
                                             <div className="space-y-2"><Label className="text-[9px] font-black text-muted-foreground opacity-60 uppercase">COLOR</Label><div className="flex gap-2"> {['#FFFFFF', '#ffff00', '#000000', '#3B82F6', '#ef4444'].map(c => <button key={c} onClick={() => { updateElement({ color: c }); commitChange(); }} className={cn("size-8 rounded-lg border-2", selectedElement.color === c ? "border-primary scale-110" : "border-border")} style={{ backgroundColor: c }} />)} </div></div>
                                         </div>
                                     )}
