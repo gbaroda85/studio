@@ -203,7 +203,7 @@ function GR7Logo({ className }: { className?: string }) {
           </text>
           <text 
             x="62" 
-            y="76" 
+            y="74" 
             style={{ 
               fill: '#ef4444', 
               fontSize: '64px', 

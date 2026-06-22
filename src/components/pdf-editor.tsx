@@ -520,7 +520,6 @@ export default function PdfEditor() {
                         
                         const rad = (-elRotDeg * Math.PI) / 180;
                         const centerX = x + length / 2;
-                        // Align to vertical center of UI element (which is 2 * thickness offset from top)
                         const centerY = y - (thickness * 2);
 
                         const x1_rel = -length / 2;
