@@ -362,7 +362,7 @@ export default function PdfUnlocker() {
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-base md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Encrypted PDF</p>
-                                        <p className="text-[10px] text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">Local Secure Render</p>
+                                        <p className="text-[10px] text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">100% Private local RAM processing.</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="application/pdf" onChange={onFileChange} />
