@@ -496,15 +496,14 @@ export default function PdfEditor() {
                     const x = ox + x_pdf;
                     const y = oy + y_pdf;
                     const elRotDeg = (el as any).rotation || 0;
-                    // Standardize: PDF rotation is counter-clockwise, CSS is clockwise.
-                    const finalRotation = degrees(-elRotDeg - pageRotation);
+                    const op = el.opacity / 100;
 
                     if (el.type === 'text') {
                         const fontName = el.font === 'Times' ? StandardFonts.TimesRomanBold : el.font === 'Courier' ? StandardFonts.CourierBold : StandardFonts.HelveticaBold;
                         const font = await newPdfDoc.embedFont(fontName);
                         pdfPage.drawText(el.text, { 
                             x, y: y - (el.size * 0.8), size: el.size, font, 
-                            color: hexToRgbLib(el.color), opacity: el.opacity / 100, rotate: degrees(-elRotDeg)
+                            color: hexToRgbLib(el.color), opacity: op, rotate: degrees(-elRotDeg)
                         });
                     } else if (el.type === 'mask' || el.type === 'highlight') {
                         const sw = (el.width / 100) * visualW;
@@ -512,35 +511,42 @@ export default function PdfEditor() {
                         pdfPage.drawRectangle({
                             x, y: y - sh, width: sw, height: sh, 
                             color: hexToRgbLib(el.color), 
-                            opacity: el.opacity / 100, rotate: degrees(-elRotDeg)
+                            opacity: op, rotate: degrees(-elRotDeg)
                         });
                     } else if (el.type === 'arrow') {
                         const length = (el.width / 100) * visualW;
                         const thickness = (el as any).height || 3;
                         const color = hexToRgbLib(el.color);
-                        // Correct trigonometry for PDF Y-up system
-                        // Clockwise rotation in CSS needs to be negated for math standard
-                        const angleRad = (-(elRotDeg) * Math.PI) / 180;
-                        const op = el.opacity / 100;
+                        
+                        // Pivot around center to match CSS transform-origin: center
+                        // Negate rotation for CCW to CW conversion
+                        const rad = (-elRotDeg * Math.PI) / 180;
+                        const centerX = x + length / 2;
+                        const centerY = y;
 
-                        const endX = x + length * Math.cos(angleRad);
-                        const endY = y + length * Math.sin(angleRad);
+                        const x1_rel = -length / 2;
+                        const y1_rel = 0;
+                        const x2_rel = length / 2;
+                        const y2_rel = 0;
+
+                        const startX = centerX + (x1_rel * Math.cos(rad) - y1_rel * Math.sin(rad));
+                        const startY = centerY + (x1_rel * Math.sin(rad) + y1_rel * Math.cos(rad));
+                        const endX = centerX + (x2_rel * Math.cos(rad) - y2_rel * Math.sin(rad));
+                        const endY = centerY + (x2_rel * Math.sin(rad) + y2_rel * Math.cos(rad));
 
                         pdfPage.drawLine({
-                            start: { x, y },
+                            start: { x: startX, y: startY },
                             end: { x: endX, y: endY },
-                            thickness,
-                            color,
-                            opacity: op
+                            thickness, color, opacity: op
                         });
                         
+                        // Arrowhead
                         const headSize = thickness * 4;
-                        const headAngle = Math.PI / 7;
-                        
-                        const h1x = endX - headSize * Math.cos(angleRad - headAngle);
-                        const h1y = endY - headSize * Math.sin(angleRad - headAngle);
-                        const h2x = endX - headSize * Math.cos(angleRad + headAngle);
-                        const h2y = endY - headSize * Math.sin(angleRad + headAngle);
+                        const headAngle = Math.PI / 6;
+                        const h1x = endX - headSize * Math.cos(rad - headAngle);
+                        const h1y = endY - headSize * Math.sin(rad - headAngle);
+                        const h2x = endX - headSize * Math.cos(rad + headAngle);
+                        const h2y = endY - headSize * Math.sin(rad + headAngle);
 
                         pdfPage.drawLine({ start: { x: endX, y: endY }, end: { x: h1x, y: h1y }, thickness, color, opacity: op });
                         pdfPage.drawLine({ start: { x: endX, y: endY }, end: { x: h2x, y: h2y }, thickness, color, opacity: op });
@@ -550,7 +556,7 @@ export default function PdfEditor() {
                         const embeddedImg = isPng ? await newPdfDoc.embedPng(imgBuffer) : await newPdfDoc.embedJpg(imgBuffer);
                         const imgW = (el.width / 100) * visualW;
                         const imgH = imgW * (embeddedImg.height / embeddedImg.width);
-                        pdfPage.drawImage(embeddedImg, { x, y: y - imgH, width: imgW, height: imgH, rotate: degrees(-elRotDeg), opacity: el.opacity / 100 });
+                        pdfPage.drawImage(embeddedImg, { x, y: y - imgH, width: imgW, height: imgH, rotate: degrees(-elRotDeg), opacity: op });
                     }
                 }
             }
