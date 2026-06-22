@@ -314,7 +314,8 @@ export default function PdfUnlocker() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#0d5a71', '#ef4444', '#ffffff'] });
             toast({ title: 'Success!', description: 'File processed and sanitized.' });
         } catch (error: any) {
-            if (error.name === 'PasswordException' || error.message?.toLowerCase().includes('password')) {
+            const msg = error.message?.toLowerCase() || "";
+            if (error.name === 'PasswordException' || msg.includes('password') || msg.includes('decrypt')) {
                 setErrorDetails("Incorrect Password. Please check and try again.");
             } else {
                 setErrorDetails("Failed to process this specific document type.");
