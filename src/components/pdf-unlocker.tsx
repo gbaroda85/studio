@@ -50,13 +50,36 @@ if (typeof window !== 'undefined') {
 
 const StarIcons = () => (
     <>
-        {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`star-${i} pointer-events-none`}>
-                <svg viewBox="0 0 784.11 815.53" className="fill-white">
-                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
-                </svg>
-            </div>
-        ))}
+        <div className="star-1">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-2">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-3">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-4">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-5">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
+        <div className="star-6">
+            <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+            </svg>
+        </div>
     </>
 );
 
@@ -126,8 +149,7 @@ export default function PdfUnlocker() {
             const loadingTask = pdfjs.getDocument({ 
                 data: new Uint8Array(bufferCopy),
                 cMapUrl: `https://unpkg.com/pdfjs-dist@${PDF_JS_VERSION}/cmaps/`,
-                cMapPacked: true,
-                isEvalSupported: false
+                cMapPacked: true
             });
             await loadingTask.promise;
             setIsProtected(false);
@@ -345,7 +367,7 @@ export default function PdfUnlocker() {
                         <Card
                             className={cn(
                                 "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2rem] md:rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
-                                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
+                                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                             )}
                             onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}
                             onClick={() => fileInputRef.current?.click()}

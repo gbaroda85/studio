@@ -84,8 +84,9 @@ export default function VideoToMp3Converter() {
 
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith('video/')) {
-            if (file.size > 200 * 1024 * 1024) { 
-                toast({ variant: 'destructive', title: 'File Too Large', description: 'Max 200MB supported.' });
+            // Increased limit to 3GB (3 * 1024 * 1024 * 1024)
+            if (file.size > 3221225472) { 
+                toast({ variant: 'destructive', title: 'File Too Large', description: 'Max 3GB supported.' });
                 return;
             }
             setVideoFile(file);
@@ -194,7 +195,7 @@ export default function VideoToMp3Converter() {
                                     </div>
                                     <div className="text-center px-4">
                                         <p className="text-lg md:text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Video File here</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Extraction happens locally.</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Max 3GB. Extraction happens locally.</p>
                                     </div>
                                 </div>
                                 <input ref={fileInputRef} type="file" className="hidden" accept="video/*" onChange={onFileChange} />
