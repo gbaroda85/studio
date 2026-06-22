@@ -157,7 +157,7 @@ export default function PdfUnlocker() {
                     await checkEncryption(e.target.result as ArrayBuffer);
                 }
             };
-            reader.readAsArrayBuffer(file);
+            reader.readAsDataBuffer(file);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload a PDF file.' });
         }
@@ -398,7 +398,7 @@ export default function PdfUnlocker() {
                                     </div>
                                 </CardHeader>
 
-                                <CardContent className="p-5 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
+                                <CardContent className="p-5 md:p-8 space-y-6 flex-1 overflow-y-auto custom-scrollbar min-h-[300px]">
                                     {isChecking ? (
                                         <div className="py-10 flex flex-col items-center justify-center gap-3">
                                             <Loader2 className="h-8 w-8 animate-spin text-primary opacity-20" />
@@ -502,12 +502,12 @@ export default function PdfUnlocker() {
                                     ) : (
                                         <Button 
                                             size="lg" 
-                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 w-full shadow-[0_15px_30px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95" 
+                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 w-full shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_20px_40px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95" 
                                             onClick={handleDownload}
                                         >
                                             <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
                                             <span className="flex-1 px-12 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD PDF</span>
-                                            <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-10 group-hover:pr-12 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-20px' }}>
+                                            <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-10 group-hover:pr-12 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                                 <Download className="size-8 md:size-10 group-hover:scale-110 transition-transform" />
                                                 <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
                                             </div>
@@ -534,7 +534,7 @@ export default function PdfUnlocker() {
                                         <Eye className="size-3.5" /> Visual Feedback
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="p-0 flex flex-col h-[500px] lg:h-[700px]">
+                                <CardContent className="p-0 flex flex-col h-[400px] lg:h-[550px]">
                                     <ScrollArea className="flex-1 w-full p-8 md:p-12">
                                         <div className="flex flex-col items-center gap-12">
                                             {previewPages.length > 0 ? (
