@@ -4,24 +4,24 @@
 
 @layer base {
   :root {
-    --background: 15 5% 88%;      /* #E3E2DF - Soft Off-white */
+    --background: 220 33% 98%;    /* Very light cool background matching the image */
     --foreground: 341 100% 18%;   /* #5D001E - Deep Maroon */
-    --card: 15 5% 92%;           /* Slightly varied bg for cards */
+    --card: 0 0% 100%;           
     --card-foreground: 341 100% 18%;
-    --popover: 15 5% 88%;
+    --popover: 0 0% 100%;
     --popover-foreground: 341 100% 18%;
     --primary: 334 74% 35%;       /* #9A1750 - Deep Magenta */
     --primary-foreground: 0 0% 100%;
     --secondary: 345 49% 79%;     /* #E3AFBC - Light Pink */
     --secondary-foreground: 341 100% 18%;
-    --muted: 345 20% 85%;
-    --muted-foreground: 341 40% 35%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
     --accent: 342 83% 62%;        /* #EE4C7C - Bright Pink/Coral */
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 345 49% 75%;
-    --input: 345 49% 82%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
     --ring: 334 74% 35%;
     --radius: 1.5rem;
   }
@@ -74,22 +74,29 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* PREMIUM MESH GRADIENT FROM USER IMAGE */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: -20;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(334, 74%, 35%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(342, 83%, 62%, 0.03) 0px, transparent 50%);
+    background: 
+      radial-gradient(at 0% 0%, hsla(158, 80%, 92%, 1) 0, transparent 45%), 
+      radial-gradient(at 50% 0%, hsla(230, 80%, 93%, 1) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(180, 80%, 92%, 1) 0, transparent 45%), 
+      radial-gradient(at 0% 100%, hsla(280, 80%, 92%, 1) 0, transparent 45%), 
+      radial-gradient(at 50% 100%, hsla(200, 80%, 92%, 1) 0, transparent 50%), 
+      radial-gradient(at 100% 100%, hsla(140, 80%, 92%, 1) 0, transparent 45%);
+    background-color: #f8fafc;
     pointer-events: none;
   }
 
   .dark body::before {
-    background-image: 
-      radial-gradient(at 50% -20%, hsla(333, 100%, 68%, 0.1) 0px, transparent 70%),
+    background: 
+      radial-gradient(at 50% -20%, hsla(333, 100%, 68%, 0.08) 0px, transparent 70%),
       radial-gradient(at 0% 100%, hsla(285, 45%, 4%, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(333, 70%, 50%, 0.1) 0px, transparent 70%);
+      radial-gradient(at 100% 100%, hsla(333, 70%, 50%, 0.08) 0px, transparent 70%);
+    background-color: #020617;
   }
 
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
