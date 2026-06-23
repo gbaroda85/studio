@@ -64,7 +64,8 @@ import {
   Trophy,
   Target,
   Settings,
-  Video
+  Video,
+  MousePointer2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -409,82 +410,115 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHY CHOOSE GR7 TOOLS - INFOGRAPHIC DESIGN BASED ON IMAGE */}
+      {/* WHY USERS LOVE GR7 - PREMIUM INFOGRAPHIC THEME */}
       {!isSearching && (
-        <section className="relative w-full no-print overflow-hidden">
-          {/* Background Split Effect */}
-          <div className="absolute inset-0 z-0">
-             <div className="h-1/2 w-full bg-slate-100 dark:bg-slate-900/50" />
-             <div className="h-1/2 w-full bg-gradient-to-r from-sky-500 to-emerald-500" />
+        <section className="relative w-full no-print overflow-hidden bg-white pb-32">
+          {/* Top Background Area (Purple Gradient) */}
+          <div className="absolute top-0 left-0 w-full h-[600px] z-0 overflow-hidden">
+             <div className="absolute inset-0 bg-gradient-to-br from-[#2d0b3a] via-[#1a1a1a] to-[#2d0b3a]" />
+             <div className="absolute inset-0 opacity-20 mix-blend-overlay">
+                <Image src={placeholderData.hero_bg.url} alt="bg" fill className="object-cover" />
+             </div>
+             
+             {/* Floating Decorative Shapes (Blurred Rectangles from image) */}
+             <div className="absolute top-40 -left-20 w-80 h-16 bg-pink-500/20 blur-2xl rounded-full rotate-12 animate-pulse" />
+             <div className="absolute bottom-20 -right-20 w-96 h-20 bg-primary/20 blur-3xl rounded-full -rotate-12 animate-pulse" style={{ animationDelay: '2s' }} />
+             <div className="absolute top-1/4 right-[10%] w-40 h-8 border-4 border-white/10 rounded-full blur-sm" />
+             <div className="absolute bottom-1/3 left-[5%] w-60 h-10 border-4 border-primary/10 rounded-full blur-sm" />
           </div>
 
-          <div className="max-w-7xl mx-auto px-6 py-24 md:py-32 relative z-10">
-            <header className="text-center mb-24 space-y-2">
-                <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-800 dark:text-white">WHY USERS LOVE GR7 TOOLS</h2>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">FAST, SECURE AND RELIABLE</p>
-                <div className="w-12 h-1 bg-gradient-to-r from-blue-600 to-emerald-500 mx-auto mt-4 rounded-full" />
+          <div className="max-w-7xl mx-auto px-6 pt-24 md:pt-32 relative z-10">
+            <header className="text-center mb-24 space-y-3">
+                <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-white/10 border border-white/20 text-white/80 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-md mb-4 shadow-xl">
+                    <Sparkles className="size-3 text-yellow-400" /> OUR VALUES
+                </div>
+                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white font-headline leading-tight">WHY USERS LOVE <br/> <span className="text-primary">GR7 TOOLS</span></h2>
+                <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-white/40">FAST, SECURE AND RELIABLE</p>
             </header>
 
-            <div className="relative">
-                {/* Connecting Line with Dots (Desktop) */}
-                <div className="hidden md:block absolute top-1/2 left-0 w-full h-1 bg-white/20 -translate-y-1/2 z-0">
-                    <div className="absolute left-[16%] top-1/2 -translate-y-1/2 size-4 rounded-full bg-white shadow-lg" />
-                    <div className="absolute left-[50%] top-1/2 -translate-y-1/2 size-4 rounded-full bg-white shadow-lg" />
-                    <div className="absolute right-[16%] top-1/2 -translate-y-1/2 size-4 rounded-full bg-white shadow-lg" />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14 relative">
+                
+                {/* NODE 01: VALUES (100% PRIVATE) */}
+                <div className="relative group pt-10">
+                    {/* Background Number Watermark */}
+                    <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4">01</span>
+                    
+                    <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
+                        {/* Top Decorative Tab */}
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#1e3a8a] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20">
+                            <span className="font-black text-[10px] uppercase tracking-widest">VALUES</span>
+                        </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative z-10">
-                    {/* Node 01: VALUES (Privacy) */}
-                    <div className="relative flex flex-col items-center group">
-                        <span className="absolute -top-16 text-8xl font-black text-slate-300 dark:text-slate-700/30 opacity-50 select-none transition-transform group-hover:-translate-y-2">01</span>
-                        <div className="w-full max-w-[280px] bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border-2 border-white/50 relative overflow-hidden transition-all duration-500 hover:-translate-y-2">
-                            <div className="bg-[#1e3a8a] text-white py-3 text-center">
-                                <span className="font-black text-xs tracking-widest uppercase">VALUES</span>
-                            </div>
-                            <div className="p-8 text-center space-y-4">
-                                <h3 className="font-black text-sm uppercase text-slate-900 dark:text-slate-100">100% PRIVATE</h3>
-                                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Your data never leaves your device. All processing happens locally in RAM.</p>
+                        <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16">
+                            <div className="space-y-6 flex-1">
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Privacy Policy</p>
+                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">100% PRIVATE</h3>
+                                </div>
+                                <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
+                                <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Your data never leaves your device. All processing happens locally in your browser RAM.</p>
                             </div>
                         </div>
-                        <div className="mt-8 size-20 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-sky-400 flex items-center justify-center transition-transform group-hover:scale-110">
-                            <ShieldCheck className="size-10 text-sky-500" />
-                        </div>
-                    </div>
 
-                    {/* Node 02: VISION (Speed) */}
-                    <div className="relative flex flex-col items-center group">
-                        <span className="absolute -top-16 text-8xl font-black text-slate-300 dark:text-slate-700/30 opacity-50 select-none transition-transform group-hover:-translate-y-2">02</span>
-                        <div className="w-full max-w-[280px] bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border-2 border-white/50 relative overflow-hidden transition-all duration-500 hover:-translate-y-2">
-                            <div className="bg-[#0ea5e9] text-white py-3 text-center">
-                                <span className="font-black text-xs tracking-widest uppercase">VISION</span>
-                            </div>
-                            <div className="p-8 text-center space-y-4">
-                                <h3 className="font-black text-sm uppercase text-slate-900 dark:text-slate-100">NATIVE SPEED</h3>
-                                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Using WASM technology for hardware-level performance without server lag.</p>
-                            </div>
-                        </div>
-                        <div className="mt-8 size-20 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-blue-400 flex items-center justify-center transition-transform group-hover:scale-110">
-                            <Zap className="size-10 text-blue-500" />
-                        </div>
-                    </div>
-
-                    {/* Node 03: MISSION (Quality) */}
-                    <div className="relative flex flex-col items-center group">
-                        <span className="absolute -top-16 text-8xl font-black text-slate-300 dark:text-slate-700/30 opacity-50 select-none transition-transform group-hover:-translate-y-2">03</span>
-                        <div className="w-full max-w-[280px] bg-white dark:bg-slate-900 rounded-[2rem] shadow-2xl border-2 border-white/50 relative overflow-hidden transition-all duration-500 hover:-translate-y-2">
-                            <div className="bg-[#10b981] text-white py-3 text-center">
-                                <span className="font-black text-xs tracking-widest uppercase">MISSION</span>
-                            </div>
-                            <div className="p-8 text-center space-y-4">
-                                <h3 className="font-black text-sm uppercase text-slate-900 dark:text-slate-100">HD QUALITY</h3>
-                                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Industrial-grade 300 DPI rendering for official portal compliance.</p>
-                            </div>
-                        </div>
-                        <div className="mt-8 size-20 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-emerald-400 flex items-center justify-center transition-transform group-hover:scale-110">
-                            <Target className="size-10 text-emerald-500" />
+                        {/* Overlapping Bottom Icon */}
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6">
+                            <ShieldCheck className="size-8 md:size-10 text-sky-500" />
                         </div>
                     </div>
                 </div>
+
+                {/* NODE 02: VISION (NATIVE SPEED) */}
+                <div className="relative group pt-10">
+                    <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4">02</span>
+                    
+                    <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0ea5e9] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20">
+                            <span className="font-black text-[10px] uppercase tracking-widest">VISION</span>
+                        </div>
+
+                        <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16">
+                            <div className="space-y-6 flex-1">
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">System Core</p>
+                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">NATIVE SPEED</h3>
+                                </div>
+                                <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
+                                <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Using WebAssembly technology for hardware-level performance without any server-side lag.</p>
+                            </div>
+                        </div>
+
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6">
+                            <Zap className="size-8 md:size-10 text-yellow-500" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* NODE 03: MISSION (HD QUALITY) */}
+                <div className="relative group pt-10">
+                    <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4">03</span>
+                    
+                    <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#10b981] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20">
+                            <span className="font-black text-[10px] uppercase tracking-widest">MISSION</span>
+                        </div>
+
+                        <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16">
+                            <div className="space-y-6 flex-1">
+                                <div className="space-y-1">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Output Standards</p>
+                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">HD QUALITY</h3>
+                                </div>
+                                <div className="h-1 w-12 bg-primary mx-auto rounded-full" />
+                                <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.</p>
+                            </div>
+                        </div>
+
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6">
+                            <Target className="size-8 md:size-10 text-emerald-500" />
+                        </div>
+                    </div>
+                </div>
+
             </div>
           </div>
         </section>
@@ -492,3 +526,4 @@ export default function Page() {
     </div>
   );
 }
+
