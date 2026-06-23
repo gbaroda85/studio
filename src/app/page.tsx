@@ -62,6 +62,8 @@ import {
   CheckCircle2,
   Menu,
   Trophy,
+  Target,
+  Settings,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -406,10 +408,10 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHY CHOOSE GR7 TOOLS - PREMIUM FEATURE GRID STYLE */}
+      {/* WHY CHOOSE GR7 TOOLS - INFOGRAPHIC DESIGN */}
       {!isSearching && (
-        <section className="px-4 py-20 md:py-32 no-print w-full bg-slate-50/50 dark:bg-transparent border-t">
-          <div className="max-w-7xl mx-auto space-y-16">
+        <section className="px-4 py-24 md:py-40 no-print w-full bg-slate-50/50 dark:bg-transparent border-t">
+          <div className="max-w-7xl mx-auto space-y-24">
             <div className="text-center space-y-4">
                 <div className="inline-flex items-center px-4 py-1 rounded-full bg-white dark:bg-slate-800 border shadow-sm">
                     <span className="text-[8px] md:text-[10px] font-black uppercase tracking-[0.2em] text-primary/60">CORE PRINCIPLES</span>
@@ -423,47 +425,68 @@ export default function Page() {
                 </p>
             </div>
             
-            <div className="relative">
-                {/* Connecting Lines (Desktop) */}
-                <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
-                    <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
-                        <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="#3b82f6" strokeWidth="2" strokeDasharray="6 6" className="opacity-20" />
-                        <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
-                        <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
-                    </svg>
+            <div className="relative flex flex-col md:flex-row items-center justify-center gap-12 md:gap-4">
+                {/* Connecting Lines & Arrows (Desktop Only) */}
+                <div className="hidden md:block absolute top-1/2 left-[20%] right-[20%] -translate-y-1/2 z-0 pointer-events-none">
+                    <div className="relative w-full h-10">
+                         {/* Connection 1 to 2 */}
+                         <div className="absolute left-[15%] top-1/2 -translate-y-1/2 flex items-center gap-2">
+                             <div className="size-2 rounded-full bg-cyan-400" />
+                             <div className="h-0.5 w-16 lg:w-32 bg-gradient-to-r from-cyan-400 to-indigo-500" />
+                             <ArrowRight className="size-4 text-indigo-500" />
+                             <div className="size-2 rounded-full bg-indigo-500" />
+                         </div>
+                         {/* Connection 2 to 3 */}
+                         <div className="absolute right-[15%] top-1/2 -translate-y-1/2 flex items-center gap-2">
+                             <div className="size-2 rounded-full bg-indigo-500" />
+                             <div className="h-0.5 w-16 lg:w-32 bg-gradient-to-r from-indigo-500 to-purple-500" />
+                             <ArrowRight className="size-4 text-purple-500" />
+                             <div className="size-2 rounded-full bg-purple-500" />
+                         </div>
+                    </div>
                 </div>
 
-                <div className="grid md:grid-cols-3 gap-8 relative z-10">
-                    {/* Feature 1 */}
-                    <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                        <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
-                            <div className="size-12 rounded-full bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center shadow-inner">
-                                <ShieldCheck className="text-cyan-500 size-6" />
+                {/* INFOGRAPHIC NODES */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 lg:gap-24 relative z-10 w-full">
+                    {/* Node 1: Privacy */}
+                    <div className="flex flex-col items-center group">
+                        <div className="relative size-64 lg:size-72 rounded-full p-[2px] bg-gradient-to-br from-cyan-300 via-blue-500 to-teal-400 shadow-2xl transition-transform duration-500 group-hover:scale-105 transform-gpu">
+                            <div className="size-full rounded-full bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+                                <div className="absolute top-0 right-0 size-24 bg-cyan-400/5 blur-2xl rounded-full" />
+                                <div className="size-14 rounded-2xl bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center mb-4 shadow-inner">
+                                    <Search className="size-7 text-cyan-600" />
+                                </div>
+                                <h3 className="text-lg font-black uppercase tracking-widest text-cyan-600 mb-2">100% PRIVATE</h3>
+                                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed uppercase opacity-80">Your images and documents never leave your device. All processing happens 100% locally.</p>
                             </div>
-                            <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">100% PRIVATE</h3>
-                            <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your images and documents never leave your device. All processing happens 100% locally in your browser's RAM.</p>
                         </div>
                     </div>
 
-                    {/* Feature 2 */}
-                    <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-indigo-400 to-purple-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                        <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
-                            <div className="size-12 rounded-full bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center shadow-inner">
-                                <Zap className="text-indigo-500 size-6" />
+                    {/* Node 2: Speed */}
+                    <div className="flex flex-col items-center group">
+                        <div className="relative size-64 lg:size-72 rounded-full p-[2px] bg-gradient-to-br from-indigo-400 via-purple-600 to-blue-500 shadow-2xl transition-transform duration-500 group-hover:scale-105 transform-gpu">
+                            <div className="size-full rounded-full bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+                                <div className="absolute top-0 right-0 size-24 bg-purple-400/5 blur-2xl rounded-full" />
+                                <div className="size-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center mb-4 shadow-inner">
+                                    <Settings className="size-7 text-indigo-600 animate-spin-slow" />
+                                </div>
+                                <h3 className="text-lg font-black uppercase tracking-widest text-indigo-600 mb-2">NATIVE SPEED</h3>
+                                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed uppercase opacity-80">Using advanced WASM technology, we process files at your device's native hardware speed.</p>
                             </div>
-                            <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">NATIVE SPEED</h3>
-                            <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Using advanced WASM technology, we process files at your device's native hardware speed. No server queues.</p>
                         </div>
                     </div>
 
-                    {/* Feature 3 */}
-                    <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-purple-400 to-pink-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
-                        <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
-                            <div className="size-12 rounded-full bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shadow-inner">
-                                <Trophy className="text-purple-500 size-6" />
+                    {/* Node 3: Quality */}
+                    <div className="flex flex-col items-center group">
+                        <div className="relative size-64 lg:size-72 rounded-full p-[2px] bg-gradient-to-br from-purple-400 via-pink-600 to-rose-500 shadow-2xl transition-transform duration-500 group-hover:scale-105 transform-gpu">
+                            <div className="size-full rounded-full bg-white dark:bg-slate-950 flex flex-col items-center justify-center p-8 text-center relative overflow-hidden">
+                                <div className="absolute top-0 right-0 size-24 bg-rose-400/5 blur-2xl rounded-full" />
+                                <div className="size-14 rounded-2xl bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mb-4 shadow-inner">
+                                    <Target className="size-7 text-rose-600" />
+                                </div>
+                                <h3 className="text-lg font-black uppercase tracking-widest text-rose-600 mb-2">STUDIO QUALITY</h3>
+                                <p className="text-[10px] text-muted-foreground font-bold leading-relaxed uppercase opacity-80">Engineered for professional submissions. Every output is rendered in high-definition 300 DPI.</p>
                             </div>
-                            <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">STUDIO QUALITY</h3>
-                            <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Engineered for professional submissions. Every output is rendered in high-definition (300 DPI equivalent).</p>
                         </div>
                     </div>
                 </div>
