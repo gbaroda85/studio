@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 220 33% 98%;    /* Very light cool background matching the image */
+    --background: 220 33% 98%;    /* #F5F7FF base equivalent */
     --foreground: 341 100% 18%;   /* #5D001E - Deep Maroon */
     --card: 0 0% 100%;           
     --card-foreground: 341 100% 18%;
@@ -69,20 +69,17 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* PREMIUM GLOBAL MESH GRADIENT */
+  /* PREMIUM GLOBAL AURORA PASTEL BACKGROUND */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
     z-index: -20;
     background: 
-      radial-gradient(at 0% 0%, hsla(158, 80%, 92%, 1) 0, transparent 45%), 
-      radial-gradient(at 50% 0%, hsla(230, 80%, 93%, 1) 0, transparent 50%), 
-      radial-gradient(at 100% 0%, hsla(180, 80%, 92%, 1) 0, transparent 45%), 
-      radial-gradient(at 0% 100%, hsla(280, 80%, 92%, 1) 0, transparent 45%), 
-      radial-gradient(at 50% 100%, hsla(200, 80%, 92%, 1) 0, transparent 50%), 
-      radial-gradient(at 100% 100%, hsla(140, 80%, 92%, 1) 0, transparent 45%);
-    background-color: #f8fafc;
+      radial-gradient(circle at 15% 20%, rgba(224,255,245,0.65) 0%, transparent 35%),
+      radial-gradient(circle at 85% 25%, rgba(220,230,255,0.60) 0%, transparent 35%),
+      radial-gradient(circle at 50% 85%, rgba(255,240,220,0.55) 0%, transparent 40%),
+      linear-gradient(135deg, #F5F7FF 0%, #EEF4FF 35%, #F3EEFF 65%, #E8FFF8 100%);
     pointer-events: none;
     transition: opacity 0.5s ease-in-out;
   }
