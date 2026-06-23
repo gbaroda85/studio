@@ -303,6 +303,14 @@ export default function Page() {
           </div>
 
           <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-10 md:mb-8 animate-fade-in-up">
+            <Link href="/tools" className="uiverse-clay-btn">
+              <div className="button-outer">
+                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
+                  <LayoutGrid className="size-4 text-primary" />
+                  <span>ALL TOOLS</span>
+                </div>
+              </div>
+            </Link>
             <Link href="/tools?tab=image" className="uiverse-clay-btn">
               <div className="button-outer">
                 <div className="button-inner flex items-center gap-2 px-4 md:px-6">
@@ -526,4 +534,3 @@ export default function Page() {
     </div>
   );
 }
-
