@@ -38,3 +38,8 @@ export const PdfCropperClient = dynamic(() => import('@/components/pdf-cropper')
   ssr: false,
   loading: () => <LoadingState message="Initializing Crop Studio..." />
 });
+
+export const VideoCompressorClient = dynamic(() => import('@/components/video-compressor'), {
+  ssr: false,
+  loading: () => <LoadingState message="Initializing Cloud Workspace..." />
+});

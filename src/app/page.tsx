@@ -64,6 +64,7 @@ import {
   Trophy,
   Target,
   Settings,
+  Video
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -75,12 +76,12 @@ const ALL_TOOLS = [
   // FEATURED / VISUAL PROCESSORS
   { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-gradient-to-br from-blue-500 to-blue-700", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-gradient-to-br from-violet-500 to-violet-700", lightBg: "bg-violet-50", category: "featured" },
+  { icon: Video, title: "VIDEO COMPRESSOR", description: "Shrink large videos for WhatsApp & Email in HD.", href: "/compress-video", colorClass: "bg-gradient-to-br from-orange-400 to-orange-600", lightBg: "bg-orange-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-gradient-to-br from-sky-400 to-sky-600", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "featured" },
   { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic Color filters.", href: "/document-scan", colorClass: "bg-gradient-to-br from-emerald-400 to-emerald-600", lightBg: "bg-emerald-50", category: "featured" },
   { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-gradient-to-br from-emerald-500 to-emerald-700", lightBg: "bg-[#fefce8]", category: "featured" },
-  { icon: PenTool, title: "SIGNATURE RESIZER", description: "Resize signature to exact CM/Pixel and KB size.", href: "/signature-resizer", colorClass: "bg-gradient-to-br from-orange-500 to-orange-700", lightBg: "bg-orange-50", category: "featured" },
   
   // PDF TOOLKIT
   { icon: Layers, title: "ORGANIZE PDF", description: "Delete, reorder and rotate pages visually.", href: "/organize-pdf", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "pdf-kit" },
@@ -293,7 +294,7 @@ export default function Page() {
           
           <div className="space-y-1 mb-8 md:mb-6 animate-fade-in-up px-4">
             <p className="text-[10px] md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80 uppercase md:normal-case">
-              Everything happens locally in your device RAM, 100% private.
+              Everything happens locally in your browser RAM, 100% private.
             </p>
             <p className="hidden md:block text-xs md:text-base text-slate-400 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80">
               Fast, secure, and ready for official submissions.
@@ -420,7 +421,7 @@ export default function Page() {
           <div className="max-w-7xl mx-auto px-6 py-24 md:py-32 relative z-10">
             <header className="text-center mb-24 space-y-2">
                 <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-800 dark:text-white">OUR MISSION</h2>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">INFOGRAPHIC</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">WHY CHOOSE GR7 TOOLS</p>
                 <div className="w-12 h-1 bg-gradient-to-r from-blue-600 to-emerald-500 mx-auto mt-4 rounded-full" />
             </header>
 

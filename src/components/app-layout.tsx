@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -63,7 +62,8 @@ import {
   CalendarDays,
   ScanLine,
   Palette,
-  Banknote
+  Banknote,
+  Video
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -169,6 +169,7 @@ const CATEGORIES = [
     icon: Music,
     color: "text-indigo-500",
     tools: [
+      { href: '/compress-video', label: 'video_compress_label', icon: Video },
       { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
     ]
   },
