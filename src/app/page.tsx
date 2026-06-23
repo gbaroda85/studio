@@ -65,7 +65,8 @@ import {
   Target,
   Settings,
   Video,
-  MousePointer2
+  MousePointer2,
+  ChevronRight
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -198,6 +199,41 @@ const UiverseViewAllButton = ({ href }: { href: string }) => {
   );
 };
 
+const LaptopIllustration = ({ className }: { className?: string }) => (
+    <div className={cn("relative w-full max-w-[550px] transform-gpu transition-all duration-700", className)}>
+        {/* Main Laptop Body (Lid) */}
+        <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-3xl p-2.5 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)] border-[8px] border-slate-100 dark:border-slate-700/50">
+            {/* Screen Content - Dashboard Simplified */}
+            <div className="w-full h-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden flex flex-col p-4 gap-4">
+                <div className="flex items-center justify-between border-b pb-3">
+                    <div className="flex gap-2">
+                        <div className="size-2.5 rounded-full bg-rose-400" />
+                        <div className="size-2.5 rounded-full bg-amber-400" />
+                        <div className="size-2.5 rounded-full bg-emerald-400" />
+                    </div>
+                    <div className="h-2 w-24 bg-muted rounded-full" />
+                </div>
+                <div className="grid grid-cols-3 gap-3 flex-1 overflow-hidden">
+                    {Array.from({ length: 9 }).map((_, i) => (
+                        <div key={i} className="rounded-xl bg-muted/30 p-2 flex flex-col gap-2 border border-slate-50 dark:border-slate-800">
+                            <div className={cn("size-6 rounded-lg opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
+                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
+                            <div className="h-1 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+        {/* Keyboard Base */}
+        <div className="h-5 w-[112%] -ml-[6%] bg-slate-300 dark:bg-slate-700 rounded-b-2xl relative shadow-2xl overflow-hidden">
+             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-2.5 bg-slate-400/50 dark:bg-slate-800/50 rounded-b-xl" />
+        </div>
+        {/* Decorative Floating Blobs around laptop */}
+        <div className="absolute -top-10 -right-10 size-20 bg-primary/10 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute -bottom-10 -left-10 size-24 bg-accent/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+    </div>
+);
+
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full touch-manipulation">
     <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl dark:shadow-primary/5 hover:shadow-2xl dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[280px] md:min-h-[300px] overflow-hidden text-left">
@@ -258,96 +294,108 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-6 md:pt-4 pb-12 md:pb-8 overflow-hidden bg-transparent border-b-2 border-border/50 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10 transform-gpu">
+      <section className="relative w-full pt-10 md:pt-16 pb-20 md:pb-24 overflow-hidden z-10 transform-gpu bg-transparent">
+        {/* PREMIUM MODERN SAAS BACKGROUND */}
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden opacity-0" />
-          <div className="hidden dark:block absolute inset-0">
-            {placeholderData.hero_bg.url && (
-              <Image 
-                src={placeholderData.hero_bg.url} 
-                alt="Hero Background" 
-                fill 
-                className="object-cover opacity-20 transition-opacity duration-700"
-                priority
-                data-ai-hint={placeholderData.hero_bg.hint}
-              />
-            )}
-          </div>
-          <div className="absolute inset-0 bg-slate-900/60 mix-blend-multiply opacity-0 dark:opacity-100 transition-opacity duration-500" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/90 opacity-0" />
+          <div className="absolute inset-0 bg-[#FDFBFC] dark:bg-transparent" />
+          
+          {/* Organic Blended Blobs */}
+          <div className="absolute top-[10%] left-[5%] size-[500px] bg-[#FDE7D8] rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
+          <div className="absolute top-[5%] right-[10%] size-[600px] bg-[#FBE3EA] rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-[10%] left-[20%] size-[550px] bg-[#EDE7FF] rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-[5%] right-[15%] size-[500px] bg-[#DFF4FF] rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1.5s' }} />
+          
+          {/* Subtle floating particles/shapes */}
+          <div className="absolute top-[30%] left-[40%] size-3 bg-primary/20 rounded-full blur-sm animate-bounce" style={{ animationDuration: '4s' }} />
+          <div className="absolute top-[60%] right-[30%] size-2 bg-accent/20 rounded-full blur-sm animate-bounce" style={{ animationDuration: '6s' }} />
+          
+          {/* Large curved abstract shapes */}
+          <svg className="absolute bottom-0 left-0 w-full h-auto opacity-10 pointer-events-none" viewBox="0 0 1440 320">
+              <path fill="currentColor" fillOpacity="1" d="M0,192L80,186.7C160,181,320,171,480,186.7C640,203,800,245,960,240C1120,235,1280,181,1360,154.7L1440,128L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
+          </svg>
         </div>
 
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-48 -left-48 size-[500px] md:size-[800px] bg-primary/10 rounded-full blur-[160px] animate-pulse" />
-          <div className="absolute top-1/2 -right-48 size-[500px] md:size-[800px] bg-accent/10 rounded-full blur-[160px] animate-pulse" />
-        </div>
+        <div className="w-full px-5 md:px-12 relative z-10">
+          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-12">
+            
+            {/* LEFT CONTENT */}
+            <div className="flex-1 text-center lg:text-left space-y-6 max-w-2xl lg:max-w-xl xl:max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-2 shadow-sm animate-fade-in-up">
+                    <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
+                </div>
+                
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-2 md:mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta">
+                    Professional Tools for <br className="hidden md:block" />
+                    <span className="text-gradient-hero">Images & PDFs</span>
+                </h1>
+                
+                <div className="space-y-1 mb-8 md:mb-6 animate-fade-in-up px-4 lg:px-0">
+                    <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed opacity-80">
+                    Everything happens locally in your browser RAM, 100% private. <br className="hidden md:block" />
+                    Fast, secure, and ready for official submissions.
+                    </p>
+                </div>
 
-        <div className="w-full px-5 md:px-12 relative z-10 text-center">
-          <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-4 md:mb-3 shadow-sm animate-fade-in-up">
-            <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
-          </div>
-          
-          <h1 className="text-2xl md:text-5xl lg:text-6xl font-black mb-2 md:mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta max-w-4xl mx-auto">
-            Professional Tools for <br className="hidden md:block" />
-            <span className="text-gradient-hero">Images & PDFs</span>
-          </h1>
-          
-          <div className="space-y-1 mb-8 md:mb-6 animate-fade-in-up px-4">
-            <p className="text-[10px] md:text-base text-slate-500 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80 uppercase md:normal-case">
-              Everything happens locally in your browser RAM, 100% private.
-            </p>
-            <p className="hidden md:block text-xs md:text-base text-slate-400 dark:text-slate-400 max-w-3xl mx-auto font-bold leading-relaxed opacity-80">
-              Fast, secure, and ready for official submissions.
-            </p>
-          </div>
+                <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 mb-10 md:mb-8 animate-fade-in-up">
+                    <Link href="/tools" className="uiverse-clay-btn">
+                    <div className="button-outer">
+                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
+                        <LayoutGrid className="size-4 text-primary" />
+                        <span>ALL TOOLS</span>
+                        </div>
+                    </div>
+                    </Link>
+                    <Link href="/tools?tab=image" className="uiverse-clay-btn">
+                    <div className="button-outer">
+                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
+                        <ImageIcon className="size-4 text-blue-500" />
+                        <span>IMAGE TOOLS</span>
+                        </div>
+                    </div>
+                    </Link>
+                    <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
+                    <div className="button-outer">
+                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
+                        <FileText className="size-4 text-rose-500" />
+                        <span>PDF TOOLS</span>
+                        </div>
+                    </div>
+                    </Link>
+                    <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
+                    <div className="button-outer">
+                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
+                        <Calculator className="size-4 text-emerald-500" />
+                        <span>CALCULATORS</span>
+                        </div>
+                    </div>
+                    </Link>
+                </div>
 
-          <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-10 md:mb-8 animate-fade-in-up">
-            <Link href="/tools" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                  <LayoutGrid className="size-4 text-primary" />
-                  <span>ALL TOOLS</span>
+                <div className="max-w-2xl mx-auto lg:mx-0 relative group animate-fade-in-up px-2 md:px-0">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
+                    <div className="relative">
+                    <Input
+                        type="text"
+                        placeholder="Search tools... (e.g. 'scan', 'barcode')"
+                        className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <Search className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 size-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-primary z-10 pointer-events-none" />
+                    </div>
                 </div>
-              </div>
-            </Link>
-            <Link href="/tools?tab=image" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                  <ImageIcon className="size-4 text-blue-500" />
-                  <span>IMAGE TOOLS</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/tools?tab=pdf" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                  <FileText className="size-4 text-rose-500" />
-                  <span>PDF TOOLS</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/tools?tab=calculator" className="uiverse-clay-btn">
-              <div className="button-outer">
-                <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                  <Calculator className="size-4 text-emerald-500" />
-                  <span>CALCULATORS</span>
-                </div>
-              </div>
-            </Link>
-          </div>
-
-          <div className="max-w-2xl mx-auto relative group animate-fade-in-up px-2 md:px-0">
-            <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search tools... (e.g. 'scan', 'barcode')"
-                className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <Search className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 size-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-primary z-10 pointer-events-none" />
             </div>
+
+            {/* RIGHT DECORATIVE LAPTOP (Desktop Only or Scaled Mobile) */}
+            <div className="hidden lg:block lg:flex-1 relative animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                <LaptopIllustration className="ml-auto" />
+            </div>
+
+            {/* MOBILE LAPTOP ILLUSTRATION */}
+            <div className="lg:hidden w-full max-w-[400px] animate-fade-in-up mt-10" style={{ animationDelay: '0.4s' }}>
+                <LaptopIllustration />
+            </div>
+
           </div>
         </div>
       </section>
@@ -408,7 +456,7 @@ export default function Page() {
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Calculators</h2>
                         <UiverseViewAllButton href="/tools?tab=calculator" />
                     </div>
-                    <div className="grid grid-cols-1 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
