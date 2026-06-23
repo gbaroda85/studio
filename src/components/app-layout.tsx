@@ -189,7 +189,7 @@ function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden">
-        <svg viewBox="0 0 100 100" className="w-full h-full p-0.5 md:p-1">
+        <svg viewBox="0 0 1000 100" className="w-full h-full p-0.5 md:p-1">
           <text 
             x="8" 
             y="72" 
@@ -227,30 +227,54 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   const { t } = useLanguage();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [isLocked, setIsLocked] = useState(false); // Track if opened by click
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
+    if (isLocked) return; // Ignore hover if already locked open
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setOpen(true);
   };
 
   const handleMouseLeave = () => {
+    if (isLocked) return; // Stay open if locked
     timeoutRef.current = setTimeout(() => {
       setOpen(false);
     }, 150);
   };
 
+  const handleToggle = (e: React.MouseEvent) => {
+    // Prevent default DropdownMenuTrigger behavior as we manage 'open' state manually
+    e.preventDefault();
+    if (isLocked) {
+      setIsLocked(false);
+      setOpen(false);
+    } else {
+      setIsLocked(true);
+      setOpen(true);
+    }
+  };
+
   return (
     <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative">
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
+      <DropdownMenu 
+        open={open} 
+        onOpenChange={(val) => {
+          setOpen(val);
+          if (!val) setIsLocked(false); // Reset lock if closed via backdrop/esc
+        }}
+      >
+        <DropdownMenuTrigger asChild onClick={handleToggle}>
           <Button 
             variant="ghost" 
-            className="h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none"
+            className={cn(
+                "h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none",
+                isLocked && "bg-primary/10 text-primary"
+            )}
           >
             <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
             <span className="hidden xl:inline">{t(category.name)}</span>
-            <ChevronDown className="size-3 opacity-50 group-hover:rotate-180 transition-transform" />
+            <ChevronDown className={cn("size-3 opacity-50 transition-transform", (open || isLocked) && "rotate-180")} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
@@ -265,7 +289,12 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
           {category.tools.map((tool) => (
-            <DropdownMenuItem key={tool.href} asChild className="rounded-xl">
+            <DropdownMenuItem 
+                key={tool.href} 
+                asChild 
+                className="rounded-xl"
+                onClick={() => { setOpen(false); setIsLocked(false); }}
+            >
               <Link href={tool.href} className={cn(
                 "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors min-h-[44px]", 
                 pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
