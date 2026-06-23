@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -514,11 +513,11 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   if (!isMounted) return null;
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-background relative overflow-x-hidden pt-16 md:pt-20">
+    <div className="flex flex-col min-h-screen w-full bg-transparent relative overflow-x-hidden pt-16 md:pt-20">
       <AppHeader />
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)] overflow-x-hidden">
          <div className="w-full flex-1 flex flex-col items-center px-0 p-0 m-0">
-            <div className="w-full flex-1 flex flex-col items-center">
+            <div className="w-full flex-1 flex flex-col items-center bg-transparent">
               {children}
             </div>
             <AppFooter />

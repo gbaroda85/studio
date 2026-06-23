@@ -67,24 +67,16 @@
     position: relative;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
-  }
-
-  /* PREMIUM GLOBAL AURORA PASTEL BACKGROUND */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -20;
+    /* EXACT AURORA GRADIENT FROM IMAGE */
     background: 
       radial-gradient(circle at 15% 20%, rgba(224,255,245,0.65) 0%, transparent 35%),
       radial-gradient(circle at 85% 25%, rgba(220,230,255,0.60) 0%, transparent 35%),
       radial-gradient(circle at 50% 85%, rgba(255,240,220,0.55) 0%, transparent 40%),
       linear-gradient(135deg, #F5F7FF 0%, #EEF4FF 35%, #F3EEFF 65%, #E8FFF8 100%);
-    pointer-events: none;
-    transition: opacity 0.5s ease-in-out;
+    background-attachment: fixed;
   }
 
-  .dark body::before {
+  .dark body {
     background: 
       radial-gradient(at 50% -20%, hsla(333, 100%, 68%, 0.08) 0px, transparent 70%),
       radial-gradient(at 0% 100%, hsla(285, 45%, 4%, 0.05) 0px, transparent 50%),

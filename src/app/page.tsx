@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -259,9 +258,9 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-6 md:pt-4 pb-12 md:pb-8 overflow-hidden bg-background dark:bg-[#0a040d] border-b-2 border-border/50 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10 transform-gpu">
+      <section className="relative w-full pt-6 md:pt-4 pb-12 md:pb-8 overflow-hidden bg-transparent border-b-2 border-border/50 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] transition-colors duration-500 z-10 transform-gpu">
         <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#fdf8f9] via-[#1e73be]/5 to-[#d4e157]/10 dark:hidden opacity-0" />
           <div className="hidden dark:block absolute inset-0">
             {placeholderData.hero_bg.url && (
               <Image 
@@ -275,7 +274,7 @@ export default function Page() {
             )}
           </div>
           <div className="absolute inset-0 bg-slate-900/60 mix-blend-multiply opacity-0 dark:opacity-100 transition-opacity duration-500" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/90" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background/90 opacity-0" />
         </div>
 
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
@@ -353,7 +352,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="pt-8 md:pt-12 pb-24 md:pb-24 bg-background w-full">
+      <section className="pt-8 md:pt-12 pb-24 md:pb-24 bg-transparent w-full">
         <div className="w-full px-5 md:px-12">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300">
@@ -420,7 +419,7 @@ export default function Page() {
 
       {/* WHY USERS LOVE GR7 - PREMIUM INFOGRAPHIC THEME */}
       {!isSearching && (
-        <section className="relative w-full no-print overflow-hidden bg-white pb-32">
+        <section className="relative w-full no-print overflow-hidden bg-transparent pb-32">
           {/* Top Background Area (Purple Gradient) */}
           <div className="absolute top-0 left-0 w-full h-[600px] z-0 overflow-hidden">
              <div className="absolute inset-0 bg-gradient-to-br from-[#2d0b3a] via-[#1a1a1a] to-[#2d0b3a]" />
