@@ -118,7 +118,6 @@ const ALL_TOOLS = [
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
-  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
@@ -422,7 +421,7 @@ export default function Page() {
           <div className="max-w-7xl mx-auto px-6 py-24 md:py-32 relative z-10">
             <header className="text-center mb-24 space-y-2">
                 <h2 className="text-2xl md:text-4xl font-black uppercase tracking-tight text-slate-800 dark:text-white">WHY USERS LOVE GR7 TOOLS</h2>
-                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">WHY CHOOSE GR7 TOOLS</p>
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">FAST, SECURE AND RELIABLE</p>
                 <div className="w-12 h-1 bg-gradient-to-r from-blue-600 to-emerald-500 mx-auto mt-4 rounded-full" />
             </header>
 
