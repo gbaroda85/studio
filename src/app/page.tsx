@@ -312,25 +312,25 @@ export default function Page() {
         <div className="w-full px-5 md:px-12 relative z-10">
           <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
             
-            {/* CONTENT BLOCK - Left aligned on desktop */}
-            <div className="flex-1 text-center lg:text-left space-y-4 max-w-4xl lg:max-w-2xl mx-auto lg:mx-0 flex flex-col items-center lg:items-start">
+            {/* CONTENT BLOCK - Left aligned but shifted slightly right on desktop */}
+            <div className="flex-1 text-center space-y-4 max-w-4xl lg:max-w-2xl mx-auto lg:ml-20 flex flex-col items-center">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
                 
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white text-center lg:text-left">
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white text-center">
                     Professional Tools for <br className="hidden md:block" />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">Images & PDFs</span>
                 </h1>
                 
-                <div className="space-y-1 mb-4 animate-fade-in-up px-4 lg:px-0 text-center lg:text-left">
-                    <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed opacity-80 mx-auto lg:mx-0">
+                <div className="space-y-1 mb-4 animate-fade-in-up px-4 text-center">
+                    <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed opacity-80 mx-auto">
                     Everything happens locally in your browser RAM, 100% private. <br className="hidden md:block" />
                     Fast, secure, and ready for official submissions.
                     </p>
                 </div>
 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 mb-6 animate-fade-in-up">
+                <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-6 animate-fade-in-up">
                     <Link href="/tools" className="uiverse-clay-btn">
                     <div className="button-outer">
                         <div className="button-inner flex items-center gap-2 px-4 md:px-6">
@@ -357,13 +357,13 @@ export default function Page() {
                     </Link>
                 </div>
 
-                <div className="max-w-2xl w-full mx-auto lg:mx-0 relative group animate-fade-in-up px-2 md:px-0">
+                <div className="max-w-2xl w-full mx-auto relative group animate-fade-in-up px-2 md:px-0">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
                     <div className="relative">
                     <Input
                         type="text"
                         placeholder="Search tools... (e.g. 'scan', 'barcode')"
-                        className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight text-center lg:text-left"
+                        className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight text-center"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
