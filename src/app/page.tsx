@@ -99,7 +99,7 @@ const ALL_TOOLS = [
   { icon: Receipt, title: "GST INVOICE GENERATOR", description: "Generate professional GST compliant invoices instantly.", href: "/gst-invoice", colorClass: "bg-emerald-600", lightBg: "bg-emerald-50", category: "calculator" },
   { icon: IndianRupee, title: "GST CALCULATOR", description: "Calculate GST addition or removal instantly.", href: "/gst-calculator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "calculator" },
   { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-[#eff6ff]", category: "calculator" },
-  { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on Fixed and Recurring Deposits.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
+  { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on your bank deposits with quarterly and monthly compounding precision.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
   { icon: Landmark, title: "INCOME TAX CALCULATOR", description: "Calculate income tax liability for FY 2024-25.", href: "/income-tax-calculator", colorClass: "bg-blue-700", lightBg: "bg-blue-50", category: "calculator" },
 
   // FILE TOOLS
@@ -119,7 +119,6 @@ const ALL_TOOLS = [
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
-  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
@@ -211,25 +210,6 @@ const LaptopIllustration = ({ className }: { className?: string }) => (
                transformStyle: 'preserve-3d'
              }}>
             
-            {/* Keyboard Base (Realistic Perspective) */}
-            <div 
-                className="absolute bottom-[-5%] left-1/2 -translate-x-1/2 w-[108%] h-full bg-slate-300 dark:bg-slate-700 rounded-2xl shadow-[0_30px_60px_-10px_rgba(0,0,0,0.5)] border-b-[10px] border-slate-400/50 z-10"
-                style={{ 
-                  transform: 'rotateX(82deg) translateZ(-30px)',
-                  transformOrigin: 'bottom'
-                }}
-            >
-                 {/* Trackpad */}
-                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-32 h-20 bg-slate-400/10 rounded-xl border border-white/5 shadow-inner" />
-                 
-                 {/* Keyboard Lines Visual */}
-                 <div className="absolute top-10 left-8 right-8 bottom-32 grid grid-cols-12 gap-1 opacity-20">
-                    {Array.from({ length: 60 }).map((_, i) => (
-                      <div key={i} className="bg-slate-500/50 rounded-sm" />
-                    ))}
-                 </div>
-            </div>
-
             {/* Main Laptop Lid (Screen part) */}
             <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-2xl p-2 md:p-3 shadow-2xl border-[6px] border-slate-100 dark:border-slate-700/50 z-20 overflow-hidden">
                 {/* Screen Content - Dashboard Simplified */}
@@ -321,7 +301,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-4 pb-2 overflow-hidden z-10 transform-gpu bg-transparent">
+      <section className="relative w-full pt-2 pb-0 overflow-hidden z-10 transform-gpu bg-transparent">
         {/* PREMIUM MODERN SAAS BACKGROUND */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#FDFBFC] dark:bg-transparent" />
@@ -394,7 +374,7 @@ export default function Page() {
                     </Link>
                 </div>
 
-                <div className="max-w-2xl mx-auto lg:mx-0 relative group animate-fade-in-up px-2 md:px-0">
+                <div className="max-w-2xl mx-auto lg:mx-0 relative group animate-fade-in-up px-2 md:px-0 pb-10 md:pb-12">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
                     <div className="relative">
                     <Input
