@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -205,31 +204,6 @@ const UiverseViewAllButton = ({ href }: { href: string }) => {
   );
 };
 
-const LaptopIllustration = ({ className }: { className?: string }) => (
-    <div 
-        className={cn("relative w-full max-w-[450px] transform-gpu transition-all duration-700", className)}
-        style={{ perspective: '3000px' }}
-    >
-        <div className="relative transform-gpu transition-transform duration-700 hover:scale-105" 
-             style={{ 
-               transform: 'rotateY(-28deg) rotateX(8deg)',
-               transformStyle: 'preserve-3d',
-               backfaceVisibility: 'hidden'
-             }}>
-            
-            {/* Screen Portion Only */}
-            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-2xl p-2 md:p-3 shadow-2xl border-[6px] border-slate-100 dark:border-slate-700/50 z-20 overflow-hidden transform-gpu">
-                {/* Screen Content - Dashboard Simplified */}
-                
-            </div>
-        </div>
-        
-        {/* Decorative Floating Blobs around laptop */}
-        <div className="absolute -top-5 -right-5 size-20 bg-primary/10 rounded-full blur-2xl animate-pulse transform-gpu" />
-        <div className="absolute -bottom-10 -left-5 size-24 bg-accent/10 rounded-full blur-3xl animate-pulse transform-gpu" style={{ animationDelay: '1s' }} />
-    </div>
-);
-
 const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }: any) => (
   <Link href={href} className="group block h-full touch-manipulation transform-gpu">
     <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl dark:shadow-primary/5 hover:shadow-2xl dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.02] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[280px] md:min-h-[300px] overflow-hidden text-left">
@@ -300,10 +274,10 @@ export default function Page() {
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10 transform-gpu">
-          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6 transform-gpu">
+          <div className="max-w-[1400px] mx-auto flex flex-col items-center justify-center transform-gpu">
             
-            {/* CONTENT BLOCK - Perfectly Centered and shifted right for balance */}
-            <div className="flex-1 text-center space-y-4 max-w-4xl lg:max-w-2xl mx-auto lg:ml-56 flex flex-col items-center transform-gpu">
+            {/* CONTENT BLOCK - Perfectly Centered */}
+            <div className="flex-1 text-center space-y-4 max-w-4xl mx-auto flex flex-col items-center transform-gpu">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up transform-gpu">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
@@ -368,11 +342,6 @@ export default function Page() {
                     <Search className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 size-5 md:h-6 md:w-6 text-slate-400 group-focus-within:text-primary z-10 pointer-events-none transform-gpu" />
                     </div>
                 </div>
-            </div>
-
-            {/* DECORATIVE 3D SCREEN ILLUSTRATION - Right aligned on desktop */}
-            <div className="w-full max-w-[400px] lg:max-w-[500px] animate-fade-in-up mt-8 lg:mt-0 mx-auto lg:ml-auto lg:mr-[-60px] transform-gpu" style={{ animationDelay: '0.4s' }}>
-                <LaptopIllustration />
             </div>
 
           </div>
