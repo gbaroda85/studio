@@ -300,19 +300,19 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-4 pb-12 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-slate-950/20 border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
+      <section className="relative w-full max-w-[2000px] pt-4 pb-12 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-[#001D39] border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] transition-colors duration-500">
         {/* PREMIUM MODERN SAAS BACKGROUND BLOBS */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
-          <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-[10%] left-[20%] size-[450px] bg-[#EDE7FF] rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '2s' }} />
-          <div className="absolute bottom-[5%] right-[15%] size-[400px] bg-[#DFF4FF] rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] dark:bg-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
+          <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] dark:bg-accent/10 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-[10%] left-[20%] size-[450px] bg-[#EDE7FF] dark:bg-indigo-500/10 rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-[5%] right-[15%] size-[400px] bg-[#DFF4FF] dark:bg-sky-500/10 rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1.5s' }} />
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10">
           <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
             
-            {/* CONTENT BLOCK - Perfectly Centered but shifted right for balance */}
+            {/* CONTENT BLOCK - Perfectly Centered and shifted right for balance */}
             <div className="flex-1 text-center space-y-4 max-w-4xl lg:max-w-2xl mx-auto lg:ml-56 flex flex-col items-center">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
