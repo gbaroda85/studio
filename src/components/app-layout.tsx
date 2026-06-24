@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -225,86 +226,48 @@ function GR7Logo({ className }: { className?: string }) {
 function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   const { t } = useLanguage();
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
-  const [isLocked, setIsLocked] = useState(false); 
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const handleMouseEnter = () => {
-    if (isLocked) return; 
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    setOpen(true);
-  };
-
-  const handleMouseLeave = () => {
-    if (isLocked) return; 
-    timeoutRef.current = setTimeout(() => {
-      setOpen(false);
-    }, 150);
-  };
-
-  const handleToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (isLocked) {
-      setIsLocked(false);
-      setOpen(false);
-    } else {
-      setIsLocked(true);
-      setOpen(true);
-    }
-  };
 
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative">
-      <DropdownMenu 
-        open={open} 
-        onOpenChange={(val) => {
-          setOpen(val);
-          if (!val) setIsLocked(false); 
-        }}
-      >
-        <DropdownMenuTrigger asChild onClick={handleToggle}>
-          <Button 
-            variant="ghost" 
-            className={cn(
-                "h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none",
-                isLocked && "bg-primary/10 text-primary"
-            )}
-          >
-            <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
-            <span className="hidden xl:inline">{t(category.name)}</span>
-            <ChevronDown className={cn("size-3 opacity-50 transition-transform", (open || isLocked) && "rotate-180")} />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent 
-          align="end" 
-          sideOffset={12}
-          className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900 z-[110]"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          className={cn(
+              "h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group",
+              "data-[state=open]:bg-primary/10 data-[state=open]:text-primary"
+          )}
         >
-          <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3">
-            {t(category.name)}
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          {category.tools.map((tool) => (
-            <DropdownMenuItem 
-                key={tool.href} 
-                asChild 
-                className="rounded-xl"
-                onClick={() => { setOpen(false); setIsLocked(false); }}
-            >
-              <Link href={tool.href} className={cn(
-                "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors min-h-[44px]", 
-                pathname === tool.href ? "bg-primary/10 text-primary" : "hover:bg-muted"
-              )}>
-                <tool.icon className={cn("size-4", category.color)} />
-                <span className="font-bold text-xs">{t(tool.label) || tool.label}</span>
-              </Link>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+          <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
+          <span className="hidden xl:inline">{t(category.name)}</span>
+          <ChevronDown className="size-3 opacity-50 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        align="end" 
+        sideOffset={12}
+        className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900 z-[110]"
+      >
+        <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3 text-left">
+          {t(category.name)}
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        {category.tools.map((tool) => (
+          <DropdownMenuItem 
+              key={tool.href} 
+              asChild 
+              className="rounded-xl focus:bg-primary/5 focus:text-primary cursor-pointer transition-colors"
+          >
+            <Link href={tool.href} className={cn(
+              "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors min-h-[44px]", 
+              pathname === tool.href ? "bg-primary/10 text-primary" : ""
+            )}>
+              <tool.icon className={cn("size-4", category.color)} />
+              <span className="font-bold text-xs">{t(tool.label) || tool.label}</span>
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -320,7 +283,7 @@ function SettingsMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={12} className="w-48 p-2 rounded-2xl shadow-2xl border-2 z-[110]">
-        <DropdownMenuLabel className="font-headline text-[10px] tracking-widest uppercase text-muted-foreground pb-2">{t('language')}</DropdownMenuLabel>
+        <DropdownMenuLabel className="font-headline text-[10px] tracking-widest uppercase text-muted-foreground pb-2 text-left">{t('language')}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setLanguage('en')} className="rounded-xl font-bold py-3 min-h-[44px]">🇺🇸 {t('english')}</DropdownMenuItem>
         <DropdownMenuItem onClick={() => setLanguage('hi')} className="rounded-xl font-bold py-3 min-h-[44px]">🇮🇳 {t('hindi')}</DropdownMenuItem>
