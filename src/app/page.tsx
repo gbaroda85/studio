@@ -98,9 +98,9 @@ const ALL_TOOLS = [
   { icon: Banknote, title: "SALARY SLIP GENERATOR", description: "Generate professional A4 pay slips for employees instantly.", href: "/salary-slip", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: Receipt, title: "GST INVOICE GENERATOR", description: "Generate professional GST compliant invoices instantly.", href: "/gst-invoice", colorClass: "bg-emerald-600", lightBg: "bg-emerald-50", category: "calculator" },
   { icon: IndianRupee, title: "GST CALCULATOR", description: "Calculate GST addition or removal instantly.", href: "/gst-calculator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "calculator" },
-  { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-[#eff6ff]", category: "calculator" },
+  { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on your bank deposits with quarterly and monthly compounding precision.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
-  { icon: Landmark, title: "INCOME TAX CALCULATOR", description: "Calculate income tax liability for FY 2024-25.", href: "/income-tax-calculator", colorClass: "bg-blue-700", lightBg: "bg-blue-50", category: "calculator" },
+  { icon: Landmark, title: "INCOME TAX CALCULATOR", description: "Calculate income tax liability for FY 2025-26.", href: "/income-tax-calculator", colorClass: "bg-blue-700", lightBg: "bg-blue-50", category: "calculator" },
 
   // FILE TOOLS
   { icon: Printer, title: "AADHAAR CARD PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "file" },
@@ -321,13 +321,13 @@ export default function Page() {
         <div className="w-full px-5 md:px-12 relative z-10">
           <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
             
-            {/* LEFT CONTENT */}
-            <div className="flex-1 text-center lg:text-left space-y-4 max-w-2xl lg:max-w-xl xl:max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up">
+            {/* CENTERED CONTENT */}
+            <div className="flex-1 text-center space-y-4 max-w-2xl lg:max-w-xl xl:max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up mx-auto">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
                 
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white">
+                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white text-center">
                     Professional Tools for <br className="hidden md:block" />
                     <span className="text-gradient-hero">Images & PDFs</span>
                 </h1>
@@ -339,7 +339,7 @@ export default function Page() {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 mb-6 animate-fade-in-up">
+                <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-6 animate-fade-in-up">
                     <Link href="/tools" className="uiverse-clay-btn">
                     <div className="button-outer">
                         <div className="button-inner flex items-center gap-2 px-4 md:px-6">
@@ -374,13 +374,13 @@ export default function Page() {
                     </Link>
                 </div>
 
-                <div className="max-w-2xl mx-auto lg:mx-0 relative group animate-fade-in-up px-2 md:px-0 pb-10 md:pb-12">
+                <div className="max-w-2xl mx-auto relative group animate-fade-in-up px-2 md:px-0 pb-10 md:pb-12">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
                     <div className="relative">
                     <Input
                         type="text"
                         placeholder="Search tools... (e.g. 'scan', 'barcode')"
-                        className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight"
+                        className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight text-center"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -395,7 +395,7 @@ export default function Page() {
             </div>
 
             {/* MOBILE LAPTOP ILLUSTRATION */}
-            <div className="lg:hidden w-full max-w-[320px] animate-fade-in-up mt-6" style={{ animationDelay: '0.4s' }}>
+            <div className="lg:hidden w-full max-w-[320px] animate-fade-in-up mt-6 mx-auto" style={{ animationDelay: '0.4s' }}>
                 <LaptopIllustration />
             </div>
 
