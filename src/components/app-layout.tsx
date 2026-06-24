@@ -255,7 +255,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   };
 
   return (
-    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative">
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className="relative transform-gpu">
       <DropdownMenu 
         open={open} 
         onOpenChange={(val) => {
@@ -315,7 +315,7 @@ function SettingsMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10 border-none shadow-none touch-manipulation">
+        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10 border-none shadow-none touch-manipulation transform-gpu">
           <Settings className="h-5 w-5 text-slate-800 dark:text-slate-200" />
           <span className="sr-only">Settings</span>
         </Button>
@@ -339,7 +339,7 @@ function MobileNav() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl touch-manipulation">
+        <Button variant="ghost" size="icon" className="lg:hidden h-10 w-10 rounded-xl touch-manipulation transform-gpu">
           <Menu className="size-6" />
         </Button>
       </SheetTrigger>
@@ -404,9 +404,9 @@ function AppHeader() {
   return (
     <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center transform-gpu">
       <div className="w-full h-full flex items-center justify-between px-3 md:px-8 lg:px-12">
-        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 transform-gpu">
             <MobileNav />
-            <Link href="/" className="flex items-center group mr-1 md:mr-2 touch-manipulation">
+            <Link href="/" className="flex items-center group mr-1 md:mr-2 touch-manipulation transform-gpu">
               <GR7Logo />
             </Link>
             
@@ -414,7 +414,7 @@ function AppHeader() {
               asChild
               variant="ghost" 
               className={cn(
-                "hidden lg:flex h-10 px-4 font-black text-xs items-center gap-2 transition-all focus-visible:ring-0 border-none shadow-none",
+                "hidden lg:flex h-10 px-4 font-black text-xs items-center gap-2 transition-all focus-visible:ring-0 border-none shadow-none transform-gpu",
                 pathname === '/' ? "text-primary bg-primary/5" : "text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5"
               )}
             >
@@ -425,8 +425,8 @@ function AppHeader() {
             </Button>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-3">
-            <nav className="hidden lg:flex items-center gap-1 mr-2">
+        <div className="flex items-center gap-1 sm:gap-3 transform-gpu">
+            <nav className="hidden lg:flex items-center gap-1 mr-2 transform-gpu">
                 {CATEGORIES.map((cat) => (
                   <NavDropdown key={cat.name} category={cat} />
                 ))}
@@ -434,8 +434,8 @@ function AppHeader() {
 
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
-            <div className="flex items-center gap-1 md:gap-2">
-                <a href="mailto:grs.business29@gmail.com" className="support-uiverse px-2 md:px-4 touch-manipulation h-10">
+            <div className="flex items-center gap-1 md:gap-2 transform-gpu">
+                <a href="mailto:grs.business29@gmail.com" className="support-uiverse px-2 md:px-4 touch-manipulation h-10 transform-gpu">
                     <span className="uiverse-tooltip hidden md:block">grs.business29@gmail.com</span>
                     <Mail className="size-4 md:mr-2" />
                     <span className="hidden md:inline text-xs font-black">Support</span>
@@ -454,16 +454,16 @@ export function AppFooter() {
   const { t } = useLanguage();
   return (
     <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0 transform-gpu">
-      <div className="w-full px-4 md:px-12 lg:px-16">
+      <div className="w-full px-4 md:px-12 lg:px-16 transform-gpu">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12">
             <div className="md:col-span-2 space-y-4 md:space-y-6">
-            <Link href="/" className="flex items-center gap-2 inline-block">
+            <Link href="/" className="flex items-center gap-2 inline-block transform-gpu">
                 <GR7Logo />
             </Link>
             <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
             </p>
-            <div className="flex items-center gap-4 pt-4">
+            <div className="flex items-center gap-4 pt-4 transform-gpu">
                 <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
                     <ShieldCheck className="size-3" /> Client-Side
                 </div>
@@ -513,11 +513,11 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
   if (!isMounted) return null;
   
   return (
-    <div className="flex flex-col min-h-screen w-full bg-transparent relative overflow-x-hidden pt-16 md:pt-20">
+    <div className="flex flex-col min-h-screen w-full bg-transparent relative overflow-x-hidden pt-16 md:pt-20 transform-gpu">
       <AppHeader />
-      <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)] overflow-x-hidden">
-         <div className="w-full flex-1 flex flex-col items-center px-0 p-0 m-0">
-            <div className="w-full flex-1 flex flex-col items-center bg-transparent">
+      <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)] overflow-x-hidden transform-gpu">
+         <div className="w-full flex-1 flex flex-col items-center px-0 p-0 m-0 transform-gpu">
+            <div className="w-full flex-1 flex flex-col items-center bg-transparent transform-gpu">
               {children}
             </div>
             <AppFooter />
