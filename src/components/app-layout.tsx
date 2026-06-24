@@ -188,13 +188,13 @@ function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
       <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden">
-        <svg viewBox="0 0 100 100" className="w-full h-full p-0.5 md:p-1">
+        <svg viewBox="0 0 1000 1000" className="w-full h-full p-0.5 md:p-1">
           <text 
-            x="8" 
-            y="72" 
+            x="80" 
+            y="720" 
             style={{ 
               fill: '#0d5a71', 
-              fontSize: '44px', 
+              fontSize: '440px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
             }}
@@ -202,11 +202,11 @@ function GR7Logo({ className }: { className?: string }) {
             GR
           </text>
           <text 
-            x="62" 
-            y="74" 
+            x="620" 
+            y="740" 
             style={{ 
               fill: '#ef4444', 
-              fontSize: '64px', 
+              fontSize: '640px', 
               fontWeight: 900, 
               fontFamily: 'Arial Black, sans-serif'
             }}
@@ -226,24 +226,23 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
   const { t } = useLanguage();
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [isLocked, setIsLocked] = useState(false); // Track if opened by click
+  const [isLocked, setIsLocked] = useState(false); 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleMouseEnter = () => {
-    if (isLocked) return; // Ignore hover if already locked open
+    if (isLocked) return; 
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setOpen(true);
   };
 
   const handleMouseLeave = () => {
-    if (isLocked) return; // Stay open if locked
+    if (isLocked) return; 
     timeoutRef.current = setTimeout(() => {
       setOpen(false);
     }, 150);
   };
 
   const handleToggle = (e: React.MouseEvent) => {
-    // Prevent default DropdownMenuTrigger behavior as we manage 'open' state manually
     e.preventDefault();
     if (isLocked) {
       setIsLocked(false);
@@ -260,7 +259,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
         open={open} 
         onOpenChange={(val) => {
           setOpen(val);
-          if (!val) setIsLocked(false); // Reset lock if closed via backdrop/esc
+          if (!val) setIsLocked(false); 
         }}
       >
         <DropdownMenuTrigger asChild onClick={handleToggle}>
@@ -517,7 +516,8 @@ export default function AppLayout({children}: {children: React.ReactNode}) {
       <AppHeader />
       <main className="flex-1 flex flex-col w-full relative min-h-[calc(100vh-80px)] overflow-x-hidden transform-gpu">
          <div className="w-full flex-1 flex flex-col items-center px-0 p-0 m-0 transform-gpu">
-            <div className="w-full flex-1 flex flex-col items-center bg-transparent transform-gpu">
+            {/* Added min-h-[75vh] to prevent footer from jumping up while page content fades in */}
+            <div className="w-full flex-1 flex flex-col items-center bg-transparent transform-gpu min-h-[75vh]">
               {children}
             </div>
             <AppFooter />
