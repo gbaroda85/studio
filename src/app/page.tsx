@@ -301,19 +301,14 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-2 pb-10 lg:pb-0 overflow-hidden z-10 transform-gpu bg-transparent mx-auto">
-        {/* PREMIUM MODERN SAAS BACKGROUND - RESTORING 3D CURVED BOTTOM */}
+      <section className="relative w-full max-w-[2000px] pt-4 pb-8 lg:pb-0 overflow-hidden z-10 transform-gpu bg-transparent mx-auto">
+        {/* PREMIUM MODERN SAAS BACKGROUND - CLEAN 3D CURVED BOTTOM */}
         <div className="absolute inset-0 z-0 bg-[#FDFBFC] dark:bg-slate-950/20 border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[3rem] md:rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
           {/* Organic Blended Blobs */}
           <div className="absolute top-[10%] left-[5%] size-[500px] bg-[#FDE7D8] rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
           <div className="absolute top-[5%] right-[10%] size-[600px] bg-[#FBE3EA] rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
           <div className="absolute bottom-[10%] left-[20%] size-[550px] bg-[#EDE7FF] rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '2s' }} />
           <div className="absolute bottom-[5%] right-[15%] size-[500px] bg-[#DFF4FF] rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1.5s' }} />
-          
-          {/* Large curved abstract shapes */}
-          <svg className="absolute bottom-0 left-0 w-full h-auto opacity-10 pointer-events-none" viewBox="0 0 1440 320">
-              <path fill="currentColor" fillOpacity="1" d="M0,192L80,186.7C160,181,320,171,480,186.7C640,203,800,245,960,240C1120,235,1280,181,1360,154.7L1440,128L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path>
-          </svg>
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10">
