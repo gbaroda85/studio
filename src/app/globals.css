@@ -57,7 +57,6 @@
     -moz-osx-smoothing: grayscale;
     scrollbar-gutter: stable !important;
     overflow-y: scroll !important;
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
   
   body {
@@ -67,7 +66,7 @@
     position: relative;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
-    /* BACKGROND OPTIMIZATION FOR SMOOTH SCROLL */
+    /* GPU STABILIZED BACKGROUND */
     background: 
       radial-gradient(circle at 15% 20%, rgba(224,255,245,0.65) 0%, transparent 35%),
       radial-gradient(circle at 85% 25%, rgba(220,230,255,0.60) 0%, transparent 35%),
@@ -75,6 +74,7 @@
       linear-gradient(135deg, #F5F7FF 0%, #EEF4FF 35%, #F3EEFF 65%, #E8FFF8 100%);
     background-attachment: fixed;
     background-size: cover;
+    transform: translateZ(0); /* Force top-level layer */
   }
 
   .dark body {
@@ -91,18 +91,18 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* GPU ACCELERATION ON INTERACTIVE ELEMENTS */
+  /* HARDWARE ACCELERATION FOR RENDERING STABILITY */
   a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
     cursor: pointer !important;
     touch-action: manipulation;
-    transform: translateZ(0);
+    transform: translate3d(0,0,0);
     backface-visibility: hidden;
   }
 }
 
 /* RENDERING STABILITY & SCROLL PERFORMANCE */
 .glass-card, .btn-pos-uiverse, .magic-button, header, footer, .uiverse-clay-btn, .animate-in {
-  transform: translateZ(0);
+  transform: translate3d(0,0,0);
   backface-visibility: hidden;
   perspective: 1000px;
   will-change: transform, opacity;
