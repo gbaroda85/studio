@@ -201,16 +201,16 @@ const UiverseViewAllButton = ({ href }: { href: string }) => {
 
 const LaptopIllustration = ({ className }: { className?: string }) => (
     <div 
-        className={cn("relative w-full max-w-[500px] transform-gpu transition-all duration-700", className)}
+        className={cn("relative w-full max-w-[450px] transform-gpu transition-all duration-700", className)}
         style={{ perspective: '3000px' }}
     >
         <div className="relative transform-gpu transition-transform duration-700 hover:scale-105" 
              style={{ 
-               transform: 'rotateY(-30deg) rotateX(10deg)',
+               transform: 'rotateY(-28deg) rotateX(8deg)',
                transformStyle: 'preserve-3d'
              }}>
             
-            {/* Main Laptop Lid (Screen part) */}
+            {/* Main Laptop Screen part */}
             <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-2xl p-2 md:p-3 shadow-2xl border-[6px] border-slate-100 dark:border-slate-700/50 z-20 overflow-hidden">
                 {/* Screen Content - Dashboard Simplified */}
                 <div className="w-full h-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden flex flex-col p-3 md:p-4 gap-4">
@@ -301,21 +301,20 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-4 pb-8 lg:pb-0 overflow-hidden z-10 transform-gpu bg-transparent mx-auto">
-        {/* PREMIUM MODERN SAAS BACKGROUND - CLEAN 3D CURVED BOTTOM */}
-        <div className="absolute inset-0 z-0 bg-[#FDFBFC] dark:bg-slate-950/20 border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[3rem] md:rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
-          {/* Organic Blended Blobs */}
-          <div className="absolute top-[10%] left-[5%] size-[500px] bg-[#FDE7D8] rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
-          <div className="absolute top-[5%] right-[10%] size-[600px] bg-[#FBE3EA] rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-[10%] left-[20%] size-[550px] bg-[#EDE7FF] rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '2s' }} />
-          <div className="absolute bottom-[5%] right-[15%] size-[500px] bg-[#DFF4FF] rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1.5s' }} />
+      <section className="relative w-full max-w-[2000px] pt-4 pb-12 lg:pb-0 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-slate-950/20 border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[3rem] md:rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
+        {/* PREMIUM MODERN SAAS BACKGROUND BLOBS */}
+        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
+          <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-[10%] left-[20%] size-[450px] bg-[#EDE7FF] rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '2s' }} />
+          <div className="absolute bottom-[5%] right-[15%] size-[400px] bg-[#DFF4FF] rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1.5s' }} />
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10">
-          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 md:gap-6">
             
             {/* CENTERED CONTENT */}
-            <div className="flex-1 text-center space-y-4 max-w-2xl lg:max-w-xl xl:max-w-2xl mx-auto">
+            <div className="flex-1 text-center space-y-3 max-w-2xl lg:max-w-xl xl:max-w-2xl mx-auto">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up mx-auto">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
@@ -577,3 +576,4 @@ export default function Page() {
     </div>
   );
 }
+
