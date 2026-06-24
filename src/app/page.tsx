@@ -202,44 +202,47 @@ const UiverseViewAllButton = ({ href }: { href: string }) => {
 const LaptopIllustration = ({ className }: { className?: string }) => (
     <div 
         className={cn("relative w-full max-w-[500px] transform-gpu transition-all duration-700", className)}
-        style={{ perspective: '1500px' }}
+        style={{ perspective: '2000px' }}
     >
         <div className="transform-gpu transition-transform duration-700 hover:scale-105" 
-             style={{ transform: 'rotateY(-25deg) rotateX(12deg)' }}>
+             style={{ transform: 'rotateY(-35deg) rotateX(15deg) rotateZ(-2deg)' }}>
+            
             {/* Main Laptop Body (Lid/Screen) */}
-            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-3xl p-2 md:p-3 shadow-[0_60px_100px_-20px_rgba(0,0,0,0.4)] border-[10px] border-slate-100 dark:border-slate-700/50">
+            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-2xl p-2 md:p-3 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] border-[8px] border-slate-100 dark:border-slate-700/50 z-20">
                 {/* Screen Content - Dashboard Simplified */}
-                <div className="w-full h-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden flex flex-col p-4 gap-4">
+                <div className="w-full h-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden flex flex-col p-3 md:p-4 gap-4">
                     <div className="flex items-center justify-between border-b pb-3 shrink-0">
-                        <div className="flex gap-2">
-                            <div className="size-2 rounded-full bg-rose-400" />
-                            <div className="size-2 rounded-full bg-amber-400" />
-                            <div className="size-2 rounded-full bg-emerald-400" />
+                        <div className="flex gap-1.5">
+                            <div className="size-1.5 rounded-full bg-rose-400" />
+                            <div className="size-1.5 rounded-full bg-amber-400" />
+                            <div className="size-1.5 rounded-full bg-emerald-400" />
                         </div>
-                        <div className="h-1.5 w-16 bg-muted rounded-full" />
+                        <div className="h-1 w-12 bg-muted rounded-full" />
                     </div>
                     <div className="grid grid-cols-3 gap-2 flex-1 overflow-hidden">
                         {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="rounded-xl bg-muted/30 p-2 flex flex-col gap-2 border border-slate-50 dark:border-slate-800">
-                                <div className={cn("size-5 rounded-lg opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
-                                <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
+                            <div key={i} className="rounded-lg bg-muted/30 p-1.5 flex flex-col gap-1.5 border border-slate-50 dark:border-slate-800">
+                                <div className={cn("size-4 rounded-md opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
+                                <div className="h-0.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
-            {/* Keyboard Base (Real 3D feel) */}
+
+            {/* Keyboard Base (Enhanced 3D cross-view perspective) */}
             <div 
-                className="h-4 w-[110%] -ml-[5%] bg-slate-300 dark:bg-slate-700 rounded-b-3xl relative shadow-[0_15px_30px_-5px_rgba(0,0,0,0.3)] border-t-[4px] border-white/30"
-                style={{ transform: 'rotateX(55deg) translateY(-8px)' }}
+                className="h-5 w-[114%] -ml-[7%] bg-slate-300 dark:bg-slate-700 rounded-b-3xl relative shadow-[0_40px_80px_-10px_rgba(0,0,0,0.6)] border-t-[10px] border-white/40 z-10"
+                style={{ transform: 'rotateX(75deg) translateY(-20px) translateZ(-15px)' }}
             >
-                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1.5 bg-slate-400/50 dark:bg-slate-800/50 rounded-b-lg" />
+                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-slate-400/50 dark:bg-slate-800/50 rounded-full" />
+                 <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-40 h-3 bg-slate-400/10 dark:bg-slate-800/10 rounded-t-xl" />
             </div>
         </div>
         
         {/* Decorative Floating Blobs around laptop */}
-        <div className="absolute -top-10 -right-5 size-16 bg-primary/10 rounded-full blur-2xl animate-pulse" />
-        <div className="absolute -bottom-5 -left-5 size-20 bg-accent/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-5 -right-5 size-20 bg-primary/10 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute -bottom-10 -left-5 size-24 bg-accent/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
     </div>
 );
 
@@ -303,7 +306,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-12 pb-10 overflow-hidden z-10 transform-gpu bg-transparent">
+      <section className="relative w-full pt-10 pb-8 overflow-hidden z-10 transform-gpu bg-transparent">
         {/* PREMIUM MODERN SAAS BACKGROUND */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#FDFBFC] dark:bg-transparent" />
@@ -490,7 +493,7 @@ export default function Page() {
           <div className="max-w-7xl mx-auto px-6 pt-24 md:pt-32 relative z-10">
             <header className="text-center mb-24 space-y-3">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/80 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-md mb-4 shadow-xl">
-                    <Sparkles className="size-3 text-yellow-400" /> OUR VALUES
+                    <Sparkles className="size-2.5" /> OUR VALUES
                 </div>
                 <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white font-headline leading-tight">WHY USERS LOVE <br/> <span className="text-primary">GR7 TOOLS</span></h2>
                 <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-white/40">FAST, SECURE AND RELIABLE</p>
