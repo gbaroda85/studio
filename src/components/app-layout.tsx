@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -163,6 +162,20 @@ const CATEGORIES = [
     ]
   },
   {
+    name: "converter_tools",
+    icon: Infinity,
+    color: "text-amber-500",
+    tools: [
+      { href: '/color-picker', label: 'color_picker_label', icon: Palette },
+      { href: '/qr-code-generator', label: 'qr_code_generator_label', icon: QrCode },
+      { href: '/barcode-generator', label: 'barcode_generator_label', icon: Barcode },
+      { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
+      { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
+      { href: '/fuel-converter', label: 'fuel_converter_label', icon: Fuel },
+      { href: '/pressure-converter', label: 'pressure_converter_label', icon: Waves },
+    ]
+  },
+  {
     name: "audio_tools",
     icon: Volume2,
     color: "text-indigo-600",
@@ -176,20 +189,6 @@ const CATEGORIES = [
     color: "text-indigo-500",
     tools: [
       { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
-    ]
-  },
-  {
-    name: "converter_tools",
-    icon: Infinity,
-    color: "text-amber-500",
-    tools: [
-      { href: '/color-picker', label: 'color_picker_label', icon: Palette },
-      { href: '/qr-code-generator', label: 'qr_code_generator_label', icon: QrCode },
-      { href: '/barcode-generator', label: 'barcode_generator_label', icon: Barcode },
-      { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
-      { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
-      { href: '/fuel-converter', label: 'fuel_converter_label', icon: Fuel },
-      { href: '/pressure-converter', label: 'pressure_converter_label', icon: Waves },
     ]
   }
 ];

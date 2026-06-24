@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense } from 'react';
@@ -558,9 +557,9 @@ function ToolsPageContent() {
     { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-rose-500' },
     { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
     { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },
+    { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Infinity, color: 'text-emerald-500' },
     { value: 'audio', categoryKey: 'audio_tools', features: audioFeatures, icon: Volume2, color: 'text-indigo-600' },
     { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Music, color: 'text-indigo-500' },
-    { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Infinity, color: 'text-emerald-500' },
   ];
 
   const searchResults = useMemo(() => {
