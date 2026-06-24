@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -21,13 +22,13 @@ import {
     CheckCircle2, 
     X,
     Trash2,
-    Crop,
-    ArrowRightLeft,
     Clock,
-    Music,
     MousePointer2,
-    Check,
-    ListFilter
+    ListFilter,
+    Activity,
+    Info,
+    ChevronRight,
+    Music
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -84,14 +85,12 @@ export default function Mp3Cutter() {
     const [currentTime, setCurrentTime] = useState(0);
     const [zoom, setZoom] = useState([50]);
     
-    // Trimming logic
     const [selection, setSelection] = useState({ start: 0, end: 10 });
     const [fadeIn, setFadeIn] = useState(0);
     const [fadeOut, setFadeOut] = useState(0);
     const [normalize, setNormalize] = useState(false);
-    const [keepSelected, setKeepSelected] = useState(true); // true = trim, false = delete section
+    const [keepSelected, setKeepSelected] = useState(true);
 
-    const [resultBlob, setResultBlob] = useState<Blob | null>(null);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
 
     const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -105,14 +104,14 @@ export default function Mp3Cutter() {
         
         const ws = WaveSurfer.create({
             container: containerRef.current,
-            waveColor: '#d1d5db',
-            progressColor: '#3b82f6',
+            waveColor: '#94a3b8', // Muted slate
+            progressColor: '#3b82f6', // Sharp blue
             cursorColor: '#ef4444',
             barWidth: 2,
-            barRadius: 3,
-            height: 200,
+            barGap: 3,
+            height: 180,
             autoCenter: true,
-            dragToSeek: true,
+            dragToSeek: false, // Disabled to prioritize handle dragging
             minPxPerSec: zoom[0]
         });
 
@@ -122,19 +121,29 @@ export default function Mp3Cutter() {
         ws.on('ready', () => {
             const d = ws.getDuration();
             setDuration(d);
-            setSelection({ start: 0, end: Math.min(d, 30) });
             
-            // Initial Region
+            // Set initial 30% selection
+            const initialEnd = Math.min(d, d * 0.3);
+            setSelection({ start: 0, end: initialEnd });
+            
+            // Add Single Editable Region
             regions.addRegion({
                 start: 0,
-                end: Math.min(d, 30),
-                color: 'rgba(59, 130, 246, 0.15)',
+                end: initialEnd,
+                color: 'rgba(255, 255, 255, 0)', // Transparent inside, handled by CSS borders
                 drag: true,
                 resize: true,
             });
         });
 
-        ws.on('audioprocess', (time) => setCurrentTime(time));
+        ws.on('audioprocess', (time) => {
+            setCurrentTime(time);
+            // Auto stop at end of selection if playing selection
+            if (ws.isPlaying() && time >= selection.end) {
+                ws.pause();
+                ws.setTime(selection.start);
+            }
+        });
         ws.on('interaction', (time) => setCurrentTime(time));
         ws.on('play', () => setIsPlaying(true));
         ws.on('pause', () => setIsPlaying(false));
@@ -145,13 +154,17 @@ export default function Mp3Cutter() {
 
         ws.load(url);
         wavesurferRef.current = ws;
-    }, [zoom]);
+    }, [zoom, selection.end, selection.start]);
 
     useEffect(() => {
         if (audioFile && stage === 'studio' && !wavesurferRef.current) {
             const url = URL.createObjectURL(audioFile);
             initWavesurfer(url);
-            return () => URL.revokeObjectURL(url);
+            return () => {
+                URL.revokeObjectURL(url);
+                wavesurferRef.current?.destroy();
+                wavesurferRef.current = null;
+            };
         }
     }, [audioFile, stage, initWavesurfer]);
 
@@ -161,25 +174,25 @@ export default function Mp3Cutter() {
         }
     }, [zoom]);
 
-    // --- FILE HANDLERS ---
     const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith('audio/')) {
             setAudioFile(file);
             setStage('studio');
+            setResultUrl(null);
         } else if (file) {
-            toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload an audio file.' });
+            toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid audio file.' });
         }
     };
 
     const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
     const onDrop = (e: React.DragEvent) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-    // --- STUDIO ACTIONS ---
     const togglePlay = () => wavesurferRef.current?.playPause();
     
     const playSelection = () => {
         if (!wavesurferRef.current) return;
-        wavesurferRef.current.play(selection.start, selection.end);
+        wavesurferRef.current.setTime(selection.start);
+        wavesurferRef.current.play();
     };
 
     const handleManualTimeChange = (type: 'start' | 'end', val: string) => {
@@ -193,105 +206,6 @@ export default function Mp3Cutter() {
         const region = regionsPluginRef.current?.getRegions()[0];
         if (region) {
             region.update({ start: newSelection.start, end: newSelection.end });
-        }
-    };
-
-    // --- PROCESSING ENGINE ---
-    const exportAudio = async () => {
-        if (!audioFile) return;
-        setIsProcessing(true);
-        setStage('processing');
-        setProgress(10);
-
-        try {
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const arrayBuffer = await audioFile.arrayBuffer();
-            setProgress(30);
-            
-            const originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            setProgress(50);
-
-            const { start, end } = selection;
-            const sampleRate = originalBuffer.sampleRate;
-            
-            let finalBuffer: AudioBuffer;
-
-            if (keepSelected) {
-                // TRIM MODE
-                const startFrame = Math.floor(start * sampleRate);
-                const endFrame = Math.floor(end * sampleRate);
-                const frameCount = endFrame - startFrame;
-                
-                const offlineCtx = new OfflineAudioContext(
-                    originalBuffer.numberOfChannels,
-                    frameCount,
-                    sampleRate
-                );
-
-                const source = offlineCtx.createBufferSource();
-                source.buffer = originalBuffer;
-
-                const gainNode = offlineCtx.createGain();
-                
-                // Apply Fades
-                if (fadeIn > 0) {
-                    gainNode.gain.setValueAtTime(0, 0);
-                    gainNode.gain.linearRampToValueAtTime(1, fadeIn);
-                }
-                if (fadeOut > 0) {
-                    const fadeOutStart = (end - start) - fadeOut;
-                    gainNode.gain.setValueAtTime(1, Math.max(0, fadeOutStart));
-                    gainNode.gain.linearRampToValueAtTime(0, end - start);
-                }
-
-                source.connect(gainNode);
-                gainNode.connect(offlineCtx.destination);
-                
-                source.start(0, start, end - start);
-                finalBuffer = await offlineCtx.startRendering();
-            } else {
-                // DELETE SECTION MODE
-                const startFrame = Math.floor(start * sampleRate);
-                const endFrame = Math.floor(end * sampleRate);
-                const totalFrames = originalBuffer.length - (endFrame - startFrame);
-
-                finalBuffer = audioCtx.createBuffer(
-                    originalBuffer.numberOfChannels,
-                    totalFrames,
-                    sampleRate
-                );
-
-                for (let channel = 0; channel < originalBuffer.numberOfChannels; channel++) {
-                    const originalData = originalBuffer.getChannelData(channel);
-                    const newData = finalBuffer.getChannelData(channel);
-                    
-                    newData.set(originalData.subarray(0, startFrame));
-                    newData.set(originalData.subarray(endFrame), startFrame);
-                }
-            }
-
-            setProgress(80);
-            const wavBlob = audioBufferToWav(finalBuffer);
-            const url = URL.createObjectURL(wavBlob);
-            
-            setResultBlob(wavBlob);
-            setResultUrl(url);
-            setProgress(100);
-            
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#3b82f6', '#ffffff']
-            });
-
-            toast({ title: "Studio Export Ready!" });
-        } catch (e) {
-            console.error(e);
-            toast({ variant: 'destructive', title: "Studio Error", description: "Could not process audio." });
-            setStage('studio');
-        } finally {
-            setIsProcessing(false);
         }
     };
 
@@ -319,13 +233,72 @@ export default function Mp3Cutter() {
         return new Blob([outBuffer], { type: "audio/wav" });
     };
 
-    const handleDownload = () => {
-        if (!resultUrl) return;
-        const link = document.createElement('a');
-        link.href = resultUrl;
-        const baseName = audioFile?.name.split('.').slice(0, -1).join('.') || 'audio';
-        link.download = `GR7-Cut-${baseName}.wav`;
-        link.click();
+    const exportAudio = async () => {
+        if (!audioFile) return;
+        setIsProcessing(true);
+        setStage('processing');
+        setProgress(10);
+
+        try {
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const arrayBuffer = await audioFile.arrayBuffer();
+            const originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            setProgress(40);
+
+            const { start, end } = selection;
+            const sampleRate = originalBuffer.sampleRate;
+            
+            let finalBuffer: AudioBuffer;
+
+            if (keepSelected) {
+                const startFrame = Math.floor(start * sampleRate);
+                const endFrame = Math.floor(end * sampleRate);
+                const frameCount = Math.max(1, endFrame - startFrame);
+                
+                const offlineCtx = new OfflineAudioContext(originalBuffer.numberOfChannels, frameCount, sampleRate);
+                const source = offlineCtx.createBufferSource();
+                source.buffer = originalBuffer;
+
+                const gainNode = offlineCtx.createGain();
+                if (fadeIn > 0) {
+                    gainNode.gain.setValueAtTime(0, 0);
+                    gainNode.gain.linearRampToValueAtTime(1, fadeIn);
+                }
+                if (fadeOut > 0) {
+                    gainNode.gain.setValueAtTime(1, Math.max(0, (end - start) - fadeOut));
+                    gainNode.gain.linearRampToValueAtTime(0, end - start);
+                }
+
+                source.connect(gainNode);
+                gainNode.connect(offlineCtx.destination);
+                source.start(0, start, end - start);
+                finalBuffer = await offlineCtx.startRendering();
+            } else {
+                const startFrame = Math.floor(start * sampleRate);
+                const endFrame = Math.floor(end * sampleRate);
+                const totalFrames = Math.max(1, originalBuffer.length - (endFrame - startFrame));
+
+                finalBuffer = audioCtx.createBuffer(originalBuffer.numberOfChannels, totalFrames, sampleRate);
+                for (let channel = 0; channel < originalBuffer.numberOfChannels; channel++) {
+                    const originalData = originalBuffer.getChannelData(channel);
+                    const newData = finalBuffer.getChannelData(channel);
+                    newData.set(originalData.subarray(0, startFrame));
+                    newData.set(originalData.subarray(endFrame), startFrame);
+                }
+            }
+
+            setProgress(80);
+            const wavBlob = audioBufferToWav(finalBuffer);
+            setResultUrl(URL.createObjectURL(wavBlob));
+            setProgress(100);
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            toast({ title: "Studio Export Ready!" });
+        } catch (e) {
+            toast({ variant: 'destructive', title: "Studio Error" });
+            setStage('studio');
+        } finally {
+            setIsProcessing(false);
+        }
     };
 
     const handleReset = () => {
@@ -333,17 +306,42 @@ export default function Mp3Cutter() {
         wavesurferRef.current = null;
         setAudioFile(null);
         setResultUrl(null);
-        setResultBlob(null);
         setStage('upload');
         setProgress(0);
-        setCurrentTime(0);
-        setDuration(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col items-center gap-6">
-            
+            <style jsx global>{`
+                .wavesurfer-region {
+                    border-top: 4px solid #FFC928 !important;
+                    border-bottom: 4px solid #FFC928 !important;
+                    box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.45) !important;
+                    z-index: 10 !important;
+                    background-color: transparent !important;
+                    cursor: move !important;
+                }
+                .wavesurfer-handle {
+                    width: 20px !important;
+                    background-color: #FFC928 !important;
+                    opacity: 1 !important;
+                    z-index: 20 !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    cursor: ew-resize !important;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.3) !important;
+                }
+                .wavesurfer-handle::after {
+                    content: "|||" !important;
+                    color: rgba(0,0,0,0.4) !important;
+                    font-size: 10px !important;
+                    font-weight: 900 !important;
+                    letter-spacing: -1px !important;
+                }
+            `}</style>
+
             {stage === 'upload' && (
                 <div className="w-full max-w-2xl py-10 flex flex-col items-center">
                     <Card 
@@ -400,12 +398,29 @@ export default function Mp3Cutter() {
                                 </div>
                             </CardHeader>
                             <CardContent className="p-6 md:p-10 bg-slate-50 dark:bg-black/20">
-                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-inner border-2">
+                                
+                                {/* LIVE ANALYTICS HUD */}
+                                <div className="mb-6 grid grid-cols-3 gap-4">
+                                    <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
+                                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">Start Point</p>
+                                        <p className="text-xs md:text-sm font-black text-primary font-mono">{formatTime(selection.start)}</p>
+                                    </div>
+                                    <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
+                                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">End Point</p>
+                                        <p className="text-xs md:text-sm font-black text-primary font-mono">{formatTime(selection.end)}</p>
+                                    </div>
+                                    <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-3 text-center shadow-inner">
+                                        <p className="text-[8px] font-black uppercase text-primary opacity-60 mb-1">Duration</p>
+                                        <p className="text-xs md:text-sm font-black text-primary font-mono">{formatTime(selection.end - selection.start)}</p>
+                                    </div>
+                                </div>
+
+                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-inner border-2 overflow-hidden">
                                     <div ref={containerRef} className="w-full touch-none" onTouchStart={e => e.stopPropagation()} />
                                     <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40">
                                         <span>00:00.00</span>
                                         <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">
-                                            <Clock className="size-3" /> {formatTime(currentTime)}
+                                            <Activity className="size-3 animate-pulse" /> {formatTime(currentTime)}
                                         </div>
                                         <span>{formatTime(duration)}</span>
                                     </div>
@@ -416,47 +431,11 @@ export default function Mp3Cutter() {
                                         {isPlaying ? <Pause className="size-6" /> : <Play className="size-6 ml-1" />}
                                     </Button>
                                     <Button variant="secondary" className="h-14 px-8 rounded-2xl font-black uppercase text-xs shadow-lg border-2" onClick={playSelection}>
-                                        <ListFilter className="mr-2 size-4" /> PLAY SELECTION
+                                        <ListFilter className="mr-2 size-4" /> PREVIEW SELECTION
                                     </Button>
                                 </div>
                             </CardContent>
                         </Card>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="rounded-[2rem] border-2 shadow-xl bg-card/50">
-                                <CardHeader className="p-6 border-b bg-muted/20">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2"><Scissors className="size-3" /> Selection Mode</Label>
-                                </CardHeader>
-                                <CardContent className="p-6 space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className={cn("p-4 rounded-xl border-2 cursor-pointer transition-all", keepSelected ? "border-primary bg-primary/5 shadow-inner" : "border-muted")} onClick={() => setKeepSelected(true)}>
-                                            <p className="text-[10px] font-black uppercase">KEEP SELECTION</p>
-                                            <p className="text-[8px] font-bold opacity-40 uppercase">Trim edges</p>
-                                        </div>
-                                        <div className={cn("p-4 rounded-xl border-2 cursor-pointer transition-all", !keepSelected ? "border-rose-500 bg-rose-500/5 shadow-inner" : "border-muted")} onClick={() => setKeepSelected(false)}>
-                                            <p className="text-[10px] font-black uppercase">DELETE SELECTION</p>
-                                            <p className="text-[8px] font-bold opacity-40 uppercase">Cut middle</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card className="rounded-[2rem] border-2 shadow-xl bg-card/50">
-                                <CardHeader className="p-6 border-b bg-muted/20">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2"><Settings2 className="size-3" /> Time Inputs</Label>
-                                </CardHeader>
-                                <CardContent className="p-6 grid grid-cols-2 gap-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-40">Start (sec)</Label>
-                                        <Input type="number" step="0.01" value={selection.start.toFixed(2)} onChange={e => handleManualTimeChange('start', e.target.value)} className="h-10 font-black border-2 rounded-xl text-center" />
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <Label className="text-[8px] font-black uppercase opacity-40">End (sec)</Label>
-                                        <Input type="number" step="0.01" value={selection.end.toFixed(2)} onChange={e => handleManualTimeChange('end', e.target.value)} className="h-10 font-black border-2 rounded-xl text-center" />
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
                     </div>
 
                     <div className="lg:col-span-4 space-y-6">
@@ -485,8 +464,8 @@ export default function Mp3Cutter() {
                                 <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 text-left shadow-sm">
                                     <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Studio Quality</p>
-                                        <p className="text-[8px] text-green-600/80 font-medium leading-tight uppercase">Lossless buffer rendering active. No quality drop on export.</p>
+                                        <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Isolation</p>
+                                        <p className="text-[8px] text-green-600/80 font-medium leading-tight uppercase">Draggable handles allow millisecond precision for ringtones and clips.</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -497,9 +476,9 @@ export default function Mp3Cutter() {
                                 >
                                     <StarIcons />
                                     <Scissors className="size-7 group-hover:rotate-12 transition-transform" />
-                                    <span className="uppercase tracking-tighter text-lg font-black">EXPORT AUDIO</span>
+                                    <span className="uppercase tracking-tighter text-lg font-black">EXTRACT PART</span>
                                 </Button>
-                                <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="mr-2 size-3" /> Start New</Button>
+                                <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300"><RefreshCcw className="mr-2 size-3" /> Start Over</Button>
                             </CardFooter>
                         </Card>
                     </div>
@@ -517,9 +496,9 @@ export default function Mp3Cutter() {
                                 </div>
                             </div>
                             <div className="text-center space-y-4 w-full px-10">
-                                <p className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tighter animate-pulse">Mastering Audio Buffer...</p>
+                                <p className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tighter animate-pulse">Rendering Audio Buffer...</p>
                                 <Progress value={progress} className="h-2 shadow-inner" />
-                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.3em] opacity-40">Local Studio Rendering • No Server Upload</p>
+                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.3em] opacity-40">Local Workspace Rendering • Private</p>
                             </div>
                         </>
                     ) : (
@@ -535,7 +514,7 @@ export default function Mp3Cutter() {
                             </div>
                             
                             {resultUrl && (
-                                <div className="bg-white dark:bg-slate-900 p-4 rounded-3xl border-2 shadow-xl w-full max-w-md mx-auto">
+                                <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] border-2 shadow-xl w-full max-w-md mx-auto">
                                     <audio controls src={resultUrl} className="w-full h-12" />
                                 </div>
                             )}
@@ -545,7 +524,12 @@ export default function Mp3Cutter() {
                                 <Button 
                                     size="lg" 
                                     className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none flex-[2] w-full" 
-                                    onClick={handleDownload}
+                                    onClick={() => {
+                                        const link = document.createElement('a');
+                                        link.href = resultUrl!;
+                                        link.download = `GR7-Studio-${audioFile?.name || 'result'}.wav`;
+                                        link.click();
+                                    }}
                                 >
                                     <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                                     <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">DOWNLOAD STUDIO FILE</span>
@@ -562,3 +546,4 @@ export default function Mp3Cutter() {
         </div>
     );
 }
+
