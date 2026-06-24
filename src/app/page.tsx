@@ -98,7 +98,7 @@ const ALL_TOOLS = [
   { icon: Banknote, title: "SALARY SLIP GENERATOR", description: "Generate professional A4 pay slips for employees instantly.", href: "/salary-slip", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: Receipt, title: "GST INVOICE GENERATOR", description: "Generate professional GST compliant invoices instantly.", href: "/gst-invoice", colorClass: "bg-emerald-600", lightBg: "bg-emerald-50", category: "calculator" },
   { icon: IndianRupee, title: "GST CALCULATOR", description: "Calculate GST addition or removal instantly.", href: "/gst-calculator", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "calculator" },
-  { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
+  { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-[#eff6ff]", category: "calculator" },
   { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on Fixed and Recurring Deposits.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-orange-50", category: "calculator" },
   { icon: Landmark, title: "INCOME TAX CALCULATOR", description: "Calculate income tax liability for FY 2024-25.", href: "/income-tax-calculator", colorClass: "bg-blue-700", lightBg: "bg-blue-50", category: "calculator" },
 
@@ -200,34 +200,41 @@ const UiverseViewAllButton = ({ href }: { href: string }) => {
 };
 
 const LaptopIllustration = ({ className }: { className?: string }) => (
-    <div className={cn("relative w-full max-w-[550px] transform-gpu transition-all duration-700", className)}>
-        {/* Main Laptop Body (Lid) */}
-        <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-3xl p-2.5 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.3)] border-[8px] border-slate-100 dark:border-slate-700/50">
-            {/* Screen Content - Dashboard Simplified */}
-            <div className="w-full h-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden flex flex-col p-4 gap-4">
-                <div className="flex items-center justify-between border-b pb-3">
-                    <div className="flex gap-2">
-                        <div className="size-2.5 rounded-full bg-rose-400" />
-                        <div className="size-2.5 rounded-full bg-amber-400" />
-                        <div className="size-2.5 rounded-full bg-emerald-400" />
-                    </div>
-                    <div className="h-2 w-24 bg-muted rounded-full" />
-                </div>
-                <div className="grid grid-cols-3 gap-3 flex-1 overflow-hidden">
-                    {Array.from({ length: 9 }).map((_, i) => (
-                        <div key={i} className="rounded-xl bg-muted/30 p-2 flex flex-col gap-2 border border-slate-50 dark:border-slate-800">
-                            <div className={cn("size-6 rounded-lg opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
-                            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
-                            <div className="h-1 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-full" />
+    <div 
+        className={cn("relative w-full max-w-[550px] transform-gpu transition-all duration-700", className)}
+        style={{ perspective: '1200px' }}
+    >
+        <div className="transform-gpu transition-transform duration-700 hover:scale-105" 
+             style={{ transform: 'rotateY(-25deg) rotateX(10deg)' }}>
+            {/* Main Laptop Body (Lid) */}
+            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-3xl p-2.5 shadow-[0_60px_100px_-20px_rgba(0,0,0,0.4)] border-[8px] border-slate-100 dark:border-slate-700/50">
+                {/* Screen Content - Dashboard Simplified */}
+                <div className="w-full h-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden flex flex-col p-4 gap-4">
+                    <div className="flex items-center justify-between border-b pb-3">
+                        <div className="flex gap-2">
+                            <div className="size-2.5 rounded-full bg-rose-400" />
+                            <div className="size-2.5 rounded-full bg-amber-400" />
+                            <div className="size-2.5 rounded-full bg-emerald-400" />
                         </div>
-                    ))}
+                        <div className="h-2 w-24 bg-muted rounded-full" />
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 flex-1 overflow-hidden">
+                        {Array.from({ length: 9 }).map((_, i) => (
+                            <div key={i} className="rounded-xl bg-muted/30 p-2 flex flex-col gap-2 border border-slate-50 dark:border-slate-800">
+                                <div className={cn("size-6 rounded-lg opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
+                                <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
+                                <div className="h-1 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
+            {/* Keyboard Base */}
+            <div className="h-6 w-[112%] -ml-[6%] bg-slate-300 dark:bg-slate-700 rounded-b-2xl relative shadow-2xl overflow-hidden border-t border-white/20">
+                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-3 bg-slate-400/50 dark:bg-slate-800/50 rounded-b-xl" />
+            </div>
         </div>
-        {/* Keyboard Base */}
-        <div className="h-5 w-[112%] -ml-[6%] bg-slate-300 dark:bg-slate-700 rounded-b-2xl relative shadow-2xl overflow-hidden">
-             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-2.5 bg-slate-400/50 dark:bg-slate-800/50 rounded-b-xl" />
-        </div>
+        
         {/* Decorative Floating Blobs around laptop */}
         <div className="absolute -top-10 -right-10 size-20 bg-primary/10 rounded-full blur-2xl animate-pulse" />
         <div className="absolute -bottom-10 -left-10 size-24 bg-accent/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
@@ -294,7 +301,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-10 md:pt-16 pb-20 md:pb-24 overflow-hidden z-10 transform-gpu bg-transparent">
+      <section className="relative w-full pt-16 pb-20 overflow-hidden z-10 transform-gpu bg-transparent">
         {/* PREMIUM MODERN SAAS BACKGROUND */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#FDFBFC] dark:bg-transparent" />
@@ -304,10 +311,6 @@ export default function Page() {
           <div className="absolute top-[5%] right-[10%] size-[600px] bg-[#FBE3EA] rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
           <div className="absolute bottom-[10%] left-[20%] size-[550px] bg-[#EDE7FF] rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '2s' }} />
           <div className="absolute bottom-[5%] right-[15%] size-[500px] bg-[#DFF4FF] rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1.5s' }} />
-          
-          {/* Subtle floating particles/shapes */}
-          <div className="absolute top-[30%] left-[40%] size-3 bg-primary/20 rounded-full blur-sm animate-bounce" style={{ animationDuration: '4s' }} />
-          <div className="absolute top-[60%] right-[30%] size-2 bg-accent/20 rounded-full blur-sm animate-bounce" style={{ animationDuration: '6s' }} />
           
           {/* Large curved abstract shapes */}
           <svg className="absolute bottom-0 left-0 w-full h-auto opacity-10 pointer-events-none" viewBox="0 0 1440 320">
@@ -324,7 +327,7 @@ export default function Page() {
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
                 
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-2 md:mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-2 md:mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white">
                     Professional Tools for <br className="hidden md:block" />
                     <span className="text-gradient-hero">Images & PDFs</span>
                 </h1>
