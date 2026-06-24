@@ -14,7 +14,7 @@ interface ToolNavigationProps {
 export function ToolNavigation({ href, label, className }: ToolNavigationProps) {
   return (
     <div className={cn(
-      "fixed top-20 md:top-24 left-4 md:left-6 z-[110] no-print",
+      "fixed top-18 md:top-22 left-4 md:left-6 z-[110] no-print",
       className
     )}>
       <div className="animate-in fade-in slide-in-from-left-4 duration-500">
