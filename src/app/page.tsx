@@ -224,7 +224,7 @@ const LaptopIllustration = ({ className }: { className?: string }) => (
                     </div>
                     <div className="grid grid-cols-3 gap-2 flex-1 overflow-hidden">
                         {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="rounded-lg bg-muted/30 p-1.5 flex flex-col gap-1.5 border border-slate-50 dark:border-slate-800">
+                            <div key={i} className={cn("rounded-lg bg-muted/30 p-1.5 flex flex-col gap-1.5 border border-slate-50 dark:border-slate-800")}>
                                 <div className={cn("size-4 rounded-md opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
                                 <div className="h-0.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
                             </div>
@@ -301,7 +301,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-4 pb-12 lg:pb-0 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-slate-950/20 border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[3rem] md:rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
+      <section className="relative w-full max-w-[2000px] pt-4 pb-24 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-slate-950/20 border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
         {/* PREMIUM MODERN SAAS BACKGROUND BLOBS */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
@@ -311,11 +311,11 @@ export default function Page() {
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10">
-          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-4 md:gap-6">
+          <div className="max-w-[1400px] mx-auto flex flex-col items-center justify-center gap-6">
             
             {/* CENTERED CONTENT */}
-            <div className="flex-1 text-center space-y-3 max-w-2xl lg:max-w-xl xl:max-w-2xl mx-auto">
-                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up mx-auto">
+            <div className="flex-1 text-center space-y-4 max-w-4xl mx-auto flex flex-col items-center">
+                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
                 
@@ -366,7 +366,7 @@ export default function Page() {
                     </Link>
                 </div>
 
-                <div className="max-w-2xl mx-auto relative group animate-fade-in-up px-2 md:px-0">
+                <div className="max-w-2xl w-full mx-auto relative group animate-fade-in-up px-2 md:px-0">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
                     <div className="relative">
                     <Input
@@ -381,13 +381,8 @@ export default function Page() {
                 </div>
             </div>
 
-            {/* RIGHT DECORATIVE LAPTOP */}
-            <div className="hidden lg:block lg:flex-1 relative animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                <LaptopIllustration className="ml-auto" />
-            </div>
-
-            {/* MOBILE LAPTOP ILLUSTRATION */}
-            <div className="lg:hidden w-full max-w-[280px] animate-fade-in-up mt-8 mb-14 mx-auto" style={{ animationDelay: '0.4s' }}>
+            {/* DECORATIVE 3D SCREEN ILLUSTRATION */}
+            <div className="w-full max-w-[400px] animate-fade-in-up mt-8 mx-auto" style={{ animationDelay: '0.4s' }}>
                 <LaptopIllustration />
             </div>
 
@@ -553,8 +548,7 @@ export default function Page() {
                         </div>
 
                         <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16">
-                            <div className="space-y-6 flex-1">
-                                <div className="space-y-1">
+                            <div className="space-y-1">
                                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Output Standards</p>
                                     <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">HD QUALITY</h3>
                                 </div>
@@ -576,4 +570,3 @@ export default function Page() {
     </div>
   );
 }
-
