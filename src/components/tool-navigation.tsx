@@ -13,12 +13,12 @@ interface ToolNavigationProps {
 
 /**
  * @fileOverview Navigation component to go back to tools list.
- * Fixed position to stay below the header.
+ * Fixed position to stay below the header with a slight gap.
  */
 export function ToolNavigation({ href, label, className }: ToolNavigationProps) {
   return (
     <div className={cn(
-      "fixed top-16 md:top-20 left-4 md:left-6 z-[110] no-print",
+      "fixed top-[74px] md:top-[92px] left-4 md:left-6 z-[110] no-print",
       className
     )}>
       <div className="animate-in fade-in slide-in-from-left-4 duration-500">
