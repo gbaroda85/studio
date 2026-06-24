@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
 import { 
@@ -104,14 +103,14 @@ export default function Mp3Cutter() {
         
         const ws = WaveSurfer.create({
             container: containerRef.current,
-            waveColor: '#94a3b8', // Muted slate
-            progressColor: '#3b82f6', // Sharp blue
+            waveColor: '#94a3b8',
+            progressColor: '#3b82f6',
             cursorColor: '#ef4444',
             barWidth: 2,
             barGap: 3,
             height: 180,
             autoCenter: true,
-            dragToSeek: false, // Disabled to prioritize handle dragging
+            dragToSeek: false,
             minPxPerSec: zoom[0]
         });
 
@@ -122,15 +121,14 @@ export default function Mp3Cutter() {
             const d = ws.getDuration();
             setDuration(d);
             
-            // Set initial 30% selection
             const initialEnd = Math.min(d, d * 0.3);
             setSelection({ start: 0, end: initialEnd });
             
-            // Add Single Editable Region
             regions.addRegion({
+                id: 'trim-region',
                 start: 0,
                 end: initialEnd,
-                color: 'rgba(255, 255, 255, 0)', // Transparent inside, handled by CSS borders
+                color: 'rgba(59, 130, 246, 0.1)',
                 drag: true,
                 resize: true,
             });
@@ -138,12 +136,12 @@ export default function Mp3Cutter() {
 
         ws.on('audioprocess', (time) => {
             setCurrentTime(time);
-            // Auto stop at end of selection if playing selection
             if (ws.isPlaying() && time >= selection.end) {
                 ws.pause();
                 ws.setTime(selection.start);
             }
         });
+        
         ws.on('interaction', (time) => setCurrentTime(time));
         ws.on('play', () => setIsPlaying(true));
         ws.on('pause', () => setIsPlaying(false));
@@ -154,7 +152,7 @@ export default function Mp3Cutter() {
 
         ws.load(url);
         wavesurferRef.current = ws;
-    }, [zoom, selection.end, selection.start]);
+    }, []); // Removed zoom dependency from init to prevent re-init loops
 
     useEffect(() => {
         if (audioFile && stage === 'studio' && !wavesurferRef.current) {
@@ -168,6 +166,7 @@ export default function Mp3Cutter() {
         }
     }, [audioFile, stage, initWavesurfer]);
 
+    // Handle Zoom Changes
     useEffect(() => {
         if (wavesurferRef.current) {
             wavesurferRef.current.zoom(zoom[0]);
@@ -183,9 +182,6 @@ export default function Mp3Cutter() {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid audio file.' });
         }
     };
-
-    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
-    const onDrop = (e: React.DragEvent) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
     const togglePlay = () => wavesurferRef.current?.playPause();
     
@@ -206,6 +202,7 @@ export default function Mp3Cutter() {
         const region = regionsPluginRef.current?.getRegions()[0];
         if (region) {
             region.update({ start: newSelection.start, end: newSelection.end });
+            wavesurferRef.current?.setTime(newSelection.start);
         }
     };
 
@@ -321,6 +318,7 @@ export default function Mp3Cutter() {
                     z-index: 10 !important;
                     background-color: transparent !important;
                     cursor: move !important;
+                    pointer-events: auto !important;
                 }
                 .wavesurfer-handle {
                     width: 20px !important;
@@ -332,6 +330,7 @@ export default function Mp3Cutter() {
                     justify-content: center !important;
                     cursor: ew-resize !important;
                     box-shadow: 0 0 10px rgba(0,0,0,0.3) !important;
+                    pointer-events: auto !important;
                 }
                 .wavesurfer-handle::after {
                     content: "|||" !important;
@@ -339,6 +338,10 @@ export default function Mp3Cutter() {
                     font-size: 10px !important;
                     font-weight: 900 !important;
                     letter-spacing: -1px !important;
+                }
+                /* Ensure touch events aren't captured by page scroll */
+                .wavesurfer-region, .wavesurfer-handle {
+                    touch-action: none !important;
                 }
             `}</style>
 
@@ -351,7 +354,7 @@ export default function Mp3Cutter() {
                         )}
                         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                         onDragLeave={() => setIsDragOver(false)}
-                        onDrop={onDrop}
+                        onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-8 text-center">
@@ -368,7 +371,7 @@ export default function Mp3Cutter() {
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">MP3, WAV, M4A, OGG Supported.</p>
                                 </div>
                             </div>
-                            <input ref={fileInputRef} type="file" className="hidden" accept="audio/*" onChange={onFileChange} />
+                            <input ref={fileInputRef} type="file" className="hidden" accept="audio/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
                         <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
@@ -393,30 +396,41 @@ export default function Mp3Cutter() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setZoom([Math.max(10, zoom[0] - 10)])}><ZoomOut className="h-4 w-4"/></Button>
-                                    <span className="text-[10px] font-black w-8 text-center">{zoom}%</span>
+                                    <span className="text-[10px] font-black w-8 text-center">{zoom[0]}%</span>
                                     <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setZoom([Math.min(200, zoom[0] + 10)])}><ZoomIn className="h-4 w-4"/></Button>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-6 md:p-10 bg-slate-50 dark:bg-black/20">
                                 
-                                {/* LIVE ANALYTICS HUD */}
                                 <div className="mb-6 grid grid-cols-3 gap-4">
                                     <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
                                         <p className="text-[8px] font-black uppercase opacity-40 mb-1">Start Point</p>
-                                        <p className="text-xs md:text-sm font-black text-primary font-mono">{formatTime(selection.start)}</p>
+                                        <Input 
+                                            type="number" 
+                                            step="0.01"
+                                            value={selection.start.toFixed(2)} 
+                                            onChange={(e) => handleManualTimeChange('start', e.target.value)}
+                                            className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                        />
                                     </div>
                                     <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
                                         <p className="text-[8px] font-black uppercase opacity-40 mb-1">End Point</p>
-                                        <p className="text-xs md:text-sm font-black text-primary font-mono">{formatTime(selection.end)}</p>
+                                        <Input 
+                                            type="number" 
+                                            step="0.01"
+                                            value={selection.end.toFixed(2)} 
+                                            onChange={(e) => handleManualTimeChange('end', e.target.value)}
+                                            className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                        />
                                     </div>
                                     <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-3 text-center shadow-inner">
                                         <p className="text-[8px] font-black uppercase text-primary opacity-60 mb-1">Duration</p>
-                                        <p className="text-xs md:text-sm font-black text-primary font-mono">{formatTime(selection.end - selection.start)}</p>
+                                        <p className="text-xs md:text-sm font-black text-primary font-mono py-1.5">{formatTime(selection.end - selection.start)}</p>
                                     </div>
                                 </div>
 
                                 <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-inner border-2 overflow-hidden">
-                                    <div ref={containerRef} className="w-full touch-none" onTouchStart={e => e.stopPropagation()} />
+                                    <div ref={containerRef} className="w-full touch-none" />
                                     <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40">
                                         <span>00:00.00</span>
                                         <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">
@@ -546,4 +560,3 @@ export default function Mp3Cutter() {
         </div>
     );
 }
-
