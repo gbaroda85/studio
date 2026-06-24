@@ -19,7 +19,7 @@ import {
   Eraser,
   FileScan,
   FileText,
-  Image as ImageIcon,
+  ImageIcon,
   Crop,
   Lock,
   Calculator,
@@ -366,7 +366,7 @@ export default function Page() {
                     </Link>
                 </div>
 
-                <div className="max-w-2xl w-full mx-auto relative group animate-fade-in-up px-2 md:px-0 transform-gpu">
+                <div className="max-w-2xl w-full mx-auto relative group animate-fade-in-up px-2 md:px-0 mt-6 transform-gpu">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity transform-gpu" />
                     <div className="relative transform-gpu">
                     <Input
