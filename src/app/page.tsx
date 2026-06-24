@@ -119,7 +119,7 @@ const ALL_TOOLS = [
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
   { icon: HomeIcon, title: "MORTGAGE CALCULATOR", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
   { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
-  { icon: Crop, title: "CROP IMAGE", description: "Precisely crop and fix perspective on photos.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
+  { icon: Crop, title: "CROP IMAGE", description: "Precisely crop and fix perspective on photos.", href: "/crop-image", colorClass: "bg-cyan-50", lightBg: "bg-[#ecfeff]", category: "image" },
   { icon: Maximize, title: "IMAGE RESIZER", description: "Change image dimensions for official forms.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
   { icon: PenLine, title: "SIGNATURE BG REMOVER", description: "Extract clean signatures from paper photos.", href: "/remove-signature", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
@@ -220,24 +220,7 @@ const LaptopIllustration = ({ className }: { className?: string }) => (
             {/* Screen Portion Only */}
             <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-2xl p-2 md:p-3 shadow-2xl border-[6px] border-slate-100 dark:border-slate-700/50 z-20 overflow-hidden transform-gpu">
                 {/* Screen Content - Dashboard Simplified */}
-                <div className="w-full h-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden flex flex-col p-3 md:p-4 gap-4 transform-gpu">
-                    <div className="flex items-center justify-between border-b pb-3 shrink-0">
-                        <div className="flex gap-1.5">
-                            <div className="size-1.5 rounded-full bg-rose-400" />
-                            <div className="size-1.5 rounded-full bg-amber-400" />
-                            <div className="size-1.5 rounded-full bg-emerald-400" />
-                        </div>
-                        <div className="h-1 w-12 bg-muted rounded-full" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-2 flex-1 overflow-hidden transform-gpu">
-                        {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className={cn("rounded-lg bg-muted/30 p-1.5 flex flex-col gap-1.5 border border-slate-50 dark:border-slate-800 transform-gpu")}>
-                                <div className={cn("size-4 rounded-md opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
-                                <div className="h-0.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
-                            </div>
-                        ))}
-                    </div>
-                </div>
+                
             </div>
         </div>
         
