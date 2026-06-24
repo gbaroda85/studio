@@ -301,11 +301,9 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-2 pb-0 overflow-hidden z-10 transform-gpu bg-transparent">
-        {/* PREMIUM MODERN SAAS BACKGROUND */}
-        <div className="absolute inset-0 z-0">
-          <div className="absolute inset-0 bg-[#FDFBFC] dark:bg-transparent" />
-          
+      <section className="relative w-full max-w-[2000px] pt-2 pb-10 lg:pb-0 overflow-hidden z-10 transform-gpu bg-transparent mx-auto">
+        {/* PREMIUM MODERN SAAS BACKGROUND - RESTORING 3D CURVED BOTTOM */}
+        <div className="absolute inset-0 z-0 bg-[#FDFBFC] dark:bg-slate-950/20 border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[3rem] md:rounded-b-[5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)]">
           {/* Organic Blended Blobs */}
           <div className="absolute top-[10%] left-[5%] size-[500px] bg-[#FDE7D8] rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
           <div className="absolute top-[5%] right-[10%] size-[600px] bg-[#FBE3EA] rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse" style={{ animationDelay: '1s' }} />
@@ -322,7 +320,7 @@ export default function Page() {
           <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
             
             {/* CENTERED CONTENT */}
-            <div className="flex-1 text-center space-y-4 max-w-2xl lg:max-w-xl xl:max-w-2xl">
+            <div className="flex-1 text-center space-y-4 max-w-2xl lg:max-w-xl xl:max-w-2xl mx-auto">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up mx-auto">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
@@ -332,8 +330,8 @@ export default function Page() {
                     <span className="text-gradient-hero">Images & PDFs</span>
                 </h1>
                 
-                <div className="space-y-1 mb-4 animate-fade-in-up px-4 lg:px-0">
-                    <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed opacity-80">
+                <div className="space-y-1 mb-4 animate-fade-in-up px-4 lg:px-0 text-center">
+                    <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed opacity-80 mx-auto">
                     Everything happens locally in your browser RAM, 100% private. <br className="hidden md:block" />
                     Fast, secure, and ready for official submissions.
                     </p>
@@ -374,7 +372,7 @@ export default function Page() {
                     </Link>
                 </div>
 
-                <div className="max-w-2xl mx-auto relative group animate-fade-in-up px-2 md:px-0 pb-10 md:pb-12">
+                <div className="max-w-2xl mx-auto relative group animate-fade-in-up px-2 md:px-0">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity" />
                     <div className="relative">
                     <Input
@@ -395,7 +393,7 @@ export default function Page() {
             </div>
 
             {/* MOBILE LAPTOP ILLUSTRATION */}
-            <div className="lg:hidden w-full max-w-[320px] animate-fade-in-up mt-6 mx-auto" style={{ animationDelay: '0.4s' }}>
+            <div className="lg:hidden w-full max-w-[280px] animate-fade-in-up mt-8 mb-14 mx-auto" style={{ animationDelay: '0.4s' }}>
                 <LaptopIllustration />
             </div>
 
