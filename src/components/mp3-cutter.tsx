@@ -41,7 +41,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -195,6 +195,9 @@ export default function Mp3Cutter() {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid audio file.' });
         }
     };
+
+    const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
+    const onDrop = (e: React.DragEvent) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
     const togglePlay = () => wavesurferRef.current?.playPause();
     
@@ -403,7 +406,7 @@ export default function Mp3Cutter() {
                         )}
                         onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                         onDragLeave={() => setIsDragOver(false)}
-                        onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); }}
+                        onDrop={onDrop}
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-8 text-center">
@@ -420,7 +423,7 @@ export default function Mp3Cutter() {
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP3, WAV, M4A Support</p>
                                 </div>
                             </div>
-                            <input ref={fileInputRef} type="file" className="hidden" accept="audio/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
+                            <input ref={fileInputRef} type="file" className="hidden" accept="audio/*" onChange={onFileChange} />
                         </CardContent>
                     </Card>
                 </div>
@@ -440,7 +443,7 @@ export default function Mp3Cutter() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setZoom([Math.max(10, zoom[0] - 10)])}><ZoomOut className="h-4 w-4"/></Button>
-                                    <span className="text-[10px] font-black w-8 text-center">{zoom[0]}%</span>
+                                    <span className="text-sm font-black w-8 text-center">{zoom[0]}%</span>
                                     <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setZoom([Math.min(300, zoom[0] + 10)])}><ZoomIn className="h-4 w-4"/></Button>
                                 </div>
                             </CardHeader>
@@ -552,7 +555,7 @@ export default function Mp3Cutter() {
                                     <Scissors className="size-7 group-hover:rotate-12 transition-transform" />
                                     <span className="uppercase tracking-tighter text-lg font-black">EXTRACT & JOIN</span>
                                 </Button>
-                                <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300"><RefreshCcw className="mr-2 size-3" /> Start Over</Button>
+                                <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300"><RefreshCcw className="size-3" /> Start Over</Button>
                             </CardFooter>
                         </Card>
                     </div>
