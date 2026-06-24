@@ -119,7 +119,6 @@ const ALL_TOOLS = [
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
-  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-[#f0fdfa]", category: "image" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
@@ -374,7 +373,7 @@ export default function Page() {
             </div>
 
             {/* DECORATIVE 3D SCREEN ILLUSTRATION - Right aligned on desktop */}
-            <div className="w-full max-w-[400px] lg:max-w-[500px] animate-fade-in-up mt-8 lg:mt-0 mx-auto" style={{ animationDelay: '0.4s' }}>
+            <div className="w-full max-w-[400px] lg:max-w-[500px] animate-fade-in-up mt-8 lg:mt-0 mx-auto lg:ml-auto lg:mr-[-60px]" style={{ animationDelay: '0.4s' }}>
                 <LaptopIllustration />
             </div>
 
