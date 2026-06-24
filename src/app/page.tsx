@@ -201,43 +201,45 @@ const UiverseViewAllButton = ({ href }: { href: string }) => {
 
 const LaptopIllustration = ({ className }: { className?: string }) => (
     <div 
-        className={cn("relative w-full max-w-[550px] transform-gpu transition-all duration-700", className)}
-        style={{ perspective: '1200px' }}
+        className={cn("relative w-full max-w-[500px] transform-gpu transition-all duration-700", className)}
+        style={{ perspective: '1500px' }}
     >
         <div className="transform-gpu transition-transform duration-700 hover:scale-105" 
-             style={{ transform: 'rotateY(-25deg) rotateX(10deg)' }}>
-            {/* Main Laptop Body (Lid) */}
-            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-3xl p-2.5 shadow-[0_60px_100px_-20px_rgba(0,0,0,0.4)] border-[8px] border-slate-100 dark:border-slate-700/50">
+             style={{ transform: 'rotateY(-25deg) rotateX(12deg)' }}>
+            {/* Main Laptop Body (Lid/Screen) */}
+            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-3xl p-2 md:p-3 shadow-[0_60px_100px_-20px_rgba(0,0,0,0.4)] border-[10px] border-slate-100 dark:border-slate-700/50">
                 {/* Screen Content - Dashboard Simplified */}
                 <div className="w-full h-full bg-white dark:bg-slate-900 rounded-2xl overflow-hidden flex flex-col p-4 gap-4">
-                    <div className="flex items-center justify-between border-b pb-3">
+                    <div className="flex items-center justify-between border-b pb-3 shrink-0">
                         <div className="flex gap-2">
-                            <div className="size-2.5 rounded-full bg-rose-400" />
-                            <div className="size-2.5 rounded-full bg-amber-400" />
-                            <div className="size-2.5 rounded-full bg-emerald-400" />
+                            <div className="size-2 rounded-full bg-rose-400" />
+                            <div className="size-2 rounded-full bg-amber-400" />
+                            <div className="size-2 rounded-full bg-emerald-400" />
                         </div>
-                        <div className="h-2 w-24 bg-muted rounded-full" />
+                        <div className="h-1.5 w-16 bg-muted rounded-full" />
                     </div>
-                    <div className="grid grid-cols-3 gap-3 flex-1 overflow-hidden">
-                        {Array.from({ length: 9 }).map((_, i) => (
+                    <div className="grid grid-cols-3 gap-2 flex-1 overflow-hidden">
+                        {Array.from({ length: 6 }).map((_, i) => (
                             <div key={i} className="rounded-xl bg-muted/30 p-2 flex flex-col gap-2 border border-slate-50 dark:border-slate-800">
-                                <div className={cn("size-6 rounded-lg opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
-                                <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
-                                <div className="h-1 w-2/3 bg-slate-200 dark:bg-slate-700 rounded-full" />
+                                <div className={cn("size-5 rounded-lg opacity-40", i % 3 === 0 ? "bg-primary" : i % 3 === 1 ? "bg-blue-500" : "bg-emerald-500")} />
+                                <div className="h-1 w-full bg-slate-200 dark:bg-slate-700 rounded-full" />
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
-            {/* Keyboard Base */}
-            <div className="h-6 w-[112%] -ml-[6%] bg-slate-300 dark:bg-slate-700 rounded-b-2xl relative shadow-2xl overflow-hidden border-t border-white/20">
-                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-3 bg-slate-400/50 dark:bg-slate-800/50 rounded-b-xl" />
+            {/* Keyboard Base (Real 3D feel) */}
+            <div 
+                className="h-4 w-[110%] -ml-[5%] bg-slate-300 dark:bg-slate-700 rounded-b-3xl relative shadow-[0_15px_30px_-5px_rgba(0,0,0,0.3)] border-t-[4px] border-white/30"
+                style={{ transform: 'rotateX(55deg) translateY(-8px)' }}
+            >
+                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1.5 bg-slate-400/50 dark:bg-slate-800/50 rounded-b-lg" />
             </div>
         </div>
         
         {/* Decorative Floating Blobs around laptop */}
-        <div className="absolute -top-10 -right-10 size-20 bg-primary/10 rounded-full blur-2xl animate-pulse" />
-        <div className="absolute -bottom-10 -left-10 size-24 bg-accent/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
+        <div className="absolute -top-10 -right-5 size-16 bg-primary/10 rounded-full blur-2xl animate-pulse" />
+        <div className="absolute -bottom-5 -left-5 size-20 bg-accent/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '1s' }} />
     </div>
 );
 
@@ -301,7 +303,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-16 pb-20 overflow-hidden z-10 transform-gpu bg-transparent">
+      <section className="relative w-full pt-12 pb-10 overflow-hidden z-10 transform-gpu bg-transparent">
         {/* PREMIUM MODERN SAAS BACKGROUND */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#FDFBFC] dark:bg-transparent" />
@@ -319,7 +321,7 @@ export default function Page() {
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10">
-          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-12">
+          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12">
             
             {/* LEFT CONTENT */}
             <div className="flex-1 text-center lg:text-left space-y-6 max-w-2xl lg:max-w-xl xl:max-w-2xl">
@@ -332,14 +334,14 @@ export default function Page() {
                     <span className="text-gradient-hero">Images & PDFs</span>
                 </h1>
                 
-                <div className="space-y-1 mb-8 md:mb-6 animate-fade-in-up px-4 lg:px-0">
+                <div className="space-y-1 mb-6 md:mb-4 animate-fade-in-up px-4 lg:px-0">
                     <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed opacity-80">
                     Everything happens locally in your browser RAM, 100% private. <br className="hidden md:block" />
                     Fast, secure, and ready for official submissions.
                     </p>
                 </div>
 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 mb-10 md:mb-8 animate-fade-in-up">
+                <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 mb-8 md:mb-6 animate-fade-in-up">
                     <Link href="/tools" className="uiverse-clay-btn">
                     <div className="button-outer">
                         <div className="button-inner flex items-center gap-2 px-4 md:px-6">
