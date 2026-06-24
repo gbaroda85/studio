@@ -119,6 +119,7 @@ const ALL_TOOLS = [
   { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: FileOutput, title: "IMAGE TO JPG", description: "Convert various image formats to JPG.", href: "/image-to-jpg", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
+  { icon: FileScan, title: "IMAGE TO TEXT (OCR)", description: "Extract text from documents and images locally.", href: "/image-to-text", colorClass: "bg-teal-500", lightBg: "bg-teal-50", category: "image" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-amber-50", category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
   { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
@@ -202,13 +203,35 @@ const UiverseViewAllButton = ({ href }: { href: string }) => {
 const LaptopIllustration = ({ className }: { className?: string }) => (
     <div 
         className={cn("relative w-full max-w-[500px] transform-gpu transition-all duration-700", className)}
-        style={{ perspective: '2000px' }}
+        style={{ perspective: '3000px' }}
     >
-        <div className="transform-gpu transition-transform duration-700 hover:scale-105" 
-             style={{ transform: 'rotateY(-35deg) rotateX(15deg) rotateZ(-2deg)' }}>
+        <div className="relative transform-gpu transition-transform duration-700 hover:scale-105" 
+             style={{ 
+               transform: 'rotateY(-30deg) rotateX(10deg)',
+               transformStyle: 'preserve-3d'
+             }}>
             
-            {/* Main Laptop Body (Lid/Screen) */}
-            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-t-2xl p-2 md:p-3 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.5)] border-[8px] border-slate-100 dark:border-slate-700/50 z-20">
+            {/* Keyboard Base (Realistic Perspective) */}
+            <div 
+                className="absolute bottom-[-5%] left-1/2 -translate-x-1/2 w-[108%] h-full bg-slate-300 dark:bg-slate-700 rounded-2xl shadow-[0_30px_60px_-10px_rgba(0,0,0,0.5)] border-b-[10px] border-slate-400/50 z-10"
+                style={{ 
+                  transform: 'rotateX(82deg) translateZ(-30px)',
+                  transformOrigin: 'bottom'
+                }}
+            >
+                 {/* Trackpad */}
+                 <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-32 h-20 bg-slate-400/10 rounded-xl border border-white/5 shadow-inner" />
+                 
+                 {/* Keyboard Lines Visual */}
+                 <div className="absolute top-10 left-8 right-8 bottom-32 grid grid-cols-12 gap-1 opacity-20">
+                    {Array.from({ length: 60 }).map((_, i) => (
+                      <div key={i} className="bg-slate-500/50 rounded-sm" />
+                    ))}
+                 </div>
+            </div>
+
+            {/* Main Laptop Lid (Screen part) */}
+            <div className="relative aspect-[16/10] bg-slate-200 dark:bg-slate-800 rounded-2xl p-2 md:p-3 shadow-2xl border-[6px] border-slate-100 dark:border-slate-700/50 z-20 overflow-hidden">
                 {/* Screen Content - Dashboard Simplified */}
                 <div className="w-full h-full bg-white dark:bg-slate-900 rounded-xl overflow-hidden flex flex-col p-3 md:p-4 gap-4">
                     <div className="flex items-center justify-between border-b pb-3 shrink-0">
@@ -230,14 +253,6 @@ const LaptopIllustration = ({ className }: { className?: string }) => (
                 </div>
             </div>
 
-            {/* Keyboard Base (Enhanced 3D cross-view perspective) */}
-            <div 
-                className="h-5 w-[114%] -ml-[7%] bg-slate-300 dark:bg-slate-700 rounded-b-3xl relative shadow-[0_40px_80px_-10px_rgba(0,0,0,0.6)] border-t-[10px] border-white/40 z-10"
-                style={{ transform: 'rotateX(75deg) translateY(-20px) translateZ(-15px)' }}
-            >
-                 <div className="absolute top-2 left-1/2 -translate-x-1/2 w-24 h-1.5 bg-slate-400/50 dark:bg-slate-800/50 rounded-full" />
-                 <div className="absolute bottom-1 left-1/2 -translate-x-1/2 w-40 h-3 bg-slate-400/10 dark:bg-slate-800/10 rounded-t-xl" />
-            </div>
         </div>
         
         {/* Decorative Floating Blobs around laptop */}
@@ -306,7 +321,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full pt-10 pb-8 overflow-hidden z-10 transform-gpu bg-transparent">
+      <section className="relative w-full pt-4 pb-2 overflow-hidden z-10 transform-gpu bg-transparent">
         {/* PREMIUM MODERN SAAS BACKGROUND */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[#FDFBFC] dark:bg-transparent" />
@@ -324,27 +339,27 @@ export default function Page() {
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10">
-          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 md:gap-12">
+          <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-between gap-6">
             
             {/* LEFT CONTENT */}
-            <div className="flex-1 text-center lg:text-left space-y-6 max-w-2xl lg:max-w-xl xl:max-w-2xl">
-                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-2 shadow-sm animate-fade-in-up">
+            <div className="flex-1 text-center lg:text-left space-y-4 max-w-2xl lg:max-w-xl xl:max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
                 
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-2 md:mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-black mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white">
                     Professional Tools for <br className="hidden md:block" />
                     <span className="text-gradient-hero">Images & PDFs</span>
                 </h1>
                 
-                <div className="space-y-1 mb-6 md:mb-4 animate-fade-in-up px-4 lg:px-0">
+                <div className="space-y-1 mb-4 animate-fade-in-up px-4 lg:px-0">
                     <p className="text-xs md:text-lg text-slate-500 dark:text-slate-400 font-bold leading-relaxed opacity-80">
                     Everything happens locally in your browser RAM, 100% private. <br className="hidden md:block" />
                     Fast, secure, and ready for official submissions.
                     </p>
                 </div>
 
-                <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 mb-8 md:mb-6 animate-fade-in-up">
+                <div className="flex flex-wrap justify-center lg:justify-start gap-2 md:gap-4 mb-6 animate-fade-in-up">
                     <Link href="/tools" className="uiverse-clay-btn">
                     <div className="button-outer">
                         <div className="button-inner flex items-center gap-2 px-4 md:px-6">
@@ -394,13 +409,13 @@ export default function Page() {
                 </div>
             </div>
 
-            {/* RIGHT DECORATIVE LAPTOP (Desktop Only or Scaled Mobile) */}
+            {/* RIGHT DECORATIVE LAPTOP */}
             <div className="hidden lg:block lg:flex-1 relative animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                 <LaptopIllustration className="ml-auto" />
             </div>
 
             {/* MOBILE LAPTOP ILLUSTRATION */}
-            <div className="lg:hidden w-full max-w-[400px] animate-fade-in-up mt-10" style={{ animationDelay: '0.4s' }}>
+            <div className="lg:hidden w-full max-w-[320px] animate-fade-in-up mt-6" style={{ animationDelay: '0.4s' }}>
                 <LaptopIllustration />
             </div>
 
