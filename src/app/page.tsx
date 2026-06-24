@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -57,16 +58,16 @@ import {
   PenLine,
   PenTool,
   CalendarDays,
-  Banknote,
+  Menu,
   Palette,
   CheckCircle2,
-  Menu,
   Trophy,
   Target,
   Settings,
   Video,
   MousePointer2,
-  ChevronRight
+  ChevronRight,
+  Volume2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -95,6 +96,10 @@ const ALL_TOOLS = [
   { icon: FilePenLine, title: "PDF EDITOR", description: "Edit text, images and pages in any PDF document.", href: "/edit-pdf", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
   { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-gradient-to-br from-cyan-500 to-cyan-700", lightBg: "bg-cyan-50", category: "pdf-kit" },
 
+  // AUDIO & VIDEO
+  { icon: Volume2, title: "MP3 CUTTER", description: "Trim, cut and enhance audio files precisely.", href: "/mp3-cutter", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "audio" },
+  { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "video" },
+
   // FINANCE CENTER
   { icon: Banknote, title: "SALARY SLIP GENERATOR", description: "Generate professional A4 pay slips for employees instantly.", href: "/salary-slip", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: Receipt, title: "GST INVOICE GENERATOR", description: "Generate professional GST compliant invoices instantly.", href: "/gst-invoice", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "calculator" },
@@ -112,7 +117,6 @@ const ALL_TOOLS = [
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
   { icon: HomeIcon, title: "MORTGAGE CALCULATOR", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
-  { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "video" },
   { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
   { icon: Crop, title: "CROP IMAGE", description: "Precisely crop and fix perspective on photos.", href: "/crop-image", colorClass: "bg-cyan-500", lightBg: "bg-[#ecfeff]", category: "image" },
   { icon: Maximize, title: "IMAGE RESIZER", description: "Change image dimensions for official forms.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
@@ -500,7 +504,7 @@ export default function Page() {
                             <div className="space-y-6 flex-1 transform-gpu">
                                 <div className="space-y-1 transform-gpu">
                                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Privacy Policy</p>
-                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">100% PRIVATE</h3>
+                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-800 dark:text-white uppercase leading-none">100% PRIVATE</h3>
                                 </div>
                                 <div className="h-1 w-12 bg-primary mx-auto rounded-full transform-gpu" />
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Your data never leaves your device. All processing happens locally in your browser RAM.</p>
@@ -527,7 +531,7 @@ export default function Page() {
                             <div className="space-y-6 flex-1 transform-gpu">
                                 <div className="space-y-1 transform-gpu">
                                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">System Core</p>
-                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">NATIVE SPEED</h3>
+                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-800 dark:text-white uppercase leading-none">NATIVE SPEED</h3>
                                 </div>
                                 <div className="h-1 w-12 bg-primary mx-auto rounded-full transform-gpu" />
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Using WebAssembly technology for hardware-level performance without any server-side lag.</p>
@@ -553,7 +557,7 @@ export default function Page() {
                             <div className="space-y-6 flex-1 transform-gpu">
                                 <div className="space-y-1 transform-gpu">
                                     <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Output Standards</p>
-                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">HD QUALITY</h3>
+                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-800 dark:text-white uppercase leading-none">HD QUALITY</h3>
                                 </div>
                                 <div className="h-1 w-12 bg-primary mx-auto rounded-full transform-gpu" />
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.</p>

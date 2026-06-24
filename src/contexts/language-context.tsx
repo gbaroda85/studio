@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -78,6 +79,8 @@ const translations = {
     instagram_downloader_description: 'Download Reels and Videos from Instagram privately.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extract high-quality audio from video files instantly.',
+    mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
+    mp3_cutter_description: 'Trim, cut and enhance audio files with precise waveform control.',
     create_zip_label: 'CREATE ZIP',
     create_zip_description: 'Combine multiple files into a single zip.',
     unzip_file_label: 'UNZIP FILE',
@@ -206,6 +209,8 @@ const translations = {
     add_page_numbers_description: 'PDF में पेज नंबर डालें।',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'वीडियो फ़ाइलों से तुरंत ऑडियो निकालें।',
+    mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
+    mp3_cutter_description: 'सटीक वेवफॉर्म कंट्रोल के साथ ऑडियो फ़ाइलों को ट्रिम और एडिट करें।',
     create_zip_label: 'CREATE ZIP',
     create_zip_description: 'कई फ़ाइलों को ज़िप में मिलाएं।',
     unzip_file_label: 'UNZIP FILE',
@@ -332,8 +337,12 @@ const translations = {
     add_watermark_description: 'Añade texto al PDF.',
     add_page_numbers_label: 'ADD PAGE NUMBERS',
     add_page_numbers_description: 'Inserta números en PDF.',
+    instagram_downloader_label: 'INSTAGRAM DOWNLOADER',
+    instagram_downloader_description: 'Download Reels and Videos from Instagram privately.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extrae audio de alta calidad de videos.',
+    mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
+    mp3_cutter_description: 'Trim, cut and enhance audio files with precise waveform control.',
     create_zip_label: 'CREATE ZIP',
     create_zip_description: 'Combina archivos en un zip.',
     unzip_file_label: 'UNZIP FILE',

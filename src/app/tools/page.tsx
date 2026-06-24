@@ -70,7 +70,9 @@ import {
   Sparkles,
   LayoutGrid,
   CreditCard,
-  ScanLine
+  ScanLine,
+  ScissorsLineIcons,
+  Volume2
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -81,7 +83,7 @@ function ToolsPageContent() {
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '');
 
-  const validTabs = ['all', 'image', 'pdf', 'video', 'file', 'calculator', 'converters'];
+  const validTabs = ['all', 'image', 'pdf', 'audio', 'video', 'file', 'calculator', 'converters'];
   const tabParam = searchParams.get('tab');
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'all';
 
@@ -315,6 +317,17 @@ function ToolsPageContent() {
     },
   ];
 
+  const audioFeatures = [
+    {
+      href: '/mp3-cutter',
+      labelKey: 'mp3_cutter_label',
+      descriptionKey: 'mp3_cutter_description',
+      icon: Volume2,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-[#eff6ff]'
+    },
+  ];
+
   const videoFeatures = [
     {
       href: '/video-to-mp3',
@@ -544,6 +557,7 @@ function ToolsPageContent() {
   const allFeatureGroups = [
     { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500' },
     { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-rose-500' },
+    { value: 'audio', categoryKey: 'audio_tools', features: audioFeatures, icon: Volume2, color: 'text-indigo-600' },
     { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Music, color: 'text-indigo-500' },
     { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
     { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },
