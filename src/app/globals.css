@@ -89,8 +89,8 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* HARDWARE ACCELERATION FOR STABILITY */
-  a, button, .glass-card, header, footer, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
+  /* HARDWARE ACCELERATION FOR STABILITY WITHOUT BREAKING FIXED POSITIONING */
+  .glass-card, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
     transform: translate3d(0,0,0);
     backface-visibility: hidden;
     perspective: 1000px;
