@@ -71,7 +71,6 @@ import {
   LayoutGrid,
   CreditCard,
   ScanLine,
-  ScissorsLineIcons,
   Volume2
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
@@ -557,10 +556,10 @@ function ToolsPageContent() {
   const allFeatureGroups = [
     { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500' },
     { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-rose-500' },
-    { value: 'audio', categoryKey: 'audio_tools', features: audioFeatures, icon: Volume2, color: 'text-indigo-600' },
-    { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Music, color: 'text-indigo-500' },
     { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
     { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },
+    { value: 'audio', categoryKey: 'audio_tools', features: audioFeatures, icon: Volume2, color: 'text-indigo-600' },
+    { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Music, color: 'text-indigo-500' },
     { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Infinity, color: 'text-emerald-500' },
   ];
 

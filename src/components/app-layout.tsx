@@ -64,7 +64,8 @@ import {
   ScanLine,
   Palette,
   Banknote,
-  Video
+  Video,
+  Volume2
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -131,6 +132,16 @@ const CATEGORIES = [
     ]
   },
   {
+    name: "file_tools",
+    icon: Archive,
+    color: "text-violet-500",
+    tools: [
+      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
+      { href: '/create-zip', label: 'create_zip_label', icon: Archive },
+      { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },
+    ]
+  },
+  {
     name: "calculator_pro",
     icon: Calculator,
     color: "text-emerald-500",
@@ -152,17 +163,11 @@ const CATEGORIES = [
     ]
   },
   {
-    name: "converter_tools",
-    icon: Infinity,
-    color: "text-amber-500",
+    name: "audio_tools",
+    icon: Volume2,
+    color: "text-indigo-600",
     tools: [
-      { href: '/color-picker', label: 'color_picker_label', icon: Palette },
-      { href: '/qr-code-generator', label: 'qr_code_generator_label', icon: QrCode },
-      { href: '/barcode-generator', label: 'barcode_generator_label', icon: Barcode },
-      { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
-      { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
-      { href: '/fuel-converter', label: 'fuel_converter_label', icon: Fuel },
-      { href: '/pressure-converter', label: 'pressure_converter_label', icon: Waves },
+      { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Volume2 },
     ]
   },
   {
@@ -174,13 +179,17 @@ const CATEGORIES = [
     ]
   },
   {
-    name: "file_tools",
-    icon: Archive,
-    color: "text-violet-500",
+    name: "converter_tools",
+    icon: Infinity,
+    color: "text-amber-500",
     tools: [
-      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
-      { href: '/create-zip', label: 'create_zip_label', icon: Archive },
-      { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },
+      { href: '/color-picker', label: 'color_picker_label', icon: Palette },
+      { href: '/qr-code-generator', label: 'qr_code_generator_label', icon: QrCode },
+      { href: '/barcode-generator', label: 'barcode_generator_label', icon: Barcode },
+      { href: '/acceleration-converter', label: 'acceleration_converter_label', icon: Gauge },
+      { href: '/area-converter', label: 'area_converter_label', icon: AreaChart },
+      { href: '/fuel-converter', label: 'fuel_converter_label', icon: Fuel },
+      { href: '/pressure-converter', label: 'pressure_converter_label', icon: Waves },
     ]
   }
 ];
