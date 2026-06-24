@@ -300,7 +300,7 @@ export default function Page() {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <section className="relative w-full max-w-[2000px] pt-4 pb-12 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-[#001D39] border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] transition-colors duration-500">
+      <section className="relative w-full max-w-[2000px] pt-4 pb-16 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-[#001D39] border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] transition-colors duration-500">
         {/* PREMIUM MODERN SAAS BACKGROUND BLOBS */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
           <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] dark:bg-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse" />
