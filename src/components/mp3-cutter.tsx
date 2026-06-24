@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -163,7 +162,7 @@ export default function Mp3Cutter() {
     }, [zoom]);
 
     // --- FILE HANDLERS ---
-    const handleFile = (file: File | null) => {
+    const handleFileChange = (file: File | null) => {
         if (file && file.type.startsWith('audio/')) {
             setAudioFile(file);
             setStage('studio');
@@ -545,10 +544,10 @@ export default function Mp3Cutter() {
                                 <Button variant="outline" onClick={() => setStage('studio')} className="h-14 px-8 rounded-xl font-black uppercase text-[10px] border-2 flex-1 w-full"><RefreshCcw className="mr-2 size-4" /> Back to Studio</Button>
                                 <Button 
                                     size="lg" 
-                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none flex-[2] w-full" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none flex-[2] w-full" 
                                     onClick={handleDownload}
                                 >
-                                    <div className="absolute left-4 w-0.5 h-6 bg-white/40 rounded-full" />
+                                    <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
                                     <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">DOWNLOAD STUDIO FILE</span>
                                     <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                         <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
