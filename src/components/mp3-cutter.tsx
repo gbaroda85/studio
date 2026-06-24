@@ -27,7 +27,9 @@ import {
     Activity,
     Info,
     ChevronRight,
-    Music
+    Music,
+    Plus,
+    Square
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -39,10 +41,17 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
 type Stage = 'upload' | 'studio' | 'processing';
+
+interface RegionData {
+    id: string;
+    start: number;
+    end: number;
+}
 
 function formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);
@@ -84,12 +93,12 @@ export default function Mp3Cutter() {
     const [currentTime, setCurrentTime] = useState(0);
     const [zoom, setZoom] = useState([50]);
     
-    const [selection, setSelection] = useState({ start: 0, end: 10 });
+    const [regionsList, setRegionsList] = useState<RegionData[]>([]);
+    const [activeRegionId, setActiveRegionId] = useState<string | null>(null);
+    
     const [fadeIn, setFadeIn] = useState(0);
     const [fadeOut, setFadeOut] = useState(0);
     const [normalize, setNormalize] = useState(false);
-    const [keepSelected, setKeepSelected] = useState(true);
-
     const [resultUrl, setResultUrl] = useState<string | null>(null);
 
     const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -108,10 +117,12 @@ export default function Mp3Cutter() {
             cursorColor: '#ef4444',
             barWidth: 2,
             barGap: 3,
-            height: 180,
+            height: 200,
             autoCenter: true,
-            dragToSeek: false,
-            minPxPerSec: zoom[0]
+            autoScroll: true,
+            dragToSeek: true,
+            minPxPerSec: zoom[0],
+            normalize: true,
         });
 
         const regions = ws.registerPlugin(RegionsPlugin.create());
@@ -121,38 +132,39 @@ export default function Mp3Cutter() {
             const d = ws.getDuration();
             setDuration(d);
             
-            const initialEnd = Math.min(d, d * 0.3);
-            setSelection({ start: 0, end: initialEnd });
-            
-            regions.addRegion({
-                id: 'trim-region',
+            // Initial selection
+            const initialEnd = Math.min(d, 30);
+            const r = regions.addRegion({
+                id: 'region-1',
                 start: 0,
                 end: initialEnd,
-                color: 'rgba(59, 130, 246, 0.1)',
+                color: 'rgba(255, 201, 40, 0.1)',
                 drag: true,
                 resize: true,
             });
+            setRegionsList([{ id: r.id, start: r.start, end: r.end }]);
+            setActiveRegionId(r.id);
         });
 
         ws.on('audioprocess', (time) => {
             setCurrentTime(time);
-            if (ws.isPlaying() && time >= selection.end) {
-                ws.pause();
-                ws.setTime(selection.start);
-            }
         });
         
         ws.on('interaction', (time) => setCurrentTime(time));
         ws.on('play', () => setIsPlaying(true));
         ws.on('pause', () => setIsPlaying(false));
 
-        regions.on('region-updated', (region) => {
-            setSelection({ start: region.start, end: region.end });
+        regions.on('region-updated', (region: any) => {
+            setRegionsList(prev => prev.map(r => r.id === region.id ? { ...r, start: region.start, end: region.end } : r));
+        });
+
+        regions.on('region-clicked', (region: any) => {
+            setActiveRegionId(region.id);
         });
 
         ws.load(url);
         wavesurferRef.current = ws;
-    }, []); // Removed zoom dependency from init to prevent re-init loops
+    }, []);
 
     useEffect(() => {
         if (audioFile && stage === 'studio' && !wavesurferRef.current) {
@@ -166,7 +178,6 @@ export default function Mp3Cutter() {
         }
     }, [audioFile, stage, initWavesurfer]);
 
-    // Handle Zoom Changes
     useEffect(() => {
         if (wavesurferRef.current) {
             wavesurferRef.current.zoom(zoom[0]);
@@ -178,6 +189,8 @@ export default function Mp3Cutter() {
             setAudioFile(file);
             setStage('studio');
             setResultUrl(null);
+            setRegionsList([]);
+            setActiveRegionId(null);
         } else if (file) {
             toast({ variant: 'destructive', title: 'Invalid File', description: 'Please upload a valid audio file.' });
         }
@@ -185,25 +198,67 @@ export default function Mp3Cutter() {
 
     const togglePlay = () => wavesurferRef.current?.playPause();
     
-    const playSelection = () => {
+    const playRegion = (r: RegionData) => {
         if (!wavesurferRef.current) return;
-        wavesurferRef.current.setTime(selection.start);
+        wavesurferRef.current.setTime(r.start);
         wavesurferRef.current.play();
     };
 
+    const addNewSegment = () => {
+        if (!wavesurferRef.current || !regionsPluginRef.current) return;
+        const d = wavesurferRef.current.getDuration();
+        const start = Math.min(currentTime, d - 5);
+        const end = Math.min(start + 10, d);
+        
+        const r = regionsPluginRef.current.addRegion({
+            id: `region-${Math.random().toString(36).substr(2, 5)}`,
+            start,
+            end,
+            color: 'rgba(255, 201, 40, 0.1)',
+            drag: true,
+            resize: true,
+        });
+        setRegionsList(prev => [...prev, { id: r.id, start: r.start, end: r.end }]);
+        setActiveRegionId(r.id);
+        toast({ title: "New Segment Added" });
+    };
+
+    const removeRegion = (id: string) => {
+        if (regionsList.length <= 1) return;
+        const region = regionsPluginRef.current?.getRegions().find((r: any) => r.id === id);
+        if (region) {
+            region.remove();
+            const updated = regionsList.filter(r => r.id !== id);
+            setRegionsList(updated);
+            if (activeRegionId === id) setActiveRegionId(updated[0].id);
+        }
+    };
+
     const handleManualTimeChange = (type: 'start' | 'end', val: string) => {
+        if (!activeRegionId) return;
         const time = parseFloat(val);
         if (isNaN(time)) return;
         
-        const newSelection = { ...selection, [type]: Math.max(0, Math.min(duration, time)) };
-        if (newSelection.start >= newSelection.end) return;
-
-        setSelection(newSelection);
-        const region = regionsPluginRef.current?.getRegions()[0];
+        const region = regionsPluginRef.current?.getRegions().find((r: any) => r.id === activeRegionId);
         if (region) {
-            region.update({ start: newSelection.start, end: newSelection.end });
-            wavesurferRef.current?.setTime(newSelection.start);
+            const start = type === 'start' ? Math.max(0, Math.min(region.end - 0.1, time)) : region.start;
+            const end = type === 'end' ? Math.max(region.start + 0.1, Math.min(duration, time)) : region.end;
+            region.update({ start, end });
         }
+    };
+
+    const concatenateAudioBuffers = (audioCtx: AudioContext, buffers: AudioBuffer[]): AudioBuffer => {
+        const totalLength = buffers.reduce((acc, buf) => acc + buf.length, 0);
+        const out = audioCtx.createBuffer(buffers[0].numberOfChannels, totalLength, buffers[0].sampleRate);
+        
+        for (let channel = 0; channel < buffers[0].numberOfChannels; channel++) {
+            let offset = 0;
+            for (const buf of buffers) {
+                out.getChannelData(channel).set(buf.getChannelData(channel), offset);
+                offset += buf.length;
+            }
+        }
+        return out;
     };
 
     const audioBufferToWav = (buffer: AudioBuffer) => {
@@ -231,7 +286,7 @@ export default function Mp3Cutter() {
     };
 
     const exportAudio = async () => {
-        if (!audioFile) return;
+        if (!audioFile || regionsList.length === 0) return;
         setIsProcessing(true);
         setStage('processing');
         setProgress(10);
@@ -240,14 +295,14 @@ export default function Mp3Cutter() {
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const arrayBuffer = await audioFile.arrayBuffer();
             const originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            setProgress(40);
+            setProgress(30);
 
-            const { start, end } = selection;
-            const sampleRate = originalBuffer.sampleRate;
-            
-            let finalBuffer: AudioBuffer;
+            const sortedRegions = [...regionsList].sort((a, b) => a.start - b.start);
+            const segmentBuffers: AudioBuffer[] = [];
 
-            if (keepSelected) {
+            for (let i = 0; i < sortedRegions.length; i++) {
+                const { start, end } = sortedRegions[i];
+                const sampleRate = originalBuffer.sampleRate;
                 const startFrame = Math.floor(start * sampleRate);
                 const endFrame = Math.floor(end * sampleRate);
                 const frameCount = Math.max(1, endFrame - startFrame);
@@ -257,11 +312,14 @@ export default function Mp3Cutter() {
                 source.buffer = originalBuffer;
 
                 const gainNode = offlineCtx.createGain();
-                if (fadeIn > 0) {
+                
+                // Apply fades only to the overall joined audio if needed, 
+                // but here we apply per segment for transition smoothing
+                if (fadeIn > 0 && i === 0) {
                     gainNode.gain.setValueAtTime(0, 0);
                     gainNode.gain.linearRampToValueAtTime(1, fadeIn);
                 }
-                if (fadeOut > 0) {
+                if (fadeOut > 0 && i === sortedRegions.length - 1) {
                     gainNode.gain.setValueAtTime(1, Math.max(0, (end - start) - fadeOut));
                     gainNode.gain.linearRampToValueAtTime(0, end - start);
                 }
@@ -269,29 +327,23 @@ export default function Mp3Cutter() {
                 source.connect(gainNode);
                 gainNode.connect(offlineCtx.destination);
                 source.start(0, start, end - start);
-                finalBuffer = await offlineCtx.startRendering();
-            } else {
-                const startFrame = Math.floor(start * sampleRate);
-                const endFrame = Math.floor(end * sampleRate);
-                const totalFrames = Math.max(1, originalBuffer.length - (endFrame - startFrame));
-
-                finalBuffer = audioCtx.createBuffer(originalBuffer.numberOfChannels, totalFrames, sampleRate);
-                for (let channel = 0; channel < originalBuffer.numberOfChannels; channel++) {
-                    const originalData = originalBuffer.getChannelData(channel);
-                    const newData = finalBuffer.getChannelData(channel);
-                    newData.set(originalData.subarray(0, startFrame));
-                    newData.set(originalData.subarray(endFrame), startFrame);
-                }
+                
+                const renderedSegment = await offlineCtx.startRendering();
+                segmentBuffers.push(renderedSegment);
+                setProgress(30 + Math.round(((i + 1) / sortedRegions.length) * 40));
             }
 
+            const finalBuffer = concatenateAudioBuffers(audioCtx, segmentBuffers);
             setProgress(80);
+            
             const wavBlob = audioBufferToWav(finalBuffer);
             setResultUrl(URL.createObjectURL(wavBlob));
             setProgress(100);
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            toast({ title: "Studio Export Ready!" });
+            toast({ title: "Multi-Part Join Complete!" });
         } catch (e) {
-            toast({ variant: 'destructive', title: "Studio Error" });
+            console.error(e);
+            toast({ variant: 'destructive', title: "Extraction Error" });
             setStage('studio');
         } finally {
             setIsProcessing(false);
@@ -305,20 +357,22 @@ export default function Mp3Cutter() {
         setResultUrl(null);
         setStage('upload');
         setProgress(0);
+        setRegionsList([]);
+        setActiveRegionId(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    const activeRegion = regionsList.find(r => r.id === activeRegionId);
+
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col items-center gap-6">
+        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col items-center gap-6 pb-20">
             <style jsx global>{`
                 .wavesurfer-region {
                     border-top: 4px solid #FFC928 !important;
                     border-bottom: 4px solid #FFC928 !important;
-                    box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.45) !important;
                     z-index: 10 !important;
-                    background-color: transparent !important;
+                    background-color: rgba(255, 201, 40, 0.15) !important;
                     cursor: move !important;
-                    pointer-events: auto !important;
                 }
                 .wavesurfer-handle {
                     width: 20px !important;
@@ -330,7 +384,6 @@ export default function Mp3Cutter() {
                     justify-content: center !important;
                     cursor: ew-resize !important;
                     box-shadow: 0 0 10px rgba(0,0,0,0.3) !important;
-                    pointer-events: auto !important;
                 }
                 .wavesurfer-handle::after {
                     content: "|||" !important;
@@ -338,10 +391,6 @@ export default function Mp3Cutter() {
                     font-size: 10px !important;
                     font-weight: 900 !important;
                     letter-spacing: -1px !important;
-                }
-                /* Ensure touch events aren't captured by page scroll */
-                .wavesurfer-region, .wavesurfer-handle {
-                    touch-action: none !important;
                 }
             `}</style>
 
@@ -358,7 +407,7 @@ export default function Mp3Cutter() {
                         onClick={() => fileInputRef.current?.click()}
                     >
                         <CardHeader className="bg-muted/30 border-b p-8 text-center">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AUDIO WORKSPACE</CardTitle>
+                            <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">AUDIO STUDIO</CardTitle>
                         </CardHeader>
                         <CardContent className="p-12 md:p-20">
                             <div className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-10 flex flex-col items-center justify-center space-y-6 bg-muted/30 group relative">
@@ -367,17 +416,12 @@ export default function Mp3Cutter() {
                                     <Zap className="absolute -top-1 -right-1 size-8 text-yellow-500 animate-pulse" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Audio File here</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">MP3, WAV, M4A, OGG Supported.</p>
+                                    <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Audio File</p>
+                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP3, WAV, M4A Support</p>
                                 </div>
                             </div>
                             <input ref={fileInputRef} type="file" className="hidden" accept="audio/*" onChange={(e) => handleFileChange(e.target.files?.[0] || null)} />
                         </CardContent>
-                        <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
-                            <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
-                            <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> INSTANT VISUALS</div>
-                            <div className="flex items-center gap-1.5"><Volume2 className="size-3.5 text-primary" /> HD STUDIO</div>
-                        </CardFooter>
                     </Card>
                 </div>
             )}
@@ -397,40 +441,42 @@ export default function Mp3Cutter() {
                                 <div className="flex items-center gap-2">
                                     <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setZoom([Math.max(10, zoom[0] - 10)])}><ZoomOut className="h-4 w-4"/></Button>
                                     <span className="text-[10px] font-black w-8 text-center">{zoom[0]}%</span>
-                                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setZoom([Math.min(200, zoom[0] + 10)])}><ZoomIn className="h-4 w-4"/></Button>
+                                    <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg" onClick={() => setZoom([Math.min(300, zoom[0] + 10)])}><ZoomIn className="h-4 w-4"/></Button>
                                 </div>
                             </CardHeader>
                             <CardContent className="p-6 md:p-10 bg-slate-50 dark:bg-black/20">
                                 
-                                <div className="mb-6 grid grid-cols-3 gap-4">
-                                    <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
-                                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">Start Point</p>
-                                        <Input 
-                                            type="number" 
-                                            step="0.01"
-                                            value={selection.start.toFixed(2)} 
-                                            onChange={(e) => handleManualTimeChange('start', e.target.value)}
-                                            className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
-                                        />
+                                {activeRegion && (
+                                    <div className="mb-6 grid grid-cols-3 gap-4 animate-in slide-in-from-top-2">
+                                        <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
+                                            <p className="text-[8px] font-black uppercase opacity-40 mb-1">Start Point</p>
+                                            <Input 
+                                                type="number" 
+                                                step="0.01"
+                                                value={activeRegion.start.toFixed(2)} 
+                                                onChange={(e) => handleManualTimeChange('start', e.target.value)}
+                                                className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                            />
+                                        </div>
+                                        <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
+                                            <p className="text-[8px] font-black uppercase opacity-40 mb-1">End Point</p>
+                                            <Input 
+                                                type="number" 
+                                                step="0.01"
+                                                value={activeRegion.end.toFixed(2)} 
+                                                onChange={(e) => handleManualTimeChange('end', e.target.value)}
+                                                className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                            />
+                                        </div>
+                                        <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-3 text-center shadow-inner">
+                                            <p className="text-[8px] font-black uppercase text-primary opacity-60 mb-1">Clip Length</p>
+                                            <p className="text-xs md:text-sm font-black text-primary font-mono py-1.5">{formatTime(activeRegion.end - activeRegion.start)}</p>
+                                        </div>
                                     </div>
-                                    <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
-                                        <p className="text-[8px] font-black uppercase opacity-40 mb-1">End Point</p>
-                                        <Input 
-                                            type="number" 
-                                            step="0.01"
-                                            value={selection.end.toFixed(2)} 
-                                            onChange={(e) => handleManualTimeChange('end', e.target.value)}
-                                            className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
-                                        />
-                                    </div>
-                                    <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-3 text-center shadow-inner">
-                                        <p className="text-[8px] font-black uppercase text-primary opacity-60 mb-1">Duration</p>
-                                        <p className="text-xs md:text-sm font-black text-primary font-mono py-1.5">{formatTime(selection.end - selection.start)}</p>
-                                    </div>
-                                </div>
+                                )}
 
-                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-inner border-2 overflow-hidden">
-                                    <div ref={containerRef} className="w-full touch-none" />
+                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-inner border-2 overflow-x-auto custom-scrollbar">
+                                    <div ref={containerRef} className="w-full min-w-full" style={{ touchAction: 'none' }} />
                                     <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40">
                                         <span>00:00.00</span>
                                         <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">
@@ -444,19 +490,36 @@ export default function Mp3Cutter() {
                                     <Button variant="outline" size="icon" className="size-14 rounded-full border-4 shadow-xl active:scale-95 transition-all" onClick={togglePlay}>
                                         {isPlaying ? <Pause className="size-6" /> : <Play className="size-6 ml-1" />}
                                     </Button>
-                                    <Button variant="secondary" className="h-14 px-8 rounded-2xl font-black uppercase text-xs shadow-lg border-2" onClick={playSelection}>
-                                        <ListFilter className="mr-2 size-4" /> PREVIEW SELECTION
+                                    <Button className="h-14 px-8 rounded-2xl bg-primary text-white font-black uppercase text-xs shadow-lg group" onClick={addNewSegment}>
+                                        <Plus className="mr-2 size-4 group-hover:scale-125 transition-transform" /> ADD NEW SEGMENT
                                     </Button>
                                 </div>
                             </CardContent>
+                            <CardFooter className="bg-muted/10 p-6 border-t">
+                                <ScrollArea className="w-full h-auto">
+                                    <div className="flex gap-3 pb-2">
+                                        {regionsList.map((r, i) => (
+                                            <div key={r.id} onClick={() => { setActiveRegionId(r.id); playRegion(r); }}
+                                                 className={cn("flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all", activeRegionId === r.id ? "bg-primary/10 border-primary" : "bg-white border-transparent hover:border-primary/20")}>
+                                                <Badge variant="secondary" className="bg-primary/20 text-primary">#{i + 1}</Badge>
+                                                <div className="flex flex-col text-[10px] font-bold">
+                                                    <span>{formatTime(r.start)} - {formatTime(r.end)}</span>
+                                                </div>
+                                                <Button size="icon" variant="ghost" className="size-6 rounded-full text-destructive" onClick={(e) => { e.stopPropagation(); removeRegion(r.id); }}><Trash2 className="size-3" /></Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <ScrollBar orientation="horizontal" />
+                                </ScrollArea>
+                            </CardFooter>
                         </Card>
                     </div>
 
                     <div className="lg:col-span-4 space-y-6">
-                        <Card className="glass-panel border-none shadow-2xl rounded-[2.5rem]">
+                        <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                             <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
                                 <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
-                                    <Sparkles className="size-5 text-primary" /> Studio Mastering
+                                    <Settings2 className="size-4 md:size-5 text-primary" /> Multi-Part Logic
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6 md:p-8 space-y-10 text-left">
@@ -469,17 +532,13 @@ export default function Mp3Cutter() {
                                         <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">FADE OUT (SEC)</Label><Badge variant="secondary" className="font-mono text-[9px]">{fadeOut}s</Badge></div>
                                         <Slider min={0} max={5} step={0.1} value={[fadeOut]} onValueChange={v => setFadeOut(v[0])} />
                                     </div>
-                                    <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border-2 border-dashed">
-                                        <div className="flex items-center gap-3"><Volume2 className="size-4 text-primary"/><Label className="text-[10px] font-black uppercase opacity-60">Normalise Audio</Label></div>
-                                        <Switch checked={normalize} onCheckedChange={setNormalize} />
-                                    </div>
                                 </div>
 
-                                <div className="p-5 bg-green-500/5 rounded-2xl border-2 border-green-500/10 flex gap-4 text-left shadow-sm">
+                                <div className="p-5 bg-blue-500/5 rounded-2xl border-2 border-blue-500/10 flex gap-4 text-left shadow-sm">
                                     <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Pro Isolation</p>
-                                        <p className="text-[8px] text-green-600/80 font-medium leading-tight uppercase">Draggable handles allow millisecond precision for ringtones and clips.</p>
+                                        <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Multi-Trim Active</p>
+                                        <p className="text-[8px] text-green-600/80 font-medium leading-tight uppercase">Segments will be joined seamlessly into one file.</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -487,10 +546,11 @@ export default function Mp3Cutter() {
                                 <Button 
                                     className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 group px-10 flex items-center justify-center gap-4 shadow-2xl" 
                                     onClick={exportAudio}
+                                    disabled={regionsList.length === 0}
                                 >
                                     <StarIcons />
                                     <Scissors className="size-7 group-hover:rotate-12 transition-transform" />
-                                    <span className="uppercase tracking-tighter text-lg font-black">EXTRACT PART</span>
+                                    <span className="uppercase tracking-tighter text-lg font-black">EXTRACT & JOIN</span>
                                 </Button>
                                 <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300"><RefreshCcw className="mr-2 size-3" /> Start Over</Button>
                             </CardFooter>
@@ -510,9 +570,9 @@ export default function Mp3Cutter() {
                                 </div>
                             </div>
                             <div className="text-center space-y-4 w-full px-10">
-                                <p className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tighter animate-pulse">Rendering Audio Buffer...</p>
+                                <p className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tighter animate-pulse">Processing Multi-Parts...</p>
                                 <Progress value={progress} className="h-2 shadow-inner" />
-                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.3em] opacity-40">Local Workspace Rendering • Private</p>
+                                <p className="text-[10px] font-black uppercase text-muted-foreground tracking-[0.3em] opacity-40">Local Workspace Join Rendering</p>
                             </div>
                         </>
                     ) : (
@@ -523,8 +583,8 @@ export default function Mp3Cutter() {
                                 <Sparkles className="absolute -top-2 -right-2 text-yellow-400" />
                             </div>
                             <div className="space-y-2">
-                                <h3 className="text-3xl font-black uppercase tracking-tighter text-green-700">Studio Export Complete</h3>
-                                <p className="text-sm text-muted-foreground font-bold uppercase">Your audio is ready for high-fidelity download.</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-green-700">Studio Join Complete</h3>
+                                <p className="text-sm text-muted-foreground font-bold uppercase">Your multi-part join is ready for download.</p>
                             </div>
                             
                             {resultUrl && (
@@ -541,12 +601,12 @@ export default function Mp3Cutter() {
                                     onClick={() => {
                                         const link = document.createElement('a');
                                         link.href = resultUrl!;
-                                        link.download = `GR7-Studio-${audioFile?.name || 'result'}.wav`;
+                                        link.download = `GR7-Joined-${audioFile?.name || 'result'}.wav`;
                                         link.click();
                                     }}
                                 >
                                     <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
-                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">DOWNLOAD STUDIO FILE</span>
+                                    <span className="flex-1 px-10 text-center tracking-widest text-[11px] uppercase">SAVE JOINED FILE</span>
                                     <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                         <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
                                         <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
