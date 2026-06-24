@@ -52,7 +52,7 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    text-rendering: optimizeSpeed;
+    text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-smoothing: grayscale;
     scrollbar-gutter: stable !important;
@@ -66,15 +66,14 @@
     position: relative;
     overflow-x: hidden !important;
     -webkit-overflow-scrolling: touch;
-    /* GPU STABILIZED BACKGROUND */
+    
+    /* PERFORMANCE OPTIMIZED BACKGROUND - NO FIXED ATTACHMENT */
     background: 
       radial-gradient(circle at 15% 20%, rgba(224,255,245,0.65) 0%, transparent 35%),
       radial-gradient(circle at 85% 25%, rgba(220,230,255,0.60) 0%, transparent 35%),
       radial-gradient(circle at 50% 85%, rgba(255,240,220,0.55) 0%, transparent 40%),
       linear-gradient(135deg, #F5F7FF 0%, #EEF4FF 35%, #F3EEFF 65%, #E8FFF8 100%);
-    background-attachment: fixed;
-    background-size: cover;
-    transform: translateZ(0); /* Force top-level layer */
+    background-size: 100% 100%;
   }
 
   .dark body {
@@ -83,7 +82,6 @@
       radial-gradient(at 0% 100%, hsla(285, 45%, 4%, 0.05) 0px, transparent 50%),
       radial-gradient(at 100% 100%, hsla(333, 70%, 50%, 0.08) 0px, transparent 70%);
     background-color: #020617;
-    background-attachment: fixed;
   }
 
   * {
@@ -91,26 +89,19 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  /* HARDWARE ACCELERATION FOR RENDERING STABILITY */
-  a, button, [role="button"], label, input, select, textarea, .cursor-pointer, .glass-card, .group, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
-    cursor: pointer !important;
-    touch-action: manipulation;
+  /* HARDWARE ACCELERATION FOR STABILITY */
+  a, button, .glass-card, header, footer, .magic-button, .btn-pos-uiverse, .uiverse-clay-btn {
     transform: translate3d(0,0,0);
     backface-visibility: hidden;
+    perspective: 1000px;
   }
 }
 
-/* RENDERING STABILITY & SCROLL PERFORMANCE */
-.glass-card, .btn-pos-uiverse, .magic-button, header, footer, .uiverse-clay-btn, .animate-in {
-  transform: translate3d(0,0,0);
-  backface-visibility: hidden;
-  perspective: 1000px;
-  will-change: transform, opacity;
-}
-
+/* RENDERING PERFORMANCE FIXES */
 section {
   content-visibility: auto;
   contain-intrinsic-size: 1px 500px;
+  contain: paint;
 }
 
 .font-headline {
@@ -125,6 +116,7 @@ section {
 .glass-card {
   @apply bg-white/70 dark:bg-slate-900/40 backdrop-blur-md border border-white/30 dark:border-white/10 shadow-2xl;
   transition: transform 0.2s cubic-bezier(0.2, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.2, 0, 0.2, 1);
+  will-change: transform, box-shadow;
 }
 
 .text-gradient-hero {
