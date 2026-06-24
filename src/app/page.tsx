@@ -372,7 +372,7 @@ export default function Page() {
                     <Input
                         type="text"
                         placeholder="Search tools... (e.g. 'scan', 'barcode')"
-                        className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight text-center transform-gpu"
+                        className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight text-left transform-gpu"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
