@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
@@ -185,10 +186,9 @@ export function HowToGuide({ title, steps }: HowToGuideProps) {
             <div 
                 key={index} 
                 className={cn(
-                    "relative w-full animate-in fade-in slide-in-from-bottom-4 duration-500",
+                    "relative w-full animate-in fade-in slide-in-from-bottom-4 duration-700",
                     shouldCenter && "md:col-span-2 flex justify-center"
                 )} 
-                style={{ animationDelay: `${index * 100}ms` }}
             >
                 {/* Cleaned Card Container - Reduced Height and Removed Triangle Pointer */}
                 <div className={cn(
