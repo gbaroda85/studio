@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -51,20 +52,21 @@ import {
   TrendingUp,
   PiggyBank,
   Layers,
+  CalendarDays,
+  ScanLine as ScanLineIcon,
+  Palette,
+  Banknote,
+  Video,
+  Volume2,
   Home as HomeIcon,
   Scissors,
   Music,
   PenLine,
   PenTool,
-  CalendarDays,
-  Palette,
   CheckCircle2,
   Trophy,
   Target,
-  Video,
-  MousePointer2,
-  Volume2,
-  Banknote
+  MousePointer2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -269,7 +271,7 @@ export default function Page() {
           <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] dark:bg-accent/10 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '2s' }} />
         </div>
 
-        <div className="w-full px-5 md:px-12 relative z-10 transform-gpu">
+        <div className="w-full px-6 md:px-16 relative z-10 transform-gpu">
           <div className="max-w-[1400px] mx-auto flex flex-col items-center justify-center transform-gpu">
             <div className="flex-1 text-center space-y-4 max-w-4xl mx-auto flex flex-col items-center transform-gpu">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up transform-gpu">

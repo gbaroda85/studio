@@ -1,10 +1,11 @@
+
 'use client';
 
 import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
 
 /**
- * @fileOverview Client-side wrappers for heavy AI/PDF tools to prevent SSR errors in Next.js 15.
+ * @fileOverview Client-side wrappers for heavy AI/PDF/Audio tools to prevent SSR errors in Next.js 15.
  */
 
 const LoadingState = ({ message }: { message: string }) => (
@@ -42,4 +43,9 @@ export const PdfCropperClient = dynamic(() => import('@/components/pdf-cropper')
 export const VideoCompressorClient = dynamic(() => import('@/components/video-compressor'), {
   ssr: false,
   loading: () => <LoadingState message="Initializing Cloud Workspace..." />
+});
+
+export const Mp3CompressorClient = dynamic(() => import('@/components/mp3-compressor'), {
+  ssr: false,
+  loading: () => <LoadingState message="Initializing Audio Engine..." />
 });

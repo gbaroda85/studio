@@ -1,7 +1,7 @@
 
 import { Metadata } from 'next';
 import { ShieldCheck, HelpCircle, Zap, Volume2, Sparkles, FileAudio, LayoutList, MonitorCheck, Download } from 'lucide-react';
-import Mp3Compressor from '@/components/mp3-compressor';
+import { Mp3CompressorClient } from '@/components/client-tool-wrappers';
 import { HowToGuide } from '@/components/how-to-guide';
 import { ToolNavigation } from '@/components/tool-navigation';
 import {
@@ -59,7 +59,7 @@ export default function CompressMp3Page() {
             </div>
 
             <div className="w-full flex justify-center">
-                <Mp3Compressor />
+                <Mp3CompressorClient />
             </div>
         </div>
 

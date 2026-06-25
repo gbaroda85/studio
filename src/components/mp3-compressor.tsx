@@ -437,7 +437,7 @@ export default function Mp3Compressor() {
                             <Card className="border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-card/50">
                                 <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
                                     <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-3 text-left"><Monitor className="size-4 text-primary" /> Audio Studio Player</CardTitle>
-                                    <Badge variant="outline" className="text-[8px] font-black uppercase bg-white/50 backdrop-blur-md">Local Preview</Badge>
+                                    <Badge variant="outline" className="bg-white/50 backdrop-blur-md">Local Preview</Badge>
                                 </CardHeader>
                                 <CardContent className="p-8 space-y-10">
                                     <div className="space-y-6">
@@ -453,7 +453,7 @@ export default function Mp3Compressor() {
 
                                         <AnimatePresence>
                                             {compressedUrl && (
-                                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 pt-6 border-t-2 border-dashed border-primary/20 text-left">
+                                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full space-y-6 pt-6 border-t-2 border-dashed border-primary/20 text-left">
                                                     <div className="flex justify-between items-center px-2">
                                                         <Label className="text-[10px] font-black uppercase text-emerald-600 flex items-center gap-2"><Sparkles className="size-3"/> Optimized Output</Label>
                                                         <Badge className="bg-emerald-500 text-white text-[8px] font-black uppercase">{estimation?.bitrate} kbps</Badge>

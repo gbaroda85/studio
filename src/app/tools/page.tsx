@@ -48,9 +48,18 @@ import {
   FileScan,
   FileText,
   PenLine,
+  ShieldCheck,
+  ChevronDown,
+  Menu,
+  Languages,
+  Zap,
+  Home as HomeIcon,
   UserCircle,
-  Lock,
+  Infinity as InfinityIcon,
   Printer,
+  Lock,
+  Heart,
+  Sparkles,
   FilePenLine,
   Music,
   RotateCw,
@@ -66,14 +75,8 @@ import {
   Banknote,
   Video,
   Volume2,
-  Sparkles,
-  Zap,
-  ShieldCheck,
-  LayoutGrid,
-  Menu,
-  ChevronRight,
   PenTool,
-  Home as HomeIcon
+  LayoutGrid
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -326,7 +329,7 @@ function ToolsPageContent() {
       descriptionKey: 'audio_merger_description',
       icon: Merge,
       color: 'bg-indigo-600',
-      lightBg: 'bg-[#eef2ff]'
+      lightBg: 'bg-indigo-50'
     },
     {
       href: '/compress-mp3',
@@ -334,7 +337,7 @@ function ToolsPageContent() {
       descriptionKey: 'compress_mp3_description',
       icon: FileArchive,
       color: 'bg-violet-600',
-      lightBg: 'bg-[#f5f3ff]'
+      lightBg: 'bg-violet-50'
     },
     {
       href: '/mp3-cutter',
@@ -342,7 +345,7 @@ function ToolsPageContent() {
       descriptionKey: 'mp3_cutter_description',
       icon: Scissors,
       color: 'bg-rose-600',
-      lightBg: 'bg-[#fff1f2]'
+      lightBg: 'bg-rose-50'
     },
     {
       href: '/audio-converter',
@@ -350,7 +353,7 @@ function ToolsPageContent() {
       descriptionKey: 'audio_converter_description',
       icon: FileOutput,
       color: 'bg-blue-600',
-      lightBg: 'bg-[#eff6ff]'
+      lightBg: 'bg-blue-50'
     },
   ];
 
