@@ -575,13 +575,13 @@ function ToolsPageContent() {
   const isSearching = searchQuery.trim() !== '';
 
   const allFeatureGroups = [
-    { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500' },
-    { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-rose-500' },
-    { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500' },
-    { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500' },
-    { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Palette, color: 'text-emerald-500' },
-    { value: 'audio', categoryKey: 'audio_tools', features: audioFeatures, icon: Volume2, color: 'text-indigo-600' },
-    { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Music, color: 'text-indigo-500' },
+    { value: 'image', categoryKey: 'image_tools', features: imageFeatures, icon: ImageIcon, color: 'text-blue-500', bgColor: 'bg-blue-500' },
+    { value: 'pdf', categoryKey: 'pdf_tools', features: pdfFeatures, icon: FileText, color: 'text-rose-500', bgColor: 'bg-rose-500' },
+    { value: 'file', categoryKey: 'file_tools', features: fileFeatures, icon: Archive, color: 'text-purple-500', bgColor: 'bg-purple-500' },
+    { value: 'calculator', categoryKey: 'calculator_pro', features: calculatorFeatures, icon: Calculator, color: 'text-cyan-500', bgColor: 'bg-cyan-500' },
+    { value: 'converters', categoryKey: 'converter_tools', features: converterFeatures, icon: Palette, color: 'text-emerald-500', bgColor: 'bg-emerald-500' },
+    { value: 'audio', categoryKey: 'audio_tools', features: audioFeatures, icon: Volume2, color: 'text-indigo-600', bgColor: 'bg-indigo-600' },
+    { value: 'video', categoryKey: 'video_tools', features: videoFeatures, icon: Music, color: 'text-indigo-500', bgColor: 'bg-indigo-500' },
   ];
 
   const searchResults = useMemo(() => {
@@ -646,13 +646,13 @@ function ToolsPageContent() {
         {isSearching ? (
             <div className="space-y-20 font-body">
             {searchResults.length > 0 ? (
-                searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
-                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu">
+                searchResults.map(({ categoryKey, features, icon: Icon, bgColor }) => (
+                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu text-left">
                     <div className="flex items-center gap-3 mb-10 text-left">
-                      <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-md", color.replace('text-', 'bg-'))}>
+                      <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-md", bgColor)}>
                         <Icon className="size-6 text-white" />
                       </div>
-                      <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tighter">
+                      <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
                         {t(categoryKey)}
                       </h2>
                     </div>
@@ -719,10 +719,10 @@ function ToolsPageContent() {
             </div>
 
             <TabsContent value="all" className="space-y-16 md:space-y-24 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none transform-gpu">
-                {allFeatureGroups.map(({ categoryKey, features, icon: Icon, color }) => (
-                    <section key={categoryKey} className="space-y-8 md:space-y-10">
+                {allFeatureGroups.map(({ categoryKey, features, icon: Icon, bgColor }) => (
+                    <section key={categoryKey} className="space-y-8 md:space-y-10 text-left">
                         <div className="flex items-center gap-3 mb-6 text-left">
-                            <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-md", color.replace('text-', 'bg-'))}>
+                            <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-md", bgColor)}>
                                 <Icon className="size-6 text-white" />
                             </div>
                             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
