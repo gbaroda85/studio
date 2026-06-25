@@ -43,7 +43,7 @@ export default function ResumeBuilderPage() {
 
   return (
     <main className="flex-1 flex flex-col items-center w-full pt-16 md:pt-28 text-left overflow-x-hidden">
-        <ToolNavigation href="/tools?tab=image" label="Back to Tools" />
+        <ToolNavigation href="/tools" label="Back to Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4">
             <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
@@ -62,12 +62,12 @@ export default function ResumeBuilderPage() {
             </div>
 
             {/* MAIN TOOL COMPONENT */}
-            <div className="w-full">
+            <div className="w-full relative z-10">
                 <ResumeBuilderMain />
             </div>
         </div>
 
-        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 md:px-12 pb-24">
+        <div className="w-full max-w-7xl mx-auto space-y-16 px-4 md:px-12 pb-24 relative z-0">
             <HowToGuide title="Professional Resume Builder" steps={steps} />
 
             <section className="space-y-10 py-10 border-t">

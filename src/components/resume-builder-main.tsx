@@ -9,8 +9,6 @@ import {
     Wand2, 
     Download, 
     RefreshCcw, 
-    Eye, 
-    CheckCircle2, 
     Plus, 
     Trash2, 
     ChevronRight, 
@@ -25,27 +23,12 @@ import {
     UserPlus,
     X,
     Loader2,
-    Save,
-    ArrowLeftRight,
-    Search,
-    Type,
-    Maximize,
-    Smartphone,
-    Monitor,
-    Zap,
-    History,
-    ShieldCheck,
-    Palette,
-    Layers,
-    RotateCcw,
-    Printer,
-    Menu,
-    Clock,
-    User2,
-    CheckCircle,
     LayoutGrid,
     ZoomIn,
-    ZoomOut
+    ZoomOut,
+    ShieldCheck,
+    Zap,
+    User2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -57,13 +40,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Progress } from '@/components/ui/progress';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import ResumeTemplates from './resume-templates';
-import { RESUME_SUGGESTIONS } from './resume-suggestions';
 
 // --- TYPES ---
 
@@ -355,10 +334,10 @@ export default function ResumeBuilderMain() {
     return (
         <div className="w-full flex flex-col gap-8 animate-in fade-in duration-700">
             
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch h-full max-h-[90vh]">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 
                 {/* 1. STEPPER & FORM COLUMN */}
-                <div className="lg:col-span-5 flex flex-col gap-4 no-print h-full">
+                <div className="lg:col-span-5 flex flex-col gap-4 no-print min-h-0">
                     
                     {/* Completeness Bar */}
                     <Card className="rounded-3xl border-2 border-primary/10 shadow-lg overflow-hidden bg-white/50 backdrop-blur-xl">
@@ -381,7 +360,7 @@ export default function ResumeBuilderMain() {
                         </CardContent>
                     </Card>
 
-                    <Card className="flex-1 flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/20 h-full min-h-0">
+                    <Card className="flex flex-col border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/20 h-fit">
                         <CardHeader className="bg-primary/5 border-b p-4 md:p-6 shrink-0">
                             <ScrollArea className="w-full whitespace-nowrap pb-2">
                                 <div className="flex gap-2">
@@ -404,7 +383,7 @@ export default function ResumeBuilderMain() {
                             </ScrollArea>
                         </CardHeader>
 
-                        <CardContent className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 space-y-10 text-left">
+                        <CardContent className="p-6 md:p-8 space-y-10 text-left overflow-visible">
                             <AnimatePresence mode="wait">
                                 <motion.div 
                                     key={activeStepId}
@@ -548,8 +527,8 @@ export default function ResumeBuilderMain() {
                 </div>
 
                 {/* 2. PREVIEW COLUMN */}
-                <div className="lg:col-span-7 flex flex-col gap-6 h-full relative">
-                    <Card className="overflow-hidden glass-card border-none shadow-3xl flex flex-col bg-card/50 rounded-[2.5rem] h-full">
+                <div className="lg:col-span-7 flex flex-col gap-6 relative">
+                    <Card className="overflow-hidden glass-card border-none shadow-3xl flex flex-col bg-card/50 rounded-[2.5rem]">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
                                 <Layout className="h-4 w-4 text-primary" />
@@ -565,7 +544,7 @@ export default function ResumeBuilderMain() {
                             </div>
                         </CardHeader>
 
-                        <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative flex flex-col">
+                        <CardContent className="p-0 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative flex flex-col min-h-[600px]">
                             <ScrollArea className="flex-1 w-full h-full p-4 md:p-12 lg:p-20 overflow-visible">
                                 <div className="flex justify-center min-h-full items-start p-4">
                                     <div 
@@ -613,4 +592,3 @@ export default function ResumeBuilderMain() {
         </div>
     );
 }
-
