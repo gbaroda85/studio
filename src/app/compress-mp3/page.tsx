@@ -11,6 +11,8 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: 'Professional MP3 Compressor - Shrink Audio Size Online Free (HD)',
   description: 'Compress MP3, WAV, and M4A files while maintaining high fidelity. Choose between easy presets or advanced bitrate controls. 100% private local browser processing.',

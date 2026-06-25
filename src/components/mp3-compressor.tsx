@@ -2,8 +2,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, useCallback, type ChangeEvent, type DragEvent } from "react";
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
 import { 
     UploadCloud, 
     Download, 
@@ -92,7 +90,7 @@ export default function Mp3Compressor() {
     const [statusText, setStatusText] = useState("");
     const [isDragOver, setIsDragOver] = useState(false);
 
-    const ffmpegRef = useRef<FFmpeg | null>(null);
+    const ffmpegRef = useRef<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const estimation = useMemo(() => {
@@ -155,38 +153,34 @@ export default function Mp3Compressor() {
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
-    const loadFFmpeg = async () => {
-        const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-        const ffmpeg = new FFmpeg();
-        ffmpegRef.current = ffmpeg;
-        
-        ffmpeg.on('log', ({ message }) => {
-            console.log(message);
-        });
-
-        ffmpeg.on('progress', ({ progress }) => {
-            setProgress(Math.round(progress * 100));
-        });
-
-        await ffmpeg.load({
-            coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-            wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-        });
-    };
-
     const handleCompress = async () => {
         if (!file || !audioInfo) return;
         
         setIsProcessing(true);
         setProgress(0);
-        setStatusText("Booting FFmpeg Engine...");
+        setStatusText("Booting Engine...");
 
         try {
-            if (!ffmpegRef.current) {
-                await loadFFmpeg();
-            }
-            const ffmpeg = ffmpegRef.current!;
+            // DYNAMIC IMPORTS TO AVOID TURBOPACK WORKER ERRORS
+            const { FFmpeg } = await import("@ffmpeg/ffmpeg");
+            const { fetchFile, toBlobURL } = await import("@ffmpeg/util");
 
+            if (!ffmpegRef.current) {
+                const ffmpeg = new FFmpeg();
+                const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+                
+                ffmpeg.on('progress', ({ progress }) => {
+                    setProgress(Math.round(progress * 100));
+                });
+
+                await ffmpeg.load({
+                    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+                });
+                ffmpegRef.current = ffmpeg;
+            }
+
+            const ffmpeg = ffmpegRef.current;
             const inputName = 'input' + file.name.substring(file.name.lastIndexOf('.'));
             const outputName = 'output.mp3';
 
@@ -215,7 +209,7 @@ export default function Mp3Compressor() {
             toast({ title: "Compression Success!" });
         } catch (error: any) {
             console.error("Compression Final Error:", error);
-            toast({ variant: 'destructive', title: "Process Failed", description: "WASM engine failed to initialize." });
+            toast({ variant: 'destructive', title: "Process Failed", description: "Engine failed to initialize." });
         } finally {
             setIsProcessing(false);
         }
@@ -284,9 +278,9 @@ export default function Mp3Compressor() {
                                 </div>
                             ) : (
                                 <div className="space-y-10 animate-in slide-in-from-left duration-300">
-                                    <div className="bg-primary/5 p-6 rounded-[2.5rem] border-2 border-primary/10 shadow-inner relative overflow-hidden group">
+                                    <div className="bg-primary/5 p-6 rounded-[2.5rem] border-2 border-primary/10 shadow-inner relative overflow-hidden group text-left">
                                         <div className="absolute top-0 right-0 size-24 bg-primary/5 blur-2xl rounded-full" />
-                                        <div className="flex items-center gap-4 mb-6 text-left">
+                                        <div className="flex items-center gap-4 mb-6">
                                             <div className="size-14 rounded-2xl bg-white dark:bg-slate-900 border flex items-center justify-center shadow-lg"><FileAudio className="size-8 text-primary" /></div>
                                             <div className="flex-1 truncate">
                                                 <p className="text-sm font-black uppercase tracking-tight truncate">{audioInfo?.name}</p>
@@ -297,8 +291,8 @@ export default function Mp3Compressor() {
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Duration</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo ? formatTime(audioInfo.duration) : '---'}</span></div>
-                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Bitrate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.bitrate || '---'} kbps</span></div>
+                                            <div className="flex flex-col gap-0.5"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Duration</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo ? formatTime(audioInfo.duration) : '---'}</span></div>
+                                            <div className="flex flex-col gap-0.5"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Bitrate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.bitrate || '---'} kbps</span></div>
                                         </div>
                                     </div>
 
@@ -331,7 +325,7 @@ export default function Mp3Compressor() {
 
                                         <TabsContent value="advanced" className="m-0 space-y-6 animate-in fade-in duration-300">
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2 text-left">
+                                                <div className="space-y-2">
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Target Bitrate</Label>
                                                     <Select value={bitrate} onValueChange={v => setBitrate(v as Bitrate)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
@@ -340,7 +334,7 @@ export default function Mp3Compressor() {
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
-                                                <div className="space-y-2 text-left">
+                                                <div className="space-y-2">
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Sample Rate</Label>
                                                     <Select value={sampleRate} onValueChange={v => setSampleRate(v as SampleRate)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
@@ -361,7 +355,7 @@ export default function Mp3Compressor() {
                         <CardFooter className="bg-muted/10 p-6 md:p-8 border-t flex flex-col gap-4 shrink-0">
                              {file && !compressedUrl && (
                                 <Button 
-                                    className="magic-button w-full h-16 md:h-20 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl" 
+                                    className="magic-button w-full h-16 md:h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl border-none" 
                                     onClick={handleCompress}
                                     disabled={isProcessing}
                                 >
@@ -381,7 +375,7 @@ export default function Mp3Compressor() {
                              )}
                              <div className="flex items-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] mx-auto">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
-                                <div className="flex items-center gap-1.5"><Cloud className="size-3.5 text-blue-500" /> WASM CORE</div>
+                                <div className="flex items-center gap-1.5"><Cloud className="size-3.5 text-blue-500" /> ON-DEMAND CORE</div>
                             </div>
                         </CardFooter>
                     </Card>
@@ -393,11 +387,11 @@ export default function Mp3Compressor() {
                              <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-900 border-2 border-primary/20 relative group">
                                 <div className="absolute top-0 right-0 size-80 bg-primary/5 blur-3xl rounded-full" />
                                 <CardHeader className="bg-primary/5 p-4 border-b text-center shrink-0">
-                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-primary flex items-center justify-center gap-2 text-left">
+                                    <CardTitle className="text-[10px] font-black uppercase tracking-[0.4em] text-primary flex items-center justify-center gap-2">
                                     <Activity className="size-3" /> PRECISION METRICS
                                     </CardTitle>
                                 </CardHeader>
-                                <CardContent className="p-8 md:p-12 space-y-10 relative z-10">
+                                <CardContent className="p-8 md:p-12 space-y-10 relative z-10 text-left">
                                     <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-muted/20 p-8 rounded-[2.5rem] border-2 shadow-inner">
                                         <div className="text-center md:text-left space-y-1">
                                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Estimated Savings</p>
