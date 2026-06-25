@@ -33,7 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-// Import lamejs safely for browser environment
+// Dynamic import for lamejs
 let lamejs: any = null;
 
 type CompressionMode = 'easy' | 'advanced';
@@ -98,11 +98,16 @@ export default function Mp3Compressor() {
     const originalAudioRef = useRef<HTMLAudioElement>(null);
     const compressedAudioRef = useRef<HTMLAudioElement>(null);
 
-    // FIX: Professional LameJS Loading Logic to prevent MPEGMode Reference Errors
+    // FIX: Load LameJS and initialize Global Shim to fix MPEGMode error
     useEffect(() => {
         if (typeof window !== 'undefined' && !lamejs) {
             import('lamejs').then(module => {
                 lamejs = module;
+                // CRITICAL SHIM: Attach internal classes to window to prevent "not defined" errors in library
+                (window as any).MPEGMode = (module as any).MPEGMode;
+                (window as any).Lame = (module as any).Lame;
+                (window as any).BitStream = (module as any).BitStream;
+                (window as any).VbrMode = (module as any).VbrMode;
             }).catch(e => console.error("LameJS load error:", e));
         }
     }, []);
@@ -180,6 +185,10 @@ export default function Mp3Compressor() {
         setStatusText("Initializing Local Workspace...");
 
         try {
+            // Re-apply SHIM just in case
+            (window as any).MPEGMode = (lamejs as any).MPEGMode;
+            (window as any).Lame = (lamejs as any).Lame;
+
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const arrayBuffer = await file.arrayBuffer();
             setStatusText("Decoding Audio Stream...");
@@ -189,8 +198,7 @@ export default function Mp3Compressor() {
             const targetSampleRate = sampleRate === 'auto' ? audioBuffer.sampleRate : parseInt(sampleRate);
             const channels = audioBuffer.numberOfChannels;
 
-            // CRITICAL FIX: Ensure the Mp3Encoder is created correctly from the imported module
-            // Some lamejs versions require different instantiation patterns
+            // Use the constructor with proper scoping
             const Mp3Encoder = lamejs.Mp3Encoder;
             const mp3encoder = new Mp3Encoder(channels, targetSampleRate, targetBitrate);
             
@@ -235,12 +243,13 @@ export default function Mp3Compressor() {
             setCompressedUrl(URL.createObjectURL(blob));
             
             setProgress(100);
+            setStatusText("Success");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "Compression Success!" });
             await audioCtx.close();
         } catch (error: any) {
             console.error("Compression Error:", error);
-            toast({ variant: 'destructive', title: "Process Failed", description: "This error usually occurs due to large file memory limits." });
+            toast({ variant: 'destructive', title: "Process Failed", description: "Browser memory limit reached or format error." });
         } finally {
             setIsProcessing(false);
         }
