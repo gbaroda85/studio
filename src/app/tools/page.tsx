@@ -366,6 +366,14 @@ function ToolsPageContent() {
       color: 'bg-indigo-500',
       lightBg: 'bg-[#eff6ff]'
     },
+    {
+        href: '/compress-video',
+        labelKey: 'video_compressor_label',
+        descriptionKey: 'video_compressor_description',
+        icon: Video,
+        color: 'bg-primary',
+        lightBg: 'bg-primary/5'
+    }
   ];
 
   const fileFeatures = [
@@ -657,7 +665,7 @@ function ToolsPageContent() {
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
                 <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu">
-                    <div className="flex items-center gap-3 mb-10">
+                    <div className="flex items-center gap-3 mb-10 text-left">
                       <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/5 shadow-md", color)}>
                         <Icon className="size-6 text-white" />
                       </div>
@@ -730,7 +738,7 @@ function ToolsPageContent() {
             <TabsContent value="all" className="space-y-16 md:space-y-24 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none transform-gpu">
                 {allFeatureGroups.map(({ categoryKey, features, icon: Icon, color }) => (
                     <section key={categoryKey} className="space-y-8 md:space-y-10">
-                        <div className="flex items-center gap-3 mb-6">
+                        <div className="flex items-center gap-3 mb-6 text-left">
                             <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/5 shadow-md", color)}>
                                 <Icon className="size-6 text-white" />
                             </div>

@@ -34,10 +34,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-type CompressionMode = 'easy' | 'advanced';
-type QualityLevel = 'low' | 'medium' | 'high';
-type Bitrate = '320' | '256' | '192' | '128' | '96' | '64' | '48';
-type SampleRate = 'auto' | '44100' | '22050' | '16000';
+export const dynamic = "force-dynamic";
 
 interface AudioInfo {
     name: string;
@@ -80,10 +77,10 @@ export default function Mp3Compressor() {
     const [compressedUrl, setCompressedUrl] = useState<string | null>(null);
     const [audioInfo, setAudioInfo] = useState<AudioInfo | null>(null);
     
-    const [mode, setMode] = useState<CompressionMode>('easy');
-    const [easyQuality, setEasyQuality] = useState<QualityLevel>('medium');
-    const [bitrate, setBitrate] = useState<Bitrate>('128');
-    const [sampleRate, setSampleRate] = useState<SampleRate>('auto');
+    const [mode, setMode] = useState<'easy' | 'advanced'>('easy');
+    const [easyQuality, setEasyQuality] = useState<'low' | 'medium' | 'high'>('medium');
+    const [bitrate, setBitrate] = useState('128');
+    const [sampleRate, setSampleRate] = useState('auto');
 
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -161,7 +158,7 @@ export default function Mp3Compressor() {
         setStatusText("Booting Engine...");
 
         try {
-            // DYNAMIC IMPORTS TO AVOID TURBOPACK WORKER ERRORS
+            // DYNAMIC IMPORTS ONLY ON CLICK
             const { FFmpeg } = await import("@ffmpeg/ffmpeg");
             const { fetchFile, toBlobURL } = await import("@ffmpeg/util");
 
@@ -296,7 +293,7 @@ export default function Mp3Compressor() {
                                         </div>
                                     </div>
 
-                                    <Tabs value={mode} onValueChange={(v) => setMode(v as CompressionMode)} className="w-full">
+                                    <Tabs value={mode} onValueChange={(v) => setMode(v as any)} className="w-full">
                                         <div className="flex items-center justify-between mb-4 px-1">
                                             <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                                                 <Settings2 className="size-3" /> Configuration
@@ -309,10 +306,10 @@ export default function Mp3Compressor() {
 
                                         <TabsContent value="easy" className="m-0 space-y-4 animate-in fade-in duration-300">
                                             <div className="grid grid-cols-3 gap-3">
-                                                {(['low', 'medium', 'high'] as QualityLevel[]).map(q => (
+                                                {['low', 'medium', 'high'].map(q => (
                                                     <button 
                                                         key={q} 
-                                                        onClick={() => setEasyQuality(q)}
+                                                        onClick={() => setEasyQuality(q as any)}
                                                         className={cn(
                                                             "btn-pos-uiverse h-12 transition-all !ring-[3px] !ring-slate-950 dark:!ring-white",
                                                             easyQuality === q && "active-uiverse"
@@ -327,7 +324,7 @@ export default function Mp3Compressor() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Target Bitrate</Label>
-                                                    <Select value={bitrate} onValueChange={v => setBitrate(v as Bitrate)}>
+                                                    <Select value={bitrate} onValueChange={v => setBitrate(v)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
                                                         <SelectContent className="rounded-xl border-2 shadow-2xl">
                                                             {['320', '256', '192', '128', '96', '64', '48'].map(b => <SelectItem key={b} value={b} className="font-bold py-2">{b} kbps</SelectItem>)}
@@ -336,7 +333,7 @@ export default function Mp3Compressor() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Sample Rate</Label>
-                                                    <Select value={sampleRate} onValueChange={v => setSampleRate(v as SampleRate)}>
+                                                    <Select value={sampleRate} onValueChange={v => setSampleRate(v)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
                                                         <SelectContent className="rounded-xl border-2 shadow-2xl">
                                                             <SelectItem value="auto" className="font-bold py-2">Auto (Keep Original)</SelectItem>
@@ -433,7 +430,7 @@ export default function Mp3Compressor() {
                                     <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-3 text-left"><Monitor className="size-4 text-primary" /> Audio Studio Player</CardTitle>
                                     <Badge variant="outline" className="bg-white/50 backdrop-blur-md">Local Preview</Badge>
                                 </CardHeader>
-                                <CardContent className="p-8 space-y-10">
+                                <CardContent className="p-8 space-y-10 text-left">
                                     <div className="space-y-6">
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center px-2">
