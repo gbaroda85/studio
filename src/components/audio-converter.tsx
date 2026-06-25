@@ -22,7 +22,8 @@ import {
     Archive,
     Smartphone,
     Monitor,
-    FileAudio
+    FileAudio,
+    FileOutput
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -83,7 +84,10 @@ export default function AudioConverter() {
 
     const handleFiles = (files: FileList | null) => {
         if (!files || files.length === 0) return;
-        const newFiles = Array.from(files).filter(f => f.type.startsWith('audio/') || f.name.toLowerCase().endsWith('.mp3') || f.name.toLowerCase().endsWith('.wav') || f.name.toLowerCase().endsWith('.ogg') || f.name.toLowerCase().endsWith('.m4a'));
+        const newFiles = Array.from(files).filter(f => 
+            f.type.startsWith('audio/') || 
+            ['mp3', 'wav', 'ogg', 'm4a', 'webm'].some(ext => f.name.toLowerCase().endsWith(ext))
+        );
         
         const newItems: AudioItem[] = newFiles.map(file => ({
             id: Math.random().toString(36).substr(2, 9),
@@ -100,7 +104,11 @@ export default function AudioConverter() {
     };
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files);
-    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFiles(e.dataTransfer.files); };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { 
+        e.preventDefault(); 
+        setIsDragOver(false); 
+        handleFiles(e.dataTransfer.files); 
+    };
 
     const audioBufferToWav = (buffer: AudioBuffer) => {
         const numOfChan = buffer.numberOfChannels;
@@ -110,18 +118,30 @@ export default function AudioConverter() {
         let pos = 0;
         const setUint32 = (data: number) => { view.setUint32(pos, data, true); pos += 4; };
         const setUint16 = (data: number) => { view.setUint16(pos, data, true); pos += 2; };
-        setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157); setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan); setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * 2 * numOfChan); setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164); setUint32(length - pos - 4);
-        const channels = [];
-        for (let i = 0; i < buffer.numberOfChannels; i++) channels.push(buffer.getChannelData(i));
-        let offset = 0;
-        while (pos < length) {
-            for (let i = 0; i < numOfChan; i++) {
-                let sample = Math.max(-1, Math.min(1, channels[i][offset]));
+        
+        setUint32(0x46464952); // "RIFF"
+        setUint32(length - 8);
+        setUint32(0x45564157); // "WAVE"
+        setUint32(0x20746d66); // "fmt "
+        setUint32(16);
+        setUint16(1); // PCM
+        setUint16(numOfChan);
+        setUint32(buffer.sampleRate);
+        setUint32(buffer.sampleRate * 2 * numOfChan);
+        setUint16(numOfChan * 2);
+        setUint16(16); // 16-bit
+        setUint32(0x61746164); // "data"
+        setUint32(length - pos - 4);
+
+        for (let i = 0; i < buffer.numberOfChannels; i++) {
+            const channelData = buffer.getChannelData(i);
+            let offset = 44 + (i * 2);
+            for (let j = 0; j < channelData.length; j++) {
+                let sample = Math.max(-1, Math.min(1, channelData[j]));
                 sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
-                view.setInt16(pos, sample, true);
-                pos += 2;
+                view.setInt16(offset, sample, true);
+                offset += numOfChan * 2;
             }
-            offset++;
         }
         return new Blob([outBuffer], { type: "audio/wav" });
     };
@@ -145,6 +165,8 @@ export default function AudioConverter() {
         } catch (e) {
             console.error(e);
             return { ...item, isProcessing: false };
+        } finally {
+            await audioCtx.close();
         }
     };
 
@@ -153,15 +175,17 @@ export default function AudioConverter() {
         setIsConvertingAll(true);
         setProgress(0);
         
-        const updatedItems = [...items];
-        for (let i = 0; i < updatedItems.length; i++) {
-            const item = updatedItems[i];
-            if (item.resultUrl) continue;
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.resultUrl) {
+                setProgress(Math.round(((i + 1) / items.length) * 100));
+                continue;
+            }
 
             setItems(prev => prev.map(p => p.id === item.id ? { ...p, isProcessing: true } : p));
             const result = await convertSingle(item);
             setItems(prev => prev.map(p => p.id === item.id ? result : p));
-            setProgress(Math.round(((i + 1) / updatedItems.length) * 100));
+            setProgress(Math.round(((i + 1) / items.length) * 100));
         }
 
         setIsConvertingAll(false);
@@ -179,7 +203,6 @@ export default function AudioConverter() {
                 if (item.resultUrl) {
                     const response = await fetch(item.resultUrl);
                     const blob = await response.blob();
-                    const ext = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
                     zip.file(`Converted-${item.name.split('.')[0]}.${outputFormat}`, blob);
                 }
             }
@@ -188,6 +211,7 @@ export default function AudioConverter() {
             link.href = URL.createObjectURL(content);
             link.download = `GR7-Audio-Bundle-${Date.now()}.zip`;
             link.click();
+            URL.revokeObjectURL(link.href);
         } catch (e) {
             toast({ variant: 'destructive', title: 'Export Failed' });
         } finally {
@@ -206,7 +230,6 @@ export default function AudioConverter() {
     const handleReset = () => {
         items.forEach(i => i.resultUrl && URL.revokeObjectURL(i.resultUrl));
         setItems([]);
-        setResultUrl(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -348,7 +371,7 @@ export default function AudioConverter() {
                                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-4 pt-4 border-t-2 border-dashed">
                                         <div className="flex justify-between items-center px-1">
                                             <span className="text-[10px] font-black uppercase text-primary animate-pulse">Rendering Batch...</span>
-                                            <span className="text-[10px] font-black">{progress}%</span>
+                                            <span className="text-[10px] font-black">{progress} %</span>
                                         </div>
                                         <Progress value={progress} className="h-1.5 shadow-inner" />
                                     </motion.div>
@@ -373,7 +396,7 @@ export default function AudioConverter() {
                                             <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
                                         </div>
                                     </Button>
-                                    <Button variant="outline" onClick={handleReset} className="h-11 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-4 mr-2" /> Start Over</Button>
+                                    <Button variant="outline" onClick={handleReset} className="h-11 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300 shadow-sm"><RefreshCcw className="size-4 mr-2" /> Start Over</Button>
                                 </div>
                             ) : (
                                 <Button 
