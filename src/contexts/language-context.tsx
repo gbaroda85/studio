@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -24,6 +23,7 @@ const translations = {
     image_tools: 'IMAGE TOOLS',
     pdf_tools: 'PDF TOOLS',
     file_tools: 'FILE TOOLS',
+    audio_tools: 'AUDIO TOOLS',
     video_tools: 'VIDEO TOOLS',
     calculator_pro: 'CALCULATORS',
     converter_tools: 'CONVERTERS',
@@ -77,6 +77,8 @@ const translations = {
     add_page_numbers_description: 'Insert professional page numbers into PDFs.',
     instagram_downloader_label: 'INSTAGRAM DOWNLOADER',
     instagram_downloader_description: 'Download Reels and Videos from Instagram privately.',
+    audio_converter_label: 'AUDIO CONVERTER',
+    audio_converter_description: 'Convert between MP3, WAV, OGG and M4A instantly.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extract high-quality audio from video files instantly.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -156,6 +158,7 @@ const translations = {
     image_tools: 'इमेज टूल्स',
     pdf_tools: 'पीडीएफ टूल्स',
     file_tools: 'फ़ाइल टूल्स',
+    audio_tools: 'ऑडियो टूल्स',
     video_tools: 'वीडियो टूल्स',
     calculator_pro: 'कैलकुलेटर प्रो',
     converter_tools: 'कन्वर्टर्स',
@@ -207,6 +210,8 @@ const translations = {
     add_watermark_description: 'PDF में वॉटरमार्क टेक्स्ट जोड़ें।',
     add_page_numbers_label: 'ADD PAGE NUMBERS',
     add_page_numbers_description: 'PDF में पेज नंबर डालें।',
+    audio_converter_label: 'ऑडियो कनवर्टर',
+    audio_converter_description: 'MP3, WAV, OGG और M4A के बीच तुरंत कनवर्ट करें।',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'वीडियो फ़ाइलों से तुरंत ऑडियो निकालें।',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -286,6 +291,7 @@ const translations = {
     image_tools: 'IMAGE TOOLS',
     pdf_tools: 'PDF TOOLS',
     file_tools: 'FILE TOOLS',
+    audio_tools: 'AUDIO TOOLS',
     video_tools: 'VIDEO TOOLS',
     calculator_pro: 'CALCULATORS',
     converter_tools: 'CONVERTERS',
@@ -337,8 +343,8 @@ const translations = {
     add_watermark_description: 'Añade texto al PDF.',
     add_page_numbers_label: 'ADD PAGE NUMBERS',
     add_page_numbers_description: 'Inserta números en PDF.',
-    instagram_downloader_label: 'INSTAGRAM DOWNLOADER',
-    instagram_downloader_description: 'Download Reels and Videos from Instagram privately.',
+    audio_converter_label: 'Convertidor de audio',
+    audio_converter_description: 'Convierte entre MP3, WAV, OGG y M4A al instante.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extrae audio de alta calidad de videos.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',

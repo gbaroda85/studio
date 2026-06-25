@@ -324,6 +324,14 @@ function ToolsPageContent() {
       color: 'bg-indigo-600',
       lightBg: 'bg-[#eff6ff]'
     },
+    {
+      href: '/audio-converter',
+      labelKey: 'audio_converter_label',
+      descriptionKey: 'audio_converter_description',
+      icon: FileOutput,
+      color: 'bg-blue-600',
+      lightBg: 'bg-blue-50'
+    },
   ];
 
   const videoFeatures = [
@@ -708,7 +716,7 @@ function ToolsPageContent() {
                                 {t(categoryKey)}
                             </h2>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10">
                             {features.map((feature) => (
                                 <FeatureCard
                                     key={feature.href}

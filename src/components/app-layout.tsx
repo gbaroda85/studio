@@ -181,6 +181,7 @@ const CATEGORIES = [
     color: "text-indigo-600",
     tools: [
       { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Volume2 },
+      { href: '/audio-converter', label: 'audio_converter_label', icon: FileOutput },
     ]
   },
   {

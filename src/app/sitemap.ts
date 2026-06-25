@@ -1,4 +1,3 @@
-
 import { MetadataRoute } from 'next'
 
 /**
@@ -49,6 +48,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/ai-upscaler',
     // Audio Tools
     '/mp3-cutter',
+    '/audio-converter',
     // Calculators
     '/salary-slip',
     '/gst-invoice',

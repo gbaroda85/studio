@@ -98,6 +98,7 @@ const ALL_TOOLS = [
 
   // AUDIO & VIDEO
   { icon: Volume2, title: "MP3 CUTTER", description: "Trim, cut and enhance audio files precisely.", href: "/mp3-cutter", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "audio" },
+  { icon: FileOutput, title: "AUDIO CONVERTER", description: "Convert between MP3, WAV, OGG and M4A instantly.", href: "/audio-converter", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "audio" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "video" },
 
   // FINANCE CENTER
@@ -267,16 +268,13 @@ export default function Page() {
       <section className="relative w-full max-w-[2000px] pt-4 pb-10 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-[#001D39] border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] transition-colors duration-500">
         {/* PREMIUM MODERN SAAS BACKGROUND BLOBS */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none transform-gpu">
-          <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] dark:bg-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" />
-          <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] dark:bg-accent/10 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-[10%] left-[20%] size-[450px] bg-[#EDE7FF] dark:bg-indigo-500/10 rounded-full blur-[100px] opacity-40 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '2s' }} />
-          <div className="absolute bottom-[5%] right-[15%] size-[400px] bg-[#DFF4FF] dark:bg-sky-500/10 rounded-full blur-[110px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '1.5s' }} />
+          <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] dark:bg-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] dark:bg-accent/10 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="w-full px-5 md:px-12 relative z-10 transform-gpu">
           <div className="max-w-[1400px] mx-auto flex flex-col items-center justify-center transform-gpu">
             
-            {/* CONTENT BLOCK - Perfectly Centered */}
             <div className="flex-1 text-center space-y-4 max-w-4xl mx-auto flex flex-col items-center transform-gpu">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up transform-gpu">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
@@ -284,7 +282,7 @@ export default function Page() {
                 
                 <h1 className="text-3xl md:text-5xl lg:text-6xl font-black mb-1 tracking-tighter leading-[1.1] md:leading-[0.95] animate-fade-in-up font-jakarta text-slate-900 dark:text-white text-center transform-gpu">
                     Professional Tools for <br className="hidden md:block" />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">Images & PDFs</span>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">Images, PDFs & Audio</span>
                 </h1>
                 
                 <div className="space-y-1 mb-4 animate-fade-in-up px-4 text-center transform-gpu">
@@ -334,7 +332,7 @@ export default function Page() {
                     <div className="relative transform-gpu">
                     <Input
                         type="text"
-                        placeholder="Search tools... (e.g. 'scan', 'barcode')"
+                        placeholder="Search tools... (e.g. 'scan', 'barcode', 'audio')"
                         className="w-full pl-12 md:pl-14 pr-6 h-12 md:h-16 text-sm md:text-lg rounded-full bg-background/90 dark:bg-slate-900/90 border-2 border-white/5 shadow-2xl focus-visible:ring-4 focus-visible:ring-primary/20 font-bold font-jakarta backdrop-blur-sm tracking-tight text-left transform-gpu"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -393,7 +391,6 @@ export default function Page() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10 transform-gpu">
                         {ALL_TOOLS.filter(t => t.category === 'pdf-kit').slice(0, 9).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
-
                 </div>
 
                 {/* FINANCE CENTER */}
@@ -414,21 +411,14 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHY USERS LOVE GR7 - PREMIUM INFOGRAPHIC THEME */}
+      {/* WHY USERS LOVE GR7 */}
       {!isSearching && (
         <section className="relative w-full no-print overflow-hidden bg-transparent pb-32 transform-gpu">
-          {/* Top Background Area (Purple Gradient) */}
           <div className="absolute top-0 left-0 w-full h-[600px] z-0 overflow-hidden transform-gpu">
              <div className="absolute inset-0 bg-gradient-to-br from-[#2d0b3a] via-[#1a1a1a] to-[#2d0b3a] transform-gpu" />
              <div className="absolute inset-0 opacity-20 mix-blend-overlay transform-gpu">
                 <Image src={placeholderData.hero_bg.url} alt="bg" fill className="object-cover" />
              </div>
-             
-             {/* Floating Decorative Shapes (Blurred Rectangles from image) */}
-             <div className="absolute top-40 -left-20 w-80 h-16 bg-pink-500/20 blur-2xl rounded-full rotate-12 animate-pulse transform-gpu" />
-             <div className="absolute bottom-20 -right-20 w-96 h-20 bg-primary/20 blur-3xl rounded-full -rotate-12 animate-pulse transform-gpu" style={{ animationDelay: '2s' }} />
-             <div className="absolute top-1/4 right-[10%] w-40 h-8 border-4 border-white/10 rounded-full blur-sm transform-gpu" />
-             <div className="absolute bottom-1/3 left-[5%] w-60 h-10 border-4 border-primary/10 rounded-full blur-sm transform-gpu" />
           </div>
 
           <div className="max-w-7xl mx-auto px-6 pt-24 md:pt-32 relative z-10 transform-gpu">
@@ -442,17 +432,12 @@ export default function Page() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14 relative transform-gpu">
                 
-                {/* NODE 01: VALUES (100% PRIVATE) */}
                 <div className="relative group pt-10 transform-gpu">
-                    {/* Background Number Watermark */}
                     <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4 transform-gpu">01</span>
-                    
                     <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
-                        {/* Top Decorative Tab */}
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#1e3a8a] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20 transform-gpu">
                             <span className="font-black text-[10px] uppercase tracking-widest">VALUES</span>
                         </div>
-
                         <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16 transform-gpu">
                             <div className="space-y-6 flex-1 transform-gpu">
                                 <div className="space-y-1 transform-gpu">
@@ -463,23 +448,18 @@ export default function Page() {
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Your data never leaves your device. All processing happens locally in your browser RAM.</p>
                             </div>
                         </div>
-
-                        {/* Overlapping Bottom Icon */}
                         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
                             <ShieldCheck className="size-8 md:size-10 text-sky-500" />
                         </div>
                     </div>
                 </div>
 
-                {/* NODE 02: VISION (NATIVE SPEED) */}
                 <div className="relative group pt-10 transform-gpu">
                     <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4 transform-gpu">02</span>
-                    
                     <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0ea5e9] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20 transform-gpu">
                             <span className="font-black text-[10px] uppercase tracking-widest">VISION</span>
                         </div>
-
                         <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16 transform-gpu">
                             <div className="space-y-6 flex-1 transform-gpu">
                                 <div className="space-y-1 transform-gpu">
@@ -490,22 +470,18 @@ export default function Page() {
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Using WebAssembly technology for hardware-level performance without any server-side lag.</p>
                             </div>
                         </div>
-
                         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
                             <Zap className="size-8 md:size-10 text-yellow-500" />
                         </div>
                     </div>
                 </div>
 
-                {/* NODE 03: MISSION (HD QUALITY) */}
                 <div className="relative group pt-10 transform-gpu">
                     <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4 transform-gpu">03</span>
-                    
                     <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#10b981] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20 transform-gpu">
                             <span className="font-black text-[10px] uppercase tracking-widest">MISSION</span>
                         </div>
-
                         <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16 transform-gpu">
                             <div className="space-y-6 flex-1 transform-gpu">
                                 <div className="space-y-1 transform-gpu">
@@ -516,7 +492,6 @@ export default function Page() {
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.</p>
                             </div>
                         </div>
-
                         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
                             <Target className="size-8 md:size-10 text-emerald-500" />
                         </div>
