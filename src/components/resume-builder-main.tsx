@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
@@ -649,7 +648,7 @@ export default function ResumeBuilderMain() {
                                     <span className="text-[10px] font-black w-8 text-center">{zoom}%</span>
                                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setZoom(z => Math.min(200, z + 10))}><ZoomIn className="size-3.5"/></Button>
                                 </div>
-                                <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">A4 FORMAT</Badge>
+                                <Badge variant="secondary" className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">A4 FORMAT</Badge>
                             </div>
                         </CardHeader>
 

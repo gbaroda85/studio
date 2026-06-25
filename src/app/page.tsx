@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -494,7 +493,7 @@ export default function Page() {
                 </div>
             </div>
           </div>
-        </div>
+        </section>
       )}
 
       <div className="w-full mt-12 pt-12 border-t border-border/50 text-center pb-20">
