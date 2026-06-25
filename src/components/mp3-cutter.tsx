@@ -280,7 +280,8 @@ export default function Mp3Cutter() {
         if (region) {
             const start = type === 'start' ? Math.max(0, Math.min(region.end - 0.1, time)) : region.start;
             const end = type === 'end' ? Math.max(region.start + 0.1, Math.min(duration, time)) : region.end;
-            region.update({ start, end });
+            // FIX: WaveSurfer v7 uses setOptions instead of update
+            region.setOptions({ start, end });
         }
     };
 
