@@ -356,14 +356,6 @@ function ToolsPageContent() {
       icon: Music,
       color: 'bg-indigo-500',
       lightBg: 'bg-[#eff6ff]'
-    },
-    {
-        href: '/compress-video',
-        labelKey: 'video_compressor_label',
-        descriptionKey: 'video_compressor_description',
-        icon: Video,
-        color: 'bg-primary',
-        lightBg: 'bg-primary/5'
     }
   ];
 
