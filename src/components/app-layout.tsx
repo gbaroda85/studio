@@ -406,8 +406,8 @@ function AppHeader() {
             <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
 
             <div className="flex items-center gap-1 md:gap-2">
-                <a href="mailto:grs.business29@gmail.com" className="support-uiverse px-2 md:px-4 touch-manipulation h-10">
-                    <span className="uiverse-tooltip hidden md:block">grs.business29@gmail.com</span>
+                <a href="mailto:gr7imagepdf@gmail.com" className="support-uiverse px-2 md:px-4 touch-manipulation h-10">
+                    <span className="uiverse-tooltip hidden md:block">gr7imagepdf@gmail.com</span>
                     <Mail className="size-4 md:mr-2" />
                     <span className="hidden md:inline text-xs font-black">Support</span>
                 </a>
@@ -458,7 +458,7 @@ export function AppFooter() {
                 <div>
                     <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Connect</h4>
                     <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
-                        <li><a href="mailto:grs.business29@gmail.com" className="hover:text-primary transition-colors">Email Support</a></li>
+                        <li><a href="mailto:gr7imagepdf@gmail.com" className="hover:text-primary transition-colors">Email Support</a></li>
                         <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
                     </ul>
                 </div>

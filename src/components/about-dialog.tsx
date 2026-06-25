@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -41,10 +40,12 @@ export function AboutDialog() {
         </div>
         <DialogFooter>
           <Button asChild className="w-full">
-            <a href="mailto:grs.business29@gmail.com">
+            <a href="mailto:gr7imagepdf@gmail.com">
               <Send className="mr-2" /> {t('send_feedback')}
             </a>
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
