@@ -74,7 +74,10 @@ import {
   MousePointer2,
   ChevronRight,
   Volume2,
-  Banknote as BanknoteIcon
+  Banknote as BanknoteIcon,
+  Sparkles,
+  Zap,
+  ShieldCheck
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
