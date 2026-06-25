@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -79,6 +80,8 @@ const translations = {
     instagram_downloader_description: 'Download Reels and Videos from Instagram privately.',
     audio_converter_label: 'AUDIO CONVERTER',
     audio_converter_description: 'Convert between MP3, WAV, OGG and M4A instantly.',
+    audio_merger_label: 'AUDIO MERGER',
+    audio_merger_description: 'Combine multiple audio tracks into a single file.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extract high-quality audio from video files instantly.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -100,7 +103,7 @@ const translations = {
     gst_calculator_label: 'GST CALCULATOR',
     gst_calculator_description: 'Calculate GST Addition or Removal instantly.',
     gst_invoice_label: 'GST INVOICE GENERATOR',
-    gst_invoice_description: 'Generate professional GST compliant invoices instantly.',
+    gst_invoice_description: 'Generate professional GST इनवॉइस तुरंत बनाएं।',
     salary_slip_label: 'SALARY SLIP GENERATOR',
     salary_slip_description: 'Create professional A4 pay slips for employees instantly.',
     sip_calculator_label: 'SIP CALCULATOR',
@@ -212,6 +215,8 @@ const translations = {
     add_page_numbers_description: 'PDF में पेज नंबर डालें।',
     audio_converter_label: 'ऑडियो कनवर्टर',
     audio_converter_description: 'MP3, WAV, OGG और M4A के बीच तुरंत कनवर्ट करें।',
+    audio_merger_label: 'ऑडियो मर्जर',
+    audio_merger_description: 'कई ऑडियो ट्रैक्स को एक साथ जोड़ें।',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'वीडियो फ़ाइलों से तुरंत ऑडियो निकालें।',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -345,6 +350,8 @@ const translations = {
     add_page_numbers_description: 'Inserta números en PDF.',
     audio_converter_label: 'Convertidor de audio',
     audio_converter_description: 'Convierte entre MP3, WAV, OGG y M4A al instante.',
+    audio_merger_label: 'Fusión de audio',
+    audio_merger_description: 'Combine varias pistas de audio en un solo archivo.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extrae audio de alta calidad de videos.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
