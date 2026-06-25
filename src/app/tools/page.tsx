@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -70,7 +71,8 @@ import {
   ShieldCheck,
   LayoutGrid,
   Menu,
-  ChevronRight
+  ChevronRight,
+  PenTool
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -498,7 +500,7 @@ function ToolsPageContent() {
       href: '/mortgage-calculator',
       labelKey: 'mortgage_calculator_label',
       descriptionKey: 'mortgage_calculator_description',
-      icon: HomeIcon,
+      icon: Home,
       color: 'bg-primary',
       lightBg: 'bg-[#f0f9ff]'
     },

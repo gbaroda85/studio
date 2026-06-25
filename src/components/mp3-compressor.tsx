@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -33,9 +34,6 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
-
-// Dynamic reference for lamejs
-let lamejsModule: any = null;
 
 type CompressionMode = 'easy' | 'advanced';
 type QualityLevel = 'low' | 'medium' | 'high';
@@ -98,25 +96,6 @@ export default function Mp3Compressor() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const originalAudioRef = useRef<HTMLAudioElement>(null);
     const compressedAudioRef = useRef<HTMLAudioElement>(null);
-
-    // CRITICAL: Robust initialization of LameJS with Global Shim
-    useEffect(() => {
-        if (typeof window !== 'undefined' && !lamejsModule) {
-            import('lamejs').then(module => {
-                lamejsModule = module;
-                // ULTIMATE SHIM: Attach EVERY internal class to window to fix 'NOT_SET' and 'MPEGMode' errors
-                const w = window as any;
-                w.MPEGMode = module.MPEGMode;
-                w.Lame = module.Lame;
-                w.BitStream = module.BitStream;
-                w.VbrMode = module.VbrMode;
-                w.Presets = module.Presets;
-                w.GainAnalysis = module.GainAnalysis;
-                w.QuantizePVT = module.QuantizePVT;
-                console.log("[LameJS] Global shim applied successfully.");
-            }).catch(e => console.error("LameJS load error:", e));
-        }
-    }, []);
 
     const estimation = useMemo(() => {
         if (!audioInfo) return null;
@@ -181,16 +160,32 @@ export default function Mp3Compressor() {
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
     const handleCompress = async () => {
-        if (!file || !audioInfo || !lamejsModule) {
-            toast({ variant: 'destructive', title: "Engine Error", description: "Compression engine is still initializing. Please wait." });
-            return;
-        }
+        if (!file || !audioInfo) return;
         
         setIsProcessing(true);
         setProgress(0);
-        setStatusText("Initializing Local Workspace...");
+        setStatusText("Initializing Local Engine...");
 
         try {
+            // STEP 1: DYNAMIC IMPORT LAMEJS
+            const lamejs = await import('lamejs');
+            const w = window as any;
+
+            // STEP 2: APPLY ULTIMATE GLOBAL SHIMS
+            // Many versions of lamejs expect these internal classes to be available globally
+            w.MPEGMode = lamejs.MPEGMode;
+            w.Lame = lamejs.Lame;
+            w.BitStream = lamejs.BitStream;
+            w.VbrMode = lamejs.VbrMode;
+            w.Presets = lamejs.Presets;
+            w.GainAnalysis = lamejs.GainAnalysis;
+            w.QuantizePVT = lamejs.QuantizePVT;
+            w.ShortBlock = lamejs.ShortBlock;
+            w.Takehiro = lamejs.Takehiro;
+            w.Reverb = lamejs.Reverb;
+            w.IFFT = lamejs.IFFT;
+            w.PsyModel = lamejs.PsyModel;
+
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const arrayBuffer = await file.arrayBuffer();
             setStatusText("Decoding Audio Stream...");
@@ -200,9 +195,8 @@ export default function Mp3Compressor() {
             const targetSampleRate = sampleRate === 'auto' ? audioBuffer.sampleRate : parseInt(sampleRate);
             const channels = audioBuffer.numberOfChannels;
 
-            // Use window reference to ensure all shimmed properties are picked up by constructor
-            const w = window as any;
-            const mp3encoder = new w.lamejs.Mp3Encoder(channels, targetSampleRate, targetBitrate);
+            // STEP 3: INSTANTIATE WITH SCOPE
+            const mp3encoder = new lamejs.Mp3Encoder(channels, targetSampleRate, targetBitrate);
             
             const mp3Data: any[] = [];
             const sampleSize = 1152; 
@@ -250,8 +244,8 @@ export default function Mp3Compressor() {
             toast({ title: "Compression Success!" });
             await audioCtx.close();
         } catch (error: any) {
-            console.error("Compression Error:", error);
-            toast({ variant: 'destructive', title: "Process Failed", description: "Browser memory limit reached or format error." });
+            console.error("Compression Final Error:", error);
+            toast({ variant: 'destructive', title: "Process Failed", description: "Engine conflict in browser memory. Please refresh." });
         } finally {
             setIsProcessing(false);
         }
