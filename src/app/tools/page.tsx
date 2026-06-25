@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -330,15 +331,23 @@ function ToolsPageContent() {
       descriptionKey: 'audio_merger_description',
       icon: Merge,
       color: 'bg-indigo-600',
-      lightBg: 'bg-[#eff6ff]'
+      lightBg: 'bg-indigo-50'
+    },
+    {
+      href: '/compress-mp3',
+      labelKey: 'compress_mp3_label',
+      descriptionKey: 'compress_mp3_description',
+      icon: FileArchive,
+      color: 'bg-violet-600',
+      lightBg: 'bg-violet-50'
     },
     {
       href: '/mp3-cutter',
       labelKey: 'mp3_cutter_label',
       descriptionKey: 'mp3_cutter_description',
-      icon: Volume2,
-      color: 'bg-indigo-600',
-      lightBg: 'bg-[#eff6ff]'
+      icon: Scissors,
+      color: 'bg-rose-600',
+      lightBg: 'bg-rose-50'
     },
     {
       href: '/audio-converter',

@@ -98,9 +98,9 @@ const ALL_TOOLS = [
   { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-gradient-to-br from-cyan-500 to-cyan-700", lightBg: "bg-cyan-50", category: "pdf-kit" },
 
   // AUDIO & VIDEO
-  { icon: Merge, title: "AUDIO MERGER", description: "Combine multiple audio tracks into a single file.", href: "/merge-audio", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "audio" },
-  { icon: FileArchive, title: "MP3 COMPRESSOR", description: "Reduce MP3 and audio file size while maintaining HD quality.", href: "/compress-mp3", colorClass: "bg-indigo-500", lightBg: "bg-indigo-50", category: "audio" },
-  { icon: Volume2, title: "MP3 CUTTER", description: "Trim, cut and enhance audio files precisely.", href: "/mp3-cutter", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "audio" },
+  { icon: Merge, title: "AUDIO MERGER", description: "Combine multiple audio tracks into a single file.", href: "/merge-audio", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "audio" },
+  { icon: FileArchive, title: "MP3 COMPRESSOR", description: "Reduce MP3 and audio file size while maintaining HD quality.", href: "/compress-mp3", colorClass: "bg-violet-600", lightBg: "bg-violet-50", category: "audio" },
+  { icon: Scissors, title: "MP3 CUTTER", description: "Trim, cut and enhance audio files precisely.", href: "/mp3-cutter", colorClass: "bg-rose-600", lightBg: "bg-rose-50", category: "audio" },
   { icon: FileOutput, title: "AUDIO CONVERTER", description: "Convert between MP3, WAV, OGG and M4A instantly.", href: "/audio-converter", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "audio" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "video" },
 

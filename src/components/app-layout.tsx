@@ -138,7 +138,7 @@ const CATEGORIES = [
     tools: [
       { href: '/merge-audio', label: 'audio_merger_label', icon: Merge },
       { href: '/compress-mp3', label: 'compress_mp3_label', icon: FileArchive },
-      { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Volume2 },
+      { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Scissors },
       { href: '/audio-converter', label: 'audio_converter_label', icon: FileOutput },
     ]
   },
