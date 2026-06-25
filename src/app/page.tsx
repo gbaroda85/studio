@@ -277,7 +277,7 @@ export default function Page() {
         <div className="w-full px-6 md:px-16 relative z-10 transform-gpu">
           <div className="max-w-[1400px] mx-auto flex flex-col items-center justify-center transform-gpu">
             <div className="flex-1 text-center space-y-4 max-w-4xl mx-auto flex flex-col items-center transform-gpu">
-                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up transform-gpu">
+                <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/10 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up transform-gpu">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
                 </div>
                 
@@ -351,7 +351,7 @@ export default function Page() {
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 transform-gpu">
                 <div className="flex items-center gap-3 text-primary font-black text-[10px] md:text-xs uppercase tracking-widest mb-10 md:mb-12 font-body transform-gpu">
-                  <div className="w-12 md:w-16 h-1.5 md:h-2 bg-primary rounded-full" /> Search Results ({filteredTools.length})
+                  <div className="w-12 md:w-16 h-2.5 bg-primary rounded-full shrink-0" /> Search Results ({filteredTools.length})
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-8 transform-gpu">
                     {filteredTools.map((tool, i) => <ToolCard key={i} {...tool} />)}
@@ -367,7 +367,7 @@ export default function Page() {
             <>
                 <div className="mb-16 md:mb-20 transform-gpu">
                     <div className="flex items-center gap-3 text-primary font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
-                        <div className="w-12 md:w-16 h-1 md:h-2 bg-primary rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">IMAGE ENGINE</span>
+                        <div className="w-12 md:w-16 h-2.5 bg-primary rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">IMAGE ENGINE</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
@@ -380,7 +380,7 @@ export default function Page() {
 
                 <div className="mb-16 md:mb-20 transform-gpu">
                     <div className="flex items-center gap-3 text-rose-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
-                        <div className="w-12 md:w-16 h-1 md:h-2 bg-rose-500 rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">DOCUMENT STUDIO</span>
+                        <div className="w-12 md:w-16 h-2.5 bg-rose-500 rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">DOCUMENT STUDIO</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">PDF Toolkit</h2>
@@ -393,7 +393,7 @@ export default function Page() {
 
                 <div className="mb-24 md:mb-32 transform-gpu">
                     <div className="flex items-center gap-3 text-indigo-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
-                        <div className="w-12 md:w-16 h-1 md:h-2 bg-indigo-500 rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">FINANCE HUB</span>
+                        <div className="w-12 md:w-16 h-2.5 bg-indigo-500 rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">FINANCE HUB</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Calculators</h2>
@@ -465,7 +465,7 @@ export default function Page() {
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Using WebAssembly technology for hardware-level performance without any server-side lag.</p>
                             </div>
                         </div>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-900 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
                             <Zap className="size-8 md:size-10 text-yellow-500" />
                         </div>
                     </div>
@@ -487,15 +487,21 @@ export default function Page() {
                                 <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.</p>
                             </div>
                         </div>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
+                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-900 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
                             <Target className="size-8 md:size-10 text-emerald-500" />
                         </div>
                     </div>
                 </div>
             </div>
           </div>
-        </section>
+        </div>
       )}
+
+      <div className="w-full mt-12 pt-12 border-t border-border/50 text-center pb-20">
+          <p className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] md:tracking-[0.3em]">
+              © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB Studio
+          </p>
+      </div>
     </div>
   );
 }

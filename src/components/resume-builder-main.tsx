@@ -43,7 +43,8 @@ import {
     Menu,
     Clock,
     User2,
-    CheckCircle
+    CheckCircle,
+    LayoutGrid
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -205,7 +206,6 @@ export default function ResumeBuilderMain() {
     const [isExporting, setIsExporting] = useState(false);
     const [zoom, setZoom] = useState(100);
     const [isHydrated, setIsHydrated] = useState(false);
-    const [history, setHistory] = useState<ResumeData[]>([]);
     
     const previewRef = useRef<HTMLDivElement>(null);
     const photoInputRef = useRef<HTMLInputElement>(null);
@@ -663,7 +663,13 @@ export default function ResumeBuilderMain() {
                                 </div>
                                 <ScrollArea className="w-full max-w-[400px]">
                                     <div className="flex gap-2 pb-2">
-                                        {TEMPLATES.map(t => (
+                                        {[
+                                            { id: 'modern-corporate', name: 'Modern Corporate' },
+                                            { id: 'ats-professional', name: 'ATS Professional' },
+                                            { id: 'executive-minimal', name: 'Executive Minimal' },
+                                            { id: 'fresher-standard', name: 'Fresher Standard' },
+                                            { id: 'tech-developer', name: 'Tech Developer' },
+                                        ].map(t => (
                                             <button 
                                                 key={t.id} 
                                                 onClick={() => setSelectedTemplate(t.id)}
@@ -712,7 +718,7 @@ export default function ResumeBuilderMain() {
                                 <Button 
                                     size="lg" 
                                     variant="outline"
-                                    className="h-14 md:h-16 px-8 border-2 font-black text-[10px] uppercase rounded-2xl hover:bg-muted transition-all"
+                                    className="h-14 md:h-16 px-8 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-muted transition-all"
                                     onClick={() => executeExport('image')}
                                     disabled={isExporting}
                                 >
@@ -721,7 +727,7 @@ export default function ResumeBuilderMain() {
                                 
                                 <Button 
                                     size="lg" 
-                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-2xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none active:scale-95 flex-[2] min-w-[220px]" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none active:scale-95 flex-[2] min-w-[220px]" 
                                     onClick={() => executeExport('pdf')}
                                     disabled={isExporting}
                                 >
