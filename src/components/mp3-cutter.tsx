@@ -51,7 +51,17 @@ interface RegionData {
     id: string;
     start: number;
     end: number;
+    color: string;
 }
+
+const SEGMENT_COLORS = [
+    '#f97316', // Orange
+    '#8b5cf6', // Purple
+    '#10b981', // Emerald
+    '#3b82f6', // Blue
+    '#f43f5e', // Rose
+    '#eab308', // Yellow
+];
 
 function formatTime(seconds: number): string {
     const mins = Math.floor(seconds / 60);
@@ -139,15 +149,26 @@ export default function Mp3Cutter() {
             
             // Initial selection
             const initialEnd = Math.min(d, 30);
+            const mainColor = SEGMENT_COLORS[0];
             const r = regions.addRegion({
                 id: 'region-1',
                 start: 0,
                 end: initialEnd,
-                color: 'rgba(255, 201, 40, 0.1)',
+                color: `${mainColor}22`,
                 drag: true,
                 resize: true,
             });
-            setRegionsList([{ id: r.id, start: r.start, end: r.end }]);
+            
+            // Custom styling for handles and borders
+            const el = r.element;
+            el.style.borderTop = `4px solid ${mainColor}`;
+            el.style.borderBottom = `4px solid ${mainColor}`;
+            const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
+            const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
+            if (leftHandle) leftHandle.style.backgroundColor = mainColor;
+            if (rightHandle) rightHandle.style.backgroundColor = mainColor;
+
+            setRegionsList([{ id: r.id, start: r.start, end: r.end, color: mainColor }]);
             setActiveRegionId(r.id);
         });
 
@@ -241,15 +262,27 @@ export default function Mp3Cutter() {
         const start = Math.min(currentTime, d - 5);
         const end = Math.min(start + 10, d);
         
+        const nextColor = SEGMENT_COLORS[regionsList.length % SEGMENT_COLORS.length];
+        
         const r = regionsPluginRef.current.addRegion({
             id: `region-${Math.random().toString(36).substr(2, 5)}`,
             start,
             end,
-            color: 'rgba(255, 201, 40, 0.1)',
+            color: `${nextColor}22`,
             drag: true,
             resize: true,
         });
-        setRegionsList(prev => [...prev, { id: r.id, start: r.start, end: r.end }]);
+
+        // Apply color styling to handles and borders
+        const el = r.element;
+        el.style.borderTop = `4px solid ${nextColor}`;
+        el.style.borderBottom = `4px solid ${nextColor}`;
+        const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
+        const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
+        if (leftHandle) leftHandle.style.backgroundColor = nextColor;
+        if (rightHandle) rightHandle.style.backgroundColor = nextColor;
+
+        setRegionsList(prev => [...prev, { id: r.id, start: r.start, end: r.end, color: nextColor }]);
         setActiveRegionId(r.id);
         wavesurferRef.current.setTime(start);
         toast({ title: "New Segment Added" });
@@ -435,15 +468,11 @@ export default function Mp3Cutter() {
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col items-center gap-6 pb-20">
             <style jsx global>{`
                 .wavesurfer-region {
-                    border-top: 4px solid #FFC928 !important;
-                    border-bottom: 4px solid #FFC928 !important;
                     z-index: 10 !important;
-                    background-color: rgba(255, 201, 40, 0.15) !important;
                     cursor: move !important;
                 }
                 .wavesurfer-handle {
                     width: 20px !important;
-                    background-color: #FFC928 !important;
                     opacity: 1 !important;
                     z-index: 20 !important;
                     display: flex !important;
@@ -454,7 +483,7 @@ export default function Mp3Cutter() {
                 }
                 .wavesurfer-handle::after {
                     content: "|||" !important;
-                    color: rgba(0,0,0,0.4) !important;
+                    color: rgba(255,255,255,0.6) !important;
                     font-size: 10px !important;
                     font-weight: 900 !important;
                     letter-spacing: -1px !important;
@@ -515,29 +544,31 @@ export default function Mp3Cutter() {
                                 
                                 {activeRegion && (
                                     <div className="mb-6 grid grid-cols-3 gap-4 animate-in slide-in-from-top-2">
-                                        <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
+                                        <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm" style={{ borderColor: activeRegion.color }}>
                                             <p className="text-[8px] font-black uppercase opacity-40 mb-1">Start Point</p>
                                             <Input 
                                                 type="number" 
                                                 step="0.01"
                                                 value={activeRegion.start.toFixed(2)} 
                                                 onChange={(e) => handleManualTimeChange('start', e.target.value)}
-                                                className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                                className="h-8 text-center font-black border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                                style={{ color: activeRegion.color }}
                                             />
                                         </div>
-                                        <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm">
+                                        <div className="bg-white dark:bg-slate-900 border-2 rounded-2xl p-3 text-center shadow-sm" style={{ borderColor: activeRegion.color }}>
                                             <p className="text-[8px] font-black uppercase opacity-40 mb-1">End Point</p>
                                             <Input 
                                                 type="number" 
                                                 step="0.01"
                                                 value={activeRegion.end.toFixed(2)} 
                                                 onChange={(e) => handleManualTimeChange('end', e.target.value)}
-                                                className="h-8 text-center font-black text-primary border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                                className="h-8 text-center font-black border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                                style={{ color: activeRegion.color }}
                                             />
                                         </div>
-                                        <div className="bg-primary/5 border-2 border-primary/20 rounded-2xl p-3 text-center shadow-inner">
-                                            <p className="text-[8px] font-black uppercase text-primary opacity-60 mb-1">Clip Length</p>
-                                            <p className="text-xs md:text-sm font-black text-primary font-mono py-1.5">{formatTime(activeRegion.end - activeRegion.start)}</p>
+                                        <div className="bg-muted/50 border-2 rounded-2xl p-3 text-center shadow-inner" style={{ borderColor: `${activeRegion.color}44` }}>
+                                            <p className="text-[8px] font-black uppercase opacity-60 mb-1" style={{ color: activeRegion.color }}>Clip Length</p>
+                                            <p className="text-xs md:text-sm font-black font-mono py-1.5" style={{ color: activeRegion.color }}>{formatTime(activeRegion.end - activeRegion.start)}</p>
                                         </div>
                                     </div>
                                 )}
@@ -567,8 +598,13 @@ export default function Mp3Cutter() {
                                     <div className="flex gap-3 pb-2">
                                         {regionsList.map((r, i) => (
                                             <div key={r.id} onClick={() => { setActiveRegionId(r.id); playRegion(r); }}
-                                                 className={cn("flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all shrink-0", activeRegionId === r.id ? "bg-primary/10 border-primary shadow-md" : "bg-white border-transparent hover:border-primary/20 shadow-sm")}>
-                                                <Badge variant="secondary" className="bg-primary/20 text-primary">#{i + 1}</Badge>
+                                                 className={cn(
+                                                     "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all shrink-0", 
+                                                     activeRegionId === r.id ? "bg-white ring-2 shadow-md" : "bg-white border-transparent hover:border-muted-foreground/20 shadow-sm"
+                                                 )}
+                                                 style={{ borderColor: activeRegionId === r.id ? r.color : 'transparent' }}
+                                            >
+                                                <Badge style={{ backgroundColor: r.color, color: '#fff' }} className="font-black">#{i + 1}</Badge>
                                                 <div className="flex flex-col text-[10px] font-bold">
                                                     <span className="text-slate-500">{formatTime(r.start)} - {formatTime(r.end)}</span>
                                                 </div>
