@@ -4,7 +4,6 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { 
     UploadCloud, 
     Download, 
-    Music, 
     Zap, 
     ShieldCheck, 
     Sparkles, 
@@ -13,18 +12,11 @@ import {
     CheckCircle2,
     Volume2,
     Loader2,
-    Clock,
-    Play,
-    Pause,
     X,
     FileAudio,
     TrendingDown,
     Activity,
-    Info,
-    ChevronRight,
     Monitor,
-    Smartphone,
-    Layers,
     FileOutput,
     Target
 } from "lucide-react";
@@ -132,8 +124,10 @@ export default function Mp3Compressor() {
 
     const handleFile = async (selectedFile: File | null) => {
         if (!selectedFile) return;
-        const validTypes = ['audio/mpeg', 'audio/wav', 'audio/mp3', 'audio/x-m4a', 'audio/ogg', 'audio/flac', 'audio/aac'];
-        if (!validTypes.includes(selectedFile.type) && !selectedFile.name.toLowerCase().endsWith('.m4a')) {
+        const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac', '.webm'];
+        const isAudio = selectedFile.type.startsWith('audio/') || validExtensions.some(ext => selectedFile.name.toLowerCase().endsWith(ext));
+        
+        if (!isAudio) {
             toast({ variant: 'destructive', title: "Invalid Format", description: "Please upload MP3, WAV, M4A or OGG files." });
             return;
         }
@@ -159,6 +153,7 @@ export default function Mp3Compressor() {
                 bitrate: Math.round((selectedFile.size * 8) / (audioBuffer.duration * 1000))
             });
         } catch (e) {
+            console.error(e);
             toast({ variant: 'destructive', title: "Metadata Error", description: "Failed to analyze audio stream." });
         } finally {
             await audioCtx.close();
@@ -168,6 +163,10 @@ export default function Mp3Compressor() {
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
+    /**
+     * CHUNKED ENCODING ENGINE
+     * Optimized to handle memory limits by processing samples in small segments.
+     */
     const handleCompress = async () => {
         if (!file || !audioInfo) return;
         setIsProcessing(true);
@@ -186,28 +185,45 @@ export default function Mp3Compressor() {
             const mp3encoder = new lamejs.Mp3Encoder(audioBuffer.numberOfChannels, targetSampleRate, targetBitrate);
             const mp3Data: any[] = [];
 
-            const sampleSize = 1152;
-            const channels = [];
-            for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
-                const float32Data = audioBuffer.getChannelData(i);
-                const int16Data = new Int16Array(float32Data.length);
-                for (let j = 0; j < float32Data.length; j++) {
-                    int16Data[j] = Math.max(-32768, Math.min(32767, float32Data[j] * 32768));
-                }
-                channels.push(int16Data);
-            }
+            const sampleSize = 1152; // LAME standard chunk size
+            const numChannels = audioBuffer.numberOfChannels;
+            const leftChannelFloat = audioBuffer.getChannelData(0);
+            const rightChannelFloat = numChannels > 1 ? audioBuffer.getChannelData(1) : leftChannelFloat;
 
             setStatusText("Encoding HD Bitstream...");
-            for (let i = 0; i < channels[0].length; i += sampleSize) {
-                let left = channels[0].subarray(i, i + sampleSize);
-                let right = channels[1] ? channels[1].subarray(i, i + sampleSize) : left;
-                const mp3buf = mp3encoder.encodeBuffer(left, right);
-                if (mp3buf.length > 0) mp3Data.push(new Int8Array(mp3buf));
-                setProgress(Math.round((i / channels[0].length) * 100));
+            
+            // Loop through the buffer in chunks to prevent memory spikes
+            for (let i = 0; i < audioBuffer.length; i += sampleSize) {
+                const chunkEnd = Math.min(i + sampleSize, audioBuffer.length);
+                const chunkSize = chunkEnd - i;
+                
+                const leftChunk = new Int16Array(chunkSize);
+                const rightChunk = numChannels > 1 ? new Int16Array(chunkSize) : null;
+
+                for (let j = 0; j < chunkSize; j++) {
+                    // Convert Float32 (-1 to 1) to Int16 (-32768 to 32767)
+                    leftChunk[j] = Math.max(-32768, Math.min(32767, leftChannelFloat[i + j] * 32768));
+                    if (rightChunk) {
+                        rightChunk[j] = Math.max(-32768, Math.min(32767, rightChannelFloat[i + j] * 32768));
+                    }
+                }
+
+                const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk || leftChunk);
+                if (mp3buf.length > 0) {
+                    mp3Data.push(new Int8Array(mp3buf));
+                }
+
+                if (i % (sampleSize * 10) === 0) { // Update progress every few chunks
+                    setProgress(Math.round((i / audioBuffer.length) * 100));
+                    // Allow UI to breathe
+                    await new Promise(r => requestAnimationFrame(r));
+                }
             }
 
             const end = mp3encoder.flush();
-            if (end.length > 0) mp3Data.push(new Int8Array(end));
+            if (end.length > 0) {
+                mp3Data.push(new Int8Array(end));
+            }
 
             const blob = new Blob(mp3Data, { type: 'audio/mp3' });
             setCompressedUrl(URL.createObjectURL(blob));
@@ -216,7 +232,8 @@ export default function Mp3Compressor() {
             toast({ title: "Compression Success!" });
             await audioCtx.close();
         } catch (error) {
-            toast({ variant: 'destructive', title: "Process Failed", description: "Browser memory limit reached." });
+            console.error("Compression Error:", error);
+            toast({ variant: 'destructive', title: "Process Failed", description: "Browser was unable to allocate enough memory for this file length." });
         } finally {
             setIsProcessing(false);
         }
@@ -259,7 +276,7 @@ export default function Mp3Compressor() {
                                         <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">High-Fidelity Audio Logic</CardDescription>
                                     </div>
                                 </div>
-                                {file && <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 text-destructive hover:bg-destructive/5"><X className="size-5" /></Button>}
+                                {file && <Button variant="ghost" size="icon" onClick={handleReset} className="size-8 w-8 text-destructive hover:bg-destructive/5"><X className="size-5" /></Button>}
                             </div>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-8">
@@ -417,11 +434,11 @@ export default function Mp3Compressor() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
                                             <div className="flex items-center justify-between"><Zap className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-primary" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
-                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Source Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-primary")}>{audioInfo?.bitrate || '---'} kbps</p></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Source Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-primary")}>{audioInfo?.bitrate || 0} kbps</p></div>
                                         </div>
                                         <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
                                             <div className="flex items-center justify-between"><Target className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-emerald-500" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
-                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Target Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-emerald-500")}>{estimation?.bitrate || '---'} kbps</p></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Target Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-emerald-500")}>{estimation?.bitrate || 0} kbps</p></div>
                                         </div>
                                     </div>
 
