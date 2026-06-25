@@ -98,7 +98,6 @@ export default function Mp3Cutter() {
     
     const [fadeIn, setFadeIn] = useState(0);
     const [fadeOut, setFadeOut] = useState(0);
-    const [normalize, setNormalize] = useState(false);
     const [resultUrl, setResultUrl] = useState<string | null>(null);
 
     const wavesurferRef = useRef<WaveSurfer | null>(null);
@@ -155,13 +154,12 @@ export default function Mp3Cutter() {
         ws.on('audioprocess', (time) => {
             setCurrentTime(time);
             
-            // Auto-stop at end of active region
             const currentActiveId = stateRef.current.activeRegionId;
             if (currentActiveId) {
                 const active = stateRef.current.regionsList.find(r => r.id === currentActiveId);
                 if (active && time >= active.end) {
                     ws.pause();
-                    ws.setTime(active.start); // Seek back to start for next play
+                    ws.setTime(active.start); 
                 }
             }
         });
@@ -172,13 +170,11 @@ export default function Mp3Cutter() {
 
         regions.on('region-updated', (region: any) => {
             setRegionsList(prev => prev.map(r => r.id === region.id ? { ...r, start: region.start, end: region.end } : r));
-            // SYNC FIX: Jump cursor to start when handles are moved
             ws.setTime(region.start);
         });
 
         regions.on('region-clicked', (region: any) => {
             setActiveRegionId(region.id);
-            // SYNC FIX: Jump cursor to start when selection is clicked
             ws.setTime(region.start);
         });
 
@@ -225,7 +221,6 @@ export default function Mp3Cutter() {
         const active = regionsList.find(r => r.id === activeRegionId);
         if (active) {
             const time = wavesurferRef.current.getCurrentTime();
-            // If we're not playing and we're at the end or outside selection, reset to start
             if (!isPlaying && (time >= active.end || time < active.start)) {
                 wavesurferRef.current.setTime(active.start);
             }
@@ -280,7 +275,6 @@ export default function Mp3Cutter() {
         if (region) {
             const start = type === 'start' ? Math.max(0, Math.min(region.end - 0.1, time)) : region.start;
             const end = type === 'end' ? Math.max(region.start + 0.1, Math.min(duration, time)) : region.end;
-            // FIX: WaveSurfer v7 uses setOptions instead of update
             region.setOptions({ start, end });
         }
     };
@@ -321,6 +315,43 @@ export default function Mp3Cutter() {
             offset++;
         }
         return new Blob([outBuffer], { type: "audio/wav" });
+    };
+
+    const downloadSegment = async (region: RegionData) => {
+        if (!audioFile) return;
+        toast({ title: "Extracting Part...", description: "Rendering selection." });
+        
+        try {
+            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+            const arrayBuffer = await audioFile.arrayBuffer();
+            const originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            
+            const { start, end } = region;
+            const sampleRate = originalBuffer.sampleRate;
+            const startFrame = Math.floor(start * sampleRate);
+            const endFrame = Math.floor(end * sampleRate);
+            const frameCount = Math.max(1, endFrame - startFrame);
+            
+            const offlineCtx = new OfflineAudioContext(originalBuffer.numberOfChannels, frameCount, sampleRate);
+            const source = offlineCtx.createBufferSource();
+            source.buffer = originalBuffer;
+            source.connect(offlineCtx.destination);
+            source.start(0, start, end - start);
+            
+            const renderedBuffer = await offlineCtx.startRendering();
+            const wavBlob = audioBufferToWav(renderedBuffer);
+            const url = URL.createObjectURL(wavBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Part-${formatTime(start).replace(':', '-')}-${audioFile.name}.wav`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            toast({ title: "Part Ready", description: "Download started." });
+        } catch (e) {
+            toast({ variant: 'destructive', title: "Extraction Failed" });
+        }
     };
 
     const exportAudio = async () => {
@@ -536,12 +567,19 @@ export default function Mp3Cutter() {
                                     <div className="flex gap-3 pb-2">
                                         {regionsList.map((r, i) => (
                                             <div key={r.id} onClick={() => { setActiveRegionId(r.id); playRegion(r); }}
-                                                 className={cn("flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all", activeRegionId === r.id ? "bg-primary/10 border-primary" : "bg-white border-transparent hover:border-primary/20")}>
+                                                 className={cn("flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all shrink-0", activeRegionId === r.id ? "bg-primary/10 border-primary shadow-md" : "bg-white border-transparent hover:border-primary/20 shadow-sm")}>
                                                 <Badge variant="secondary" className="bg-primary/20 text-primary">#{i + 1}</Badge>
                                                 <div className="flex flex-col text-[10px] font-bold">
-                                                    <span>{formatTime(r.start)} - {formatTime(r.end)}</span>
+                                                    <span className="text-slate-500">{formatTime(r.start)} - {formatTime(r.end)}</span>
                                                 </div>
-                                                <Button size="icon" variant="ghost" className="size-6 rounded-full text-destructive" onClick={(e) => { e.stopPropagation(); removeRegion(r.id); }}><Trash2 className="size-3" /></Button>
+                                                <div className="flex items-center gap-1">
+                                                    <Button size="icon" variant="ghost" className="size-8 rounded-full text-blue-600 hover:bg-blue-50" onClick={(e) => { e.stopPropagation(); downloadSegment(r); }} title="Download this part">
+                                                        <Download className="size-4" />
+                                                    </Button>
+                                                    <Button size="icon" variant="ghost" className="size-8 rounded-full text-destructive hover:bg-destructive/5" onClick={(e) => { e.stopPropagation(); removeRegion(r.id); }}>
+                                                        <Trash2 className="size-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
@@ -555,7 +593,7 @@ export default function Mp3Cutter() {
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                             <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
                                 <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
-                                    <Settings2 className="size-4 md:size-5 text-primary" /> Multi-Part Logic
+                                    <Settings2 className="size-4 md:size-5 text-primary" /> Studio Actions
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="p-6 md:p-8 space-y-10 text-left">
@@ -573,22 +611,35 @@ export default function Mp3Cutter() {
                                 <div className="p-5 bg-blue-500/5 rounded-2xl border-2 border-blue-500/10 flex gap-4 text-left shadow-sm">
                                     <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
                                     <div className="space-y-1">
-                                        <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Multi-Trim Active</p>
-                                        <p className="text-[8px] text-green-600/80 font-medium leading-tight uppercase">Segments will be joined seamlessly into one file.</p>
+                                        <p className="text-[10px] font-black text-green-700 uppercase tracking-tight">Active Logic</p>
+                                        <p className="text-[8px] text-green-600/80 font-medium leading-tight uppercase">Join segments or download individual parts below.</p>
                                     </div>
                                 </div>
                             </CardContent>
-                            <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-3">
-                                <Button 
-                                    className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 group px-10 flex items-center justify-center gap-4 shadow-2xl" 
-                                    onClick={exportAudio}
-                                    disabled={regionsList.length === 0}
-                                >
-                                    <StarIcons />
-                                    <Scissors className="size-7 group-hover:rotate-12 transition-transform" />
-                                    <span className="uppercase tracking-tighter text-lg font-black">EXTRACT & JOIN</span>
-                                </Button>
-                                <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300"><RefreshCcw className="size-3" /> Start Over</Button>
+                            <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-4">
+                                <div className="flex flex-col gap-3 w-full">
+                                    <Button 
+                                        className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 group px-10 flex items-center justify-center gap-4 shadow-2xl" 
+                                        onClick={exportAudio}
+                                        disabled={regionsList.length === 0}
+                                    >
+                                        <StarIcons />
+                                        <Scissors className="size-7 group-hover:rotate-12 transition-transform" />
+                                        <span className="uppercase tracking-tighter text-lg font-black">EXTRACT & JOIN</span>
+                                    </Button>
+                                    
+                                    {activeRegion && (
+                                        <Button 
+                                            variant="outline"
+                                            className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase text-blue-600 border-blue-200 hover:bg-blue-50"
+                                            onClick={() => downloadSegment(activeRegion)}
+                                        >
+                                            <Download className="mr-2 size-4" /> DOWNLOAD THIS PART
+                                        </Button>
+                                    )}
+                                </div>
+
+                                <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300 shadow-sm"><RefreshCcw className="size-3" /> Start Over</Button>
                             </CardFooter>
                         </Card>
                     </div>
