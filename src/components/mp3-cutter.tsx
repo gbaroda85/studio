@@ -106,6 +106,12 @@ export default function Mp3Cutter() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const regionsPluginRef = useRef<any>(null);
 
+    // Ref to access state inside events without stale closures
+    const stateRef = useRef({ activeRegionId, regionsList });
+    useEffect(() => {
+        stateRef.current = { activeRegionId, regionsList };
+    }, [activeRegionId, regionsList]);
+
     // --- INITIALIZE WAVESURFER ---
     const initWavesurfer = useCallback((url: string) => {
         if (!containerRef.current) return;
@@ -148,6 +154,16 @@ export default function Mp3Cutter() {
 
         ws.on('audioprocess', (time) => {
             setCurrentTime(time);
+            
+            // Auto-stop at end of active region
+            const currentActiveId = stateRef.current.activeRegionId;
+            if (currentActiveId) {
+                const active = stateRef.current.regionsList.find(r => r.id === currentActiveId);
+                if (active && time >= active.end) {
+                    ws.pause();
+                    ws.setTime(active.start); // Seek back to start for next play
+                }
+            }
         });
         
         ws.on('interaction', (time) => setCurrentTime(time));
@@ -156,10 +172,14 @@ export default function Mp3Cutter() {
 
         regions.on('region-updated', (region: any) => {
             setRegionsList(prev => prev.map(r => r.id === region.id ? { ...r, start: region.start, end: region.end } : r));
+            // SYNC FIX: Jump cursor to start when handles are moved
+            ws.setTime(region.start);
         });
 
         regions.on('region-clicked', (region: any) => {
             setActiveRegionId(region.id);
+            // SYNC FIX: Jump cursor to start when selection is clicked
+            ws.setTime(region.start);
         });
 
         ws.load(url);
@@ -199,7 +219,20 @@ export default function Mp3Cutter() {
     const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => handleFileChange(e.target.files?.[0] || null);
     const onDrop = (e: React.DragEvent) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
 
-    const togglePlay = () => wavesurferRef.current?.playPause();
+    const togglePlay = () => {
+        if (!wavesurferRef.current) return;
+
+        const active = regionsList.find(r => r.id === activeRegionId);
+        if (active) {
+            const time = wavesurferRef.current.getCurrentTime();
+            // If we're not playing and we're at the end or outside selection, reset to start
+            if (!isPlaying && (time >= active.end || time < active.start)) {
+                wavesurferRef.current.setTime(active.start);
+            }
+        }
+        
+        wavesurferRef.current.playPause();
+    };
     
     const playRegion = (r: RegionData) => {
         if (!wavesurferRef.current) return;
@@ -223,6 +256,7 @@ export default function Mp3Cutter() {
         });
         setRegionsList(prev => [...prev, { id: r.id, start: r.start, end: r.end }]);
         setActiveRegionId(r.id);
+        wavesurferRef.current.setTime(start);
         toast({ title: "New Segment Added" });
     };
 
@@ -316,8 +350,6 @@ export default function Mp3Cutter() {
 
                 const gainNode = offlineCtx.createGain();
                 
-                // Apply fades only to the overall joined audio if needed, 
-                // but here we apply per segment for transition smoothing
                 if (fadeIn > 0 && i === 0) {
                     gainNode.gain.setValueAtTime(0, 0);
                     gainNode.gain.linearRampToValueAtTime(1, fadeIn);
