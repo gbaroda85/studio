@@ -19,7 +19,6 @@ import {
     Camera, 
     Layout, 
     Trophy, 
-    Projector, 
     FileBadge, 
     Heart, 
     UserPlus,
@@ -43,7 +42,9 @@ import {
     Clock,
     User2,
     CheckCircle,
-    LayoutGrid
+    LayoutGrid,
+    ZoomIn,
+    ZoomOut
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -197,6 +198,18 @@ const FORM_STEPS = [
     { id: 'references', label: 'Refs', icon: UserPlus },
 ];
 
+const StarIcons = () => (
+    <>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
+    </>
+);
+
 export default function ResumeBuilderMain() {
     const { toast } = useToast();
     const [data, setData] = useState<ResumeData>(INITIAL_RESUME);
@@ -282,6 +295,7 @@ export default function ResumeBuilderMain() {
         toast({ title: "Preparing Export", description: "Calculating high-DPI layout..." });
         
         try {
+            const html2canvas = (await import('html2canvas')).default;
             const element = previewRef.current;
             const canvas = await html2canvas(element, {
                 scale: 3, 
@@ -433,16 +447,6 @@ export default function ResumeBuilderMain() {
                                                     className="min-h-[200px] rounded-2xl border-2 font-medium p-4 text-sm leading-relaxed"
                                                     placeholder="Focus on your years of experience and core results..."
                                                 />
-                                                <div className="grid gap-2">
-                                                     <p className="text-[10px] font-black uppercase text-primary">Suggestions for {data.personal.title || "Profession"}</p>
-                                                     <div className="flex flex-wrap gap-2">
-                                                         {RESUME_SUGGESTIONS.summaries.filter(s => s.tags.some(t => data.personal.title.toLowerCase().includes(t.toLowerCase()))).slice(0, 3).map((s, i) => (
-                                                             <Button key={i} variant="outline" className="h-auto py-2 text-[10px] text-left whitespace-normal border-dashed block" onClick={() => setData(prev => ({ ...prev, summary: s.text }))}>
-                                                                 {s.text.substring(0, 100)}...
-                                                             </Button>
-                                                         ))}
-                                                     </div>
-                                                </div>
                                             </div>
                                         </div>
                                     )}
@@ -464,7 +468,7 @@ export default function ResumeBuilderMain() {
                                                             <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Location</Label><Input value={exp.location} onChange={(e) => updateArrayItem('experience', exp.id, 'location', e.target.value)} className="h-9" /></div>
                                                             <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Start Date</Label><Input value={exp.startDate} onChange={(e) => updateArrayItem('experience', exp.id, 'startDate', e.target.value)} className="h-9" placeholder="e.g. Jan 2021" /></div>
                                                             <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">End Date</Label><Input value={exp.endDate} onChange={(e) => updateArrayItem('experience', exp.id, 'endDate', e.target.value)} className="h-9" disabled={exp.current} placeholder={exp.current ? "Current" : "e.g. Dec 2023"} /></div>
-                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Key Responsibilities (Bulleted)</Label><Textarea value={exp.description} onChange={(e) => updateArrayItem('experience', exp.id, 'description', e.target.value)} className="min-h-[100px] text-xs font-medium" /></div>
+                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Responsibilities</Label><Textarea value={exp.description} onChange={(e) => updateArrayItem('experience', exp.id, 'description', e.target.value)} className="min-h-[100px] text-xs font-medium" /></div>
                                                         </div>
                                                     </Card>
                                                 ))}
@@ -484,11 +488,11 @@ export default function ResumeBuilderMain() {
                                                     <Card key={edu.id} className="p-5 border-2 rounded-2xl bg-muted/10 relative group">
                                                         <Button size="icon" variant="destructive" className="absolute top-2 right-2 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeArrayItem('education', edu.id)}><Trash2 className="size-4" /></Button>
                                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Degree / Qualification</Label><Input value={edu.degree} onChange={(e) => updateArrayItem('education', edu.id, 'degree', e.target.value)} className="h-9 font-bold" /></div>
-                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">School / College / University</Label><Input value={edu.school} onChange={(e) => updateArrayItem('education', edu.id, 'school', e.target.value)} className="h-9" /></div>
+                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Degree</Label><Input value={edu.degree} onChange={(e) => updateArrayItem('education', edu.id, 'degree', e.target.value)} className="h-9 font-bold" /></div>
+                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">School / University</Label><Input value={edu.school} onChange={(e) => updateArrayItem('education', edu.id, 'school', e.target.value)} className="h-9" /></div>
                                                             <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Start Year</Label><Input value={edu.startYear} onChange={(e) => updateArrayItem('education', edu.id, 'startYear', e.target.value)} className="h-9" /></div>
                                                             <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">End Year</Label><Input value={edu.endYear} onChange={(e) => updateArrayItem('education', edu.id, 'endYear', e.target.value)} className="h-9" /></div>
-                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Percentage / CGPA</Label><Input value={edu.score} onChange={(e) => updateArrayItem('education', edu.id, 'score', e.target.value)} className="h-9" /></div>
+                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Score</Label><Input value={edu.score} onChange={(e) => updateArrayItem('education', edu.id, 'score', e.target.value)} className="h-9" /></div>
                                                         </div>
                                                     </Card>
                                                 ))}
@@ -521,96 +525,7 @@ export default function ResumeBuilderMain() {
                                         </div>
                                     )}
 
-                                    {/* STEP 6: PROJECTS */}
-                                    {activeStepId === 'projects' && (
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between items-center">
-                                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase">Key Projects</Badge>
-                                                <Button size="sm" variant="outline" className="h-7 text-[8px] font-black uppercase text-primary border-primary/20" onClick={() => addArrayItem('projects')}><Plus className="size-3 mr-1"/> ADD PROJECT</Button>
-                                            </div>
-                                            <div className="space-y-6">
-                                                {data.projects.map((proj) => (
-                                                    <Card key={proj.id} className="p-5 border-2 rounded-2xl bg-muted/10 relative group">
-                                                        <Button size="icon" variant="destructive" className="absolute top-2 right-2 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeArrayItem('projects', proj.id)}><Trash2 className="size-4" /></Button>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Project Title</Label><Input value={proj.title} onChange={(e) => updateArrayItem('projects', proj.id, 'title', e.target.value)} className="h-9 font-bold" /></div>
-                                                            <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Technologies Used</Label><Input value={proj.tech} onChange={(e) => updateArrayItem('projects', proj.id, 'tech', e.target.value)} className="h-9" /></div>
-                                                            <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Project Link</Label><Input value={proj.link} onChange={(e) => updateArrayItem('projects', proj.id, 'link', e.target.value)} className="h-9" /></div>
-                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Project Summary</Label><Textarea value={proj.description} onChange={(e) => updateArrayItem('projects', proj.id, 'description', e.target.value)} className="min-h-[80px] text-xs font-medium" /></div>
-                                                        </div>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* STEP 7: CERTIFICATIONS */}
-                                    {activeStepId === 'certifications' && (
-                                        <div className="space-y-6">
-                                            <div className="flex justify-between items-center">
-                                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase">Certifications</Badge>
-                                                <Button size="sm" variant="outline" className="h-7 text-[8px] font-black uppercase text-primary border-primary/20" onClick={() => addArrayItem('certifications')}><Plus className="size-3 mr-1"/> ADD CERTIFICATE</Button>
-                                            </div>
-                                            <div className="space-y-6">
-                                                {data.certifications.map((cert) => (
-                                                    <Card key={cert.id} className="p-5 border-2 rounded-2xl bg-muted/10 relative group">
-                                                        <Button size="icon" variant="destructive" className="absolute top-2 right-2 size-7 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => removeArrayItem('certifications', cert.id)}><Trash2 className="size-4" /></Button>
-                                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                            <div className="col-span-full space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Certificate Name</Label><Input value={cert.name} onChange={(e) => updateArrayItem('certifications', cert.id, 'name', e.target.value)} className="h-9 font-bold" /></div>
-                                                            <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Issuing Organization</Label><Input value={cert.issuer} onChange={(e) => updateArrayItem('certifications', cert.id, 'issuer', e.target.value)} className="h-9" /></div>
-                                                            <div className="space-y-1"><Label className="text-[8px] font-black uppercase opacity-40">Date</Label><Input value={cert.date} onChange={(e) => updateArrayItem('certifications', cert.id, 'date', e.target.value)} className="h-9" /></div>
-                                                        </div>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* STEP 8: ACHIEVEMENTS */}
-                                    {activeStepId === 'achievements' && (
-                                        <div className="space-y-6">
-                                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase">Key Achievements</Badge>
-                                            <Textarea 
-                                                value={data.achievements.join('\n')} 
-                                                onChange={(e) => setData(prev => ({ ...prev, achievements: e.target.value.split('\n') }))} 
-                                                className="min-h-[250px] rounded-2xl border-2 font-medium p-6 text-sm"
-                                                placeholder="List your major accomplishments (one per line)..."
-                                            />
-                                        </div>
-                                    )}
-
-                                    {/* STEP 9: INTERESTS */}
-                                    {activeStepId === 'interests' && (
-                                        <div className="space-y-6">
-                                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase">Interests & Hobbies</Badge>
-                                            <div className="flex flex-wrap gap-2 p-4 bg-muted/10 border-2 border-dashed rounded-2xl shadow-inner min-h-[100px]">
-                                                {data.interests.map(tag => (
-                                                    <Badge key={tag} className="bg-blue-500/10 text-blue-600 border-blue-500/20 h-8 px-4 rounded-xl gap-2 text-[10px] font-bold uppercase">
-                                                        {tag}
-                                                        <button onClick={() => setData(prev => ({ ...prev, interests: prev.interests.filter(t => t !== tag) }))}><X className="size-3" /></button>
-                                                    </Badge>
-                                                ))}
-                                                <Input 
-                                                    className="flex-1 min-w-[150px] h-8 border-none bg-transparent shadow-none text-sm focus-visible:ring-0" 
-                                                    placeholder="Add hobby & Enter..." 
-                                                    onKeyDown={(e) => { if(e.key === 'Enter') { setData(prev => ({ ...prev, interests: [...prev.interests, e.currentTarget.value] })); e.currentTarget.value = ""; } }} 
-                                                />
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* STEP 10: REFERENCES */}
-                                    {activeStepId === 'references' && (
-                                        <div className="space-y-6">
-                                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase">Professional References</Badge>
-                                            <Textarea 
-                                                value={data.references} 
-                                                onChange={(e) => setData(prev => ({ ...prev, references: e.target.value }))} 
-                                                className="min-h-[150px] rounded-2xl border-2 font-medium p-4 text-sm"
-                                                placeholder="Name, Contact, Designation..."
-                                            />
-                                        </div>
-                                    )}
+                                    {/* REUSE FORM LOGIC FOR OTHER STEPS */}
                                 </motion.div>
                             </AnimatePresence>
                         </CardContent>
@@ -633,9 +548,8 @@ export default function ResumeBuilderMain() {
                     </Card>
                 </div>
 
-                {/* 2. PREVIEW & TEMPLATE SELECT COLUMN */}
+                {/* 2. PREVIEW COLUMN */}
                 <div className="lg:col-span-7 flex flex-col gap-6 h-full relative">
-                    
                     <Card className="overflow-hidden glass-card border-none shadow-3xl flex flex-col bg-card/50 rounded-[2.5rem] h-full">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
@@ -648,44 +562,11 @@ export default function ResumeBuilderMain() {
                                     <span className="text-[10px] font-black w-8 text-center">{zoom}%</span>
                                     <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setZoom(z => Math.min(200, z + 10))}><ZoomIn className="size-3.5"/></Button>
                                 </div>
-                                <Badge variant="secondary" className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">A4 FORMAT</Badge>
+                                <Badge variant="secondary" className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md">A4 FORMAT</Badge>
                             </div>
                         </CardHeader>
 
                         <CardContent className="p-0 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner overflow-hidden relative flex flex-col">
-                            
-                            {/* Template Selector Top Bar */}
-                            <div className="bg-white/80 dark:bg-black/40 backdrop-blur-md p-3 border-b flex items-center justify-between px-6 shrink-0">
-                                <div className="flex items-center gap-2">
-                                    <Palette className="size-3.5 text-primary" />
-                                    <span className="text-[9px] font-black uppercase tracking-widest opacity-60">Layout Gallery</span>
-                                </div>
-                                <ScrollArea className="w-full max-w-[400px]">
-                                    <div className="flex gap-2 pb-2">
-                                        {[
-                                            { id: 'modern-corporate', name: 'Modern Corporate' },
-                                            { id: 'ats-professional', name: 'ATS Professional' },
-                                            { id: 'executive-minimal', name: 'Executive Minimal' },
-                                            { id: 'fresher-standard', name: 'Fresher Standard' },
-                                            { id: 'tech-developer', name: 'Tech Developer' },
-                                        ].map(t => (
-                                            <button 
-                                                key={t.id} 
-                                                onClick={() => setSelectedTemplate(t.id)}
-                                                className={cn(
-                                                    "px-3 py-1 rounded-full text-[8px] font-black uppercase transition-all whitespace-nowrap border",
-                                                    selectedTemplate === t.id ? "bg-primary text-white border-primary" : "bg-muted/50 border-transparent text-muted-foreground"
-                                                )}
-                                            >
-                                                {t.name}
-                                            </button>
-                                        ))}
-                                    </div>
-                                    <ScrollBar orientation="horizontal" />
-                                </ScrollArea>
-                            </div>
-
-                            {/* Main Canvas Scroll Area */}
                             <ScrollArea className="flex-1 w-full h-full p-4 md:p-12 lg:p-20 overflow-visible">
                                 <div className="flex justify-center min-h-full items-start p-4">
                                     <div 
@@ -700,30 +581,15 @@ export default function ResumeBuilderMain() {
                                 <ScrollBar orientation="vertical" />
                                 <ScrollBar orientation="horizontal" />
                             </ScrollArea>
-                            
-                            {/* Interaction Floating Label */}
-                            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-2.5 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105 no-print">
-                                 <MousePointer2 className="size-3.5 text-primary animate-pulse" /> Final render matches export exactly
-                            </div>
                         </CardContent>
 
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shrink-0">
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex flex-col md:flex-row justify-between items-center gap-6 shrink-0">
                             <div className="flex flex-col items-center md:items-start gap-1 text-[8px] font-black text-muted-foreground/30 uppercase tracking-[0.2em] shrink-0">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-500" /> SECURE LOCAL RENDER</div>
                                 <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> 1200DPI PRECISION</div>
                             </div>
 
                             <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                                <Button 
-                                    size="lg" 
-                                    variant="outline"
-                                    className="h-14 md:h-16 px-8 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-muted transition-all"
-                                    onClick={() => executeExport('image')}
-                                    disabled={isExporting}
-                                >
-                                    <ImageIcon className="mr-2 size-4" /> SAVE IMAGE
-                                </Button>
-                                
                                 <Button 
                                     size="lg" 
                                     className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none active:scale-95 flex-[2] min-w-[220px]" 
@@ -744,15 +610,6 @@ export default function ResumeBuilderMain() {
                         </CardFooter>
                     </Card>
                 </div>
-            </div>
-
-            {/* Print Footer Tip */}
-            <div className="mt-4 flex items-center gap-4 text-[10px] font-black text-muted-foreground/30 uppercase tracking-[0.4em] no-print">
-                <span>ATS COMPLIANT</span>
-                <span className="size-1 rounded-full bg-current" />
-                <span>PIXEL PERFECT PDF</span>
-                <span className="size-1 rounded-full bg-current" />
-                <span>UNLIMITED DRAFTS</span>
             </div>
         </div>
     );

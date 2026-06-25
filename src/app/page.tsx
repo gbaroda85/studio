@@ -52,13 +52,9 @@ import {
   PiggyBank,
   Layers,
   CalendarDays,
-  ScanLine as ScanLineIcon,
   Palette,
   Banknote,
-  Video,
   Volume2,
-  Home as HomeIcon,
-  UserCircle as UserCircleIcon,
   Home as HomeLucide,
   Scissors,
   Music,
@@ -97,12 +93,6 @@ const ALL_TOOLS = [
   { icon: FilePenLine, title: "PDF EDITOR", description: "Edit text, images and pages in any PDF document.", href: "/edit-pdf", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-[#eff6ff]", category: "pdf-kit" },
   { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-gradient-to-br from-cyan-500 to-cyan-700", lightBg: "bg-cyan-50", category: "pdf-kit" },
 
-  // AUDIO & VIDEO
-  { icon: Merge, title: "AUDIO MERGER", description: "Combine multiple audio tracks into a single file.", href: "/merge-audio", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "audio" },
-  { icon: Scissors, title: "MP3 CUTTER", description: "Trim, cut and enhance audio files precisely.", href: "/mp3-cutter", colorClass: "bg-rose-600", lightBg: "bg-rose-50", category: "audio" },
-  { icon: FileOutput, title: "AUDIO CONVERTER", description: "Convert between MP3, WAV, OGG and M4A instantly.", href: "/audio-converter", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "audio" },
-  { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from any video.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "video" },
-
   // FINANCE CENTER
   { icon: Banknote, title: "SALARY SLIP GENERATOR", description: "Generate professional A4 pay slips for employees instantly.", href: "/salary-slip", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: Receipt, title: "GST INVOICE GENERATOR", description: "Generate professional GST compliant invoices instantly.", href: "/gst-invoice", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "calculator" },
@@ -120,7 +110,7 @@ const ALL_TOOLS = [
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },
   { icon: Cake, title: "AGE CALCULATOR", description: "Find out your exact age profile in years and days.", href: "/age-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
   { icon: HomeLucide, title: "MORTGAGE CALCULATOR", description: "Estimate home loans, interest and taxes instantly.", href: "/mortgage-calculator", colorClass: "bg-primary", lightBg: "bg-primary/5", category: "calculator" },
-  { icon: UserCircleIcon, title: "PASSPORT PHOTO MAKER", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
+  { icon: UserCircle, title: "PASSPORT PHOTO MAKER", description: "Create professional ID photos for all countries.", href: "/passport-photo", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdfa]", category: "image" },
   { icon: Crop, title: "CROP IMAGE", description: "Precisely crop and fix perspective on photos.", href: "/crop-image", colorClass: "bg-cyan-50", lightBg: "bg-[#ecfeff]", category: "image" },
   { icon: Maximize, title: "IMAGE RESIZER", description: "Change image dimensions for official forms.", href: "/image-resize", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "image" },
   { icon: PenLine, title: "SIGNATURE BG REMOVER", description: "Extract clean signatures from paper photos.", href: "/remove-signature", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "image" },
@@ -248,11 +238,6 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
 
 export default function Page() {
   const [searchQuery, setSearchQuery] = useState('');
-
-  useEffect(() => {
-    const visits = parseInt(localStorage.getItem('gr7_visits') || '0') + 1;
-    localStorage.setItem('gr7_visits', visits.toString());
-  }, []);
 
   const filteredTools = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -406,95 +391,6 @@ export default function Page() {
           )}
         </div>
       </section>
-
-      {!isSearching && (
-        <section className="relative w-full no-print overflow-hidden bg-transparent pb-32 transform-gpu">
-          <div className="absolute top-0 left-0 w-full h-[600px] z-0 overflow-hidden transform-gpu">
-             <div className="absolute inset-0 bg-gradient-to-br from-[#2d0b3a] via-[#1a1a1a] to-[#2d0b3a] transform-gpu" />
-             <div className="absolute inset-0 opacity-20 mix-blend-overlay transform-gpu">
-                <Image src={placeholderData.hero_bg.url} alt="bg" fill className="object-cover" />
-             </div>
-          </div>
-
-          <div className="max-w-7xl mx-auto px-6 pt-24 md:pt-32 relative z-10 transform-gpu">
-            <header className="text-center mb-24 space-y-3 transform-gpu">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 text-white/80 text-[10px] font-black uppercase tracking-[0.3em] backdrop-blur-md mb-4 shadow-xl transform-gpu">
-                    <span className="size-2.5" /> OUR VALUES
-                </div>
-                <h2 className="text-4xl md:text-6xl font-black uppercase tracking-tighter text-white font-headline leading-tight transform-gpu">WHY USERS LOVE <br/> <span className="text-primary">GR7 TOOLS</span></h2>
-                <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] text-white/40 transform-gpu">FAST, SECURE AND RELIABLE</p>
-            </header>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14 relative transform-gpu">
-                <div className="relative group pt-10 transform-gpu">
-                    <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4 transform-gpu">01</span>
-                    <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#1e3a8a] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20 transform-gpu">
-                            <span className="font-black text-[10px] uppercase tracking-widest">VALUES</span>
-                        </div>
-                        <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16 transform-gpu">
-                            <div className="space-y-6 flex-1 transform-gpu">
-                                <div className="space-y-1 transform-gpu">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Privacy Policy</p>
-                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-800 dark:text-white uppercase leading-none">100% PRIVATE</h3>
-                                </div>
-                                <div className="h-1 w-12 bg-primary mx-auto rounded-full transform-gpu" />
-                                <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Your data never leaves your device. All processing happens locally in your browser RAM.</p>
-                            </div>
-                        </div>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-800 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
-                            <ShieldCheck className="size-8 md:size-10 text-sky-500" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="relative group pt-10 transform-gpu">
-                    <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4 transform-gpu">02</span>
-                    <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#0ea5e9] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20 transform-gpu">
-                            <span className="font-black text-[10px] uppercase tracking-widest">VISION</span>
-                        </div>
-                        <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16 transform-gpu">
-                            <div className="space-y-6 flex-1 transform-gpu">
-                                <div className="space-y-1 transform-gpu">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">System Core</p>
-                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-800 dark:text-white uppercase leading-none">NATIVE SPEED</h3>
-                                </div>
-                                <div className="h-1 w-12 bg-primary mx-auto rounded-full transform-gpu" />
-                                <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Using WebAssembly technology for hardware-level performance without any server-side lag.</p>
-                            </div>
-                        </div>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-900 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
-                            <Zap className="size-8 md:size-10 text-yellow-500" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="relative group pt-10 transform-gpu">
-                    <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4 transform-gpu">03</span>
-                    <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
-                        <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[#10b981] text-white px-8 py-2 rounded-full shadow-2xl border-4 border-white z-20 transform-gpu">
-                            <span className="font-black text-[10px] uppercase tracking-widest">MISSION</span>
-                        </div>
-                        <div className="p-10 md:p-12 text-center flex-1 flex flex-col pt-16 transform-gpu">
-                            <div className="space-y-6 flex-1 transform-gpu">
-                                <div className="space-y-1 transform-gpu">
-                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground opacity-40">Output Standards</p>
-                                    <h3 className="text-3xl lg:text-4xl font-black tracking-tighter text-slate-800 dark:text-white uppercase leading-none">HD QUALITY</h3>
-                                </div>
-                                <div className="h-1 w-12 bg-primary mx-auto rounded-full transform-gpu" />
-                                <p className="text-xs md:text-sm text-muted-foreground font-bold leading-relaxed uppercase opacity-70">Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.</p>
-                            </div>
-                        </div>
-                        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 size-16 md:size-20 rounded-3xl bg-white dark:bg-slate-900 shadow-3xl border-[6px] border-slate-50 dark:border-slate-950 flex items-center justify-center transition-transform group-hover:scale-110 group-hover:rotate-6 transform-gpu">
-                            <Target className="size-8 md:size-10 text-emerald-500" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       <div className="w-full mt-12 pt-12 border-t border-border/50 text-center pb-20">
           <p className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] md:tracking-[0.3em]">
