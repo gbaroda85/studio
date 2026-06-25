@@ -329,7 +329,7 @@ function ToolsPageContent() {
       descriptionKey: 'audio_merger_description',
       icon: Merge,
       color: 'bg-indigo-600',
-      lightBg: 'bg-indigo-50'
+      lightBg: 'bg-[#eef2ff]'
     },
     {
       href: '/compress-mp3',
@@ -337,7 +337,7 @@ function ToolsPageContent() {
       descriptionKey: 'compress_mp3_description',
       icon: FileArchive,
       color: 'bg-violet-600',
-      lightBg: 'bg-violet-50'
+      lightBg: 'bg-[#f5f3ff]'
     },
     {
       href: '/mp3-cutter',
@@ -345,7 +345,7 @@ function ToolsPageContent() {
       descriptionKey: 'mp3_cutter_description',
       icon: Scissors,
       color: 'bg-rose-600',
-      lightBg: 'bg-rose-50'
+      lightBg: 'bg-[#fff1f2]'
     },
     {
       href: '/audio-converter',
@@ -353,7 +353,7 @@ function ToolsPageContent() {
       descriptionKey: 'audio_converter_description',
       icon: FileOutput,
       color: 'bg-blue-600',
-      lightBg: 'bg-blue-50'
+      lightBg: 'bg-[#eff6ff]'
     },
   ];
 

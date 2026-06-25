@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -375,7 +376,7 @@ export default function Page() {
 
                 <div className="mb-16 md:mb-20 transform-gpu">
                     <div className="flex items-center gap-3 text-rose-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
-                        <div className="w-12 md:w-16 h-1 md:h-2 bg-rose-500 rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">DOCUMENT STUDIO</span>
+                        <div className="w-12 md:w-16 h-1 md:h-2 bg-rose-50 rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">DOCUMENT STUDIO</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
                         <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">PDF Toolkit</h2>

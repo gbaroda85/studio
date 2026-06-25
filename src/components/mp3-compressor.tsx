@@ -34,15 +34,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-// Import lamejs safely for Next.js
-let lamejs: any;
-if (typeof window !== 'undefined') {
-    try {
-        lamejs = require('lamejs');
-    } catch (e) {
-        console.error("LameJS load failed", e);
-    }
-}
+// Import lamejs dynamically to avoid MPEGMode reference errors in SSR/Bundling
+let lamejs: any = null;
 
 type CompressionMode = 'easy' | 'advanced';
 type QualityLevel = 'low' | 'medium' | 'high';
@@ -105,6 +98,20 @@ export default function Mp3Compressor() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const originalAudioRef = useRef<HTMLAudioElement>(null);
     const compressedAudioRef = useRef<HTMLAudioElement>(null);
+
+    // Load lamejs properly on the client
+    useEffect(() => {
+        const loadLame = async () => {
+            if (typeof window !== 'undefined' && !lamejs) {
+                try {
+                    lamejs = await import('lamejs');
+                } catch (e) {
+                    console.error("LameJS load failed", e);
+                }
+            }
+        };
+        loadLame();
+    }, []);
 
     const estimation = useMemo(() => {
         if (!audioInfo) return null;
@@ -169,7 +176,11 @@ export default function Mp3Compressor() {
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
     const handleCompress = async () => {
-        if (!file || !audioInfo || !lamejs) return;
+        if (!file || !audioInfo || !lamejs) {
+            toast({ variant: 'destructive', title: "Engine Error", description: "Compression engine is still loading. Please wait a second." });
+            return;
+        }
+        
         setIsProcessing(true);
         setProgress(0);
         setStatusText("Initializing Local Workspace...");
@@ -182,10 +193,16 @@ export default function Mp3Compressor() {
             
             const targetBitrate = estimation?.bitrate || 128;
             const targetSampleRate = sampleRate === 'auto' ? audioBuffer.sampleRate : parseInt(sampleRate);
-            
-            // FIX: Robust initialization to avoid MPEGMode reference errors
             const channels = audioBuffer.numberOfChannels;
-            const mp3encoder = new lamejs.Mp3Encoder(channels, targetSampleRate, targetBitrate);
+
+            // Using robust instantiation logic
+            let mp3encoder;
+            try {
+                mp3encoder = new lamejs.Mp3Encoder(channels, targetSampleRate, targetBitrate);
+            } catch (initError) {
+                console.error("Encoder Init Error:", initError);
+                throw new Error("MPEGMode/LameJS Initialization Failed");
+            }
             
             const mp3Data: any[] = [];
             const sampleSize = 1152; 
@@ -213,7 +230,7 @@ export default function Mp3Compressor() {
                     mp3Data.push(new Int8Array(mp3buf));
                 }
 
-                if (i % (sampleSize * 20) === 0) {
+                if (i % (sampleSize * 50) === 0) {
                     setProgress(Math.round((i / audioBuffer.length) * 100));
                     await new Promise(r => requestAnimationFrame(r));
                 }
@@ -230,9 +247,9 @@ export default function Mp3Compressor() {
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "Compression Success!" });
             await audioCtx.close();
-        } catch (error) {
+        } catch (error: any) {
             console.error("Compression Error:", error);
-            toast({ variant: 'destructive', title: "Process Failed", description: "Memory limit hit or unsupported audio structure." });
+            toast({ variant: 'destructive', title: "Process Failed", description: "Browser environment issue or large file memory limit." });
         } finally {
             setIsProcessing(false);
         }
