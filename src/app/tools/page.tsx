@@ -77,7 +77,8 @@ import {
   Banknote as BanknoteIcon,
   Sparkles,
   Zap,
-  ShieldCheck
+  ShieldCheck,
+  LayoutGrid
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -651,7 +652,7 @@ function ToolsPageContent() {
                 searchResults.map(({ categoryKey, features, icon: Icon, color }) => (
                 <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu">
                     <div className="flex items-center gap-3 mb-10">
-                      <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
+                      <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/5 shadow-md", color)}>
                         <Icon className="size-6" />
                       </div>
                       <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tighter">
@@ -724,7 +725,7 @@ function ToolsPageContent() {
                 {allFeatureGroups.map(({ categoryKey, features, icon: Icon, color }) => (
                     <section key={categoryKey} className="space-y-8 md:space-y-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/50 shadow-md", color)}>
+                            <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/5 shadow-md", color)}>
                                 <Icon className="size-6" />
                             </div>
                             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
