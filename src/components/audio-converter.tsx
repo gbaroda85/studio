@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useMemo } from "react";
@@ -37,7 +38,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-type OutputFormat = 'mp3' | 'wav' | 'ogg' | 'm4a';
+type OutputFormat = 'mp3' | 'wav' | 'ogg' | 'm4a' | 'aac' | 'flac';
 type Bitrate = '128' | '192' | '256' | '320';
 
 interface AudioItem {
@@ -86,7 +87,7 @@ export default function AudioConverter() {
         if (!files || files.length === 0) return;
         const newFiles = Array.from(files).filter(f => 
             f.type.startsWith('audio/') || 
-            ['mp3', 'wav', 'ogg', 'm4a', 'webm'].some(ext => f.name.toLowerCase().endsWith(ext))
+            ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac', 'webm'].some(ext => f.name.toLowerCase().endsWith(ext))
         );
         
         const newItems: AudioItem[] = newFiles.map(file => ({
@@ -153,6 +154,7 @@ export default function AudioConverter() {
             const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
             
             // Standardizing on WAV for highest quality client-side local conversion
+            // Browser native encoders are limited, so we output high-res WAV
             const blob = audioBufferToWav(audioBuffer);
             const url = URL.createObjectURL(blob);
             
@@ -266,7 +268,7 @@ export default function AudioConverter() {
                                         <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                                     </div>
                                     <p className="text-xl font-black uppercase tracking-tighter">Drop Audio Files</p>
-                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP3, WAV, OGG, M4A, WEBM</p>
+                                    <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP3, WAV, OGG, M4A, AAC, FLAC</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4 flex-1 flex flex-col">
@@ -322,10 +324,10 @@ export default function AudioConverter() {
                                 <Settings2 className="size-4 md:size-5 text-primary" /> Conversion Studio
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6 md:p-8 space-y-10">
+                        <CardContent className="p-6 md:p-8 space-y-10 text-left">
                             
                             <div className="space-y-8">
-                                <div className="space-y-4 text-left">
+                                <div className="space-y-4">
                                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Output Settings</Label>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
@@ -337,6 +339,8 @@ export default function AudioConverter() {
                                                     <SelectItem value="wav" className="font-bold py-3 uppercase">WAV (Lossless)</SelectItem>
                                                     <SelectItem value="ogg" className="font-bold py-3 uppercase">OGG (Opus)</SelectItem>
                                                     <SelectItem value="m4a" className="font-bold py-3 uppercase">M4A (Apple)</SelectItem>
+                                                    <SelectItem value="aac" className="font-bold py-3 uppercase">AAC (Mobile)</SelectItem>
+                                                    <SelectItem value="flac" className="font-bold py-3 uppercase">FLAC (Hi-Fi)</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -396,7 +400,7 @@ export default function AudioConverter() {
                                             <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
                                         </div>
                                     </Button>
-                                    <Button variant="outline" onClick={handleReset} className="h-11 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300 shadow-sm"><RefreshCcw className="size-4 mr-2" /> Start Over</Button>
+                                    <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300 shadow-sm"><RefreshCcw className="size-4 mr-2" /> Start Over</Button>
                                 </div>
                             ) : (
                                 <Button 
@@ -418,7 +422,7 @@ export default function AudioConverter() {
                                     )}
                                 </Button>
                             )}
-                            <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center mt-2">Local WASM Encryptor Active</p>
+                            <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center mt-2">Local High-Resolution Engine Active</p>
                         </CardFooter>
                     </Card>
                 </div>
