@@ -284,7 +284,7 @@ export default function AudioMerger() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30">
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 shrink-0">
                             <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
                             <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT BUNDLE</div>
                             <div className="flex items-center gap-2"><Monitor className="size-4 text-primary" /> HD RENDER</div>
@@ -296,7 +296,7 @@ export default function AudioMerger() {
                 <div className="lg:col-span-5 flex flex-col gap-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem] flex-1 flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
                                 <Settings2 className="size-4 md:size-5 text-primary" /> Studio Actions
                             </CardTitle>
                         </CardHeader>
@@ -385,7 +385,7 @@ export default function AudioMerger() {
                                     {isMerging ? (
                                         <div className="flex items-center gap-3">
                                             <Loader2 className="size-7 md:size-8 animate-spin" />
-                                            <span className="uppercase font-black text-sm md:text-base tracking-tighter">JOINING BUNDLE...</span>
+                                            <span className="uppercase text-sm tracking-tighter">JOINING BUNDLE...</span>
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-3">

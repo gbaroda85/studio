@@ -268,7 +268,6 @@ export default function Page() {
   return (
     <div className="w-full flex flex-col items-center transform-gpu">
       <section className="relative w-full max-w-[2000px] pt-4 pb-10 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-[#001D39] border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] transition-colors duration-500">
-        {/* PREMIUM MODERN SAAS BACKGROUND BLOBS */}
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none transform-gpu">
           <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] dark:bg-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '1s' }} />
           <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] dark:bg-accent/10 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '2s' }} />
@@ -276,7 +275,6 @@ export default function Page() {
 
         <div className="w-full px-5 md:px-12 relative z-10 transform-gpu">
           <div className="max-w-[1400px] mx-auto flex flex-col items-center justify-center transform-gpu">
-            
             <div className="flex-1 text-center space-y-4 max-w-4xl mx-auto flex flex-col items-center transform-gpu">
                 <div className="inline-flex items-center gap-2 px-4 md:px-6 py-1.5 md:py-2 rounded-full bg-primary/5 border border-primary/20 text-primary text-[8px] md:text-[10px] font-bold uppercase tracking-[0.15em] md:tracking-[0.2em] mb-1 shadow-sm animate-fade-in-up transform-gpu">
                     <Sparkles className="size-2.5 md:size-3 text-yellow-400 fill-yellow-400" /> ALL-IN-ONE GR7 TOOLKIT
@@ -343,7 +341,6 @@ export default function Page() {
                     </div>
                 </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -367,7 +364,6 @@ export default function Page() {
             </div>
           ) : (
             <>
-                {/* IMAGE SOLUTION */}
                 <div className="mb-16 md:mb-20 transform-gpu">
                     <div className="flex items-center gap-3 text-primary font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
                         <div className="w-12 md:w-16 h-1 md:h-2 bg-primary rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">IMAGE ENGINE</span>
@@ -381,7 +377,6 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* PDF TOOLKIT */}
                 <div className="mb-16 md:mb-20 transform-gpu">
                     <div className="flex items-center gap-3 text-rose-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
                         <div className="w-12 md:w-16 h-1 md:h-2 bg-rose-500 rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">DOCUMENT STUDIO</span>
@@ -395,7 +390,6 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* FINANCE CENTER */}
                 <div className="mb-24 md:mb-32 transform-gpu">
                     <div className="flex items-center gap-3 text-indigo-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
                         <div className="w-12 md:w-16 h-1 md:h-2 bg-indigo-50 rounded-full" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">FINANCE HUB</span>
@@ -413,7 +407,6 @@ export default function Page() {
         </div>
       </section>
 
-      {/* WHY USERS LOVE GR7 */}
       {!isSearching && (
         <section className="relative w-full no-print overflow-hidden bg-transparent pb-32 transform-gpu">
           <div className="absolute top-0 left-0 w-full h-[600px] z-0 overflow-hidden transform-gpu">
@@ -433,7 +426,6 @@ export default function Page() {
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-10 lg:gap-14 relative transform-gpu">
-                
                 <div className="relative group pt-10 transform-gpu">
                     <span className="absolute -top-4 left-6 text-9xl font-black text-white/5 select-none transition-all group-hover:text-primary/10 group-hover:-translate-y-4 transform-gpu">01</span>
                     <div className="relative bg-white dark:bg-slate-900 rounded-[3rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] flex flex-col h-full transform-gpu transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-primary/20">
@@ -499,7 +491,6 @@ export default function Page() {
                         </div>
                     </div>
                 </div>
-
             </div>
           </div>
         </section>

@@ -89,15 +89,6 @@ export default function MergeAudioPage() {
                 </div>
                 
                 <div className="relative">
-                    {/* Connecting Lines (Desktop) */}
-                    <div className="hidden md:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
-                        <svg className="w-full h-24 absolute -top-12" preserveAspectRatio="none" viewBox="0 0 1000 100">
-                            <path d="M 300 50 C 400 50, 400 20, 500 50 S 600 80, 700 50" fill="none" stroke="currentColor" strokeWidth="2" strokeDasharray="6 6" className="text-muted-foreground/20" />
-                            <circle cx="330" cy="50" r="4" className="fill-cyan-500" />
-                            <circle cx="660" cy="50" r="4" className="fill-indigo-500" />
-                        </svg>
-                    </div>
-
                     <div className="grid md:grid-cols-3 gap-8 relative z-10">
                         <div className="group p-[2px] rounded-[2.5rem] bg-gradient-to-br from-cyan-400 to-blue-600 shadow-xl transition-all duration-300 hover:scale-[1.02]">
                             <div className="bg-white dark:bg-slate-900 rounded-[2.4rem] p-8 h-full flex flex-col items-center text-center space-y-4">
@@ -132,7 +123,6 @@ export default function MergeAudioPage() {
                 </div>
             </section>
 
-            {/* FAQ Section */}
             <section className="space-y-8 py-10 border-t">
                 <div className="text-center">
                     <HelpCircle className="mx-auto size-16 text-primary mb-4" />

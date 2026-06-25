@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -131,13 +132,13 @@ const CATEGORIES = [
     ]
   },
   {
-    name: "file_tools",
-    icon: Archive,
-    color: "text-violet-500",
+    name: "audio_tools",
+    icon: Volume2,
+    color: "text-indigo-600",
     tools: [
-      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
-      { href: '/create-zip', label: 'create_zip_label', icon: Archive },
-      { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },
+      { href: '/merge-audio', label: 'audio_merger_label', icon: Merge },
+      { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Volume2 },
+      { href: '/audio-converter', label: 'audio_converter_label', icon: FileOutput },
     ]
   },
   {
@@ -176,20 +177,13 @@ const CATEGORIES = [
     ]
   },
   {
-    name: "audio_tools",
-    icon: Volume2,
-    color: "text-indigo-600",
+    name: "file_tools",
+    icon: Archive,
+    color: "text-violet-500",
     tools: [
-      { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Volume2 },
-      { href: '/audio-converter', label: 'audio_converter_label', icon: FileOutput },
-    ]
-  },
-  {
-    name: "video_tools",
-    icon: Music,
-    color: "text-indigo-500",
-    tools: [
-      { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
+      { href: '/aadhaar-printer', label: 'aadhaar_printer_label', icon: Printer },
+      { href: '/create-zip', label: 'create_zip_label', icon: Archive },
+      { href: '/unzip-file', label: 'unzip_file_label', icon: ArchiveRestore },
     ]
   }
 ];

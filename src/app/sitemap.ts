@@ -1,3 +1,4 @@
+
 import { MetadataRoute } from 'next'
 
 /**
@@ -47,6 +48,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/marriage-biodata',
     '/ai-upscaler',
     // Audio Tools
+    '/merge-audio',
     '/mp3-cutter',
     '/audio-converter',
     // Calculators
@@ -77,7 +79,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/video-to-mp3',
   ];
 
-  // Defensive check to ensure routes is an array
+  // Defensive check to ensure rules is an array
   const safeRoutes = Array.isArray(routes) ? routes : [];
 
   if (safeRoutes.length === 0) {
