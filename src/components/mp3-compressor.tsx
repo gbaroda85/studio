@@ -293,16 +293,16 @@ export default function Mp3Compressor() {
                                             <div className="flex-1 truncate">
                                                 <p className="text-sm font-black uppercase tracking-tight truncate">{audioInfo?.name}</p>
                                                 <div className="flex items-center gap-3 mt-0.5">
-                                                    <Badge className="bg-primary text-white text-[8px] font-black">{audioInfo?.format}</Badge>
-                                                    <span className="text-[10px] font-mono opacity-40">{formatBytes(audioInfo?.size || 0)}</span>
+                                                    <Badge className="bg-primary text-white text-[8px] font-black">{audioInfo?.format || 'LOADING'}</Badge>
+                                                    <span className="text-[10px] font-mono opacity-40">{audioInfo ? formatBytes(audioInfo.size) : '---'}</span>
                                                 </div>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Duration</span><span className="text-xs font-black uppercase tracking-tight">{formatTime(audioInfo?.duration || 0)}</span></div>
-                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Sample Rate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.sampleRate} Hz</span></div>
-                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Bitrate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.bitrate} kbps</span></div>
-                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Channels</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.channels === 1 ? "MONO" : "STEREO"}</span></div>
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Duration</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo ? formatTime(audioInfo.duration) : '---'}</span></div>
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Sample Rate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.sampleRate || '---'} Hz</span></div>
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Bitrate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.bitrate || '---'} kbps</span></div>
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Channels</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo ? (audioInfo.channels === 1 ? "MONO" : "STEREO") : '---'}</span></div>
                                         </div>
                                     </div>
 
@@ -406,7 +406,7 @@ export default function Mp3Compressor() {
                                     <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-muted/20 p-8 rounded-[2.5rem] border-2 shadow-inner">
                                         <div className="text-center md:text-left space-y-1">
                                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Estimated Savings</p>
-                                            <p className="text-5xl md:text-6xl font-black text-primary tracking-tighter leading-none">-{estimation?.reduction.toFixed(0)}%</p>
+                                            <p className="text-5xl md:text-6xl font-black text-primary tracking-tighter leading-none">-{estimation?.reduction.toFixed(0) || 0}%</p>
                                         </div>
                                         <div className="size-32 rounded-3xl bg-primary text-white flex flex-col items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
                                             <TrendingDown className="size-10 mb-1" />
@@ -417,11 +417,11 @@ export default function Mp3Compressor() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
                                             <div className="flex items-center justify-between"><Zap className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-primary" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
-                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Source Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-primary")}>{audioInfo.bitrate} kbps</p></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Source Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-primary")}>{audioInfo?.bitrate || '---'} kbps</p></div>
                                         </div>
                                         <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
                                             <div className="flex items-center justify-between"><Target className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-emerald-500" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
-                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Target Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-emerald-500")}>{estimation?.bitrate} kbps</p></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Target Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-emerald-500")}>{estimation?.bitrate || '---'} kbps</p></div>
                                         </div>
                                     </div>
 
@@ -449,7 +449,7 @@ export default function Mp3Compressor() {
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center px-2">
                                                 <Label className="text-[10px] font-black uppercase opacity-60">Source File</Label>
-                                                <Badge variant="secondary" className="text-[8px] font-mono">{audioInfo.bitrate} kbps</Badge>
+                                                <Badge variant="secondary" className="text-[8px] font-mono">{audioInfo?.bitrate || '---'} kbps</Badge>
                                             </div>
                                             <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 p-2 shadow-inner group transition-all hover:border-primary/20">
                                                 <audio ref={originalAudioRef} src={originalUrl!} className="w-full h-10" controls />

@@ -57,21 +57,17 @@ import {
   PenLine,
   PenTool,
   CalendarDays,
-  Menu,
   Palette,
   CheckCircle2,
   Trophy,
   Target,
-  Settings,
   Video,
   MousePointer2,
-  ChevronRight,
   Volume2,
   Banknote
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { useState, useMemo, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 
