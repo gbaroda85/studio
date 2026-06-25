@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
@@ -343,7 +344,7 @@ export default function ResumeBuilderMain() {
         if (data.experience.length > 0) score += 20;
         if (data.education.length > 0) score += 20;
         if (data.skills.technical.length > 2) score += 10;
-        if (data.projects.length > 0) score += 10;
+        if (data.skills.tools.length > 1) score += 10;
         return score;
     }, [data]);
 
@@ -440,7 +441,7 @@ export default function ResumeBuilderMain() {
                                         <div className="space-y-6">
                                             <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 uppercase">Professional Summary</Badge>
                                             <div className="space-y-4">
-                                                <Label className="text-[9px] font-black uppercase opacity-60">Describe your career profile</Label>
+                                                <Label className="text-[10px] font-black uppercase opacity-60">Describe your career profile</Label>
                                                 <Textarea 
                                                     value={data.summary} 
                                                     onChange={(e) => setData(prev => ({ ...prev, summary: e.target.value }))} 
@@ -524,8 +525,6 @@ export default function ResumeBuilderMain() {
                                             ))}
                                         </div>
                                     )}
-
-                                    {/* REUSE FORM LOGIC FOR OTHER STEPS */}
                                 </motion.div>
                             </AnimatePresence>
                         </CardContent>
@@ -614,3 +613,4 @@ export default function ResumeBuilderMain() {
         </div>
     );
 }
+

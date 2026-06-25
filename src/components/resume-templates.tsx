@@ -5,6 +5,7 @@ import React from 'react';
 import { ResumeData } from './resume-builder-main';
 import { Mail, Phone, MapPin, Linkedin, Globe, Calendar, Award, CheckCircle2, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface TemplateProps {
     data: ResumeData;
@@ -281,7 +282,7 @@ function TechDeveloper({ data }: TemplateProps) {
             <div className="w-[30%] bg-[#1e293b] text-white p-10 flex flex-col gap-10">
                 <div className="flex flex-col items-center gap-6">
                     <div className="size-32 rounded-3xl border-4 border-white/10 overflow-hidden bg-white/5">
-                        {data.personal.photo ? <img src={data.personal.photo} className="size-full object-cover" /> : <User2 className="size-full p-6 opacity-20" />}
+                        {data.personal.photo ? <img src={data.personal.photo} className="size-full object-cover" /> : <Circle className="size-full p-6 opacity-20" />}
                     </div>
                     <div className="text-center space-y-1">
                         <h2 className="text-sm font-black uppercase tracking-widest">{data.personal.fullName}</h2>
@@ -403,3 +404,4 @@ function TemplateBase({ data, theme }: { data: ResumeData, theme: string }) {
         </div>
     );
 }
+
