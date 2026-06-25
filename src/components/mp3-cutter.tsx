@@ -589,7 +589,7 @@ export default function Mp3Cutter() {
                             </CardContent>
                             <CardFooter className="bg-muted/10 p-6 border-t flex flex-col">
                                 <ScrollArea className="w-full h-auto">
-                                    <div className="flex gap-3 pb-4">
+                                    <div className="flex gap-3 pb-4 px-2">
                                         {regionsList.map((r, i) => (
                                             <div key={r.id} onClick={() => { setActiveRegionId(r.id); playRegion(r); }}
                                                  className={cn(
@@ -660,8 +660,7 @@ export default function Mp3Cutter() {
                                     
                                     {activeRegion && (
                                         <Button 
-                                            variant="outline"
-                                            className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-sm"
+                                            className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase shadow-md transition-all active:scale-95 border-none"
                                             onClick={() => downloadSegment(activeRegion)}
                                         >
                                             <Download className="mr-2 size-4" /> DOWNLOAD THIS PART
