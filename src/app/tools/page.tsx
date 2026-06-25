@@ -647,7 +647,7 @@ function ToolsPageContent() {
             <div className="space-y-20 font-body">
             {searchResults.length > 0 ? (
                 searchResults.map(({ categoryKey, features, icon: Icon, bgColor }) => (
-                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu text-left">
+                <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu text-left pb-6">
                     <div className="flex items-center gap-3 mb-10 text-left">
                       <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-md", bgColor)}>
                         <Icon className="size-6 text-white" />
@@ -720,7 +720,7 @@ function ToolsPageContent() {
 
             <TabsContent value="all" className="space-y-16 md:space-y-24 animate-in fade-in slide-in-from-bottom-4 duration-700 outline-none transform-gpu">
                 {allFeatureGroups.map(({ categoryKey, features, icon: Icon, bgColor }) => (
-                    <section key={categoryKey} className="space-y-8 md:space-y-10 text-left">
+                    <section key={categoryKey} className="space-y-8 md:space-y-10 text-left pb-6">
                         <div className="flex items-center gap-3 mb-6 text-left">
                             <div className={cn("size-10 rounded-xl flex items-center justify-center shadow-md", bgColor)}>
                                 <Icon className="size-6 text-white" />

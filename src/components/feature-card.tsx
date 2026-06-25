@@ -29,8 +29,8 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} className="group block h-full touch-manipulation">
-      <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1.5 shadow-xl dark:shadow-primary/5 hover:shadow-2xl dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[280px] md:min-h-[300px] overflow-hidden">
-        <div className={cn("flex-1 rounded-[1.5rem] overflow-hidden flex flex-col p-5 md:p-6 shadow-inner", lightBg, "dark:bg-slate-900/60")}>
+      <div className="h-full bg-white dark:bg-[#0a040d] rounded-[2rem] p-1 shadow-[0_15px_40px_-15px_rgba(0,0,0,0.1)] dark:shadow-primary/5 hover:shadow-[0_25px_60px_-15px_rgba(0,0,0,0.2)] dark:hover:shadow-primary/20 transition-all duration-500 hover:-translate-y-2 hover:scale-[1.01] border-2 border-slate-200/50 dark:border-primary/20 flex flex-col transform-gpu min-h-[280px] md:min-h-[300px]">
+        <div className={cn("flex-1 rounded-[1.7rem] overflow-hidden flex flex-col p-5 md:p-6 shadow-inner", lightBg, "dark:bg-slate-900/60")}>
           {/* COMPACT 3D ICON CONTAINER */}
           <div className={cn(
             "grid size-12 md:size-14 place-items-center rounded-[1rem] md:rounded-[1.2rem] transition-transform duration-200 group-hover:scale-110 shrink-0 transform-gpu",
@@ -55,7 +55,7 @@ export function FeatureCard({
         </div>
 
         {/* Footer Section with Uiverse Animated Button */}
-        <div className="bg-white/20 dark:bg-black/20 py-2 md:py-2.5 px-6 md:px-8 flex items-center justify-between shrink-0">
+        <div className="bg-white/10 dark:bg-black/10 py-2 md:py-2.5 px-6 md:px-8 flex items-center justify-between shrink-0">
           <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400 opacity-60">Launch Tool</span>
           <div className="launch-arrow-btn scale-[0.6] md:scale-[0.7] origin-right -mr-2">
             <div className="button-box">
