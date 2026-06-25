@@ -18,7 +18,8 @@ import {
     Activity,
     Monitor,
     FileOutput,
-    Target
+    Target,
+    Scissors
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -33,8 +34,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-// Dynamic import for lamejs
-let lamejs: any = null;
+// Dynamic reference for lamejs
+let lamejsModule: any = null;
 
 type CompressionMode = 'easy' | 'advanced';
 type QualityLevel = 'low' | 'medium' | 'high';
@@ -98,16 +99,21 @@ export default function Mp3Compressor() {
     const originalAudioRef = useRef<HTMLAudioElement>(null);
     const compressedAudioRef = useRef<HTMLAudioElement>(null);
 
-    // FIX: Load LameJS and initialize Global Shim to fix MPEGMode error
+    // CRITICAL: Robust initialization of LameJS with Global Shim
     useEffect(() => {
-        if (typeof window !== 'undefined' && !lamejs) {
+        if (typeof window !== 'undefined' && !lamejsModule) {
             import('lamejs').then(module => {
-                lamejs = module;
-                // CRITICAL SHIM: Attach internal classes to window to prevent "not defined" errors in library
-                (window as any).MPEGMode = (module as any).MPEGMode;
-                (window as any).Lame = (module as any).Lame;
-                (window as any).BitStream = (module as any).BitStream;
-                (window as any).VbrMode = (module as any).VbrMode;
+                lamejsModule = module;
+                // ULTIMATE SHIM: Attach EVERY internal class to window to fix 'NOT_SET' and 'MPEGMode' errors
+                const w = window as any;
+                w.MPEGMode = module.MPEGMode;
+                w.Lame = module.Lame;
+                w.BitStream = module.BitStream;
+                w.VbrMode = module.VbrMode;
+                w.Presets = module.Presets;
+                w.GainAnalysis = module.GainAnalysis;
+                w.QuantizePVT = module.QuantizePVT;
+                console.log("[LameJS] Global shim applied successfully.");
             }).catch(e => console.error("LameJS load error:", e));
         }
     }, []);
@@ -175,7 +181,7 @@ export default function Mp3Compressor() {
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
     const handleCompress = async () => {
-        if (!file || !audioInfo || !lamejs) {
+        if (!file || !audioInfo || !lamejsModule) {
             toast({ variant: 'destructive', title: "Engine Error", description: "Compression engine is still initializing. Please wait." });
             return;
         }
@@ -185,10 +191,6 @@ export default function Mp3Compressor() {
         setStatusText("Initializing Local Workspace...");
 
         try {
-            // Re-apply SHIM just in case
-            (window as any).MPEGMode = (lamejs as any).MPEGMode;
-            (window as any).Lame = (lamejs as any).Lame;
-
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const arrayBuffer = await file.arrayBuffer();
             setStatusText("Decoding Audio Stream...");
@@ -198,9 +200,9 @@ export default function Mp3Compressor() {
             const targetSampleRate = sampleRate === 'auto' ? audioBuffer.sampleRate : parseInt(sampleRate);
             const channels = audioBuffer.numberOfChannels;
 
-            // Use the constructor with proper scoping
-            const Mp3Encoder = lamejs.Mp3Encoder;
-            const mp3encoder = new Mp3Encoder(channels, targetSampleRate, targetBitrate);
+            // Use window reference to ensure all shimmed properties are picked up by constructor
+            const w = window as any;
+            const mp3encoder = new w.lamejs.Mp3Encoder(channels, targetSampleRate, targetBitrate);
             
             const mp3Data: any[] = [];
             const sampleSize = 1152; 

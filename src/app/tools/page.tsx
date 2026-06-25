@@ -59,28 +59,23 @@ import {
   TrendingUp,
   PiggyBank,
   Layers,
-  Home as HomeIcon,
-  PenTool,
-  Banknote,
   CalendarDays,
-  Menu,
+  ScanLine,
   Palette,
-  CheckCircle2,
-  Trophy,
-  Target,
-  Settings,
+  Banknote,
   Video,
-  MousePointer2,
-  ChevronRight,
   Volume2,
   Sparkles,
   Zap,
   ShieldCheck,
-  LayoutGrid
+  LayoutGrid,
+  Menu,
+  ChevronRight
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import Link from 'next/link';
 
 function ToolsPageContent() {
   const {t} = useLanguage();
