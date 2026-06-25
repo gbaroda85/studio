@@ -21,15 +21,8 @@ import {
     CheckCircle2, 
     X,
     Trash2,
-    Clock,
-    MousePointer2,
-    ListFilter,
     Activity,
-    Info,
-    ChevronRight,
-    Music,
     Plus,
-    Square
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -39,7 +32,6 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -147,8 +139,7 @@ export default function Mp3Cutter() {
             const d = ws.getDuration();
             setDuration(d);
             
-            // Initial selection
-            const initialEnd = Math.min(d, 30);
+            const initialEnd = Math.min(d, d > 30 ? 30 : d);
             const mainColor = SEGMENT_COLORS[0];
             const r = regions.addRegion({
                 id: 'region-1',
@@ -159,14 +150,21 @@ export default function Mp3Cutter() {
                 resize: true,
             });
             
-            // Custom styling for handles and borders
             const el = r.element;
             el.style.borderTop = `4px solid ${mainColor}`;
             el.style.borderBottom = `4px solid ${mainColor}`;
             const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
             const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
-            if (leftHandle) leftHandle.style.backgroundColor = mainColor;
-            if (rightHandle) rightHandle.style.backgroundColor = mainColor;
+            if (leftHandle) {
+                leftHandle.style.backgroundColor = mainColor;
+                leftHandle.style.border = '2px solid white';
+                leftHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+            }
+            if (rightHandle) {
+                rightHandle.style.backgroundColor = mainColor;
+                rightHandle.style.border = '2px solid white';
+                rightHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+            }
 
             setRegionsList([{ id: r.id, start: r.start, end: r.end, color: mainColor }]);
             setActiveRegionId(r.id);
@@ -174,7 +172,6 @@ export default function Mp3Cutter() {
 
         ws.on('audioprocess', (time) => {
             setCurrentTime(time);
-            
             const currentActiveId = stateRef.current.activeRegionId;
             if (currentActiveId) {
                 const active = stateRef.current.regionsList.find(r => r.id === currentActiveId);
@@ -238,7 +235,6 @@ export default function Mp3Cutter() {
 
     const togglePlay = () => {
         if (!wavesurferRef.current) return;
-
         const active = regionsList.find(r => r.id === activeRegionId);
         if (active) {
             const time = wavesurferRef.current.getCurrentTime();
@@ -246,7 +242,6 @@ export default function Mp3Cutter() {
                 wavesurferRef.current.setTime(active.start);
             }
         }
-        
         wavesurferRef.current.playPause();
     };
     
@@ -261,7 +256,6 @@ export default function Mp3Cutter() {
         const d = wavesurferRef.current.getDuration();
         const start = Math.min(currentTime, d - 5);
         const end = Math.min(start + 10, d);
-        
         const nextColor = SEGMENT_COLORS[regionsList.length % SEGMENT_COLORS.length];
         
         const r = regionsPluginRef.current.addRegion({
@@ -273,14 +267,21 @@ export default function Mp3Cutter() {
             resize: true,
         });
 
-        // Apply color styling to handles and borders
         const el = r.element;
         el.style.borderTop = `4px solid ${nextColor}`;
         el.style.borderBottom = `4px solid ${nextColor}`;
         const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
         const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
-        if (leftHandle) leftHandle.style.backgroundColor = nextColor;
-        if (rightHandle) rightHandle.style.backgroundColor = nextColor;
+        if (leftHandle) {
+            leftHandle.style.backgroundColor = nextColor;
+            leftHandle.style.border = '2px solid white';
+            leftHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+        }
+        if (rightHandle) {
+            rightHandle.style.backgroundColor = nextColor;
+            rightHandle.style.border = '2px solid white';
+            rightHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+        }
 
         setRegionsList(prev => [...prev, { id: r.id, start: r.start, end: r.end, color: nextColor }]);
         setActiveRegionId(r.id);
@@ -310,20 +311,6 @@ export default function Mp3Cutter() {
             const end = type === 'end' ? Math.max(region.start + 0.1, Math.min(duration, time)) : region.end;
             region.setOptions({ start, end });
         }
-    };
-
-    const concatenateAudioBuffers = (audioCtx: AudioContext, buffers: AudioBuffer[]): AudioBuffer => {
-        const totalLength = buffers.reduce((acc, buf) => acc + buf.length, 0);
-        const out = audioCtx.createBuffer(buffers[0].numberOfChannels, totalLength, buffers[0].sampleRate);
-        
-        for (let channel = 0; channel < buffers[0].numberOfChannels; channel++) {
-            let offset = 0;
-            for (const buf of buffers) {
-                out.getChannelData(channel).set(buf.getChannelData(channel), offset);
-                offset += buf.length;
-            }
-        }
-        return out;
     };
 
     const audioBufferToWav = (buffer: AudioBuffer) => {
@@ -414,7 +401,6 @@ export default function Mp3Cutter() {
                 source.buffer = originalBuffer;
 
                 const gainNode = offlineCtx.createGain();
-                
                 if (fadeIn > 0 && i === 0) {
                     gainNode.gain.setValueAtTime(0, 0);
                     gainNode.gain.linearRampToValueAtTime(1, fadeIn);
@@ -433,16 +419,23 @@ export default function Mp3Cutter() {
                 setProgress(30 + Math.round(((i + 1) / sortedRegions.length) * 40));
             }
 
-            const finalBuffer = concatenateAudioBuffers(audioCtx, segmentBuffers);
-            setProgress(80);
+            const totalLength = segmentBuffers.reduce((acc, buf) => acc + buf.length, 0);
+            const finalBuffer = audioCtx.createBuffer(segmentBuffers[0].numberOfChannels, totalLength, segmentBuffers[0].sampleRate);
+            for (let channel = 0; channel < segmentBuffers[0].numberOfChannels; channel++) {
+                let offset = 0;
+                for (const buf of segmentBuffers) {
+                    finalBuffer.getChannelData(channel).set(buf.getChannelData(channel), offset);
+                    offset += buf.length;
+                }
+            }
             
+            setProgress(80);
             const wavBlob = audioBufferToWav(finalBuffer);
             setResultUrl(URL.createObjectURL(wavBlob));
             setProgress(100);
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "Multi-Part Join Complete!" });
         } catch (e) {
-            console.error(e);
             toast({ variant: 'destructive', title: "Extraction Error" });
             setStage('studio');
         } finally {
@@ -479,11 +472,12 @@ export default function Mp3Cutter() {
                     align-items: center !important;
                     justify-content: center !important;
                     cursor: ew-resize !important;
-                    box-shadow: 0 0 10px rgba(0,0,0,0.3) !important;
+                    box-shadow: 0 0 10px rgba(0,0,0,0.5) !important;
+                    border: 2px solid white !important;
                 }
                 .wavesurfer-handle::after {
                     content: "|||" !important;
-                    color: rgba(255,255,255,0.6) !important;
+                    color: rgba(255,255,255,0.8) !important;
                     font-size: 10px !important;
                     font-weight: 900 !important;
                     letter-spacing: -1px !important;
@@ -511,7 +505,7 @@ export default function Mp3Cutter() {
                                     <UploadCloud className="size-20 text-muted-foreground group-hover:text-primary transition-colors" />
                                     <Zap className="absolute -top-1 -right-1 size-8 text-yellow-500 animate-pulse" />
                                 </div>
-                                <div className="text-center">
+                                <div className="text-center px-4 text-left">
                                     <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Audio File</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP3, WAV, M4A Support</p>
                                 </div>
@@ -551,7 +545,7 @@ export default function Mp3Cutter() {
                                                 step="0.01"
                                                 value={activeRegion.start.toFixed(2)} 
                                                 onChange={(e) => handleManualTimeChange('start', e.target.value)}
-                                                className="h-8 text-center font-black border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                                className="h-8 text-center font-black border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0 bg-transparent"
                                                 style={{ color: activeRegion.color }}
                                             />
                                         </div>
@@ -562,7 +556,7 @@ export default function Mp3Cutter() {
                                                 step="0.01"
                                                 value={activeRegion.end.toFixed(2)} 
                                                 onChange={(e) => handleManualTimeChange('end', e.target.value)}
-                                                className="h-8 text-center font-black border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0"
+                                                className="h-8 text-center font-black border-none shadow-none focus-visible:ring-0 text-sm font-mono p-0 bg-transparent"
                                                 style={{ color: activeRegion.color }}
                                             />
                                         </div>
@@ -573,7 +567,7 @@ export default function Mp3Cutter() {
                                     </div>
                                 )}
 
-                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-inner border-2 overflow-x-auto custom-scrollbar">
+                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-inner border-2">
                                     <div ref={containerRef} className="w-full min-w-full" style={{ touchAction: 'none' }} />
                                     <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40">
                                         <span>00:00.00</span>
@@ -585,7 +579,7 @@ export default function Mp3Cutter() {
                                 </div>
 
                                 <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
-                                    <Button variant="outline" size="icon" className="size-14 rounded-full border-4 shadow-xl active:scale-95 transition-all" onClick={togglePlay}>
+                                    <Button variant="outline" size="icon" className="size-14 rounded-full border-4 shadow-xl active:scale-95 transition-all bg-white dark:bg-slate-900" onClick={togglePlay}>
                                         {isPlaying ? <Pause className="size-6" /> : <Play className="size-6 ml-1" />}
                                     </Button>
                                     <Button className="h-14 px-8 rounded-2xl bg-primary text-white font-black uppercase text-xs shadow-lg group" onClick={addNewSegment}>
@@ -593,23 +587,23 @@ export default function Mp3Cutter() {
                                     </Button>
                                 </div>
                             </CardContent>
-                            <CardFooter className="bg-muted/10 p-6 border-t">
+                            <CardFooter className="bg-muted/10 p-6 border-t flex flex-col">
                                 <ScrollArea className="w-full h-auto">
-                                    <div className="flex gap-3 pb-2">
+                                    <div className="flex gap-3 pb-4">
                                         {regionsList.map((r, i) => (
                                             <div key={r.id} onClick={() => { setActiveRegionId(r.id); playRegion(r); }}
                                                  className={cn(
                                                      "flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all shrink-0", 
-                                                     activeRegionId === r.id ? "bg-white ring-2 shadow-md" : "bg-white border-transparent hover:border-muted-foreground/20 shadow-sm"
+                                                     activeRegionId === r.id ? "bg-white dark:bg-slate-800 ring-2 shadow-md scale-105 z-10" : "bg-white/50 dark:bg-slate-900/50 border-transparent hover:border-muted-foreground/20 shadow-sm"
                                                  )}
                                                  style={{ borderColor: activeRegionId === r.id ? r.color : 'transparent' }}
                                             >
                                                 <Badge style={{ backgroundColor: r.color, color: '#fff' }} className="font-black">#{i + 1}</Badge>
                                                 <div className="flex flex-col text-[10px] font-bold">
-                                                    <span className="text-slate-500">{formatTime(r.start)} - {formatTime(r.end)}</span>
+                                                    <span className="text-slate-500 dark:text-slate-400">{formatTime(r.start)} - {formatTime(r.end)}</span>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <Button size="icon" variant="ghost" className="size-8 rounded-full text-blue-600 hover:bg-blue-50" onClick={(e) => { e.stopPropagation(); downloadSegment(r); }} title="Download this part">
+                                                    <Button size="icon" variant="ghost" className="size-8 rounded-full text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30" onClick={(e) => { e.stopPropagation(); downloadSegment(r); }} title="Download this part">
                                                         <Download className="size-4" />
                                                     </Button>
                                                     <Button size="icon" variant="ghost" className="size-8 rounded-full text-destructive hover:bg-destructive/5" onClick={(e) => { e.stopPropagation(); removeRegion(r.id); }}>
@@ -655,7 +649,7 @@ export default function Mp3Cutter() {
                             <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-4">
                                 <div className="flex flex-col gap-3 w-full">
                                     <Button 
-                                        className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 group px-10 flex items-center justify-center gap-4 shadow-2xl" 
+                                        className="magic-button w-full h-16 md:h-18 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 group px-10 flex items-center justify-center gap-4 shadow-2xl" 
                                         onClick={exportAudio}
                                         disabled={regionsList.length === 0}
                                     >
@@ -667,7 +661,7 @@ export default function Mp3Cutter() {
                                     {activeRegion && (
                                         <Button 
                                             variant="outline"
-                                            className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase text-blue-600 border-blue-200 hover:bg-blue-50"
+                                            className="w-full h-12 rounded-xl border-2 font-black text-xs uppercase text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-900/50 hover:bg-blue-50 dark:hover:bg-blue-900/30 shadow-sm"
                                             onClick={() => downloadSegment(activeRegion)}
                                         >
                                             <Download className="mr-2 size-4" /> DOWNLOAD THIS PART
@@ -717,7 +711,7 @@ export default function Mp3Cutter() {
                             )}
 
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-xl mx-auto pt-6">
-                                <Button variant="outline" onClick={() => setStage('studio')} className="h-14 px-8 rounded-xl font-black uppercase text-[10px] border-2 flex-1 w-full"><RefreshCcw className="mr-2 size-4" /> Back to Studio</Button>
+                                <Button variant="outline" onClick={() => setStage('studio')} className="h-14 px-8 rounded-xl font-black uppercase text-[10px] border-2 flex-1 w-full bg-white dark:bg-slate-900"><RefreshCcw className="mr-2 size-4" /> Back to Studio</Button>
                                 <Button 
                                     size="lg" 
                                     className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none flex-[2] w-full" 
