@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -67,7 +68,8 @@ import {
   CheckCircle2,
   Trophy,
   Target,
-  MousePointer2
+  MousePointer2,
+  BookOpenText
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -76,6 +78,7 @@ import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
   // FEATURED / VISUAL PROCESSORS
+  { icon: BookOpenText, title: "RESUME BUILDER", description: "Create professional ATS-friendly resumes instantly.", href: "/resume-builder", colorClass: "bg-gradient-to-br from-indigo-600 to-blue-700", lightBg: "bg-indigo-50", category: "featured" },
   { icon: CalendarDays, title: "ADD NAME & DATE TO PHOTO", description: "Add Name and Date to passport photos instantly.", href: "/passport-date-name", colorClass: "bg-gradient-to-br from-blue-500 to-blue-700", lightBg: "bg-blue-50", category: "featured" },
   { icon: Wand2, title: "PHOTO ENHANCER", description: "Improve brightness, contrast and quality instantly.", href: "/enhance-photo", colorClass: "bg-gradient-to-br from-violet-500 to-violet-700", lightBg: "bg-violet-50", category: "featured" },
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-rose-50", category: "featured" },
@@ -136,7 +139,7 @@ const ALL_TOOLS = [
   { icon: AreaChart, title: "AREA CONVERTER", description: "Convert international and local land area units.", href: "/area-converter", colorClass: "bg-lime-500", lightBg: "bg-[#f7fee7]", category: "converters" },
   { icon: Fuel, title: "FUEL CONVERTER", description: "Convert between MPG and km/L efficiency units.", href: "/fuel-converter", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "converters" },
   { icon: Waves, title: "PRESSURE CONVERTER", description: "Convert Bar, PSI, and Pascal units with precision.", href: "/pressure-converter", colorClass: "bg-sky-500", lightBg: "bg-[#f0f9ff]", category: "converters" },
-  { icon: Route, title: "FUEL COST CALCULATOR", description: "Estimate trip fuel expenses and distance.", href: "/fuel-cost-calculator", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "calculator" },
+  { icon: Route, title: "FUEL COST CALCULATOR", description: "Estimate trip fuel expenses and distance.", href: "/fuel-cost-calculator", colorClass: "bg-rose-50", lightBg: "bg-[#fff1f2]", category: "calculator" },
   { icon: Coins, title: "INTEREST CALCULATOR", description: "Calculate simple and compound interest returns.", href: "/interest-calculator", colorClass: "bg-yellow-600", lightBg: "bg-[#fefce8]", category: "calculator" },
   { icon: Receipt, title: "SALES TAX CALCULATOR", description: "Calculate bill tax and final price inclusive of tax.", href: "/sales-tax-calculator", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
   { icon: Percent, title: "PERCENTAGE CALCULATOR", description: "Find percentages for marks, ratios and discounts.", href: "/percentage-calculator", colorClass: "bg-blue-500", lightBg: "bg-[#eff6ff]", category: "calculator" },
