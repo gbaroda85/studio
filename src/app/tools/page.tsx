@@ -605,7 +605,7 @@ function ToolsPageContent() {
             Everything happens locally in your browser for 100% privacy.
           </p>
 
-          <div className="relative max-lg mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="relative max-w-2xl w-full mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
               <div className="relative">
                 <input
