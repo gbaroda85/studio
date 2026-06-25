@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
     'pdfjs-dist',
     'tesseract.js',
     'pdf-lib',
-    '@tensorflow/tfjs'
+    '@tensorflow/tfjs',
+    '@ffmpeg/ffmpeg',
+    '@ffmpeg/util'
   ],
   images: {
     remotePatterns: [
