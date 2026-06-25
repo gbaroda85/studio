@@ -1,4 +1,3 @@
-
 import { MetadataRoute } from 'next'
 
 /**
@@ -51,7 +50,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/merge-audio',
     '/mp3-cutter',
     '/audio-converter',
-    '/compress-mp3',
     // Calculators
     '/salary-slip',
     '/gst-invoice',

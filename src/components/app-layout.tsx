@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -39,13 +40,9 @@ import {
   Menu,
   Languages,
   Zap,
-  Home,
+  Home as HomeIcon,
   UserCircle,
-  Infinity,
-  Gauge,
-  AreaChart,
-  Fuel,
-  Waves,
+  Infinity as InfinityIcon,
   Printer,
   Lock,
   Heart,
@@ -64,7 +61,11 @@ import {
   Palette,
   Banknote,
   Video,
-  Volume2
+  Volume2,
+  Gauge,
+  AreaChart,
+  Fuel,
+  Waves
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -136,7 +137,6 @@ const CATEGORIES = [
     color: "text-indigo-600",
     tools: [
       { href: '/merge-audio', label: 'audio_merger_label', icon: Merge },
-      { href: '/compress-mp3', label: 'compress_mp3_label', icon: FileArchive },
       { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Scissors },
       { href: '/audio-converter', label: 'audio_converter_label', icon: FileOutput },
     ]
@@ -159,12 +159,12 @@ const CATEGORIES = [
       { href: '/fuel-cost-calculator', label: 'fuel_cost_calculator_label', icon: Route },
       { href: '/interest-calculator', label: 'interest_calculator_label', icon: Coins },
       { href: '/sales-tax-calculator', label: 'sales_tax_calculator_label', icon: Receipt },
-      { href: '/mortgage-calculator', label: 'mortgage_calculator_label', icon: Home },
+      { href: '/mortgage-calculator', label: 'mortgage_calculator_label', icon: HomeIcon },
     ]
   },
   {
     name: "converter_tools",
-    icon: Infinity,
+    icon: InfinityIcon,
     color: "text-amber-500",
     tools: [
       { href: '/color-picker', label: 'color_picker_label', icon: Palette },
@@ -334,7 +334,7 @@ function MobileNav() {
                   pathname === '/' ? "bg-primary text-white shadow-primary/20" : "hover:bg-muted text-slate-800 dark:text-slate-200"
                 )}
               >
-                <Home className="size-4" />
+                <HomeIcon className="size-4" />
                 {t('home')}
               </Link>
             </div>
@@ -391,7 +391,7 @@ function AppHeader() {
               )}
             >
               <Link href="/">
-                <Home className="size-4" />
+                <HomeIcon className="size-4" />
                 <span className="hidden xl:inline">{t('home')}</span>
               </Link>
             </Button>

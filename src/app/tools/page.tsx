@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense } from 'react';
@@ -330,14 +329,6 @@ function ToolsPageContent() {
       icon: Merge,
       color: 'bg-indigo-600',
       lightBg: 'bg-indigo-50'
-    },
-    {
-      href: '/compress-mp3',
-      labelKey: 'compress_mp3_label',
-      descriptionKey: 'compress_mp3_description',
-      icon: FileArchive,
-      color: 'bg-violet-600',
-      lightBg: 'bg-violet-50'
     },
     {
       href: '/mp3-cutter',
