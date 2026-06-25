@@ -66,11 +66,15 @@ import {
   CalendarDays,
   Menu,
   Palette,
-  Sparkles,
-  LayoutGrid,
-  CreditCard,
-  ScanLine,
-  Volume2
+  CheckCircle2,
+  Trophy,
+  Target,
+  Settings,
+  Video,
+  MousePointer2,
+  ChevronRight,
+  Volume2,
+  Banknote as BanknoteIcon
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -316,6 +320,14 @@ function ToolsPageContent() {
   ];
 
   const audioFeatures = [
+    {
+      href: '/merge-audio',
+      labelKey: 'audio_merger_label',
+      descriptionKey: 'audio_merger_description',
+      icon: Merge,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-[#eff6ff]'
+    },
     {
       href: '/mp3-cutter',
       labelKey: 'mp3_cutter_label',
