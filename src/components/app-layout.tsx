@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -136,6 +137,7 @@ const CATEGORIES = [
     color: "text-indigo-600",
     tools: [
       { href: '/merge-audio', label: 'audio_merger_label', icon: Merge },
+      { href: '/compress-mp3', label: 'compress_mp3_label', icon: FileArchive },
       { href: '/mp3-cutter', label: 'mp3_cutter_label', icon: Volume2 },
       { href: '/audio-converter', label: 'audio_converter_label', icon: FileOutput },
     ]
@@ -431,14 +433,14 @@ export function AppFooter() {
             <Link href="/" className="flex items-center gap-2 inline-block">
                 <GR7Logo />
             </Link>
-            <p className="text-sm text-muted-foreground max-w-sm font-medium leading-relaxed">
+            <p className="text-sm text-muted-foreground max-sm font-medium leading-relaxed">
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
             </p>
             <div className="flex items-center gap-4 pt-4">
                 <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
                     <ShieldCheck className="size-3" /> Client-Side
                 </div>
-                <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-500/10">
+                <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-100/10">
                     <Zap className="size-3" /> No Server Storage
                 </div>
             </div>

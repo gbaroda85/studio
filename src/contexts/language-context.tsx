@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode } from 'react';
@@ -79,6 +80,8 @@ const translations = {
     audio_converter_description: 'Convert between MP3, WAV, OGG and M4A instantly.',
     audio_merger_label: 'AUDIO MERGER',
     audio_merger_description: 'Combine multiple audio tracks into a single file.',
+    compress_mp3_label: 'MP3 COMPRESSOR',
+    compress_mp3_description: 'Reduce MP3 and audio file size while maintaining HD quality.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extract high-quality audio from video files instantly.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -142,7 +145,7 @@ const translations = {
     qr_code_generator_label: 'QR CODE GENERATOR',
     qr_code_generator_description: 'Generate custom QR codes with logos and gradients instantly.',
     ai_upscaler_label: 'AI UPSCALER',
-    ai_upscaler_description: 'Upscale images to 2x and 4x using browser AI.',
+    ai_upscaler_description: 'Aumente la escala de las imágenes a 2x y 4x utilizando la IA del navegador.',
     privacy_policy: 'Privacy Policy',
     terms_of_service: 'Terms of Service',
   },
@@ -211,9 +214,11 @@ const translations = {
     add_page_numbers_label: 'ADD PAGE NUMBERS',
     add_page_numbers_description: 'PDF में पेज नंबर डालें।',
     audio_converter_label: 'ऑडियो कनवर्टर',
-    audio_converter_description: 'MP3, WAV, OGG और M4A के बीच तुरंत कनवर्ट करें।',
+    audio_converter_description: 'MP3, WAV, OGG aur M4A ke beech turant convert karein.',
     audio_merger_label: 'ऑडियो मर्जर',
-    audio_merger_description: 'कई ऑडियो ट्रैक्स को एक साथ जोड़ें।',
+    audio_merger_description: 'Kai audio tracks ko ek saath jodein.',
+    compress_mp3_label: 'MP3 COMPRESSOR',
+    compress_mp3_description: 'HD quality banaye rakhte huye MP3 aur audio file size kam karein.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'वीडियो फ़ाइलों से तुरंत ऑडियो निकालें।',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -349,6 +354,8 @@ const translations = {
     audio_converter_description: 'Convierte entre MP3, WAV, OGG y M4A al instante.',
     audio_merger_label: 'Fusión de audio',
     audio_merger_description: 'Combine varias pistas de audio en un solo archivo.',
+    compress_mp3_label: 'COMPRESOR DE MP3',
+    compress_mp3_description: 'Reduzca el tamaño del archivo MP3 y de audio mientras mantiene la calidad HD.',
     video_to_mp3_label: 'VIDEO TO MP3',
     video_to_mp3_description: 'Extrae audio de alta calidad de videos.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
