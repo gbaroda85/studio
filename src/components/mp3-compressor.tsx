@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -33,10 +34,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-// Import lamejs dynamically
+// Import lamejs safely for Next.js
 let lamejs: any;
 if (typeof window !== 'undefined') {
-    lamejs = require('lamejs');
+    try {
+        lamejs = require('lamejs');
+    } catch (e) {
+        console.error("LameJS load failed", e);
+    }
 }
 
 type CompressionMode = 'easy' | 'advanced';
@@ -163,12 +168,8 @@ export default function Mp3Compressor() {
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
-    /**
-     * CHUNKED ENCODING ENGINE
-     * Optimized to handle memory limits by processing samples in small segments.
-     */
     const handleCompress = async () => {
-        if (!file || !audioInfo) return;
+        if (!file || !audioInfo || !lamejs) return;
         setIsProcessing(true);
         setProgress(0);
         setStatusText("Initializing Local Workspace...");
@@ -182,26 +183,25 @@ export default function Mp3Compressor() {
             const targetBitrate = estimation?.bitrate || 128;
             const targetSampleRate = sampleRate === 'auto' ? audioBuffer.sampleRate : parseInt(sampleRate);
             
-            const mp3encoder = new lamejs.Mp3Encoder(audioBuffer.numberOfChannels, targetSampleRate, targetBitrate);
+            // FIX: Robust initialization to avoid MPEGMode reference errors
+            const channels = audioBuffer.numberOfChannels;
+            const mp3encoder = new lamejs.Mp3Encoder(channels, targetSampleRate, targetBitrate);
+            
             const mp3Data: any[] = [];
-
-            const sampleSize = 1152; // LAME standard chunk size
-            const numChannels = audioBuffer.numberOfChannels;
+            const sampleSize = 1152; 
             const leftChannelFloat = audioBuffer.getChannelData(0);
-            const rightChannelFloat = numChannels > 1 ? audioBuffer.getChannelData(1) : leftChannelFloat;
+            const rightChannelFloat = channels > 1 ? audioBuffer.getChannelData(1) : leftChannelFloat;
 
             setStatusText("Encoding HD Bitstream...");
             
-            // Loop through the buffer in chunks to prevent memory spikes
             for (let i = 0; i < audioBuffer.length; i += sampleSize) {
                 const chunkEnd = Math.min(i + sampleSize, audioBuffer.length);
                 const chunkSize = chunkEnd - i;
                 
                 const leftChunk = new Int16Array(chunkSize);
-                const rightChunk = numChannels > 1 ? new Int16Array(chunkSize) : null;
+                const rightChunk = channels > 1 ? new Int16Array(chunkSize) : null;
 
                 for (let j = 0; j < chunkSize; j++) {
-                    // Convert Float32 (-1 to 1) to Int16 (-32768 to 32767)
                     leftChunk[j] = Math.max(-32768, Math.min(32767, leftChannelFloat[i + j] * 32768));
                     if (rightChunk) {
                         rightChunk[j] = Math.max(-32768, Math.min(32767, rightChannelFloat[i + j] * 32768));
@@ -213,9 +213,8 @@ export default function Mp3Compressor() {
                     mp3Data.push(new Int8Array(mp3buf));
                 }
 
-                if (i % (sampleSize * 10) === 0) { // Update progress every few chunks
+                if (i % (sampleSize * 20) === 0) {
                     setProgress(Math.round((i / audioBuffer.length) * 100));
-                    // Allow UI to breathe
                     await new Promise(r => requestAnimationFrame(r));
                 }
             }
@@ -233,7 +232,7 @@ export default function Mp3Compressor() {
             await audioCtx.close();
         } catch (error) {
             console.error("Compression Error:", error);
-            toast({ variant: 'destructive', title: "Process Failed", description: "Browser was unable to allocate enough memory for this file length." });
+            toast({ variant: 'destructive', title: "Process Failed", description: "Memory limit hit or unsupported audio structure." });
         } finally {
             setIsProcessing(false);
         }
@@ -262,10 +261,9 @@ export default function Mp3Compressor() {
         <div className="w-full max-w-7xl px-4 flex flex-col gap-8 pb-32 animate-in fade-in duration-700 mx-auto text-left">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
-                {/* 1. INPUT SECTION */}
                 <div className="lg:col-span-5 flex flex-col gap-6 no-print">
                     <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
-                        <CardHeader className="bg-primary/5 border-b p-6 md:p-8">
+                        <CardHeader className="bg-primary/5 border-b p-6 md:p-8 text-left">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                     <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
@@ -307,7 +305,7 @@ export default function Mp3Compressor() {
                                         <div className="absolute top-0 right-0 size-24 bg-primary/5 blur-2xl rounded-full" />
                                         <div className="flex items-center gap-4 mb-6">
                                             <div className="size-14 rounded-2xl bg-white dark:bg-slate-900 border flex items-center justify-center shadow-lg"><FileAudio className="size-8 text-primary" /></div>
-                                            <div className="flex-1 truncate">
+                                            <div className="flex-1 truncate text-left">
                                                 <p className="text-sm font-black uppercase tracking-tight truncate">{audioInfo?.name}</p>
                                                 <div className="flex items-center gap-3 mt-0.5">
                                                     <Badge className="bg-primary text-white text-[8px] font-black">{audioInfo?.format || 'LOADING'}</Badge>
@@ -352,7 +350,7 @@ export default function Mp3Compressor() {
 
                                         <TabsContent value="advanced" className="m-0 space-y-6 animate-in fade-in duration-300">
                                             <div className="grid grid-cols-2 gap-4">
-                                                <div className="space-y-2">
+                                                <div className="space-y-2 text-left">
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Target Bitrate</Label>
                                                     <Select value={bitrate} onValueChange={v => setBitrate(v as Bitrate)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
@@ -361,7 +359,7 @@ export default function Mp3Compressor() {
                                                         </SelectContent>
                                                     </Select>
                                                 </div>
-                                                <div className="space-y-2">
+                                                <div className="space-y-2 text-left">
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Sample Rate</Label>
                                                     <Select value={sampleRate} onValueChange={v => setSampleRate(v as SampleRate)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
@@ -379,7 +377,7 @@ export default function Mp3Compressor() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t flex flex-col gap-4">
+                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t flex flex-col gap-4 shrink-0">
                              {file && !compressedUrl && (
                                 <Button 
                                     className="magic-button w-full h-16 md:h-20 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl" 
@@ -408,7 +406,6 @@ export default function Mp3Compressor() {
                     </Card>
                 </div>
 
-                {/* 2. RESULTS SECTION */}
                 <div className="lg:col-span-7 space-y-6">
                     {file ? (
                         <div className="space-y-6 animate-in zoom-in-95 duration-500">
@@ -434,11 +431,11 @@ export default function Mp3Compressor() {
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
                                             <div className="flex items-center justify-between"><Zap className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-primary" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
-                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Source Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-primary")}>{audioInfo?.bitrate || 0} kbps</p></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Source Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-primary")}>{audioInfo?.bitrate} kbps</p></div>
                                         </div>
                                         <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
                                             <div className="flex items-center justify-between"><Target className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-emerald-500" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
-                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Target Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-emerald-500")}>{estimation?.bitrate || 0} kbps</p></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Target Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-emerald-500")}>{estimation?.bitrate} kbps</p></div>
                                         </div>
                                     </div>
 
@@ -475,7 +472,7 @@ export default function Mp3Compressor() {
 
                                         <AnimatePresence>
                                             {compressedUrl && (
-                                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 pt-6 border-t-2 border-dashed border-primary/20">
+                                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 pt-6 border-t-2 border-dashed border-primary/20 text-left">
                                                     <div className="flex justify-between items-center px-2">
                                                         <Label className="text-[10px] font-black uppercase text-emerald-600 flex items-center gap-2"><Sparkles className="size-3"/> Optimized Output</Label>
                                                         <Badge className="bg-emerald-500 text-white text-[8px] font-black uppercase">{estimation?.bitrate} kbps</Badge>

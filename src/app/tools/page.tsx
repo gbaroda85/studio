@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Suspense } from 'react';
@@ -603,7 +604,6 @@ function ToolsPageContent() {
 
   return (
     <main className="flex-1 bg-transparent w-full flex flex-col items-center">
-      {/* 3D Elevated Header Section */}
       <section className="relative w-full max-w-[2000px] pt-10 pb-16 overflow-hidden bg-background dark:bg-[#001D39] border-b-2 border-border/50 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.2)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] mx-auto mb-10 transition-colors duration-500 z-10 transform-gpu">
         <div className="absolute inset-0 z-0">
           <Image 
@@ -659,7 +659,7 @@ function ToolsPageContent() {
                 <section key={categoryKey} className="animate-in fade-in slide-in-from-bottom-4 duration-500 transform-gpu">
                     <div className="flex items-center gap-3 mb-10">
                       <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/5 shadow-md", color)}>
-                        <Icon className="size-6" />
+                        <Icon className="size-6 text-white" />
                       </div>
                       <h2 className="text-2xl md:text-3xl font-semibold uppercase tracking-tighter">
                         {t(categoryKey)}
@@ -732,7 +732,7 @@ function ToolsPageContent() {
                     <section key={categoryKey} className="space-y-8 md:space-y-10">
                         <div className="flex items-center gap-3 mb-6">
                             <div className={cn("size-10 rounded-xl flex items-center justify-center bg-muted/5 shadow-md", color)}>
-                                <Icon className="size-6" />
+                                <Icon className="size-6 text-white" />
                             </div>
                             <h2 className="text-2xl md:text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">
                                 {t(categoryKey)}
