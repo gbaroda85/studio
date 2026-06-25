@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -34,7 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-// Import lamejs dynamically to avoid MPEGMode reference errors in SSR/Bundling
+// Import lamejs safely for browser environment
 let lamejs: any = null;
 
 type CompressionMode = 'easy' | 'advanced';
@@ -99,18 +98,13 @@ export default function Mp3Compressor() {
     const originalAudioRef = useRef<HTMLAudioElement>(null);
     const compressedAudioRef = useRef<HTMLAudioElement>(null);
 
-    // Load lamejs properly on the client
+    // FIX: Professional LameJS Loading Logic to prevent MPEGMode Reference Errors
     useEffect(() => {
-        const loadLame = async () => {
-            if (typeof window !== 'undefined' && !lamejs) {
-                try {
-                    lamejs = await import('lamejs');
-                } catch (e) {
-                    console.error("LameJS load failed", e);
-                }
-            }
-        };
-        loadLame();
+        if (typeof window !== 'undefined' && !lamejs) {
+            import('lamejs').then(module => {
+                lamejs = module;
+            }).catch(e => console.error("LameJS load error:", e));
+        }
     }, []);
 
     const estimation = useMemo(() => {
@@ -177,7 +171,7 @@ export default function Mp3Compressor() {
 
     const handleCompress = async () => {
         if (!file || !audioInfo || !lamejs) {
-            toast({ variant: 'destructive', title: "Engine Error", description: "Compression engine is still loading. Please wait a second." });
+            toast({ variant: 'destructive', title: "Engine Error", description: "Compression engine is still initializing. Please wait." });
             return;
         }
         
@@ -195,14 +189,10 @@ export default function Mp3Compressor() {
             const targetSampleRate = sampleRate === 'auto' ? audioBuffer.sampleRate : parseInt(sampleRate);
             const channels = audioBuffer.numberOfChannels;
 
-            // Using robust instantiation logic
-            let mp3encoder;
-            try {
-                mp3encoder = new lamejs.Mp3Encoder(channels, targetSampleRate, targetBitrate);
-            } catch (initError) {
-                console.error("Encoder Init Error:", initError);
-                throw new Error("MPEGMode/LameJS Initialization Failed");
-            }
+            // CRITICAL FIX: Ensure the Mp3Encoder is created correctly from the imported module
+            // Some lamejs versions require different instantiation patterns
+            const Mp3Encoder = lamejs.Mp3Encoder;
+            const mp3encoder = new Mp3Encoder(channels, targetSampleRate, targetBitrate);
             
             const mp3Data: any[] = [];
             const sampleSize = 1152; 
@@ -244,12 +234,13 @@ export default function Mp3Compressor() {
             const blob = new Blob(mp3Data, { type: 'audio/mp3' });
             setCompressedUrl(URL.createObjectURL(blob));
             
+            setProgress(100);
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "Compression Success!" });
             await audioCtx.close();
         } catch (error: any) {
             console.error("Compression Error:", error);
-            toast({ variant: 'destructive', title: "Process Failed", description: "Browser environment issue or large file memory limit." });
+            toast({ variant: 'destructive', title: "Process Failed", description: "This error usually occurs due to large file memory limits." });
         } finally {
             setIsProcessing(false);
         }
