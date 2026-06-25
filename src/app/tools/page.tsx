@@ -597,7 +597,7 @@ function ToolsPageContent() {
             <LayoutGrid className="size-3" /> THE COMPLETE GR7 TOOLKIT
           </div>
           
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight uppercase font-headline">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight uppercase font-headline text-black dark:text-white">
             All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-accent">Hub Studio</span>
           </h1>
           
@@ -605,7 +605,7 @@ function ToolsPageContent() {
             Everything happens locally in your browser for 100% privacy.
           </p>
 
-          <div className="relative max-w-lg mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+          <div className="relative max-lg mx-auto z-20 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <div className="absolute -inset-1 bg-gradient-to-r from-primary via-blue-500 to-accent rounded-full blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
               <div className="relative">
                 <input
