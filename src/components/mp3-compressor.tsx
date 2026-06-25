@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
@@ -25,7 +24,9 @@ import {
     ChevronRight,
     Monitor,
     Smartphone,
-    Layers
+    Layers,
+    FileOutput,
+    Target
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -40,7 +41,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
-// Import lamejs dynamically to avoid build-time window issues
+// Import lamejs dynamically
 let lamejs: any;
 if (typeof window !== 'undefined') {
     lamejs = require('lamejs');
@@ -102,16 +103,12 @@ export default function Mp3Compressor() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [statusText, setStatusText] = useState("");
-    const [processingTime, setProcessingTime] = useState(0);
     const [isDragOver, setIsDragOver] = useState(false);
-    const [isOriginalPlaying, setIsOriginalPlaying] = useState(false);
-    const [isCompressedPlaying, setIsCompressedPlaying] = useState(false);
 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const originalAudioRef = useRef<HTMLAudioElement>(null);
     const compressedAudioRef = useRef<HTMLAudioElement>(null);
 
-    // Estimation logic
     const estimation = useMemo(() => {
         if (!audioInfo) return null;
         let targetBitrate = 128;
@@ -147,7 +144,6 @@ export default function Mp3Compressor() {
         setCompressedUrl(null);
         setProgress(0);
 
-        // Extract Metadata
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         try {
             const arrayBuffer = await selectedFile.arrayBuffer();
@@ -169,6 +165,7 @@ export default function Mp3Compressor() {
         }
     };
 
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
     const handleCompress = async () => {
@@ -176,7 +173,6 @@ export default function Mp3Compressor() {
         setIsProcessing(true);
         setProgress(0);
         setStatusText("Initializing Local Workspace...");
-        const startTime = Date.now();
 
         try {
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -187,7 +183,6 @@ export default function Mp3Compressor() {
             const targetBitrate = estimation?.bitrate || 128;
             const targetSampleRate = sampleRate === 'auto' ? audioBuffer.sampleRate : parseInt(sampleRate);
             
-            // LameJS Encoder logic
             const mp3encoder = new lamejs.Mp3Encoder(audioBuffer.numberOfChannels, targetSampleRate, targetBitrate);
             const mp3Data: any[] = [];
 
@@ -195,7 +190,6 @@ export default function Mp3Compressor() {
             const channels = [];
             for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
                 const float32Data = audioBuffer.getChannelData(i);
-                // Convert float32 to int16 (PCM)
                 const int16Data = new Int16Array(float32Data.length);
                 for (let j = 0; j < float32Data.length; j++) {
                     int16Data[j] = Math.max(-32768, Math.min(32767, float32Data[j] * 32768));
@@ -217,15 +211,24 @@ export default function Mp3Compressor() {
 
             const blob = new Blob(mp3Data, { type: 'audio/mp3' });
             setCompressedUrl(URL.createObjectURL(blob));
-            setProcessingTime((Date.now() - startTime) / 1000);
             
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
             toast({ title: "Compression Success!" });
+            await audioCtx.close();
         } catch (error) {
             toast({ variant: 'destructive', title: "Process Failed", description: "Browser memory limit reached." });
         } finally {
             setIsProcessing(false);
         }
+    };
+
+    const handleDownload = () => {
+        if (!compressedUrl || !file) return;
+        const link = document.createElement("a");
+        link.href = compressedUrl;
+        const name = file.name.split('.')[0];
+        link.download = `Optimized-${name}.mp3`;
+        link.click();
     };
 
     const handleReset = () => {
@@ -283,7 +286,6 @@ export default function Mp3Compressor() {
                                 </div>
                             ) : (
                                 <div className="space-y-10 animate-in slide-in-from-left duration-300">
-                                    {/* INFO PANEL */}
                                     <div className="bg-primary/5 p-6 rounded-[2.5rem] border-2 border-primary/10 shadow-inner relative overflow-hidden group">
                                         <div className="absolute top-0 right-0 size-24 bg-primary/5 blur-2xl rounded-full" />
                                         <div className="flex items-center gap-4 mb-6">
@@ -297,14 +299,13 @@ export default function Mp3Compressor() {
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-y-4 gap-x-8">
-                                            <DetailItem label="Duration" value={formatTime(audioInfo?.duration || 0)} />
-                                            <DetailItem label="Sample Rate" value={`${audioInfo?.sampleRate} Hz`} />
-                                            <DetailItem label="Bitrate" value={`${audioInfo?.bitrate} kbps`} />
-                                            <DetailItem label="Channels" value={audioInfo?.channels === 1 ? "MONO" : "STEREO"} />
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Duration</span><span className="text-xs font-black uppercase tracking-tight">{formatTime(audioInfo?.duration || 0)}</span></div>
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Sample Rate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.sampleRate} Hz</span></div>
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Bitrate</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.bitrate} kbps</span></div>
+                                            <div className="flex flex-col gap-0.5 text-left"><span className="text-[8px] font-black uppercase text-muted-foreground/50">Channels</span><span className="text-xs font-black uppercase tracking-tight">{audioInfo?.channels === 1 ? "MONO" : "STEREO"}</span></div>
                                         </div>
                                     </div>
 
-                                    {/* CONFIG TABS */}
                                     <Tabs value={mode} onValueChange={(v) => setMode(v as CompressionMode)} className="w-full">
                                         <div className="flex items-center justify-between mb-4 px-1">
                                             <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
@@ -376,7 +377,7 @@ export default function Mp3Compressor() {
                                         </div>
                                     ) : (
                                         <div className="flex items-center gap-3">
-                                            <FileOutput className="size-6 md:size-8 text-white/50 group-hover:scale-125 transition-transform" />
+                                            <Zap className="size-6 md:size-8 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
                                             <span className="uppercase tracking-tighter text-lg md:text-xl font-black">START COMPRESSION</span>
                                         </div>
                                     )}
@@ -390,12 +391,10 @@ export default function Mp3Compressor() {
                     </Card>
                 </div>
 
-                {/* 2. PREVIEW & RESULTS SECTION */}
+                {/* 2. RESULTS SECTION */}
                 <div className="lg:col-span-7 space-y-6">
                     {file ? (
                         <div className="space-y-6 animate-in zoom-in-95 duration-500">
-                             
-                             {/* ANALYTICS CARD */}
                              <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-900 border-2 border-primary/20 relative group">
                                 <div className="absolute top-0 right-0 size-80 bg-primary/5 blur-3xl rounded-full" />
                                 <CardHeader className="bg-primary/5 p-4 border-b text-center shrink-0">
@@ -404,7 +403,6 @@ export default function Mp3Compressor() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-8 md:p-12 space-y-10 relative z-10">
-                                    {/* Estimated Savings */}
                                     <div className="flex flex-col md:flex-row items-center justify-between gap-8 bg-muted/20 p-8 rounded-[2.5rem] border-2 shadow-inner">
                                         <div className="text-center md:text-left space-y-1">
                                             <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest opacity-60">Estimated Savings</p>
@@ -416,14 +414,17 @@ export default function Mp3Compressor() {
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <StatItem label="Source Bitrate" value={`${audioInfo.bitrate} kbps`} icon={Zap} />
-                                        <StatItem label="Target Bitrate" value={`${estimation?.bitrate} kbps`} icon={Target} color="text-emerald-500" />
-                                        <StatItem label="Current Size" value={formatBytes(audioInfo.size)} icon={Monitor} />
-                                        <StatItem label="New Est. Size" value={formatBytes(estimation?.size || 0)} icon={Smartphone} color="text-emerald-500" />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
+                                            <div className="flex items-center justify-between"><Zap className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-primary" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Source Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-primary")}>{audioInfo.bitrate} kbps</p></div>
+                                        </div>
+                                        <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
+                                            <div className="flex items-center justify-between"><Target className="size-4 opacity-40 group-hover:opacity-100 transition-opacity text-emerald-500" /><Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge></div>
+                                            <div className="truncate"><p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">Target Bitrate</p><p className={cn("text-xs font-black tracking-tight truncate", "text-emerald-500")}>{estimation?.bitrate} kbps</p></div>
+                                        </div>
                                     </div>
 
-                                    {/* Progress view during processing */}
                                     <AnimatePresence>
                                         {isProcessing && (
                                             <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="space-y-4 pt-6 border-t-2 border-dashed">
@@ -438,47 +439,32 @@ export default function Mp3Compressor() {
                                 </CardContent>
                             </Card>
 
-                            {/* AUDIO PREVIEW PLAYERS */}
                             <Card className="border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-card/50">
                                 <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
-                                    <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-3"><Monitor className="size-4 text-primary" /> Audio Comparison Studio</CardTitle>
-                                    <Badge variant="outline" className="text-[8px] font-black uppercase bg-white/50 backdrop-blur-md">32-Bit Decoded</Badge>
+                                    <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-3"><Monitor className="size-4 text-primary" /> Audio Studio Player</CardTitle>
+                                    <Badge variant="outline" className="text-[8px] font-black uppercase bg-white/50 backdrop-blur-md">Local Preview</Badge>
                                 </CardHeader>
                                 <CardContent className="p-8 space-y-10">
                                     <div className="space-y-6">
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center px-2">
-                                                <Label className="text-[10px] font-black uppercase opacity-60">Source File (Uncompressed)</Label>
+                                                <Label className="text-[10px] font-black uppercase opacity-60">Source File</Label>
                                                 <Badge variant="secondary" className="text-[8px] font-mono">{audioInfo.bitrate} kbps</Badge>
                                             </div>
                                             <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 p-2 shadow-inner group transition-all hover:border-primary/20">
-                                                <audio 
-                                                    ref={originalAudioRef} src={originalUrl!} 
-                                                    onPlay={() => setIsOriginalPlaying(true)} 
-                                                    onPause={() => setIsOriginalPlaying(false)}
-                                                    className="w-full h-10" controls 
-                                                />
+                                                <audio ref={originalAudioRef} src={originalUrl!} className="w-full h-10" controls />
                                             </div>
                                         </div>
 
                                         <AnimatePresence>
                                             {compressedUrl && (
-                                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 pt-6 border-t-2 border-dashed border-primary/10">
+                                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3 pt-6 border-t-2 border-dashed border-primary/20">
                                                     <div className="flex justify-between items-center px-2">
                                                         <Label className="text-[10px] font-black uppercase text-emerald-600 flex items-center gap-2"><Sparkles className="size-3"/> Optimized Output</Label>
                                                         <Badge className="bg-emerald-500 text-white text-[8px] font-black uppercase">{estimation?.bitrate} kbps</Badge>
                                                     </div>
                                                     <div className="bg-emerald-500/[0.03] rounded-2xl border-2 border-emerald-500/20 p-2 shadow-xl group transition-all hover:border-emerald-500/40">
-                                                        <audio 
-                                                            ref={compressedAudioRef} src={compressedUrl} 
-                                                            onPlay={() => setIsCompressedPlaying(true)} 
-                                                            onPause={() => setIsCompressedPlaying(false)}
-                                                            className="w-full h-10" controls 
-                                                        />
-                                                    </div>
-                                                    <div className="flex items-center justify-center gap-3 pt-4">
-                                                        <CheckCircle2 className="size-4 text-emerald-500" />
-                                                        <p className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Aural artifacts minimized via psychoacoustic modeling</p>
+                                                        <audio ref={compressedAudioRef} src={compressedUrl} className="w-full h-10" controls />
                                                     </div>
                                                 </motion.div>
                                             )}
@@ -491,7 +477,7 @@ export default function Mp3Compressor() {
                                             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full">
                                                 <Button 
                                                     size="lg" 
-                                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-2xl transition-all duration-300 group h-16 md:h-20 w-full shadow-2xl border-none active:scale-95" 
+                                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 w-full shadow-2xl border-none active:scale-95" 
                                                     onClick={handleDownload}
                                                 >
                                                     <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
@@ -517,30 +503,6 @@ export default function Mp3Compressor() {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
-    );
-}
-
-function DetailItem({ label, value }: { label: string, value: string }) {
-    return (
-        <div className="flex flex-col gap-0.5 text-left">
-            <span className="text-[8px] font-black uppercase text-muted-foreground/50 tracking-widest">{label}</span>
-            <span className="text-xs font-black uppercase tracking-tight">{value}</span>
-        </div>
-    );
-}
-
-function StatItem({ label, value, icon: Icon, color = "text-primary" }: { label: string, value: string, icon: any, color?: string }) {
-    return (
-        <div className="p-4 bg-white dark:bg-slate-800 rounded-[1.5rem] border shadow-sm space-y-2 group hover:border-primary/30 transition-all hover:-translate-y-0.5 text-left overflow-hidden">
-            <div className="flex items-center justify-between">
-                <Icon className={cn("size-4 opacity-40 group-hover:opacity-100 transition-opacity", color)} />
-                <Badge variant="outline" className="text-[7px] font-black border-none opacity-40 uppercase">Verified</Badge>
-            </div>
-            <div className="truncate">
-                <p className="text-[8px] font-black text-muted-foreground uppercase tracking-widest">{label}</p>
-                <p className={cn("text-xs font-black tracking-tight truncate", color)}>{value}</p>
             </div>
         </div>
     );
