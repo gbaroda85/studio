@@ -145,7 +145,6 @@ const CATEGORIES = [
     icon: Video,
     color: "text-indigo-500",
     tools: [
-      { href: '/video-splitter', label: 'video_splitter_label', icon: Scissors },
       { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
     ]
   },
