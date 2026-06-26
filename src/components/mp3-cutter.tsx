@@ -139,7 +139,8 @@ export default function Mp3Cutter() {
             barWidth: 2,
             barGap: 3,
             height: 180,
-            autoCenter: false, // Turned off to prevent the "shaking" layout shift loop
+            autoCenter: false, // Prevents infinite reflow loops
+            fillParent: true,   // Ensures it takes container width correctly
             autoScroll: true,
             dragToSeek: true,
             minPxPerSec: zoom[0],
@@ -165,20 +166,22 @@ export default function Mp3Cutter() {
                 resize: true,
             });
             
-            const el = r.element;
-            el.style.borderTop = `4px solid ${mainColor}`;
-            el.style.borderBottom = `4px solid ${mainColor}`;
-            const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
-            const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
-            if (leftHandle) {
-                leftHandle.style.backgroundColor = mainColor;
-                leftHandle.style.border = '2px solid white';
-                leftHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-            }
-            if (rightHandle) {
-                rightHandle.style.backgroundColor = mainColor;
-                rightHandle.style.border = '2px solid white';
-                rightHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+            if (r.element) {
+                const el = r.element;
+                el.style.borderTop = `4px solid ${mainColor}`;
+                el.style.borderBottom = `4px solid ${mainColor}`;
+                const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
+                const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
+                if (leftHandle) {
+                    leftHandle.style.backgroundColor = mainColor;
+                    leftHandle.style.border = '2px solid white';
+                    leftHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+                }
+                if (rightHandle) {
+                    rightHandle.style.backgroundColor = mainColor;
+                    rightHandle.style.border = '2px solid white';
+                    rightHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+                }
             }
 
             setRegionsList([{ id: r.id, start: r.start, end: r.end, color: mainColor }]);
@@ -267,20 +270,22 @@ export default function Mp3Cutter() {
             resize: true,
         });
 
-        const el = r.element;
-        el.style.borderTop = `4px solid ${nextColor}`;
-        el.style.borderBottom = `4px solid ${nextColor}`;
-        const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
-        const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
-        if (leftHandle) {
-            leftHandle.style.backgroundColor = nextColor;
-            leftHandle.style.border = '2px solid white';
-            leftHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
-        }
-        if (rightHandle) {
-            rightHandle.style.backgroundColor = nextColor;
-            rightHandle.style.border = '2px solid white';
-            rightHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+        if (r.element) {
+            const el = r.element;
+            el.style.borderTop = `4px solid ${nextColor}`;
+            el.style.borderBottom = `4px solid ${nextColor}`;
+            const leftHandle = el.querySelector('.wavesurfer-handle-left') as HTMLElement;
+            const rightHandle = el.querySelector('.wavesurfer-handle-right') as HTMLElement;
+            if (leftHandle) {
+                leftHandle.style.backgroundColor = nextColor;
+                leftHandle.style.border = '2px solid white';
+                leftHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+            }
+            if (rightHandle) {
+                rightHandle.style.backgroundColor = nextColor;
+                rightHandle.style.border = '2px solid white';
+                rightHandle.style.boxShadow = '0 0 10px rgba(0,0,0,0.5)';
+            }
         }
 
         setRegionsList(prev => [...prev, { id: r.id, start: r.start, end: r.end, color: nextColor }]);
@@ -519,7 +524,7 @@ export default function Mp3Cutter() {
 
             {stage === 'studio' && audioFile && (
                 <div className="w-full grid lg:grid-cols-12 gap-8 items-start animate-in slide-in-from-bottom-6 duration-500 text-left">
-                    <div className="lg:col-span-8 space-y-6">
+                    <div className="lg:col-span-8 space-y-6 min-w-0"> {/* min-w-0 fixes flex loops */}
                         <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem] w-full">
                             <CardHeader className="bg-muted/30 border-b py-4 px-6 flex flex-row items-center justify-between shrink-0">
                                 <div className="flex items-center gap-3">
@@ -568,9 +573,9 @@ export default function Mp3Cutter() {
                                     </div>
                                 )}
 
-                                {/* STABILIZED CONTAINER FOR WAVE */}
-                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-6 shadow-inner border-2 overflow-hidden w-full">
-                                    <div ref={containerRef} className="w-full min-w-full overflow-hidden" style={{ touchAction: 'none', height: '180px' }} />
+                                {/* STABILIZED CONTAINER FOR WAVE - Fixed Width and min-w-0 prevents shaking */}
+                                <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-6 shadow-inner border-2 overflow-hidden w-full min-w-0">
+                                    <div ref={containerRef} className="w-full !max-w-full overflow-hidden" style={{ touchAction: 'none', height: '180px' }} />
                                     <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40">
                                         <span>00:00.00</span>
                                         <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20">
