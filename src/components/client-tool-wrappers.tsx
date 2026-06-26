@@ -4,7 +4,8 @@ import dynamic from 'next/dynamic';
 import { Loader2 } from 'lucide-react';
 
 /**
- * @fileOverview Client-side wrappers for heavy AI/PDF/Audio tools to prevent SSR errors in Next.js 15.
+ * @fileOverview Client-side wrappers for heavy AI/PDF tools to prevent SSR errors.
+ * Video tools have been removed permanently.
  */
 
 const LoadingState = ({ message }: { message: string }) => (
@@ -37,9 +38,4 @@ export const PassportPhotoMakerClient = dynamic(() => import('@/components/passp
 export const PdfCropperClient = dynamic(() => import('@/components/pdf-cropper'), {
   ssr: false,
   loading: () => <LoadingState message="Initializing Crop Studio..." />
-});
-
-export const VideoCompressorClient = dynamic(() => import('@/components/video-compressor'), {
-  ssr: false,
-  loading: () => <LoadingState message="Initializing Cloud Workspace..." />
 });
