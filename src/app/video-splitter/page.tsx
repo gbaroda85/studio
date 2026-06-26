@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import VideoSplitter from '@/components/video-splitter';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -32,7 +33,7 @@ export default function VideoSplitterPage() {
     {
       title: "Media Import",
       description: "Select or drag your video file. Our local engine initializes a high-fidelity buffer in your browser RAM, ensuring zero data persistence on servers.",
-      icon: "FileVideo"
+      icon: "UploadCloud"
     },
     {
       title: "Split Protocol",
@@ -41,7 +42,7 @@ export default function VideoSplitterPage() {
     },
     {
       title: "WASM Processing",
-      description: "The engine executes ffmpeg.wasm logic to extract bitstreams at native hardware speed, preserving 100% original quality.",
+      description: "The engine executes ffmpeg.wasm logic using specialized blob workers at native hardware speed, preserving 100% original quality.",
       icon: "Zap"
     },
     {
@@ -94,7 +95,7 @@ export default function VideoSplitterPage() {
                                     <Cpu className="text-cyan-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">NATIVE WASM</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Uses WebAssembly technology to process files at hardware speed without server communication or cloud delays.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Uses WebAssembly technology with manual worker resolution to extract files at hardware speed.</p>
                             </div>
                         </div>
 
@@ -132,7 +133,7 @@ export default function VideoSplitterPage() {
                     <AccordionItem value="item-1" className="border-b-2 py-2">
                         <AccordionTrigger className="text-xl font-bold text-left">Which video formats are supported?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-lg leading-relaxed pt-2">
-                            Our studio supports all standard formats including **MP4, WebM, MOV, and AVI**. The output is usually a highly compatible MP4 format.
+                            Our studio supports all standard formats playable in your browser, including **MP4, WebM, MOV, and AVI**. The output is always a highly compatible MP4 format.
                         </AccordionContent>
                     </AccordionItem>
                     <AccordionItem value="item-2" className="border-b-2 py-2">
