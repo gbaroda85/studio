@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, useMemo, useCallback, type ChangeEvent, type DragEvent } from "react";
@@ -373,7 +374,7 @@ export default function Mp3Compressor() {
 
                 <div className="lg:col-span-7 space-y-6">
                     {file ? (
-                        <div className="space-y-6 animate-in zoom-in-95 duration-500">
+                        <div className="space-y-6 animate-in zoom-in-95 duration-500 text-left">
                              <Card className="border-none shadow-2xl rounded-[3rem] overflow-hidden bg-white dark:bg-slate-900 border-2 border-primary/20 relative group">
                                 <div className="absolute top-0 right-0 size-80 bg-primary/5 blur-3xl rounded-full" />
                                 <CardHeader className="bg-primary/5 p-4 border-b text-center shrink-0">
@@ -450,7 +451,7 @@ export default function Mp3Compressor() {
                                         </AnimatePresence>
                                     </div>
                                 </CardContent>
-                                <CardFooter className="bg-muted/10 p-8 border-t">
+                                <CardFooter className="bg-muted/10 p-8 border-t text-left">
                                     <AnimatePresence>
                                         {compressedUrl && (
                                             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full">
@@ -476,7 +477,7 @@ export default function Mp3Compressor() {
                         <div className="h-full flex flex-col items-center justify-center py-24 md:py-48 opacity-10 gap-8 rounded-[3rem] bg-muted/20 border-4 border-dashed">
                             <Volume2 className="size-32 md:size-48" />
                             <div className="space-y-1 text-center">
-                                <p className="text-3xl font-black uppercase tracking-tighter leading-none">Studio Viewport</p>
+                                <p className="text-3xl font-black uppercase tracking-tighter leading-none text-left">Studio Viewport</p>
                                 <p className="text-xs font-bold uppercase tracking-widest text-center">Select a file to begin analysis</p>
                             </div>
                         </div>
@@ -486,4 +487,3 @@ export default function Mp3Compressor() {
         </div>
     );
 }
-

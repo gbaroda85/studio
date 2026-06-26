@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
 import { 
     UploadCloud, 
     Loader2, 
@@ -78,7 +79,7 @@ function formatBytes(bytes: number): string {
 
 export default function VideoSplitter() {
     const { toast } = useToast();
-    const { ffmpeg, loading: isEngineLoading, error: engineError, loaderProgress } = useFfmpegLoader();
+    const { ffmpeg, util, loading: isEngineLoading, error: engineError, loaderProgress } = useFfmpegLoader();
 
     const [file, setFile] = useState<File | null>(null);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -118,6 +119,9 @@ export default function VideoSplitter() {
         };
     };
 
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
+    const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
+
     const calculateParts = (): SplitPart[] => {
         if (duration <= 0) return [];
         const result: SplitPart[] = [];
@@ -154,7 +158,7 @@ export default function VideoSplitter() {
     };
 
     const handleSplit = async () => {
-        if (!file || !ffmpeg) return;
+        if (!file || !ffmpeg || !util) return;
         
         const splitParts = calculateParts();
         if (splitParts.length === 0) {
@@ -167,13 +171,9 @@ export default function VideoSplitter() {
         setProgress(0);
 
         try {
-            const arrayBuffer = await file.arrayBuffer();
+            const { fetchFile } = util;
             const inputName = 'input.' + file.name.split('.').pop();
-            await ffmpeg.writeFile(inputName, new Uint8Array(arrayBuffer));
-
-            ffmpeg.on('progress', ({ progress: p }: { progress: number }) => {
-                // Internal progress for a single exec call
-            });
+            await ffmpeg.writeFile(inputName, await fetchFile(file));
 
             for (let i = 0; i < splitParts.length; i++) {
                 const part = splitParts[i];
@@ -294,7 +294,7 @@ export default function VideoSplitter() {
                                     )}
                                     onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                                     onDragLeave={() => setIsDragOver(false)}
-                                    onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0] || null); }}
+                                    onDrop={onDrop}
                                     onClick={() => !isEngineLoading && fileInputRef.current?.click()}
                                 >
                                     <div className="relative">
@@ -497,4 +497,3 @@ export default function VideoSplitter() {
         </div>
     );
 }
-
