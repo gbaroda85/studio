@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
+    serverExternalPackages: ['@imgly/background-removal', '@huggingface/transformers'],
     allowedDevOrigins: [
       '*.cloudworkstations.dev',
       '*.idx.google.com',
@@ -56,6 +57,15 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       }
     ],
+  },
+  webpack: (config) => {
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false,
+      path: false,
+      crypto: false,
+    };
+    return config;
   },
 };
 
