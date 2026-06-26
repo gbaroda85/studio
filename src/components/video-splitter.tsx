@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useRef, useEffect, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
@@ -119,10 +118,25 @@ export default function VideoSplitter() {
         };
     };
 
-    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
-    const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
-    const onDragLeave = () => setIsDragOver(false);
-    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0] || null); };
+    // --- EVENT HANDLERS DEFINED INSIDE COMPONENT ---
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        handleFile(e.target.files?.[0] || null);
+    };
+
+    const onDragOver = (e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragOver(true);
+    };
+
+    const onDragLeave = () => {
+        setIsDragOver(false);
+    };
+
+    const onDrop = (e: DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragOver(false);
+        handleFile(e.dataTransfer.files?.[0] || null);
+    };
 
     const calculateParts = (): SplitPart[] => {
         if (duration <= 0) return [];
