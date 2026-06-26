@@ -1,4 +1,3 @@
-
 "use client";
 
 import { Suspense } from 'react';
@@ -76,8 +75,7 @@ import {
   Video,
   Volume2,
   PenTool,
-  LayoutGrid,
-  BookOpenText
+  LayoutGrid
 } from 'lucide-react';
 import {useLanguage} from '@/contexts/language-context';
 import { cn } from '@/lib/utils';
@@ -94,14 +92,6 @@ function ToolsPageContent() {
   const defaultTab = tabParam && validTabs.includes(tabParam) ? tabParam : 'all';
 
   const imageFeatures = [
-    {
-      href: '/resume-builder',
-      labelKey: 'resume_builder_label',
-      descriptionKey: 'resume_builder_description',
-      icon: BookOpenText,
-      color: 'bg-indigo-600',
-      lightBg: 'bg-indigo-50'
-    },
     {
       href: '/passport-date-name',
       labelKey: 'passport_date_name_label',
