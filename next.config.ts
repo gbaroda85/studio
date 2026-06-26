@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  transpilePackages: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
   async headers() {
     return [
       {
@@ -66,13 +65,6 @@ const nextConfig: NextConfig = {
       crypto: false,
     };
     
-    // FIX: Bypass Webpack dynamic worker resolution error by aliasing to UMD build
-    // This prevents the "Module not found: Can't resolve <dynamic>" error in Next.js
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@ffmpeg/ffmpeg': '@ffmpeg/ffmpeg/dist/umd/ffmpeg.js',
-    };
-
     return config;
   },
 };

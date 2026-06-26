@@ -1,5 +1,15 @@
 
-"use client";
+'use client';
+
+/**
+ * @fileOverview Professional Video Splitter Studio using FFmpeg.wasm loaded via CDN.
+ * 
+ * Logic:
+ * 1. Loads FFmpeg from CDN via script tags to avoid Next.js build-time dynamic import errors.
+ * 2. Provides 3 splitting modes: Equal Parts, Segment Duration, and Custom Timestamps.
+ * 3. Uses `-c copy` for lossless bitstream extraction at hardware speeds.
+ * 4. Generates a ZIP bundle using JSZip for bulk downloads.
+ */
 
 import { useState, useRef, useEffect, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
 import { 
@@ -35,6 +45,75 @@ import { Textarea } from "@/components/ui/textarea";
 import { motion, AnimatePresence } from "framer-motion";
 import JSZip from "jszip";
 import confetti from 'canvas-confetti';
+
+// --- RUNTIME CDN LOADER HOOK ---
+
+function useFfmpegLoader() {
+  const [ffmpeg, setFfmpeg] = useState<any>(null);
+  const [util, setUtil] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const loaded = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (loaded.current) return;
+    loaded.current = true;
+
+    (async () => {
+      try {
+        // Load UMD builds from unpkg (these do NOT have the import.meta.url issue)
+        await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
+        await loadScript('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js');
+
+        const { FFmpeg } = window as any;
+        const FFmpegUtil = (window as any).FFmpegUtil;
+        
+        if (!FFmpeg) throw new Error('FFmpeg global not found');
+
+        const ff = new FFmpeg();
+        
+        // Load ffmpeg core & wasm via blob URLs to avoid CORS/wasm issues
+        const coreURL = await FFmpegUtil.toBlobURL(
+          'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
+          'text/javascript'
+        );
+        const wasmURL = await FFmpegUtil.toBlobURL(
+          'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
+          'application/wasm'
+        );
+        
+        await ff.load({ coreURL, wasmURL });
+
+        setFfmpeg(ff);
+        setUtil(FFmpegUtil);
+        setLoading(false);
+      } catch (err: any) {
+        console.error("FFmpeg Load Failed:", err);
+        setError(err.message || 'Failed to load video processing engine');
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  return { ffmpeg, util, loading, error };
+}
+
+function loadScript(src: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[src="${src}"]`)) {
+      resolve();
+      return;
+    }
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
+    document.head.appendChild(script);
+  });
+}
+
+// --- MAIN COMPONENT ---
 
 type SplitMode = 'equal' | 'duration' | 'custom';
 
@@ -77,6 +156,8 @@ function formatBytes(bytes: number): string {
 
 export default function VideoSplitter() {
     const { toast } = useToast();
+    const { ffmpeg, util, loading: isEngineLoading, error: engineError } = useFfmpegLoader();
+
     const [file, setFile] = useState<File | null>(null);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
     const [duration, setDuration] = useState(0);
@@ -92,8 +173,6 @@ export default function VideoSplitter() {
     const [customTimestamps, setCustomTimestamps] = useState("");
 
     const [parts, setParts] = useState<SplitPart[]>([]);
-    
-    const ffmpegRef = useRef<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFile = (selectedFile: File | null) => {
@@ -103,7 +182,12 @@ export default function VideoSplitter() {
             return;
         }
 
+        if (selectedFile.size > 800 * 1024 * 1024) {
+            toast({ variant: 'destructive', title: "File too large", description: "Local processing may crash for files > 800MB." });
+        }
+
         setFile(selectedFile);
+        if (videoUrl) URL.revokeObjectURL(videoUrl);
         const url = URL.createObjectURL(selectedFile);
         setVideoUrl(url);
         setParts([]);
@@ -118,30 +202,6 @@ export default function VideoSplitter() {
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
-
-    const loadFFmpeg = async () => {
-        if (ffmpegRef.current) return ffmpegRef.current;
-        
-        setStatusText("Booting Engine...");
-        
-        try {
-            const { FFmpeg } = await import("@ffmpeg/ffmpeg");
-            const { toBlobURL } = await import("@ffmpeg/util");
-            const ffmpeg = new FFmpeg();
-            
-            // CRITICAL: Explicit CDN Blob URL Loading to bypass Next.js build errors
-            const coreURL = await toBlobURL(`https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js`, 'text/javascript');
-            const wasmURL = await toBlobURL(`https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm`, 'application/wasm');
-            const workerURL = await toBlobURL(`https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg-worker.js`, 'text/javascript');
-
-            await ffmpeg.load({ coreURL, wasmURL, workerURL });
-            ffmpegRef.current = ffmpeg;
-            return ffmpeg;
-        } catch (e) {
-            toast({ variant: 'destructive', title: "Engine Load Failed", description: "Browser might have blocked WASM. Please refresh." });
-            throw e;
-        }
-    };
 
     const calculateParts = (): SplitPart[] => {
         if (duration <= 0) return [];
@@ -161,6 +221,7 @@ export default function VideoSplitter() {
             }
         } else {
             const ts = customTimestamps.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n)).sort((a, b) => a - b);
+            if (ts.length === 0) return [];
             if (ts[0] !== 0) ts.unshift(0);
             if (ts[ts.length - 1] < duration) ts.push(duration);
             
@@ -172,25 +233,22 @@ export default function VideoSplitter() {
     };
 
     const handleSplit = async () => {
-        if (!file) return;
+        if (!file || !ffmpeg || !util) return;
         
         const splitParts = calculateParts();
-        if (splitParts.length === 0) return;
+        if (splitParts.length === 0) {
+            toast({ variant: 'destructive', title: "Invalid Logic", description: "Please check your split settings." });
+            return;
+        }
         
         setParts(splitParts);
         setIsProcessing(true);
         setProgress(0);
 
         try {
-            const ffmpeg = await loadFFmpeg();
-            const { fetchFile } = await import("@ffmpeg/util");
-            
+            const { fetchFile } = util;
             const inputName = 'input' + file.name.substring(file.name.lastIndexOf('.'));
             await ffmpeg.writeFile(inputName, await fetchFile(file));
-
-            ffmpeg.on('progress', ({ progress }) => {
-                // This is total progress, but we need per-part status too
-            });
 
             for (let i = 0; i < splitParts.length; i++) {
                 const part = splitParts[i];
@@ -201,11 +259,11 @@ export default function VideoSplitter() {
                 const start = part.start;
                 const len = part.end - part.start;
 
-                // Lossless bitstream copy for extreme speed
+                // Lossless bitstream copy for extreme speed (-c copy)
                 await ffmpeg.exec([
-                    '-ss', start.toString(),
+                    '-ss', start.toFixed(3),
                     '-i', inputName,
-                    '-t', len.toString(),
+                    '-t', len.toFixed(3),
                     '-c', 'copy',
                     '-avoid_negative_ts', '1',
                     outputName
@@ -223,7 +281,7 @@ export default function VideoSplitter() {
             toast({ title: "Splitting Complete!" });
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: "Process Error", description: "Failed to split video." });
+            toast({ variant: 'destructive', title: "Process Error", description: "Failed to split video. Try a smaller file." });
         } finally {
             setIsProcessing(false);
         }
@@ -267,6 +325,20 @@ export default function VideoSplitter() {
 
     return (
         <div className="w-full max-w-7xl px-4 flex flex-col gap-8 pb-32 animate-in fade-in duration-700 mx-auto text-left">
+            
+            {engineError && (
+                <Card className="bg-destructive/5 border-destructive/20 rounded-2xl p-6 mb-4">
+                    <div className="flex items-center gap-4 text-destructive">
+                        <X className="size-6" />
+                        <div>
+                            <p className="font-black uppercase text-sm">Engine Load Failed</p>
+                            <p className="text-xs font-medium mt-1">{engineError}</p>
+                            <Button variant="outline" size="sm" className="mt-4 h-8 text-[10px] uppercase font-black" onClick={() => window.location.reload()}>Retry Engine</Button>
+                        </div>
+                    </div>
+                </Card>
+            )}
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
                 {/* 1. CONFIG COLUMN */}
@@ -296,21 +368,30 @@ export default function VideoSplitter() {
                                     onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                                     onDragLeave={() => setIsDragOver(false)}
                                     onDrop={handleDrop}
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() => !isEngineLoading && fileInputRef.current?.click()}
                                 >
                                     <div className="relative">
                                         <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                                     </div>
                                     <div className="text-center px-4">
-                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Select Video File</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-1 font-bold opacity-60 uppercase">MP4, WebM, MOV supported</p>
+                                        {isEngineLoading ? (
+                                            <div className="flex flex-col items-center gap-3">
+                                                <Loader2 className="size-8 animate-spin text-primary" />
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Initializing Engine...</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Select Video File</p>
+                                                <p className="text-[10px] md:text-sm text-muted-foreground mt-1 font-bold opacity-60 uppercase">MP4, WebM, MOV supported</p>
+                                            </>
+                                        )}
                                     </div>
-                                    <input ref={fileInputRef} type="file" className="hidden" accept="video/*" onChange={onFileChange} />
+                                    <input ref={fileInputRef} type="file" className="hidden" accept="video/*" onChange={onFileChange} disabled={isEngineLoading} />
                                 </div>
                             ) : (
                                 <div className="space-y-8 animate-in slide-in-from-left duration-300">
-                                    <Tabs value={splitMode} onValueChange={(v) => setSplitMode(v as SplitMode)} className="w-full">
+                                    <Tabs value={splitMode} onValueChange={(v) => { setSplitMode(v as SplitMode); setParts([]); }} className="w-full">
                                         <div className="flex items-center justify-between mb-4 px-1">
                                             <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                                                 <Settings2 className="size-3" /> Split Mode
@@ -369,7 +450,7 @@ export default function VideoSplitter() {
                                 <Button 
                                     className="magic-button w-full h-16 md:h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl border-none" 
                                     onClick={handleSplit}
-                                    disabled={isProcessing}
+                                    disabled={isProcessing || isEngineLoading}
                                 >
                                     <StarIcons />
                                     {isProcessing ? (
