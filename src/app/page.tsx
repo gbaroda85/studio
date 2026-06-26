@@ -61,11 +61,13 @@ import {
   Gauge,
   AreaChart,
   Fuel,
-  Waves
+  Waves,
+  FileArchive,
+  UserCircle
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 const ALL_TOOLS = [
