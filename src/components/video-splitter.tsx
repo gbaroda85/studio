@@ -66,15 +66,14 @@ function useFfmpegLoader() {
         await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
         await loadScript('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js');
 
-        // v0.12 UMD build exports to window.FFmpegWasm
+        // v0.12 UMD build exports to window.FFmpegWasm and window.FFmpegUtil
         const FFmpegWasm = (window as any).FFmpegWasm;
-        const FFmpeg = (window as any).FFmpeg || FFmpegWasm?.FFmpeg;
         const FFmpegUtil = (window as any).FFmpegUtil;
         
-        if (!FFmpeg) throw new Error('FFmpeg global not found in window or FFmpegWasm');
+        if (!FFmpegWasm || !FFmpegWasm.FFmpeg) throw new Error('FFmpeg global not found');
         if (!FFmpegUtil) throw new Error('FFmpegUtil global not found');
 
-        const ff = new FFmpeg();
+        const ff = new FFmpegWasm.FFmpeg();
         
         // Load ffmpeg core, wasm & worker via blob URLs
         const coreURL = await FFmpegUtil.toBlobURL(
