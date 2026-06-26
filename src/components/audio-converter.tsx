@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useMemo } from "react";
@@ -8,23 +7,20 @@ import {
     Loader2, 
     Download, 
     X, 
-    Music, 
     Zap, 
     ShieldCheck, 
-    Sparkles, 
     RefreshCcw, 
     Settings2,
-    CheckCircle2,
-    ArrowLeftRight,
     Volume2,
     Layers,
     Trash2,
     Plus,
     Archive,
     Smartphone,
-    Monitor,
-    FileAudio,
-    FileOutput
+    FileOutput,
+    Mic,
+    Activity,
+    Sparkles
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -35,11 +31,11 @@ import { Progress } from "@/components/ui/progress";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 
 type OutputFormat = 'mp3' | 'wav' | 'ogg' | 'm4a' | 'aac' | 'flac';
-type Bitrate = '128' | '192' | '256' | '320';
 
 interface AudioItem {
     id: string;
@@ -75,7 +71,8 @@ export default function AudioConverter() {
     const { toast } = useToast();
     const [items, setItems] = useState<AudioItem[]>([]);
     const [outputFormat, setOutputFormat] = useState<OutputFormat>('mp3');
-    const [bitrate, setBitrate] = useState<Bitrate>('320');
+    const [isMono, setIsMono] = useState(false);
+    const [sampleRate, setSampleRate] = useState("44100");
     const [isConvertingAll, setIsConvertingAll] = useState(false);
     const [isZipping, setIsZipping] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -105,14 +102,10 @@ export default function AudioConverter() {
     };
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files);
-    const onDrop = (e: DragEvent<HTMLDivElement>) => { 
-        e.preventDefault(); 
-        setIsDragOver(false); 
-        handleFiles(e.dataTransfer.files); 
-    };
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFiles(e.dataTransfer.files); };
 
-    const audioBufferToWav = (buffer: AudioBuffer) => {
-        const numOfChan = buffer.numberOfChannels;
+    const audioBufferToWav = (buffer: AudioBuffer, forceMono: boolean, targetSampleRate: number) => {
+        const numOfChan = forceMono ? 1 : buffer.numberOfChannels;
         const length = buffer.length * numOfChan * 2 + 44;
         const outBuffer = new ArrayBuffer(length);
         const view = new DataView(outBuffer);
@@ -127,21 +120,34 @@ export default function AudioConverter() {
         setUint32(16);
         setUint16(1); // PCM
         setUint16(numOfChan);
-        setUint32(buffer.sampleRate);
-        setUint32(buffer.sampleRate * 2 * numOfChan);
+        setUint32(targetSampleRate);
+        setUint32(targetSampleRate * 2 * numOfChan);
         setUint16(numOfChan * 2);
         setUint16(16); // 16-bit
         setUint32(0x61746164); // "data"
         setUint32(length - pos - 4);
 
-        for (let i = 0; i < buffer.numberOfChannels; i++) {
-            const channelData = buffer.getChannelData(i);
-            let offset = 44 + (i * 2);
-            for (let j = 0; j < channelData.length; j++) {
-                let sample = Math.max(-1, Math.min(1, channelData[j]));
+        if (forceMono && buffer.numberOfChannels > 1) {
+            const left = buffer.getChannelData(0);
+            const right = buffer.getChannelData(1);
+            let offset = 44;
+            for (let i = 0; i < buffer.length; i++) {
+                let sample = (left[i] + right[i]) / 2;
+                sample = Math.max(-1, Math.min(1, sample));
                 sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
                 view.setInt16(offset, sample, true);
-                offset += numOfChan * 2;
+                offset += 2;
+            }
+        } else {
+            for (let i = 0; i < buffer.numberOfChannels; i++) {
+                const channelData = buffer.getChannelData(i);
+                let offset = 44 + (i * 2);
+                for (let j = 0; j < channelData.length; j++) {
+                    let sample = Math.max(-1, Math.min(1, channelData[j]));
+                    sample = (sample < 0 ? sample * 0x8000 : sample * 0x7FFF);
+                    view.setInt16(offset, sample, true);
+                    offset += numOfChan * 2;
+                }
             }
         }
         return new Blob([outBuffer], { type: "audio/wav" });
@@ -151,11 +157,22 @@ export default function AudioConverter() {
         const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
         try {
             const arrayBuffer = await item.file.arrayBuffer();
-            const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            const originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
             
-            // Standardizing on WAV for highest quality client-side local conversion
-            // Browser native encoders are limited, so we output high-res WAV
-            const blob = audioBufferToWav(audioBuffer);
+            const targetSR = parseInt(sampleRate);
+            const offlineCtx = new OfflineAudioContext(
+                isMono ? 1 : originalBuffer.numberOfChannels,
+                Math.round(originalBuffer.duration * targetSR),
+                targetSR
+            );
+
+            const source = offlineCtx.createBufferSource();
+            source.buffer = originalBuffer;
+            source.connect(offlineCtx.destination);
+            source.start(0);
+
+            const renderedBuffer = await offlineCtx.startRendering();
+            const blob = audioBufferToWav(renderedBuffer, isMono, targetSR);
             const url = URL.createObjectURL(blob);
             
             return {
@@ -179,11 +196,6 @@ export default function AudioConverter() {
         
         for (let i = 0; i < items.length; i++) {
             const item = items[i];
-            if (item.resultUrl) {
-                setProgress(Math.round(((i + 1) / items.length) * 100));
-                continue;
-            }
-
             setItems(prev => prev.map(p => p.id === item.id ? { ...p, isProcessing: true } : p));
             const result = await convertSingle(item);
             setItems(prev => prev.map(p => p.id === item.id ? result : p));
@@ -232,6 +244,7 @@ export default function AudioConverter() {
     const handleReset = () => {
         items.forEach(i => i.resultUrl && URL.revokeObjectURL(i.resultUrl));
         setItems([]);
+        setProgress(0);
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
@@ -246,15 +259,13 @@ export default function AudioConverter() {
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-8 pb-20 mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                
-                {/* 1. LIST COLUMN */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className={cn(
                         "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50",
                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                     )} onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }} onDragLeave={() => setIsDragOver(false)} onDrop={onDrop}>
                         <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between shrink-0">
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 text-left">
                                 <Layers className="size-5 text-primary" />
                                 <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STUDIO BUNDLE</CardTitle>
                             </div>
@@ -309,62 +320,68 @@ export default function AudioConverter() {
                             )}
                         </CardContent>
                         <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30">
-                            <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                            <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT BUNDLE</div>
-                            <div className="flex items-center gap-2"><Smartphone className="size-4 text-primary" /> MOBILE OK</div>
+                            <div className="flex items-center gap-1.5"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                            <div className="flex items-center gap-1.5"><Zap className="size-4 text-yellow-500" /> LOCAL DECODE</div>
+                            <div className="flex items-center gap-1.5"><Smartphone className="size-4 text-primary" /> MOBILE OK</div>
                         </CardFooter>
                     </Card>
                 </div>
 
-                {/* 2. CONFIG COLUMN */}
                 <div className="lg:col-span-5 flex flex-col gap-6 no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 text-left">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
-                                <Settings2 className="size-4 md:size-5 text-primary" /> Conversion Studio
+                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
+                                <Settings2 className="size-4 md:size-5 text-primary" /> Quality Studio
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-10 text-left">
-                            
                             <div className="space-y-8">
                                 <div className="space-y-4">
-                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Output Settings</Label>
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Output Mapping</Label>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
-                                            <p className="text-[8px] font-black uppercase opacity-40 ml-1">Target Format</p>
-                                            <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
+                                            <p className="text-[8px] font-black uppercase opacity-40 ml-1">Sample Rate</p>
+                                            <Select value={sampleRate} onValueChange={setSampleRate}>
                                                 <SelectTrigger className="h-12 border-2 font-black rounded-xl bg-background/50 shadow-inner"><SelectValue /></SelectTrigger>
                                                 <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                    <SelectItem value="mp3" className="font-bold py-3 uppercase">MP3 (Universal)</SelectItem>
-                                                    <SelectItem value="wav" className="font-bold py-3 uppercase">WAV (Lossless)</SelectItem>
-                                                    <SelectItem value="ogg" className="font-bold py-3 uppercase">OGG (Opus)</SelectItem>
-                                                    <SelectItem value="m4a" className="font-bold py-3 uppercase">M4A (Apple)</SelectItem>
-                                                    <SelectItem value="aac" className="font-bold py-3 uppercase">AAC (Mobile)</SelectItem>
-                                                    <SelectItem value="flac" className="font-bold py-3 uppercase">FLAC (Hi-Fi)</SelectItem>
+                                                    <SelectItem value="44100" className="font-bold py-3 uppercase text-xs">44.1 kHz (Studio)</SelectItem>
+                                                    <SelectItem value="22050" className="font-bold py-3 uppercase text-xs">22 kHz (Small)</SelectItem>
+                                                    <SelectItem value="11025" className="font-bold py-3 uppercase text-xs">11 kHz (Tiny)</SelectItem>
+                                                    <SelectItem value="8000" className="font-bold py-3 uppercase text-xs">8 kHz (Voice)</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                         <div className="space-y-1.5">
-                                            <p className="text-[8px] font-black uppercase opacity-40 ml-1">Bitrate Control</p>
-                                            <Select value={bitrate} onValueChange={(v) => setBitrate(v as Bitrate)}>
+                                            <p className="text-[8px] font-black uppercase opacity-40 ml-1">Format</p>
+                                            <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
                                                 <SelectTrigger className="h-12 border-2 font-black rounded-xl bg-background/50 shadow-inner"><SelectValue /></SelectTrigger>
                                                 <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                    <SelectItem value="128" className="font-bold py-3">128 KBPS</SelectItem>
-                                                    <SelectItem value="192" className="font-bold py-3">192 KBPS</SelectItem>
-                                                    <SelectItem value="256" className="font-bold py-3">256 KBPS</SelectItem>
-                                                    <SelectItem value="320" className="font-bold py-3">320 KBPS (HD)</SelectItem>
+                                                    <SelectItem value="mp3" className="font-bold py-3">MP3</SelectItem>
+                                                    <SelectItem value="wav" className="font-bold py-3">WAV</SelectItem>
+                                                    <SelectItem value="ogg" className="font-bold py-3">OGG</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     </div>
                                 </div>
 
+                                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border-2 border-dashed">
+                                    <div className="flex items-center gap-3">
+                                        <Mic className="size-4 text-primary" />
+                                        <div className="text-left">
+                                            <p className="text-[10px] font-black uppercase">Force Mono Channel</p>
+                                            <p className="text-[8px] font-bold opacity-40 uppercase">Reduces file size by 50%</p>
+                                        </div>
+                                    </div>
+                                    <Switch checked={isMono} onCheckedChange={setIsMono} />
+                                </div>
+
                                 <div className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 text-left shadow-sm">
-                                    <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
+                                    <Activity className="size-6 text-green-600 shrink-0 mt-0.5" />
                                     <div>
-                                        <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Industrial Secure Engine</p>
+                                        <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Size Optimization Active</p>
                                         <p className="text-[8px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
-                                            Audio is processed entirely in your browser RAM. 0% data leaves your device.
+                                            Reducing sample rate and switching to mono significantly decreases WAV file weight.
                                         </p>
                                     </div>
                                 </div>
@@ -400,7 +417,7 @@ export default function AudioConverter() {
                                             <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
                                         </div>
                                     </Button>
-                                    <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300 shadow-sm"><RefreshCcw className="size-4 mr-2" /> Start Over</Button>
+                                    <Button variant="outline" onClick={handleReset} className="w-full h-11 border-2 font-black text-[9px] uppercase rounded-xl hover:bg-destructive/5 hover:text-destructive transition-all duration-300 shadow-sm"><RefreshCcw className="size-4 mr-2" /> Start Over</Button>
                                 </div>
                             ) : (
                                 <Button 
@@ -422,7 +439,6 @@ export default function AudioConverter() {
                                     )}
                                 </Button>
                             )}
-                            <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center mt-2">Local High-Resolution Engine Active</p>
                         </CardFooter>
                     </Card>
                 </div>

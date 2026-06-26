@@ -217,7 +217,7 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
         </div>
       </div>
       
-      <div className="bg-white/20 dark:bg-black/20 py-2 md:py-2.5 px-6 md:px-8 flex items-center justify-between shrink-0 transform-gpu">
+      <div className="bg-white/10 dark:bg-black/10 py-2 md:py-2.5 px-6 md:px-8 flex items-center justify-between shrink-0 transform-gpu">
         <span className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] text-slate-800 dark:text-slate-400 opacity-60">Launch Tool</span>
         <div className="launch-arrow-btn scale-[0.6] md:scale-75 origin-right -mr-2 transform-gpu">
           <div className="button-box">
@@ -352,7 +352,7 @@ export default function Page() {
                         <div className="w-12 md:w-16 h-2.5 bg-primary rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">IMAGE ENGINE</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
-                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Visual Processors</h2>
+                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase text-left">Visual Processors</h2>
                         <UiverseViewAllButton href="/tools?tab=image" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10 transform-gpu">
@@ -365,7 +365,7 @@ export default function Page() {
                         <div className="w-12 md:w-16 h-2.5 bg-rose-500 rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">DOCUMENT STUDIO</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
-                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">PDF Toolkit</h2>
+                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase text-left">PDF Toolkit</h2>
                         <UiverseViewAllButton href="/tools?tab=pdf" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10 transform-gpu">
@@ -378,7 +378,7 @@ export default function Page() {
                         <div className="w-12 md:w-16 h-2.5 bg-indigo-500 rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">FINANCE HUB</span>
                     </div>
                     <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
-                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase">Calculators</h2>
+                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase text-left">Calculators</h2>
                         <UiverseViewAllButton href="/tools?tab=calculator" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10 transform-gpu">
