@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import { useState, useRef, useEffect, useMemo, useCallback, type ChangeEvent, type DragEvent } from "react";
 import { 
@@ -32,6 +31,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion, AnimatePresence } from "framer-motion";
+import { useFfmpegLoader } from "@/hooks/use-ffmpeg-loader";
 import confetti from 'canvas-confetti';
 
 export const dynamic = "force-dynamic";
@@ -72,6 +72,8 @@ function formatTime(seconds: number): string {
 
 export default function Mp3Compressor() {
     const { toast } = useToast();
+    const { ffmpeg, util, loading: isEngineLoading, loaderProgress } = useFfmpegLoader();
+    
     const [file, setFile] = useState<File | null>(null);
     const [originalUrl, setOriginalUrl] = useState<string | null>(null);
     const [compressedUrl, setCompressedUrl] = useState<string | null>(null);
@@ -87,7 +89,6 @@ export default function Mp3Compressor() {
     const [statusText, setStatusText] = useState("");
     const [isDragOver, setIsDragOver] = useState(false);
 
-    const ffmpegRef = useRef<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const estimation = useMemo(() => {
@@ -141,7 +142,6 @@ export default function Mp3Compressor() {
             });
         } catch (e) {
             console.error(e);
-            toast({ variant: 'destructive', title: "Metadata Error", description: "Failed to analyze audio stream." });
         } finally {
             await audioCtx.close();
         }
@@ -151,33 +151,14 @@ export default function Mp3Compressor() {
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
     const handleCompress = async () => {
-        if (!file || !audioInfo) return;
+        if (!file || !audioInfo || !ffmpeg || !util) return;
         
         setIsProcessing(true);
         setProgress(0);
         setStatusText("Booting Engine...");
 
         try {
-            // DYNAMIC IMPORTS ONLY ON CLICK
-            const { FFmpeg } = await import("@ffmpeg/ffmpeg");
-            const { fetchFile, toBlobURL } = await import("@ffmpeg/util");
-
-            if (!ffmpegRef.current) {
-                const ffmpeg = new FFmpeg();
-                const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
-                
-                ffmpeg.on('progress', ({ progress }) => {
-                    setProgress(Math.round(progress * 100));
-                });
-
-                await ffmpeg.load({
-                    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-                    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-                });
-                ffmpegRef.current = ffmpeg;
-            }
-
-            const ffmpeg = ffmpegRef.current;
+            const { fetchFile } = util;
             const inputName = 'input' + file.name.substring(file.name.lastIndexOf('.'));
             const outputName = 'output.mp3';
 
@@ -261,17 +242,29 @@ export default function Mp3Compressor() {
                                     onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
                                     onDragLeave={() => setIsDragOver(false)}
                                     onDrop={handleDrop}
-                                    onClick={() => fileInputRef.current?.click()}
+                                    onClick={() => !isEngineLoading && fileInputRef.current?.click()}
                                 >
                                     <div className="relative">
                                         <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
                                         <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                                     </div>
                                     <div className="text-center px-4">
-                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Audio to Shrink</p>
-                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-1 font-bold opacity-60 uppercase">MP3, WAV, M4A, OGG supported</p>
+                                        {isEngineLoading ? (
+                                            <div className="flex flex-col items-center gap-4">
+                                                <Loader2 className="size-10 animate-spin text-primary stroke-[3]" />
+                                                <div className="space-y-2 w-full max-w-[200px]">
+                                                    <p className="text-[10px] font-black uppercase tracking-widest text-primary animate-pulse">Initializing Engine...</p>
+                                                    <Progress value={loaderProgress} className="h-1 shadow-inner" />
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Audio to Shrink</p>
+                                                <p className="text-[10px] md:text-sm text-muted-foreground mt-1 font-bold opacity-60 uppercase">MP3, WAV, M4A Support</p>
+                                            </>
+                                        )}
                                     </div>
-                                    <input ref={fileInputRef} type="file" className="hidden" accept="audio/*" onChange={onFileChange} />
+                                    <input ref={fileInputRef} type="file" className="hidden" accept="audio/*" onChange={onFileChange} disabled={isEngineLoading} />
                                 </div>
                             ) : (
                                 <div className="space-y-10 animate-in slide-in-from-left duration-300">
@@ -326,7 +319,7 @@ export default function Mp3Compressor() {
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Target Bitrate</Label>
                                                     <Select value={bitrate} onValueChange={v => setBitrate(v)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
-                                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                        <SelectContent className="rounded-xl border-2 shadow-2xl z-[150]">
                                                             {['320', '256', '192', '128', '96', '64', '48'].map(b => <SelectItem key={b} value={b} className="font-bold py-2">{b} kbps</SelectItem>)}
                                                         </SelectContent>
                                                     </Select>
@@ -335,7 +328,7 @@ export default function Mp3Compressor() {
                                                     <Label className="text-[9px] font-black uppercase opacity-60">Sample Rate</Label>
                                                     <Select value={sampleRate} onValueChange={v => setSampleRate(v)}>
                                                         <SelectTrigger className="h-11 border-2 font-black rounded-xl bg-background shadow-sm"><SelectValue /></SelectTrigger>
-                                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                        <SelectContent className="rounded-xl border-2 shadow-2xl z-[150]">
                                                             <SelectItem value="auto" className="font-bold py-2">Auto (Keep Original)</SelectItem>
                                                             <SelectItem value="44100" className="font-bold py-2">44.1 kHz</SelectItem>
                                                             <SelectItem value="22050" className="font-bold py-2">22.0 kHz</SelectItem>
@@ -354,7 +347,7 @@ export default function Mp3Compressor() {
                                 <Button 
                                     className="magic-button w-full h-16 md:h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl border-none" 
                                     onClick={handleCompress}
-                                    disabled={isProcessing}
+                                    disabled={isProcessing || isEngineLoading}
                                 >
                                     <StarIcons />
                                     {isProcessing ? (
@@ -493,3 +486,4 @@ export default function Mp3Compressor() {
         </div>
     );
 }
+
