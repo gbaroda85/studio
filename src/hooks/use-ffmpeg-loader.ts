@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * @fileOverview High-performance Runtime FFmpeg Loader for Next.js 15.
  * Bypasses build errors by loading UMD bundles from CDN at runtime.
- * Uses explicit blob URLs to avoid CORS and dynamic resolution issues.
+ * Explicitly targets the 'FFmpegWasm' namespace used by v0.12 UMD build.
  */
 export function useFfmpegLoader() {
   const [ffmpeg, setFfmpeg] = useState<any>(null);
@@ -20,7 +20,7 @@ export function useFfmpegLoader() {
     if (loaded.current) return;
     loaded.current = true;
 
-    const loadScript = (src: string, timeout = 25000): Promise<void> =>
+    const loadScript = (src: string, timeout = 30000): Promise<void> =>
       new Promise((resolve, reject) => {
         const existing = document.querySelector(`script[src="${src}"]`);
         if (existing) {
@@ -54,23 +54,28 @@ export function useFfmpegLoader() {
         setLoaderProgress(10);
         
         // 1. Load UMD builds (These create window.FFmpegWasm and window.FFmpegUtil)
-        // UMD builds do NOT contain 'import.meta.url' problematic code
+        // Using v0.12.x UMD builds which are stable for browser environments
         await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
         setLoaderProgress(30);
         await loadScript('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js');
         setLoaderProgress(50);
 
-        // Robust lookup for UMD namespaces
+        // 2. Access Classes from UMD Namespaces
+        // FFmpeg v0.12 UMD build exports to window.FFmpegWasm
         const FFmpegClass = (window as any).FFmpegWasm?.FFmpeg;
         const FFmpegUtil = (window as any).FFmpegUtil;
 
-        if (!FFmpegClass) throw new Error('FFmpeg global engine not found');
-        if (!FFmpegUtil?.toBlobURL) throw new Error('FFmpeg Utility logic not found');
+        if (!FFmpegClass) {
+            throw new Error('FFmpeg engine not found in global namespace (FFmpegWasm)');
+        }
+        if (!FFmpegUtil?.toBlobURL) {
+            throw new Error('FFmpeg Utility logic not found in global namespace');
+        }
 
         const ff = new FFmpegClass();
         setLoaderProgress(60);
 
-        // 2. Load core files via explicit blob URLs (Crucial for bypass)
+        // 3. Load core files via explicit blob URLs to avoid CORS and dynamic resolution issues
         const coreURL = await FFmpegUtil.toBlobURL(
           'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
           'text/javascript'
@@ -83,7 +88,7 @@ export function useFfmpegLoader() {
         );
         setLoaderProgress(80);
 
-        // 3. Initialize with blob URLs
+        // 4. Initialize the engine
         await ff.load({ coreURL, wasmURL });
         setLoaderProgress(100);
         

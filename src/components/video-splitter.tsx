@@ -426,13 +426,13 @@ export default function VideoSplitter() {
                                         <video src={videoUrl!} controls className="w-full max-h-[40vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" />
                                         <AnimatePresence>
                                             {isProcessing && (
-                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-10 gap-6">
+                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-10 gap-4">
                                                     <div className="relative">
                                                         <Loader2 className="size-16 md:size-20 animate-spin text-primary stroke-[3]" />
                                                         <Scissors className="absolute inset-0 m-auto size-7 md:size-9 text-primary animate-pulse" />
                                                     </div>
-                                                    <div className="space-y-4 w-full max-w-xs text-center px-6">
-                                                        <p className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter animate-pulse">{statusText}</p>
+                                                    <div className="space-y-2 w-full max-w-[200px] px-4">
+                                                        <p className="text-[10px] font-black uppercase text-white tracking-widest text-center animate-pulse">{statusText}</p>
                                                         <Progress value={progress} className="h-1.5 shadow-inner" />
                                                     </div>
                                                 </motion.div>

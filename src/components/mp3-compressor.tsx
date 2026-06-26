@@ -366,6 +366,20 @@ export default function Mp3Compressor() {
                                     )}
                                 </Button>
                              )}
+                             {compressedUrl && (
+                                <Button 
+                                    size="lg" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
+                                    onClick={handleDownload} 
+                                >
+                                    <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
+                                    <span className="flex-1 px-12 text-center tracking-widest text-lg md:text-xl uppercase">DOWNLOAD MP3</span>
+                                    <div className="bg-white h-full pl-10 pr-12 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-11 group-hover:pr-13 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                        <Download className="size-8 group-hover:scale-110 transition-transform" />
+                                        <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
+                                    </div>
+                                </Button>
+                             )}
                              <div className="flex items-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] mx-auto">
                                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
                                 <div className="flex items-center gap-1.5"><Cloud className="size-3.5 text-blue-500" /> ON-DEMAND CORE</div>
