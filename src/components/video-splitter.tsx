@@ -6,9 +6,9 @@
  * 
  * Logic:
  * 1. Loads FFmpeg from CDN via script tags to avoid Next.js build-time dynamic import errors.
- * 2. Provides 3 splitting modes: Equal Parts, Segment Duration, and Custom Timestamps.
- * 3. Uses `-c copy` for lossless bitstream extraction at hardware speeds.
- * 4. Generates a ZIP bundle using JSZip for bulk downloads.
+ * 2. Uses window.FFmpegWasm namespace for class access.
+ * 3. Provides 3 splitting modes: Equal Parts, Segment Duration, and Custom Timestamps.
+ * 4. Uses `-c copy` for lossless bitstream extraction at hardware speeds.
  */
 
 import { useState, useRef, useEffect, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
@@ -66,14 +66,17 @@ function useFfmpegLoader() {
         await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
         await loadScript('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js');
 
-        const { FFmpeg } = window as any;
+        // v0.12 UMD build exports to window.FFmpegWasm
+        const FFmpegWasm = (window as any).FFmpegWasm;
+        const FFmpeg = (window as any).FFmpeg || FFmpegWasm?.FFmpeg;
         const FFmpegUtil = (window as any).FFmpegUtil;
         
-        if (!FFmpeg) throw new Error('FFmpeg global not found');
+        if (!FFmpeg) throw new Error('FFmpeg global not found in window or FFmpegWasm');
+        if (!FFmpegUtil) throw new Error('FFmpegUtil global not found');
 
         const ff = new FFmpeg();
         
-        // Load ffmpeg core & wasm via blob URLs to avoid CORS/wasm issues
+        // Load ffmpeg core, wasm & worker via blob URLs
         const coreURL = await FFmpegUtil.toBlobURL(
           'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
           'text/javascript'
@@ -82,8 +85,12 @@ function useFfmpegLoader() {
           'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.wasm',
           'application/wasm'
         );
+        const workerURL = await FFmpegUtil.toBlobURL(
+          'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg-worker.js',
+          'text/javascript'
+        );
         
-        await ff.load({ coreURL, wasmURL });
+        await ff.load({ coreURL, wasmURL, workerURL });
 
         setFfmpeg(ff);
         setUtil(FFmpegUtil);
@@ -551,7 +558,7 @@ export default function VideoSplitter() {
                                     <div className="flex items-center gap-1.5"><Monitor className="size-3 text-primary" /> HD PREVIEW</div>
                                     <div className="flex items-center gap-1.5"><Zap className="size-3 text-yellow-500" /> WASM CORE</div>
                                 </CardFooter>
-                            </Card>
+                             </Card>
                         </div>
                     ) : (
                         <div className="h-full flex flex-col items-center justify-center py-24 md:py-48 opacity-10 gap-8 rounded-[3rem] bg-muted/20 border-4 border-dashed border-primary/20">
