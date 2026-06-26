@@ -63,7 +63,8 @@ import {
   CheckCircle2,
   Trophy,
   Target,
-  MousePointer2
+  MousePointer2,
+  Video
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -98,6 +99,9 @@ const ALL_TOOLS = [
   { icon: TrendingUp, title: "SIP CALCULATOR", description: "Estimate returns on your monthly mutual fund investments.", href: "/sip-calculator", colorClass: "bg-blue-600", lightBg: "bg-[#eff6ff]", category: "calculator" },
   { icon: PiggyBank, title: "FD & RD CALCULATOR", description: "Calculate returns on your bank deposits with quarterly and monthly compounding precision.", href: "/fd-rd-calculator", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "calculator" },
   { icon: Landmark, title: "INCOME TAX CALCULATOR", description: "Calculate income tax liability for FY 2025-26.", href: "/income-tax-calculator", colorClass: "bg-blue-700", lightBg: "bg-[#eef2ff]", category: "calculator" },
+
+  // VIDEO TOOLS
+  { icon: Scissors, title: "VIDEO SPLITTER", description: "Split video files into smaller clips by duration or parts.", href: "/video-splitter", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "video" },
 
   // FILE TOOLS
   { icon: Printer, title: "AADHAAR CARD PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "file" },

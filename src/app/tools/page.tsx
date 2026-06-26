@@ -350,6 +350,14 @@ function ToolsPageContent() {
 
   const videoFeatures = [
     {
+      href: '/video-splitter',
+      labelKey: 'video_splitter_label',
+      descriptionKey: 'video_splitter_description',
+      icon: Scissors,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-indigo-50'
+    },
+    {
       href: '/video-to-mp3',
       labelKey: 'video_to_mp3_label',
       descriptionKey: 'video_to_mp3_description',

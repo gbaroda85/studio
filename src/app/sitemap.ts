@@ -50,6 +50,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/merge-audio',
     '/mp3-cutter',
     '/audio-converter',
+    // Video Tools
+    '/video-splitter',
     // Calculators
     '/salary-slip',
     '/gst-invoice',
@@ -79,10 +81,22 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ];
 
   // Defensive check to ensure rules is an array
-  const safeRoutes = Array.isArray(routes) ? routes : [];
+  const safeRoutes = Array.isArray(routes) ? safeRoutes : [];
 
   if (safeRoutes.length === 0) {
-    return [];
+    const staticRoutes = [
+        '',
+        '/tools',
+        '/privacy-policy',
+        '/terms-of-service',
+        '/video-splitter',
+    ];
+    return staticRoutes.map(route => ({
+        url: `${baseUrl}${route}`,
+        lastModified: new Date(),
+        changeFrequency: 'daily',
+        priority: 1
+    }));
   }
 
   const sitemapEntries: MetadataRoute.Sitemap = safeRoutes.map((route) => ({

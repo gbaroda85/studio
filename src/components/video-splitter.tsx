@@ -1,12 +1,10 @@
-
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo, type ChangeEvent, type DragEvent } from "react";
 import { 
-    Scissors, 
     UploadCloud, 
-    Download, 
     Loader2, 
+    Download, 
     RefreshCcw, 
     Eye, 
     Clock, 
@@ -16,197 +14,525 @@ import {
     CheckCircle2,
     Settings2,
     MonitorPlay,
-    PlayCircle
+    Plus,
+    Trash2,
+    LayoutGrid,
+    Smartphone,
+    X,
+    ArrowRight,
+    Scissors,
+    Volume2,
+    Monitor,
 } from "lucide-react";
-import { CldUploadWidget } from 'next-cloudinary';
+import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { motion, AnimatePresence } from "framer-motion";
+import JSZip from "jszip";
 import confetti from 'canvas-confetti';
 
-/**
- * @fileOverview Professional Video Splitter using Cloudinary.
- * Offloads trimming/splitting tasks to the cloud for high performance.
- */
+type SplitMode = 'equal' | 'duration' | 'custom';
+
+interface SplitPart {
+    id: string;
+    index: number;
+    start: number;
+    end: number;
+    url: string | null;
+    status: 'pending' | 'processing' | 'done' | 'error';
+}
+
+const StarIcons = () => (
+    <>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
+    </>
+);
+
+function formatTime(seconds: number): string {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    if (hrs > 0) return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+function formatBytes(bytes: number): string {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+}
 
 export default function VideoSplitter() {
     const { toast } = useToast();
-    const [publicId, setPublicId] = useState<string | null>(null);
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [startTime, setStartTime] = useState<number>(0);
-    const [endTime, setEndtime] = useState<number>(10);
+    const [file, setFile] = useState<File | null>(null);
     const [videoUrl, setVideoUrl] = useState<string | null>(null);
-    const [isGenerating, setIsGenerating] = useState(false);
+    const [duration, setDuration] = useState(0);
+    const [isEngineLoading, setIsEngineEngineLoading] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [progress, setProgress] = useState(0);
+    const [statusText, setStatusText] = useState("");
+    const [isDragOver, setIsDragOver] = useState(false);
 
-    const cloudName = "dqwz8ynxb";
-    const uploadPreset = "gr7_video_preset";
+    // Split Config
+    const [splitMode, setSplitMode] = useState<SplitMode>('equal');
+    const [numParts, setNumParts] = useState("2");
+    const [partDuration, setPartDuration] = useState("30");
+    const [customTimestamps, setCustomTimestamps] = useState("");
 
-    const handleSuccess = (result: any) => {
-        if (result?.info?.public_id) {
-            setPublicId(result.info.public_id);
-            setVideoUrl(result.info.secure_url);
-            setEndtime(Math.floor(result.info.duration || 10));
-            toast({ title: "Video Uploaded", description: "Ready for splitting." });
+    const [parts, setParts] = useState<SplitPart[]>([]);
+    
+    const ffmpegRef = useRef<any>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFile = (selectedFile: File | null) => {
+        if (!selectedFile) return;
+        if (!selectedFile.type.startsWith('video/')) {
+            toast({ variant: 'destructive', title: "Invalid Format", description: "Please upload a video file." });
+            return;
+        }
+
+        if (selectedFile.size > 500 * 1024 * 1024) {
+            toast({ title: "Large File Warning", description: "Files > 500MB might be slow in the browser." });
+        }
+
+        setFile(selectedFile);
+        const url = URL.createObjectURL(selectedFile);
+        setVideoUrl(url);
+        setParts([]);
+        setProgress(0);
+
+        // Get duration using a temporary video element
+        const tempVideo = document.createElement('video');
+        tempVideo.src = url;
+        tempVideo.onloadedmetadata = () => {
+            setDuration(tempVideo.duration);
+        };
+    };
+
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
+    const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
+
+    const loadFFmpeg = async () => {
+        if (ffmpegRef.current) return ffmpegRef.current;
+        setIsEngineEngineLoading(true);
+        setStatusText("Booting Core...");
+        
+        try {
+            const { FFmpeg } = await import("@ffmpeg/ffmpeg");
+            const { toBlobURL } = await import("@ffmpeg/util");
+            const ffmpeg = new FFmpeg();
+            const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd';
+            
+            ffmpeg.on('log', ({ message }) => console.log(message));
+            ffmpeg.on('progress', ({ progress }) => {
+                // Progress within a single command
+            });
+
+            await ffmpeg.load({
+                coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            });
+            ffmpegRef.current = ffmpeg;
+            return ffmpeg;
+        } catch (e) {
+            toast({ variant: 'destructive', title: "Engine Load Failed", description: "Browser might have blocked WASM. Please refresh." });
+            throw e;
+        } finally {
+            setIsEngineEngineLoading(false);
         }
     };
 
-    const handleSplit = () => {
-        if (!publicId) return;
-        setIsGenerating(true);
+    const calculateParts = (): SplitPart[] => {
+        if (duration <= 0) return [];
+        const result: SplitPart[] = [];
         
-        // Generate a Cloudinary Trimming URL
-        // Format: .../so_{start},eo_{end}/v1/public_id.mp4
-        const baseUrl = `https://res.cloudinary.com/${cloudName}/video/upload`;
-        const transformations = `so_${startTime},eo_${endTime}`;
-        const finalUrl = `${baseUrl}/${transformations}/${publicId}.mp4`;
-
-        // Small simulation for industrial feel
-        setTimeout(() => {
-            const link = document.createElement('a');
-            link.href = finalUrl;
-            link.download = `Split-Video-${Date.now()}.mp4`;
-            link.click();
+        if (splitMode === 'equal') {
+            const n = parseInt(numParts) || 2;
+            const partDur = duration / n;
+            for (let i = 0; i < n; i++) {
+                result.push({ id: `p-${i}`, index: i + 1, start: i * partDur, end: (i + 1) * partDur, url: null, status: 'pending' });
+            }
+        } else if (splitMode === 'duration') {
+            const d = parseFloat(partDuration) || 30;
+            const n = Math.ceil(duration / d);
+            for (let i = 0; i < n; i++) {
+                result.push({ id: `p-${i}`, index: i + 1, start: i * d, end: Math.min((i + 1) * d, duration), url: null, status: 'pending' });
+            }
+        } else {
+            // Custom timestamps e.g. 0,10,30,60
+            const ts = customTimestamps.split(',').map(s => parseFloat(s.trim())).filter(n => !isNaN(n)).sort((a, b) => a - b);
+            if (ts[0] !== 0) ts.unshift(0);
+            if (ts[ts.length - 1] < duration) ts.push(duration);
             
+            for (let i = 0; i < ts.length - 1; i++) {
+                result.push({ id: `p-${i}`, index: i + 1, start: ts[i], end: ts[i+1], url: null, status: 'pending' });
+            }
+        }
+        return result;
+    };
+
+    const handleSplit = async () => {
+        if (!file) return;
+        
+        const splitParts = calculateParts();
+        if (splitParts.length === 0) return;
+        
+        setParts(splitParts);
+        setIsProcessing(true);
+        setProgress(0);
+        setStatusText("Initializing Environment...");
+
+        try {
+            const ffmpeg = await loadFFmpeg();
+            const { fetchFile } = await import("@ffmpeg/util");
+            
+            const inputName = 'input' + file.name.substring(file.name.lastIndexOf('.'));
+            await ffmpeg.writeFile(inputName, await fetchFile(file));
+
+            for (let i = 0; i < splitParts.length; i++) {
+                const part = splitParts[i];
+                setStatusText(`Splitting Part ${part.index} of ${splitParts.length}...`);
+                
+                setParts(prev => prev.map(p => p.id === part.id ? { ...p, status: 'processing' } : p));
+                
+                const outputName = `part_${i}.mp4`;
+                const start = part.start;
+                const len = part.end - part.start;
+
+                // -ss before -i is faster (input seeking)
+                // -c copy is lossless and extremely fast (bitstream copy)
+                await ffmpeg.exec([
+                    '-ss', start.toString(),
+                    '-i', inputName,
+                    '-t', len.toString(),
+                    '-c', 'copy',
+                    '-avoid_negative_ts', '1',
+                    outputName
+                ]);
+
+                const data = await ffmpeg.readFile(outputName);
+                const url = URL.createObjectURL(new Blob([data], { type: 'video/mp4' }));
+                
+                setParts(prev => prev.map(p => p.id === part.id ? { ...p, url, status: 'done' } : p));
+                setProgress(Math.round(((i + 1) / splitParts.length) * 100));
+            }
+
+            setStatusText("All parts ready");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-            toast({ title: "Extraction Success", description: "Trimmed video download started." });
-            setIsGenerating(false);
-        }, 1200);
+            toast({ title: "Splitting Complete!" });
+        } catch (error) {
+            console.error(error);
+            toast({ variant: 'destructive', title: "Process Error", description: "Failed to split video." });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleDownloadAllZip = async () => {
+        setIsProcessing(true);
+        setStatusText("Packing Archive...");
+        const zip = new JSZip();
+        
+        try {
+            for (const part of parts) {
+                if (part.url) {
+                    const response = await fetch(part.url);
+                    const blob = await response.blob();
+                    zip.file(`Clip_${part.index}.mp4`, blob);
+                }
+            }
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `GR7-Split-Video-Bundle-${Date.now()}.zip`;
+            link.click();
+            toast({ title: "Bundle Ready", description: "ZIP download started." });
+        } catch (e) {
+            toast({ variant: 'destructive', title: 'Export Failed' });
+        } finally {
+            setIsProcessing(false);
+            setStatusText("");
+        }
     };
 
     const handleReset = () => {
-        setPublicId(null);
+        parts.forEach(p => p.url && URL.revokeObjectURL(p.url));
+        if (videoUrl) URL.revokeObjectURL(videoUrl);
+        setFile(null);
         setVideoUrl(null);
-        setStartTime(0);
-        setEndtime(10);
+        setParts([]);
+        setIsProcessing(false);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20 mx-auto">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-                <div className="flex items-center gap-3 text-left">
-                    <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
-                        <Scissors className="size-5 md:size-6" />
-                    </div>
-                    <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Video <span className="text-primary">Splitter</span></h2>
-                        <p className="text-[9px] font-bold text-muted-foreground uppercase opacity-40">Precision Trimming Engine</p>
-                    </div>
-                </div>
-                <div className="flex gap-2 w-full md:w-auto">
-                    <Button variant="outline" onClick={handleReset} className="flex-1 md:flex-none h-11 border-2 font-black text-[9px] md:text-[10px] uppercase px-6 rounded-xl hover:bg-destructive/5 transition-all">
-                        <RefreshCcw className="mr-1.5 size-3 md:size-4" /> Start Over
-                    </Button>
-                </div>
-            </div>
-
+        <div className="w-full max-w-7xl px-4 flex flex-col gap-8 pb-32 animate-in fade-in duration-700 mx-auto text-left">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-7 flex flex-col gap-6">
-                    <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
-                        <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between">
-                            <div className="flex items-center gap-3 text-left">
-                                <Eye className="size-5 text-primary" />
-                                <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Preview Studio</CardTitle>
-                            </div>
-                            {publicId && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-pulse">RENDER READY</Badge>}
-                        </CardHeader>
-                        <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] flex flex-col items-center justify-center relative select-none">
-                            {videoUrl ? (
-                                <div className="w-full max-w-2xl animate-in zoom-in-95 duration-500">
-                                    <video src={videoUrl} controls className="w-full rounded-2xl shadow-3xl border-4 border-white bg-black" />
-                                    <div className="mt-6 flex items-center justify-center gap-6 text-[10px] font-black uppercase text-muted-foreground/40">
-                                        <div className="flex items-center gap-2"><MonitorPlay className="size-4" /> 1080P SOURCE</div>
-                                        <div className="flex items-center gap-2"><Zap className="size-4" /> CLOUD ENGINE</div>
+                
+                {/* 1. CONFIG COLUMN */}
+                <div className="lg:col-span-5 flex flex-col gap-6 no-print">
+                    <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
+                        <CardHeader className="bg-primary/5 border-b p-6 md:p-8 text-left">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="size-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                                        <Scissors className="size-7" />
+                                    </div>
+                                    <div className="text-left">
+                                        <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter leading-none">Studio Setup</CardTitle>
+                                        <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Local Splitting Engine</CardDescription>
                                     </div>
                                 </div>
-                            ) : (
-                                <CldUploadWidget 
-                                    cloudName={cloudName}
-                                    uploadPreset={uploadPreset}
-                                    onSuccess={handleSuccess}
-                                    options={{ sources: ['local'], resourceType: 'video' }}
-                                >
-                                    {({ open }) => (
-                                        <div 
-                                            onClick={() => open?.()}
-                                            className="border-4 border-dashed border-muted-foreground/20 rounded-[2.5rem] p-16 md:p-24 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-muted/40 transition-all"
-                                        >
-                                            <div className="relative">
-                                                <UploadCloud className="size-16 md:size-20 text-muted-foreground group-hover:text-primary transition-colors" />
-                                                <Zap className="absolute -top-1 -right-1 size-6 md:size-8 text-yellow-500 animate-pulse" />
-                                            </div>
-                                            <div className="text-center">
-                                                <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Video to Start</p>
-                                                <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">Max 3GB. Private Workspace.</p>
-                                            </div>
-                                        </div>
+                                {file && <Button variant="ghost" size="icon" onClick={handleReset} className="size-8 w-8 text-destructive hover:bg-destructive/5"><X className="size-5" /></Button>}
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6 md:p-8 space-y-8">
+                            {!file ? (
+                                <div 
+                                    className={cn(
+                                        "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-primary/5 transition-all",
+                                        isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                                     )}
-                                </CldUploadWidget>
+                                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                                    onDragLeave={() => setIsDragOver(false)}
+                                    onDrop={handleDrop}
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    <div className="relative">
+                                        <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary transition-colors" />
+                                        <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
+                                    </div>
+                                    <div className="text-center px-4">
+                                        <p className="text-xl md:text-2xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Video to Start</p>
+                                        <p className="text-[10px] md:text-sm text-muted-foreground mt-1 font-bold opacity-60 uppercase tracking-widest">Max 500MB recommended.</p>
+                                    </div>
+                                    <input ref={fileInputRef} type="file" className="hidden" accept="video/*" onChange={onFileChange} />
+                                </div>
+                            ) : (
+                                <div className="space-y-8 animate-in slide-in-from-left duration-300">
+                                    <Tabs value={splitMode} onValueChange={(v) => setSplitMode(v as SplitMode)} className="w-full">
+                                        <div className="flex items-center justify-between mb-4 px-1">
+                                            <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
+                                                <Settings2 className="size-3" /> Split Protocol
+                                            </Label>
+                                            <TabsList className="bg-muted p-1 rounded-xl border h-9">
+                                                <TabsTrigger value="equal" className="text-[9px] font-black uppercase px-4">EQUAL</TabsTrigger>
+                                                <TabsTrigger value="duration" className="text-[9px] font-black uppercase px-4">LENGTH</TabsTrigger>
+                                                <TabsTrigger value="custom" className="text-[9px] font-black uppercase px-4">CUSTOM</TabsTrigger>
+                                            </TabsList>
+                                        </div>
+
+                                        <TabsContent value="equal" className="m-0 space-y-4 animate-in fade-in duration-300">
+                                            <div className="space-y-3">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Number of Equal Parts</Label>
+                                                <Select value={numParts} onValueChange={setNumParts}>
+                                                    <SelectTrigger className="h-12 border-2 font-black rounded-xl bg-background/50 shadow-sm"><SelectValue /></SelectTrigger>
+                                                    <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                        {[2, 3, 4, 5, 6, 8, 10, 15, 20].map(n => <SelectItem key={n} value={n.toString()} className="font-bold py-3 uppercase">{n} Equal Parts</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1">Each part will be ~{formatTime(duration / (parseInt(numParts) || 1))} long.</p>
+                                            </div>
+                                        </TabsContent>
+
+                                        <TabsContent value="duration" className="m-0 space-y-4 animate-in fade-in duration-300">
+                                            <div className="space-y-3">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Clip Duration (Seconds)</Label>
+                                                <div className="relative group">
+                                                    <Input type="number" value={partDuration} onChange={(e) => setPartDuration(e.target.value)} className="h-12 border-2 rounded-xl font-black text-xl text-center pr-12" />
+                                                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[9px] font-black uppercase opacity-30 group-focus-within:opacity-100">SEC</span>
+                                                </div>
+                                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1">Creates clips of {partDuration}s until end of video.</p>
+                                            </div>
+                                        </TabsContent>
+
+                                        <TabsContent value="custom" className="m-0 space-y-4 animate-in fade-in duration-300">
+                                            <div className="space-y-3">
+                                                <Label className="text-[9px] font-black uppercase opacity-60">Time Marker List (Seconds)</Label>
+                                                <Textarea value={customTimestamps} onChange={(e) => setCustomTimestamps(e.target.value)} className="min-h-[100px] border-2 rounded-2xl font-bold p-4 text-sm" placeholder="e.g. 10, 25, 45, 120" />
+                                                <p className="text-[8px] font-bold text-muted-foreground uppercase opacity-40 px-1">Enter comma-separated seconds where splits should occur.</p>
+                                            </div>
+                                        </TabsContent>
+                                    </Tabs>
+
+                                    <div className="p-5 bg-green-500/5 rounded-[1.5rem] border-2 border-green-500/10 flex gap-4 text-left shadow-sm">
+                                        <ShieldCheck className="size-6 text-green-600 shrink-0 mt-0.5" />
+                                        <div>
+                                            <p className="text-[10px] md:text-[11px] font-black text-green-700 uppercase tracking-tight">Lossless Extraction</p>
+                                            <p className="text-[8px] text-green-600/80 font-medium leading-tight mt-1 uppercase">
+                                                Bitstream copying active. Original frame rate and quality preserved 100%.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
                             )}
                         </CardContent>
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 shrink-0">
-                             <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE HANDSHAKE</div>
-                             <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD EXTRACTION</div>
+                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t flex flex-col gap-4 shrink-0">
+                             {file && (
+                                <Button 
+                                    className="magic-button w-full h-16 md:h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl border-none" 
+                                    onClick={handleSplit}
+                                    disabled={isProcessing || isEngineLoading}
+                                >
+                                    <StarIcons />
+                                    {isProcessing || isEngineLoading ? (
+                                        <div className="flex items-center gap-3">
+                                            <Loader2 className="size-7 md:size-8 animate-spin" />
+                                            <span className="uppercase font-black text-sm md:text-base tracking-tighter">{statusText}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-3">
+                                            <Scissors className="size-6 md:size-7 text-yellow-400 fill-yellow-400 group-hover:scale-125 transition-transform" />
+                                            <span className="uppercase tracking-tighter text-lg md:text-xl font-black">START SPLITTING</span>
+                                        </div>
+                                    )}
+                                </Button>
+                             )}
+                             <div className="flex items-center gap-6 text-[8px] font-black text-muted-foreground/40 uppercase tracking-[0.3em] mx-auto">
+                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
+                                <div className="flex items-center gap-1.5"><Monitor className="size-3.5 text-primary" /> WASM SPEED</div>
+                            </div>
                         </CardFooter>
                     </Card>
                 </div>
 
-                <div className="lg:col-span-5 space-y-6">
-                    <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
-                        <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 text-left">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
-                                <Settings2 className="size-4 md:size-5 text-primary" /> Trimming Logic
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-6 md:p-8 space-y-8">
-                             <div className="grid grid-cols-2 gap-6 text-left">
-                                <div className="space-y-2">
-                                    <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Clock className="size-3"/> Start Point (Sec)</Label>
-                                    <Input type="number" value={startTime} onChange={(e) => setStartTime(Number(e.target.value))} className="h-12 border-2 rounded-xl font-black text-lg bg-background/50 shadow-inner" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label className="text-[10px] font-black uppercase opacity-60 flex items-center gap-2"><Clock className="size-3"/> End Point (Sec)</Label>
-                                    <Input type="number" value={endTime} onChange={(e) => setEndtime(Number(e.target.value))} className="h-12 border-2 rounded-xl font-black text-lg bg-background/50 shadow-inner" />
-                                </div>
-                             </div>
-
-                             <div className="p-5 bg-blue-500/5 rounded-[1.5rem] border-2 border-blue-500/10 flex gap-4 text-left shadow-sm">
-                                <Info className="size-6 text-blue-600 shrink-0 mt-0.5" />
-                                <div>
-                                    <p className="text-[10px] md:text-[11px] font-black text-blue-800 uppercase tracking-tight">Cloud Precision</p>
-                                    <p className="text-[8px] md:text-[10px] text-blue-700/70 font-medium leading-tight mt-1 uppercase">
-                                        Splitting is done at the bitstream level to ensure original HD quality is maintained.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div className="pt-6 border-t border-dashed border-white/10">
-                                <Button 
-                                    className="magic-button w-full h-16 md:h-20 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4" 
-                                    onClick={handleSplit}
-                                    disabled={!publicId || isGenerating}
-                                >
-                                    <StarIcons />
-                                    {isGenerating ? (
-                                        <div className="flex items-center gap-3">
-                                            <Loader2 className="size-7 md:size-8 animate-spin" />
-                                            <span className="uppercase font-black text-sm md:text-base tracking-tighter">PROCESSING...</span>
+                {/* 2. PREVIEW COLUMN */}
+                <div className="lg:col-span-7 space-y-6 flex flex-col">
+                    {file ? (
+                        <div className="space-y-6 animate-in zoom-in-95 duration-500 flex-1 flex flex-col">
+                             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
+                                <CardHeader className="bg-muted/30 border-b py-4 px-6 flex flex-row items-center justify-between shrink-0">
+                                    <div className="flex items-center gap-3">
+                                        <MonitorPlay className="h-5 w-5 text-primary" />
+                                        <div className="text-left">
+                                            <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate max-w-[200px]">{file.name}</CardTitle>
+                                            <CardDescription className="text-[9px] font-bold opacity-60 uppercase">{formatBytes(file.size)} • {formatTime(duration)}</CardDescription>
                                         </div>
-                                    ) : (
-                                        <div className="flex items-center gap-3">
-                                            <Scissors className="size-7 md:size-8 text-white/50 group-hover:scale-110 transition-transform" />
-                                            <span className="uppercase tracking-tighter text-lg md:text-2xl font-black">EXTRACT PART</span>
+                                    </div>
+                                    {parts.some(p => p.status === 'done') && <Badge className="bg-green-600 text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md animate-in zoom-in-95">RENDER READY</Badge>}
+                                </CardHeader>
+                                <CardContent className="p-6 md:p-10 flex-1 bg-slate-50 dark:bg-black/20 shadow-inner flex flex-col gap-8">
+                                    {/* Video Preview */}
+                                    <div className="w-full relative group">
+                                        <video 
+                                            src={videoUrl!} 
+                                            controls 
+                                            className="w-full max-h-[40vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" 
+                                        />
+                                        <AnimatePresence>
+                                            {isProcessing && (
+                                                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-2xl flex flex-col items-center justify-center z-10 gap-6">
+                                                    <div className="relative">
+                                                        <Loader2 className="size-20 md:size-24 animate-spin text-primary stroke-[3]" />
+                                                        <Scissors className="absolute inset-0 m-auto size-8 md:size-10 text-primary animate-pulse" />
+                                                    </div>
+                                                    <div className="space-y-4 w-full max-w-xs text-center px-4">
+                                                        <p className="text-xl md:text-2xl font-black text-white uppercase tracking-tighter animate-pulse">{statusText}</p>
+                                                        <Progress value={progress} className="h-2 shadow-inner" />
+                                                        <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.3em]">{progress}% Complete</p>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
+
+                                    {/* Generated Parts List */}
+                                    {parts.length > 0 && (
+                                        <div className="space-y-4 animate-in slide-in-from-bottom-4">
+                                            <div className="flex justify-between items-center px-1">
+                                                <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground opacity-60">Extraction results ({parts.length} parts)</Label>
+                                                {parts.every(p => p.status === 'done') && (
+                                                    <Button variant="ghost" size="sm" onClick={handleDownloadAllZip} className="h-7 text-primary font-black text-[9px] uppercase"><Archive className="size-3 mr-1.5" /> Download ZIP</Button>
+                                                )}
+                                            </div>
+                                            <ScrollArea className="h-[250px] md:h-[350px] rounded-2xl border-2 border-dashed p-4 bg-muted/10">
+                                                <div className="grid gap-3 pr-4">
+                                                    {parts.map((part) => (
+                                                        <div key={part.id} className="flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900 border-2 border-transparent hover:border-primary/20 shadow-sm transition-all group">
+                                                            <div className="flex items-center gap-4">
+                                                                <div className={cn(
+                                                                    "size-10 rounded-xl flex items-center justify-center font-black text-xs border-2 shadow-inner",
+                                                                    part.status === 'done' ? "bg-green-500/10 text-green-600 border-green-500/20" : "bg-primary/5 text-primary border-primary/20"
+                                                                )}>
+                                                                    {part.status === 'processing' ? <Loader2 className="size-5 animate-spin" /> : part.index}
+                                                                </div>
+                                                                <div className="text-left">
+                                                                    <p className="text-sm font-black uppercase tracking-tight">Clip {part.index}</p>
+                                                                    <p className="text-[10px] font-bold text-muted-foreground opacity-60">{formatTime(part.start)} - {formatTime(part.end)}</p>
+                                                                </div>
+                                                            </div>
+                                                            {part.url && (
+                                                                <Button 
+                                                                    size="sm" 
+                                                                    variant="ghost" 
+                                                                    className="h-10 px-4 rounded-xl font-black text-[9px] uppercase bg-primary/5 text-primary hover:bg-primary hover:text-white transition-all shadow-md group-hover:scale-105"
+                                                                    asChild
+                                                                >
+                                                                    <a href={part.url} download={`Clip-${part.index}-${file.name}`}>
+                                                                        <Download className="size-4 mr-2" /> SAVE MP4
+                                                                    </a>
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <ScrollBar />
+                                            </ScrollArea>
                                         </div>
                                     )}
-                                </Button>
-                                <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-30 text-center mt-4">Cloud-Powered API Active</p>
+                                </CardContent>
+                                <CardFooter className="bg-muted/10 p-6 md:p-8 border-t shrink-0 flex flex-col sm:flex-row justify-between items-center gap-6">
+                                    <div className="flex items-center gap-4">
+                                         <div className="size-14 rounded-2xl bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center border-2 border-primary/10">
+                                            <Monitor className="size-8 text-primary animate-pulse" />
+                                         </div>
+                                         <p className="text-[10px] font-bold text-muted-foreground uppercase max-w-[200px] leading-relaxed text-left">
+                                            WASM-Based Splitting: High-fidelity bitsream copying for <span className="text-primary font-black">original quality</span> preservation.
+                                         </p>
+                                    </div>
+                                    {parts.every(p => p.status === 'done') && parts.length > 0 && (
+                                        <Button 
+                                            size="lg" 
+                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 w-full sm:w-auto shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none active:scale-95 flex-[2] min-w-[220px]" 
+                                            onClick={handleDownloadAllZip}
+                                        >
+                                            <div className="absolute left-6 w-0.5 h-8 bg-white/40 rounded-full" />
+                                            <span className="flex-1 px-12 text-center tracking-widest text-lg uppercase">SAVE ALL (ZIP)</span>
+                                            <div className="bg-white h-full pl-8 pr-12 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-10 group-hover:pr-14 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                                <Archive className="size-7 group-hover:scale-110 transition-transform" />
+                                                <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
+                                            </div>
+                                        </Button>
+                                    )}
+                                </CardFooter>
+                            </Card>
+                        </div>
+                    ) : (
+                        <div className="h-full flex flex-col items-center justify-center py-24 md:py-48 opacity-10 gap-8 rounded-[3rem] bg-muted/20 border-4 border-dashed border-primary/20">
+                            <Video className="size-32 md:size-48" />
+                            <div className="space-y-1 text-center">
+                                <p className="text-3xl font-black uppercase tracking-tighter leading-none">Studio Viewport</p>
+                                <p className="text-xs font-bold uppercase tracking-widest text-center">Upload a video file to begin analysis</p>
                             </div>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
