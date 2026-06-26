@@ -120,7 +120,9 @@ export default function VideoSplitter() {
     };
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
-    const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
+    const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+    const onDragLeave = () => setIsDragOver(false);
+    const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0] || null); };
 
     const calculateParts = (): SplitPart[] => {
         if (duration <= 0) return [];
@@ -292,8 +294,8 @@ export default function VideoSplitter() {
                                         "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-primary/5 transition-all",
                                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                                     )}
-                                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                                    onDragLeave={() => setIsDragOver(false)}
+                                    onDragOver={onDragOver}
+                                    onDragLeave={onDragLeave}
                                     onDrop={onDrop}
                                     onClick={() => !isEngineLoading && fileInputRef.current?.click()}
                                 >

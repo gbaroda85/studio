@@ -149,6 +149,8 @@ export default function Mp3Compressor() {
     };
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFile(e.target.files?.[0] || null);
+    const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
+    const onDragLeave = () => setIsDragOver(false);
     const handleDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
     const handleCompress = async () => {
@@ -218,7 +220,7 @@ export default function Mp3Compressor() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                 
                 <div className="lg:col-span-5 flex flex-col gap-6 no-print">
-                    <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10">
+                    <Card className="border-2 shadow-2xl rounded-[2.5rem] overflow-hidden bg-white dark:bg-slate-950 border-primary/10 transition-all hover:border-primary/30">
                         <CardHeader className="bg-primary/5 border-b p-6 md:p-8 text-left">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
@@ -240,8 +242,8 @@ export default function Mp3Compressor() {
                                         "border-4 border-dashed border-muted-foreground/20 rounded-[2rem] p-16 flex flex-col items-center justify-center space-y-6 bg-muted/30 group cursor-pointer hover:bg-primary/5 transition-all",
                                         isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
                                     )}
-                                    onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-                                    onDragLeave={() => setIsDragOver(false)}
+                                    onDragOver={onDragOver}
+                                    onDragLeave={onDragLeave}
                                     onDrop={handleDrop}
                                     onClick={() => !isEngineLoading && fileInputRef.current?.click()}
                                 >
@@ -417,71 +419,9 @@ export default function Mp3Compressor() {
                                         )}
                                     </AnimatePresence>
                                 </CardContent>
-                            </Card>
-
-                            <Card className="border-2 shadow-xl rounded-[2.5rem] overflow-hidden bg-card/50">
-                                <CardHeader className="bg-muted/30 border-b p-6 flex flex-row items-center justify-between">
-                                    <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-3 text-left"><Monitor className="size-4 text-primary" /> Audio Studio Player</CardTitle>
-                                    <Badge variant="outline" className="bg-white/50 backdrop-blur-md">Local Preview</Badge>
-                                </CardHeader>
-                                <CardContent className="p-8 space-y-10 text-left">
-                                    <div className="space-y-6">
-                                        <div className="space-y-3">
-                                            <div className="flex justify-between items-center px-2">
-                                                <Label className="text-[10px] font-black uppercase opacity-60">Source File</Label>
-                                                <Badge variant="secondary" className="text-[8px] font-mono">{audioInfo?.bitrate || '---'} kbps</Badge>
-                                            </div>
-                                            <div className="bg-white dark:bg-slate-900 rounded-2xl border-2 p-2 shadow-inner group transition-all hover:border-primary/20">
-                                                <audio src={originalUrl!} className="w-full h-10" controls />
-                                            </div>
-                                        </div>
-
-                                        <AnimatePresence>
-                                            {compressedUrl && (
-                                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full space-y-6 pt-6 border-t-2 border-dashed border-primary/20 text-left">
-                                                    <div className="flex justify-between items-center px-2">
-                                                        <Label className="text-[10px] font-black uppercase text-emerald-600 flex items-center gap-2"><Sparkles className="size-3"/> Optimized Output</Label>
-                                                        <Badge className="bg-emerald-500 text-white text-[8px] font-black uppercase">{estimation?.bitrate} kbps</Badge>
-                                                    </div>
-                                                    <div className="bg-emerald-500/[0.03] rounded-2xl border-2 border-emerald-500/20 p-2 shadow-xl group transition-all hover:border-emerald-500/40">
-                                                        <audio src={compressedUrl} className="w-full h-10" controls />
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </AnimatePresence>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="bg-muted/10 p-8 border-t text-left">
-                                    <AnimatePresence>
-                                        {compressedUrl && (
-                                            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} className="w-full">
-                                                <Button 
-                                                    size="lg" 
-                                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 w-full shadow-2xl border-none active:scale-95" 
-                                                    onClick={handleDownload}
-                                                >
-                                                    <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
-                                                    <span className="flex-1 px-12 text-center tracking-widest text-lg md:text-xl uppercase">DOWNLOAD OPTIMIZED MP3</span>
-                                                    <div className="bg-white h-full pl-8 pr-12 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-10 group-hover:pr-14 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                                                        <Download className="size-8 group-hover:scale-110 transition-transform" />
-                                                        <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
-                                                    </div>
-                                                </Button>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </CardFooter>
-                            </Card>
+                             </Card>
                         </div>
-                    ) : (
-                        <div className="h-full flex flex-col items-center justify-center py-24 md:py-48 opacity-10 gap-8 rounded-[3rem] bg-muted/20 border-4 border-dashed">
-                            <Volume2 className="size-32 md:size-48" />
-                            <div className="space-y-1 text-center">
-                                <p className="text-3xl font-black uppercase tracking-tighter leading-none text-left">Studio Viewport</p>
-                                <p className="text-xs font-bold uppercase tracking-widest text-center">Select a file to begin analysis</p>
-                            </div>
-                        </div>
-                    )}
+                    ) : null}
                 </div>
             </div>
         </div>

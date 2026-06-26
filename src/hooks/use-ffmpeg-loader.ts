@@ -54,20 +54,15 @@ export function useFfmpegLoader() {
         setLoaderProgress(10);
         
         // 1. Load UMD builds (These create window.FFmpegWasm and window.FFmpegUtil)
+        // UMD builds do NOT contain 'import.meta.url' problematic code
         await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
         setLoaderProgress(30);
         await loadScript('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js');
         setLoaderProgress(50);
 
-        // Robust lookup for different UMD namespaces
-        const FFmpegClass = 
-            (window as any).FFmpegWasm?.FFmpeg || 
-            (window as any).FFmpeg?.FFmpeg || 
-            (window as any).FFmpeg;
-        
-        const FFmpegUtil = 
-            (window as any).FFmpegUtil || 
-            (window as any).FFmpeg?.util;
+        // Robust lookup for UMD namespaces
+        const FFmpegClass = (window as any).FFmpegWasm?.FFmpeg;
+        const FFmpegUtil = (window as any).FFmpegUtil;
 
         if (!FFmpegClass) throw new Error('FFmpeg global engine not found');
         if (!FFmpegUtil?.toBlobURL) throw new Error('FFmpeg Utility logic not found');
