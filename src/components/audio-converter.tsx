@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useMemo } from "react";
@@ -98,7 +99,6 @@ export default function AudioConverter() {
         }));
 
         setItems(prev => [...prev, ...newItems]);
-        toast({ title: `${newItems.length} Files Added` });
     };
 
     const onFileChange = (e: ChangeEvent<HTMLInputElement>) => handleFiles(e.target.files);
@@ -257,8 +257,9 @@ export default function AudioConverter() {
     };
 
     return (
-        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-8 pb-20 mx-auto">
+        <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-8 pb-20 mx-auto text-left">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className={cn(
                         "w-full glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[3rem] hover:border-primary/50",
@@ -278,7 +279,7 @@ export default function AudioConverter() {
                                         <UploadCloud className="size-16 text-muted-foreground group-hover:text-primary" />
                                         <Zap className="absolute -top-1 -right-1 size-6 text-yellow-500 animate-pulse" />
                                     </div>
-                                    <p className="text-xl font-black uppercase tracking-tighter">Drop Audio Files</p>
+                                    <p className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Drop Audio Files</p>
                                     <p className="text-[10px] md:text-sm text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP3, WAV, OGG, M4A, AAC, FLAC</p>
                                 </div>
                             ) : (
@@ -319,7 +320,7 @@ export default function AudioConverter() {
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30">
+                        <CardFooter className="bg-white dark:bg-slate-950 border-t p-5 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 shrink-0">
                             <div className="flex items-center gap-1.5"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
                             <div className="flex items-center gap-1.5"><Zap className="size-4 text-yellow-500" /> LOCAL DECODE</div>
                             <div className="flex items-center gap-1.5"><Smartphone className="size-4 text-primary" /> MOBILE OK</div>
@@ -330,7 +331,7 @@ export default function AudioConverter() {
                 <div className="lg:col-span-5 flex flex-col gap-6 no-print">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 text-left">
-                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
+                            <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
                                 <Settings2 className="size-4 md:size-5 text-primary" /> Quality Studio
                             </CardTitle>
                         </CardHeader>
@@ -356,9 +357,9 @@ export default function AudioConverter() {
                                             <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as OutputFormat)}>
                                                 <SelectTrigger className="h-12 border-2 font-black rounded-xl bg-background/50 shadow-inner"><SelectValue /></SelectTrigger>
                                                 <SelectContent className="rounded-xl border-2 shadow-2xl">
-                                                    <SelectItem value="mp3" className="font-bold py-3">MP3</SelectItem>
-                                                    <SelectItem value="wav" className="font-bold py-3">WAV</SelectItem>
-                                                    <SelectItem value="ogg" className="font-bold py-3">OGG</SelectItem>
+                                                    <SelectItem value="mp3" className="font-bold py-2">MP3</SelectItem>
+                                                    <SelectItem value="wav" className="font-bold py-2">WAV</SelectItem>
+                                                    <SelectItem value="ogg" className="font-bold py-2">OGG</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -404,7 +405,7 @@ export default function AudioConverter() {
                                 <div className="flex flex-col gap-3 w-full animate-in zoom-in-95">
                                     <Button 
                                         size="lg" 
-                                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-18 shadow-2xl border-none active:scale-95" 
+                                        className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-18 shadow-2xl border-none active:scale-95 flex-1" 
                                         onClick={handleDownloadAllZip}
                                         disabled={isZipping}
                                     >
@@ -439,6 +440,7 @@ export default function AudioConverter() {
                                     )}
                                 </Button>
                             )}
+                            <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center mt-2">Local Workspace Logic Active</p>
                         </CardFooter>
                     </Card>
                 </div>

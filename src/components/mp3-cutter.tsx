@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -553,7 +554,7 @@ export default function Mp3Cutter() {
                                     </div>
                                 )}
 
-                                {/* WAVEFORM STABILIZATION WRAPPER */}
+                                {/* WAVEFORM STABILIZATION WRAPPER - MIN-W-0 IS CRITICAL FOR FLEXBOX FIX */}
                                 <div className="relative bg-white dark:bg-slate-900 rounded-3xl p-4 md:p-6 shadow-inner border-2 overflow-hidden w-full min-w-0">
                                     <div ref={containerRef} className="w-full !max-w-full overflow-hidden" style={{ touchAction: 'none', height: '180px' }} />
                                     <div className="mt-4 flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-40">
