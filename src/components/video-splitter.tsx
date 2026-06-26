@@ -284,7 +284,7 @@ export default function VideoSplitter() {
                                         <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest mt-1">Industrial Grade Logic</CardDescription>
                                     </div>
                                 </div>
-                                {file && <Button variant="ghost" size="icon" onClick={handleReset} className="size-8 w-8 text-destructive hover:bg-destructive/5"><X className="size-5" /></Button>}
+                                {file && <Button variant="ghost" size="icon" onClick={handleReset} className="size-8 w-8 text-muted-foreground hover:text-destructive"><X className="size-5" /></Button>}
                             </div>
                         </CardHeader>
                         <CardContent className="p-6 md:p-8 space-y-8">

@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * @fileOverview High-performance Runtime FFmpeg Loader for Next.js 15.
  * Bypasses build errors by loading UMD bundles from CDN at runtime.
- * Explicitly targets the 'FFmpegWasm' namespace used by v0.12 UMD build.
+ * Explicitly targets both FFmpegWasm and FFmpeg namespaces for robustness.
  */
 export function useFfmpegLoader() {
   const [ffmpeg, setFfmpeg] = useState<any>(null);
@@ -53,20 +53,20 @@ export function useFfmpegLoader() {
       try {
         setLoaderProgress(10);
         
-        // 1. Load UMD builds (These create window.FFmpegWasm and window.FFmpegUtil)
-        // Using v0.12.x UMD builds which are stable for browser environments
+        // 1. Load UMD builds (These create window.FFmpegWasm or window.FFmpeg)
         await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
         setLoaderProgress(30);
         await loadScript('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js');
         setLoaderProgress(50);
 
         // 2. Access Classes from UMD Namespaces
-        // FFmpeg v0.12 UMD build exports to window.FFmpegWasm
-        const FFmpegClass = (window as any).FFmpegWasm?.FFmpeg;
-        const FFmpegUtil = (window as any).FFmpegUtil;
+        const win = window as any;
+        const FFmpegClass = win.FFmpegWasm?.FFmpeg || win.FFmpeg?.FFmpeg || win.FFmpeg;
+        const FFmpegUtil = win.FFmpegUtil || win.FFmpegWasm?.util || win.FFmpeg?.util;
 
         if (!FFmpegClass) {
-            throw new Error('FFmpeg engine not found in global namespace (FFmpegWasm)');
+            console.error('Available globals:', Object.keys(win).filter(k => k.toLowerCase().includes('ffmpeg')));
+            throw new Error('FFmpeg engine not found in global namespace. Check console for available globals.');
         }
         if (!FFmpegUtil?.toBlobURL) {
             throw new Error('FFmpeg Utility logic not found in global namespace');
@@ -75,7 +75,7 @@ export function useFfmpegLoader() {
         const ff = new FFmpegClass();
         setLoaderProgress(60);
 
-        // 3. Load core files via explicit blob URLs to avoid CORS and dynamic resolution issues
+        // 3. Load core files and WORKER via explicit blob URLs (CRITICAL for Next.js build)
         const coreURL = await FFmpegUtil.toBlobURL(
           'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd/ffmpeg-core.js',
           'text/javascript'
@@ -88,8 +88,14 @@ export function useFfmpegLoader() {
         );
         setLoaderProgress(80);
 
-        // 4. Initialize the engine
-        await ff.load({ coreURL, wasmURL });
+        const workerURL = await FFmpegUtil.toBlobURL(
+          'https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg-worker.js',
+          'text/javascript'
+        );
+        setLoaderProgress(90);
+
+        // 4. Initialize the engine with all explicit URLs
+        await ff.load({ coreURL, wasmURL, workerURL });
         setLoaderProgress(100);
         
         setFfmpeg(ff);
