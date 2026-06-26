@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
@@ -6,7 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 /**
  * @fileOverview High-performance Runtime FFmpeg Loader for Next.js 15.
  * Bypasses build errors by loading UMD bundles from CDN at runtime.
- * Explicitly targets both FFmpegWasm and FFmpeg namespaces for robustness.
+ * Explicitly targets FFmpegWASM and FFmpegUtil namespaces for robustness.
  */
 export function useFfmpegLoader() {
   const [ffmpeg, setFfmpeg] = useState<any>(null);
@@ -53,7 +52,8 @@ export function useFfmpegLoader() {
       try {
         setLoaderProgress(10);
         
-        // 1. Load UMD builds (These create window.FFmpegWasm or window.FFmpeg)
+        // 1. Load UMD builds (These create window.FFmpegWASM and window.FFmpegUtil)
+        // Note: Using v0.12.10 and v0.12.1 for stability
         await loadScript('https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js');
         setLoaderProgress(30);
         await loadScript('https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js');
@@ -61,8 +61,10 @@ export function useFfmpegLoader() {
 
         // 2. Access Classes from UMD Namespaces
         const win = window as any;
-        const FFmpegClass = win.FFmpegWasm?.FFmpeg || win.FFmpeg?.FFmpeg || win.FFmpeg;
-        const FFmpegUtil = win.FFmpegUtil || win.FFmpegWasm?.util || win.FFmpeg?.util;
+        
+        // The UMD builds from unpkg for 0.12.x typically export to FFmpegWASM and FFmpegUtil
+        const FFmpegClass = win.FFmpegWASM?.FFmpeg || win.FFmpegWasm?.FFmpeg || win.FFmpeg?.FFmpeg || win.FFmpeg;
+        const FFmpegUtil = win.FFmpegUtil || win.FFmpegWASM?.util || win.FFmpegWasm?.util || win.FFmpeg?.util;
 
         if (!FFmpegClass) {
             console.error('Available globals:', Object.keys(win).filter(k => k.toLowerCase().includes('ffmpeg')));

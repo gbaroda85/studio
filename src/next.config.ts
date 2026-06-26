@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 
 /**
@@ -14,7 +13,6 @@ const nextConfig: NextConfig = {
     ignoreDuringBuilds: true,
   },
   output: 'standalone',
-  transpilePackages: ['@ffmpeg/ffmpeg', '@ffmpeg/util'],
   async headers() {
     return [
       {
