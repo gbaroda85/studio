@@ -433,9 +433,7 @@ export default function Page() {
                         <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">VALUES</div>
                     </div>
                     
-                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
-                        {/* Two-Part Background */}
-                        <div className="absolute top-0 left-0 w-full h-1/3 bg-slate-50 dark:bg-white/5 pointer-events-none" />
+                    <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
                         <div className="relative z-10">
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">PRIVACY POLICY</p>
                             <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">100% <br/> PRIVATE</h3>
@@ -461,9 +459,7 @@ export default function Page() {
                         <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">VISION</div>
                     </div>
                     
-                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
-                        {/* Two-Part Background */}
-                        <div className="absolute top-0 left-0 w-full h-1/3 bg-slate-50 dark:bg-white/5 pointer-events-none" />
+                    <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
                         <div className="relative z-10">
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SYSTEM CORE</p>
                             <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">NATIVE <br/> SPEED</h3>
@@ -489,9 +485,7 @@ export default function Page() {
                         <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">MISSION</div>
                     </div>
                     
-                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
-                        {/* Two-Part Background */}
-                        <div className="absolute top-0 left-0 w-full h-1/3 bg-slate-50 dark:bg-white/5 pointer-events-none" />
+                    <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
                         <div className="relative z-10">
                             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OUTPUT STANDARDS</p>
                             <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">HD <br/> QUALITY</h3>
