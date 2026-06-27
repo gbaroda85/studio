@@ -412,11 +412,11 @@ export default function Page() {
                     </div>
                 </div>
                 
-                <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none font-headline">
+                <h2 className="text-3xl md:text-6xl font-black text-center text-white tracking-tighter uppercase leading-none font-headline">
                     WHY USERS LOVE <br />
                     <span className="text-primary font-headline">GR7 Tools</span>
                 </h2>
-                <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center font-headline">
+                <p className="mt-4 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center font-headline">
                     FAST, SECURE AND RELIABLE
                 </p>
             </div>
