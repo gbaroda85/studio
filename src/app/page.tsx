@@ -501,12 +501,6 @@ export default function Page() {
             </div>
         </div>
       </section>
-
-      <div className="w-full mt-0 pt-12 border-t border-border/50 text-center pb-20 bg-background dark:bg-slate-950">
-          <p className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] md:tracking-[0.3em]">
-              © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB Studio
-          </p>
-      </div>
     </div>
   );
 }
