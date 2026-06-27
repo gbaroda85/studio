@@ -249,7 +249,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
           <Button 
             variant="ghost" 
             className={cn(
-                "h-10 px-4 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group",
+                "h-10 px-2 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group",
                 "data-[state=open]:bg-primary/10 data-[state=open]:text-primary"
             )}
           >
@@ -393,7 +393,7 @@ function AppHeader() {
               asChild
               variant="ghost" 
               className={cn(
-                "hidden lg:flex h-10 px-4 font-black text-xs items-center gap-2 transition-all focus-visible:ring-0 border-none shadow-none",
+                "hidden lg:flex h-10 px-2 font-black text-xs items-center gap-2 transition-all focus-visible:ring-0 border-none shadow-none",
                 pathname === '/' ? "text-primary bg-primary/5" : "text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5"
               )}
             >
