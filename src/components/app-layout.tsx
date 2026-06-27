@@ -249,7 +249,7 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
           <Button 
             variant="ghost" 
             className={cn(
-                "h-10 px-1 xl:px-2 font-black text-[10px] flex items-center gap-1 xl:gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group tracking-tighter",
+                "h-10 px-1.5 xl:px-2 font-black text-[10px] flex items-center gap-1 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group tracking-tighter",
                 "data-[state=open]:bg-primary/10 data-[state=open]:text-primary"
             )}
           >

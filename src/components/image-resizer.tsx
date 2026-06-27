@@ -40,6 +40,9 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
 
+type OutputFormat = 'jpeg' | 'png' | 'webp';
+type Unit = 'px' | 'cm' | 'mm' | 'inch';
+
 const GOVT_PRESETS = [
   { label: 'Photo (SSC/UPSC)', width: 200, height: 230, format: 'jpeg' as OutputFormat, icon: User, color: 'border-blue-500', bg: 'bg-blue-500/5' },
   { label: 'Signature (SSC)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool, color: 'border-emerald-500', bg: 'bg-emerald-500/5' },
@@ -67,7 +70,7 @@ function formatBytes(bytes: number, decimals = 2): string {
   const dm = decimals < 0 ? 0 : decimals;
   const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + " " + sizes[i];
 }
 
 export default function ImageResizer() {
@@ -92,6 +95,7 @@ export default function ImageResizer() {
     if (targetUnit === 'px') return px;
     if (targetUnit === 'inch') return parseFloat((px / DPI).toFixed(2));
     if (targetUnit === 'mm') return parseFloat((px / (DPI / 25.4)).toFixed(1));
+    if (targetUnit === 'cm') return parseFloat((px / (DPI / 2.54)).toFixed(2));
     return px;
   };
 
@@ -99,6 +103,7 @@ export default function ImageResizer() {
     if (currentUnit === 'px') return val;
     if (currentUnit === 'inch') return Math.round(val * DPI);
     if (currentUnit === 'mm') return Math.round(val * (DPI / 25.4));
+    if (currentUnit === 'cm') return Math.round(val * (DPI / 2.54));
     return val;
   };
 
@@ -184,14 +189,15 @@ export default function ImageResizer() {
       const targetWidth = convertUnitToPx(parseFloat(newDimensions.width), unit);
       const targetHeight = convertUnitToPx(parseFloat(newDimensions.height), unit);
 
+      // MULTI-STAGE STEP-DOWN RESAMPLING FOR CRISP TEXT
+      // Jumping directly from 4000px to 200px creates blur. We do it in 50% steps.
       let curCanvas: HTMLCanvasElement | HTMLImageElement = img;
       let stepW = img.width;
       let stepH = img.height;
       
-      // STEP-DOWN RESAMPLING TO AVOID ALIASING
-      while (stepW > targetWidth * 2) {
-          const nextW = Math.floor(stepW / 2);
-          const nextH = Math.floor(stepH / 2);
+      while (stepW > targetWidth * 1.5) {
+          const nextW = Math.floor(stepW * 0.7);
+          const nextH = Math.floor(stepH * 0.7);
           const stepCanvas = document.createElement('canvas');
           stepCanvas.width = nextW;
           stepCanvas.height = nextH;
@@ -222,9 +228,9 @@ export default function ImageResizer() {
         
         finalCtx.drawImage(curCanvas, 0, 0, targetWidth, targetHeight);
 
-        // ENHANCED SHARPENING FILTER (UNSHARP MASK STYLE)
-        // Strength increased from 0.08 to 0.18 for HD clarity
-        const amount = 0.18; 
+        // ADVANCED 3X3 SHARPENING KERNEL FOR TEXT FIDELITY
+        // Normalizing the kernel to ensure it doesn't shift overall brightness
+        const amount = 0.25; 
         const weights = [
             0, -amount, 0,
             -amount, 1 + (4 * amount), -amount,
@@ -260,7 +266,7 @@ export default function ImageResizer() {
         finalCtx.putImageData(output, 0, 0);
 
         const mimeType = `image/${outputFormat}`;
-        // Quality increased to 0.98 for maximum fidelity
+        // Maximum quality for professional document results
         const resizedDataUrl = finalCanvas.toDataURL(mimeType, 0.98); 
         
         const blob = await (await fetch(resizedDataUrl)).blob();
@@ -269,7 +275,7 @@ export default function ImageResizer() {
       }
       
       setIsProcessing(false);
-      toast({ title: "Resized!", description: "Ultra-sharp HD re-sampling applied." });
+      toast({ title: "Resized!", description: "High-fidelity text preserving render complete." });
     };
     img.onerror = () => {
       toast({ variant: "destructive", title: "Error", description: "Could not load image." });
@@ -303,7 +309,7 @@ export default function ImageResizer() {
 
   if (!originalImageSrc) {
     return (
-      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4">
+      <div className="w-full max-w-4xl py-4 flex flex-col items-center justify-center gap-6 px-4 mx-auto">
         <Card className={cn(
             "w-full max-w-2xl glass-card overflow-hidden transition-all duration-300 border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 dark:hover:shadow-primary/20 cursor-pointer select-none",
             isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.02]"
@@ -422,7 +428,7 @@ export default function ImageResizer() {
                                             <span className="flex-1 px-12 text-center tracking-widest text-lg md:text-xl uppercase">SAVE SHARP IMAGE</span>
                                             <div className="bg-white h-full pl-10 pr-12 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-11 group-hover:pr-13 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                                 <Download className="size-8 group-hover:scale-110 transition-transform" />
-                                                <div className="absolute right-4 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
+                                                <div className="absolute right-3 w-0.5 h-10 bg-[#00aeef]/20 rounded-full" />
                                             </div>
                                         </Button>
                                     </div>
@@ -518,8 +524,8 @@ export default function ImageResizer() {
                     {/* SELECT UNIT SECTION */}
                     <div className="space-y-3">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 text-left block">Select Unit</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
+                        <div className="grid grid-cols-4 gap-2">
+                            {(['px', 'cm', 'mm', 'inch'] as Unit[]).map((u) => (
                                 <button
                                     key={u}
                                     onClick={() => handleUnitChange(u)}
@@ -552,9 +558,9 @@ export default function ImageResizer() {
                     <div className="p-3 md:p-4 bg-green-500/5 rounded-xl md:rounded-2xl border-2 border-green-500/10 flex gap-3 shadow-sm text-left">
                         <ShieldCheck className="size-5 md:size-6 text-green-600 shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-[9px] md:text-[10px] font-black text-green-700 uppercase tracking-tight">HD Resampling</p>
+                            <p className="text-[9px] md:text-[10px] font-black text-green-700 uppercase tracking-tight">Step-Down Filter</p>
                             <p className="text-[7px] md:text-[8px] text-green-600/80 font-medium leading-tight mt-0.5 uppercase">
-                                Optimized for government application forms with strict pixel requirements.
+                                Multi-stage resampling enabled for 100% crisp text results.
                             </p>
                         </div>
                     </div>
