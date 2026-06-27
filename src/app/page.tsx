@@ -64,12 +64,16 @@ import {
   Fuel,
   Waves,
   FileArchive,
-  UserCircle
+  UserCircle,
+  ShieldAlert,
+  Cpu,
+  Globe
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { Card, CardContent } from '@/components/ui/card';
 
 const ALL_TOOLS = [
   // FEATURED / VISUAL PROCESSORS
@@ -118,7 +122,7 @@ const ALL_TOOLS = [
   { icon: FileOutput, title: "IMAGE TO PNG", description: "Convert various image formats to PNG.", href: "/image-to-png", colorClass: "bg-sky-500", lightBg: "bg-[#ecfeff]", category: "image" },
   { icon: Crop, title: "CROP PDF", description: "Trim margins and fix perspective on PDF pages.", href: "/crop-pdf", colorClass: "bg-amber-600", lightBg: "bg-[#fffbeb]" , category: "pdf" },
   { icon: ImageIcon, title: "PDF TO IMAGE", description: "Convert all PDF pages into HD images.", href: "/pdf-to-image", colorClass: "bg-orange-500", lightBg: "bg-[#fff7ed]", category: "pdf" },
-  { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "pdf" },
+  { icon: FileCode, title: "HTML TO PDF", description: "Transform raw code into professional documents.", href: "/html-to-pdf", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]" , category: "pdf" },
   { icon: FileText, title: "TEXT TO PDF", description: "Convert plain text notes into a clean PDF.", href: "/text-to-pdf", colorClass: "bg-indigo-600", lightBg: "bg-[#f8fafc]", category: "pdf" },
   { icon: Copyright, title: "ADD WATERMARK", description: "Protect your PDFs with custom text watermarks.", href: "/add-watermark", colorClass: "bg-rose-500", lightBg: "bg-[#fff1f2]", category: "pdf" },
   { icon: NotebookPen, title: "ADD PAGE NUMBERS", description: "Insert professional page numbers into PDFs.", href: "/add-page-numbers", colorClass: "bg-emerald-500", lightBg: "bg-[#f7fee7]", category: "pdf" },
@@ -374,7 +378,7 @@ export default function Page() {
                     </div>
                 </div>
 
-                <div className="mb-24 md:mb-32 transform-gpu">
+                <div className="mb-16 md:mb-20 transform-gpu">
                     <div className="flex items-center gap-3 text-indigo-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
                         <div className="w-12 md:w-16 h-2.5 bg-indigo-500 rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">FINANCE HUB</span>
                     </div>
@@ -384,6 +388,58 @@ export default function Page() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 md:gap-10 transform-gpu">
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
+                    </div>
+                </div>
+
+                {/* WHY USERS LOVE GR7 TOOLS SECTION */}
+                <div className="mb-24 md:mb-32 transform-gpu animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                    <div className="flex items-center gap-3 text-emerald-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
+                        <div className="w-12 md:w-16 h-2.5 bg-emerald-500 rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">THE STUDIO ADVANTAGE</span>
+                    </div>
+                    <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
+                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase text-left">Why Professionals Choose GR7</h2>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 transform-gpu">
+                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
+                            <CardContent className="p-8 space-y-4">
+                                <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-inner">
+                                    <ShieldCheck className="size-8" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-primary">100% Private</h3>
+                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">Everything happens in your local RAM. We never store or upload your sensitive documents.</p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
+                            <CardContent className="p-8 space-y-4">
+                                <div className="size-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-inner">
+                                    <Zap className="size-8" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-blue-600">Hardware Speed</h3>
+                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">Using WebAssembly technology, processing is executed at native hardware speed without cloud delays.</p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
+                            <CardContent className="p-8 space-y-4">
+                                <div className="size-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shadow-inner">
+                                    <Maximize className="size-8" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-emerald-600">Portal Optimized</h3>
+                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">Specifically designed for SSC, UPSC, and IBPS portals with strict KB and pixel size constraints.</p>
+                            </CardContent>
+                        </Card>
+
+                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
+                            <CardContent className="p-8 space-y-4">
+                                <div className="size-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform shadow-inner">
+                                    <Sparkles className="size-8" />
+                                </div>
+                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">HD Precision</h3>
+                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">High-fidelity 300DPI rendering ensures that text and signatures remain crisp for professional printing.</p>
+                            </CardContent>
+                        </Card>
                     </div>
                 </div>
             </>
@@ -399,3 +455,4 @@ export default function Page() {
     </div>
   );
 }
+
