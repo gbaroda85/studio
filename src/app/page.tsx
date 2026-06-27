@@ -404,8 +404,8 @@ export default function Page() {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
-            <div className="mb-4 inline-flex items-center px-6 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md">
-                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Our Values</span>
+            <div className="flex items-center gap-3 text-primary font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-4 md:mb-6 font-body transform-gpu">
+                <div className="w-12 md:w-16 h-2.5 bg-primary rounded-full shrink-0" /> <span className="text-white/60">OUR VALUES</span>
             </div>
             
             <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none">

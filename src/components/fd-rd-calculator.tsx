@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -149,8 +150,8 @@ export default function FdRdCalculator() {
           <CardContent className="p-0">
              <Tabs value={mode} onValueChange={(v) => setMode(v as CalcMode)} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/30 p-1.5 border-b">
-                    <TabsTrigger value="fd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:shadow-lg">Fixed Deposit (FD)</TabsTrigger>
-                    <TabsTrigger value="rd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:shadow-lg">Recurring (RD)</TabsTrigger>
+                    <TabsTrigger value="fd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-lg">Fixed Deposit (FD)</TabsTrigger>
+                    <TabsTrigger value="rd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-lg">Recurring (RD)</TabsTrigger>
                 </TabsList>
 
                 <div className="p-6 md:p-8 space-y-10">
