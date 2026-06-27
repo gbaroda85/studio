@@ -198,7 +198,7 @@ const CATEGORIES = [
 function GR7Logo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-1.5", className)}>
-      <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden">
+      <div className="relative size-8 md:size-12 flex items-center justify-center bg-white border-[1.5px] border-slate-200 rounded-lg md:rounded-xl shadow-sm overflow-hidden text-left">
         <svg viewBox="0 0 1000 1000" className="w-full h-full p-0.5 md:p-1">
           <text 
             x="80" 
@@ -249,13 +249,13 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
           <Button 
             variant="ghost" 
             className={cn(
-                "h-10 px-2 font-black text-xs flex items-center gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group",
+                "h-10 px-1 xl:px-2 font-black text-[10px] flex items-center gap-1 xl:gap-2 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group tracking-tighter",
                 "data-[state=open]:bg-primary/10 data-[state=open]:text-primary"
             )}
           >
-            <category.icon className={cn("size-4 transition-transform group-hover:scale-110", category.color)} />
+            <category.icon className={cn("size-3.5 transition-transform group-hover:scale-110", category.color)} />
             <span className="hidden xl:inline">{t(category.name)}</span>
-            <ChevronDown className="size-3 opacity-50 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            <ChevronDown className="size-2.5 opacity-50 transition-transform duration-200 group-data-[state=open]:rotate-180" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
@@ -325,7 +325,7 @@ function MobileNav() {
       <SheetContent side="left" className="w-[85vw] sm:w-[380px] p-0 border-r-2 z-[150] rounded-r-[2.5rem]">
         <SheetHeader className="p-6 border-b text-left shrink-0">
           <SheetTitle>
-            <Link href="/" onClick={() => setOpen(false)} className="inline-block">
+            <Link href="/" onClick={() => setOpen(false)} className="inline-block text-left">
               <GR7Logo />
             </Link>
           </SheetTitle>
@@ -348,7 +348,7 @@ function MobileNav() {
 
             {CATEGORIES.map((cat) => (
               <div key={cat.name} className="space-y-3">
-                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 pl-2">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 pl-2 text-left">
                   <cat.icon className="size-3" /> {t(cat.name)}
                 </h4>
                 <div className="grid grid-cols-1 gap-2">
@@ -358,7 +358,7 @@ function MobileNav() {
                       href={tool.href}
                       onClick={() => setOpen(false)}
                       className={cn(
-                        "flex items-center gap-3 p-3.5 rounded-xl font-bold text-xs transition-all border border-transparent hover:border-border min-h-[48px]",
+                        "flex items-center gap-3 p-3.5 rounded-xl font-bold text-xs transition-all border border-transparent hover:border-border min-h-[48px] text-left",
                         pathname === tool.href ? "bg-primary/5 text-primary border-primary/20" : "hover:bg-muted"
                       )}
                     >
@@ -382,7 +382,7 @@ function AppHeader() {
 
   return (
     <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
-      <div className="w-full h-full flex items-center justify-between px-3 md:px-8 lg:px-12">
+      <div className="w-full h-full flex items-center justify-between px-3 md:px-8 lg:px-12 max-w-[2000px] mx-auto">
         <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             <MobileNav />
             <Link href="/" className="flex items-center group mr-1 md:mr-2 touch-manipulation">
@@ -404,20 +404,20 @@ function AppHeader() {
             </Button>
         </div>
 
-        <div className="flex items-center gap-1 sm:gap-3">
-            <nav className="hidden lg:flex items-center gap-1 mr-2">
+        <div className="flex items-center gap-1 sm:gap-2">
+            <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 mr-1 xl:mr-2">
                 {CATEGORIES.map((cat) => (
                   <NavDropdown key={cat.name} category={cat} />
                 ))}
             </nav>
 
-            <div className="hidden h-6 w-px bg-border mx-2 xl:block" />
+            <div className="hidden h-6 w-px bg-border mx-1 xl:mx-2 xl:block" />
 
             <div className="flex items-center gap-1 md:gap-2">
                 <a href="mailto:gr7imagepdf@gmail.com" className="support-uiverse px-2 md:px-4 touch-manipulation h-10">
                     <span className="uiverse-tooltip hidden md:block">gr7imagepdf@gmail.com</span>
                     <Mail className="size-4 md:mr-2" />
-                    <span className="hidden md:inline text-xs font-black">Support</span>
+                    <span className="hidden md:inline text-[10px] font-black uppercase tracking-tighter">Support</span>
                 </a>
                 
                 <SettingsMenu />
@@ -433,13 +433,13 @@ export function AppFooter() {
   const { t } = useLanguage();
   return (
     <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0">
-      <div className="w-full px-4 md:px-12 lg:px-16">
+      <div className="w-full px-4 md:px-12 lg:px-16 max-w-[2000px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12">
             <div className="md:col-span-2 space-y-4 md:space-y-6">
             <Link href="/" className="flex items-center gap-2 inline-block">
                 <GR7Logo />
             </Link>
-            <p className="text-sm text-muted-foreground max-sm font-medium leading-relaxed">
+            <p className="text-sm text-muted-foreground max-sm font-medium leading-relaxed text-left">
                 A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
             </p>
             <div className="flex items-center gap-4 pt-4">
@@ -452,7 +452,7 @@ export function AppFooter() {
             </div>
             </div>
             
-            <div className="grid grid-cols-2 md:grid-cols-1 gap-8 md:col-span-2">
+            <div className="grid grid-cols-2 md:grid-cols-1 gap-8 md:col-span-2 text-left">
                 <div>
                     <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Quick Links</h4>
                     <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">

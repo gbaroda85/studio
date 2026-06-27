@@ -40,9 +40,6 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from "framer-motion";
 
-type OutputFormat = 'jpeg' | 'png' | 'webp';
-type Unit = 'px' | 'mm' | 'inch';
-
 const GOVT_PRESETS = [
   { label: 'Photo (SSC/UPSC)', width: 200, height: 230, format: 'jpeg' as OutputFormat, icon: User, color: 'border-blue-500', bg: 'bg-blue-500/5' },
   { label: 'Signature (SSC)', width: 140, height: 60, format: 'jpeg' as OutputFormat, icon: PenTool, color: 'border-emerald-500', bg: 'bg-emerald-500/5' },
@@ -191,6 +188,7 @@ export default function ImageResizer() {
       let stepW = img.width;
       let stepH = img.height;
       
+      // STEP-DOWN RESAMPLING TO AVOID ALIASING
       while (stepW > targetWidth * 2) {
           const nextW = Math.floor(stepW / 2);
           const nextH = Math.floor(stepH / 2);
@@ -224,8 +222,15 @@ export default function ImageResizer() {
         
         finalCtx.drawImage(curCanvas, 0, 0, targetWidth, targetHeight);
 
-        const amount = 0.08; 
-        const weights = [0, -amount, 0, -amount, 4 * amount + 1, -amount, 0, -amount, 0];
+        // ENHANCED SHARPENING FILTER (UNSHARP MASK STYLE)
+        // Strength increased from 0.08 to 0.18 for HD clarity
+        const amount = 0.18; 
+        const weights = [
+            0, -amount, 0,
+            -amount, 1 + (4 * amount), -amount,
+            0, -amount, 0
+        ];
+        
         const imageData = finalCtx.getImageData(0, 0, targetWidth, targetHeight);
         const pixels = imageData.data;
         const output = finalCtx.createImageData(targetWidth, targetHeight);
@@ -246,16 +251,17 @@ export default function ImageResizer() {
                         b += pixels[srcOff + 2] * wt;
                     }
                 }
-                dst[dstOff] = r;
-                dst[dstOff + 1] = g;
-                dst[dstOff + 2] = b;
+                dst[dstOff] = Math.max(0, Math.min(255, r));
+                dst[dstOff + 1] = Math.max(0, Math.min(255, g));
+                dst[dstOff + 2] = Math.max(0, Math.min(255, b));
                 dst[dstOff + 3] = pixels[dstOff + 3]; 
             }
         }
         finalCtx.putImageData(output, 0, 0);
 
         const mimeType = `image/${outputFormat}`;
-        const resizedDataUrl = finalCanvas.toDataURL(mimeType, 1.0); 
+        // Quality increased to 0.98 for maximum fidelity
+        const resizedDataUrl = finalCanvas.toDataURL(mimeType, 0.98); 
         
         const blob = await (await fetch(resizedDataUrl)).blob();
         setEnhancedFileSize(blob.size);
@@ -384,7 +390,7 @@ export default function ImageResizer() {
                                 </DialogTrigger>
                                 <DialogContent className="max-w-5xl max-h-[85vh] top-[55%] overflow-hidden p-0 rounded-[2.5rem] border-none shadow-3xl bg-white dark:bg-slate-950 flex flex-col">
                                     <DialogHeader className="p-6 md:p-8 border-b bg-muted/30">
-                                        <DialogTitle className="uppercase font-black tracking-tighter text-lg md:text-2xl flex items-center gap-3">
+                                        <DialogTitle className="uppercase font-black tracking-tighter text-lg md:text-2xl flex items-center gap-3 text-left">
                                              <Eye className="text-primary size-6" /> HD Pixel Proof Analysis
                                         </DialogTitle>
                                     </DialogHeader>
@@ -429,7 +435,7 @@ export default function ImageResizer() {
                     {isProcessing ? (
                         <div className="h-full flex flex-col items-center justify-center gap-8 py-20">
                             <div className="relative">
-                                <Loader2 className="h-20 w-20 animate-spin text-primary opacity-20 stroke-[3]" />
+                                <Loader2 className="h-16 w-16 animate-spin text-primary opacity-20 stroke-[3]" />
                                 <Zap className="absolute inset-0 m-auto h-10 w-10 text-primary animate-pulse" />
                             </div>
                             <p className="text-sm font-black text-primary uppercase tracking-[0.3em] animate-pulse">Rendering HD Pixels...</p>
@@ -484,20 +490,20 @@ export default function ImageResizer() {
             {/* Dimension Settings Card */}
             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl">
                 <CardHeader className="bg-primary/5 border-b border-white/10 p-4 md:p-6">
-                    <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter text-primary">
+                    <CardTitle className="text-sm md:text-base flex items-center gap-2 font-black uppercase tracking-tighter text-primary text-left">
                         <Settings2 className="size-4 md:size-5 text-primary" /> Configuration
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 md:p-6 space-y-4 md:space-y-5">
                     {/* QUICK PRESETS */}
                     <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2 text-left">
                             <Briefcase className="size-3" /> Quick Presets
                         </Label>
                         <div className="grid grid-cols-2 gap-2">
                             {GOVT_PRESETS.map((p) => (
                                 <button key={p.label} onClick={() => applyPreset(p)} className="flex items-center gap-2 p-2 rounded-xl border-2 border-transparent bg-white/5 hover:bg-primary/5 hover:border-primary/20 transition-all text-left group">
-                                    <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform"><p.icon className="size-3.5" /></div>
+                                    <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shrink-0"><p.icon className="size-3.5" /></div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-[9px] font-black uppercase truncate leading-none mb-0.5">{p.label}</p>
                                         <p className="text-[7px] font-bold opacity-50 uppercase">{p.width}x{p.height} PX</p>
@@ -511,7 +517,7 @@ export default function ImageResizer() {
 
                     {/* SELECT UNIT SECTION */}
                     <div className="space-y-3">
-                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60">Select Unit</Label>
+                        <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest opacity-60 text-left block">Select Unit</Label>
                         <div className="grid grid-cols-3 gap-2">
                             {(['px', 'mm', 'inch'] as Unit[]).map((u) => (
                                 <button
@@ -555,7 +561,7 @@ export default function ImageResizer() {
                 </CardContent>
                 <CardFooter className="bg-muted/10 p-5 md:p-6 border-t border-white/10">
                     <Button 
-                        className="magic-button w-full h-14 md:h-16 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-3" 
+                        className="magic-button w-full h-14 md:h-16 rounded-full bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-3 shadow-xl" 
                         onClick={handleResize}
                         disabled={isProcessing}
                     >
