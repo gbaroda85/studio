@@ -414,7 +414,7 @@ export default function Page() {
                 
                 <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none font-headline">
                     WHY USERS LOVE <br />
-                    <span className="text-primary">GR7 Tools</span>
+                    <span className="text-primary font-headline">GR7 Tools</span>
                 </h2>
                 <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center">
                     FAST, SECURE AND RELIABLE
@@ -427,17 +427,17 @@ export default function Page() {
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
                 
                 {/* CARD 01: PRIVACY */}
-                <div className="relative pt-6">
-                    {/* Top Overlapping Badge */}
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                <div className="relative">
+                    {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
+                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VALUES</div>
                     </div>
                     
                     <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">PRIVACY POLICY</p>
-                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none">100% <br/> PRIVATE</h3>
+                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">100% <br/> PRIVATE</h3>
                         <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
-                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
                             YOUR DATA NEVER LEAVES YOUR DEVICE. ALL PROCESSING HAPPENS LOCALLY IN YOUR BROWSER RAM.
                         </p>
                     </div>
@@ -451,17 +451,17 @@ export default function Page() {
                 </div>
 
                 {/* CARD 02: SPEED */}
-                <div className="relative pt-6">
-                    {/* Top Overlapping Badge */}
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                <div className="relative">
+                    {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
+                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VISION</div>
                     </div>
                     
                     <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SYSTEM CORE</p>
-                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none">NATIVE <br/> SPEED</h3>
+                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">NATIVE <br/> SPEED</h3>
                         <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
-                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
                             USING WEBASSEMBLY TECHNOLOGY FOR HARDWARE-LEVEL PERFORMANCE WITHOUT ANY SERVER-SIDE LAG.
                         </p>
                     </div>
@@ -475,17 +475,17 @@ export default function Page() {
                 </div>
 
                 {/* CARD 03: QUALITY */}
-                <div className="relative pt-6">
-                    {/* Top Overlapping Badge */}
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                <div className="relative">
+                    {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
+                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">MISSION</div>
                     </div>
                     
                     <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
                         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OUTPUT STANDARDS</p>
-                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none">HD <br/> QUALITY</h3>
+                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">HD <br/> QUALITY</h3>
                         <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
-                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
                             INDUSTRIAL-GRADE 300 DPI RENDERING ENSURING EVERY PIXEL IS OPTIMIZED FOR OFFICIAL FORM SUBMISSIONS.
                         </p>
                     </div>
@@ -504,3 +504,4 @@ export default function Page() {
     </div>
   );
 }
+
