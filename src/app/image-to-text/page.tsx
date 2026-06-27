@@ -45,6 +45,19 @@ export default function ImageToTextPage() {
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
+            {/* RESTORED HEADER SECTION */}
+            <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
+                    <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
+                        Image to Text Studio
+                    </span>
+                </h1>
+
+                <p className="text-muted-foreground font-bold max-w-2xl mx-auto text-xs md:text-base">
+                    Extract text from documents, screenshots and notes locally. 100% Private.
+                </p>
+            </div>
+
             <ImageToTextConverter />
         </div>
         
@@ -79,7 +92,7 @@ export default function ImageToTextPage() {
                                     <BrainCircuit className="text-cyan-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-cyan-600">Neural Scanning</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Powered by high-performance AI models that recognize complex fonts, handwriting patterns, and regional scripts.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Powered by high-performance AI models that recognize complex fonts, handwriting patterns, and regional scripts.</p>
                             </div>
                         </div>
 
@@ -89,7 +102,7 @@ export default function ImageToTextPage() {
                                     <Monitor className="text-indigo-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-indigo-600">Format Mapping</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Preserves document structure including line breaks, paragraphs, and indentation for professional export.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Preserves document structure including line breaks, paragraphs, and indentation for professional export.</p>
                             </div>
                         </div>
 
@@ -99,7 +112,7 @@ export default function ImageToTextPage() {
                                     <ShieldCheck className="text-purple-500 size-6" />
                                 </div>
                                 <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">Local Sandbox</h3>
-                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80">Your sensitive documents and text outputs are processed entirely in browser memory. No data is stored or logged.</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed font-bold uppercase opacity-80 text-center">Your sensitive documents and text outputs are processed entirely in browser memory. No data is stored or logged.</p>
                             </div>
                         </div>
                     </div>
