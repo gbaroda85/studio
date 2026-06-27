@@ -430,7 +430,7 @@ export default function Page() {
                 <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VALUES</div>
+                        <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">VALUES</div>
                     </div>
                     
                     <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
@@ -458,7 +458,7 @@ export default function Page() {
                 <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VISION</div>
+                        <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">VISION</div>
                     </div>
                     
                     <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
@@ -486,7 +486,7 @@ export default function Page() {
                 <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">MISSION</div>
+                        <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">MISSION</div>
                     </div>
                     
                     <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
