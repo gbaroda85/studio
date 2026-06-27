@@ -429,18 +429,21 @@ export default function Page() {
                 {/* CARD 01: PRIVACY */}
                 <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
-                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
+                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-40">
                         <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">VALUES</div>
                     </div>
                     
-                    <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
-                        <div className="relative z-10">
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">PRIVACY POLICY</p>
-                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">100% <br/> PRIVATE</h3>
-                            <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
-                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                                YOUR DATA NEVER LEAVES YOUR DEVICE. ALL PROCESSING HAPPENS LOCALLY IN YOUR BROWSER RAM.
-                            </p>
+                    {/* Gradient Border Wrapper */}
+                    <div className="p-[2px] rounded-[3rem] bg-gradient-to-br from-[#1e40af] to-[#3b82f6] transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu">
+                        <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[2.9rem] p-10 pt-16 pb-24 flex flex-col items-center text-center space-y-4 relative overflow-hidden">
+                            <div className="relative z-10">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">PRIVACY POLICY</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">100% <br/> PRIVATE</h3>
+                                <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
+                                <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                    YOUR DATA NEVER LEAVES YOUR DEVICE. ALL PROCESSING HAPPENS LOCALLY IN YOUR BROWSER RAM.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -455,18 +458,21 @@ export default function Page() {
                 {/* CARD 02: SPEED */}
                 <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
-                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
+                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-40">
                         <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">VISION</div>
                     </div>
                     
-                    <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
-                        <div className="relative z-10">
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SYSTEM CORE</p>
-                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">NATIVE <br/> SPEED</h3>
-                            <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
-                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                                USING WEBASSEMBLY TECHNOLOGY FOR HARDWARE-LEVEL PERFORMANCE WITHOUT ANY SERVER-SIDE LAG.
-                            </p>
+                    {/* Gradient Border Wrapper */}
+                    <div className="p-[2px] rounded-[3rem] bg-gradient-to-br from-[#0ea5e9] to-[#38bdf8] transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu">
+                        <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[2.9rem] p-10 pt-16 pb-24 flex flex-col items-center text-center space-y-4 relative overflow-hidden">
+                            <div className="relative z-10">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SYSTEM CORE</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">NATIVE <br/> SPEED</h3>
+                                <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
+                                <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                    USING WEBASSEMBLY TECHNOLOGY FOR HARDWARE-LEVEL PERFORMANCE WITHOUT ANY SERVER-SIDE LAG.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -481,18 +487,21 @@ export default function Page() {
                 {/* CARD 03: QUALITY */}
                 <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
-                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
+                    <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-40">
                         <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white min-w-[140px] text-center">MISSION</div>
                     </div>
                     
-                    <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
-                        <div className="relative z-10">
-                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OUTPUT STANDARDS</p>
-                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">HD <br/> QUALITY</h3>
-                            <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
-                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                                INDUSTRIAL-GRADE 300 DPI RENDERING ENSURING EVERY PIXEL IS OPTIMIZED FOR OFFICIAL FORM SUBMISSIONS.
-                            </p>
+                    {/* Gradient Border Wrapper */}
+                    <div className="p-[2px] rounded-[3rem] bg-gradient-to-br from-[#10b981] to-[#34d399] transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu">
+                        <div className="bg-gradient-to-b from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 rounded-[2.9rem] p-10 pt-16 pb-24 flex flex-col items-center text-center space-y-4 relative overflow-hidden">
+                            <div className="relative z-10">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OUTPUT STANDARDS</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">HD <br/> QUALITY</h3>
+                                <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
+                                <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                    INDUSTRIAL-GRADE 300 DPI RENDERING ENSURING EVERY PIXEL IS OPTIMIZED FOR OFFICIAL FORM SUBMISSIONS.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
