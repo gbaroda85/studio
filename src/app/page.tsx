@@ -423,7 +423,7 @@ export default function Page() {
         </div>
 
         {/* Cards Section with Light Mauve Gradient Background */}
-        <div className="w-full bg-gradient-to-b from-[#f8f7ff] to-white dark:from-slate-900 dark:to-slate-950 -mt-24 pb-40 px-6">
+        <div className="w-full bg-gradient-to-b from-[#f8f7ff] to-white dark:from-slate-900 dark:to-slate-950 -mt-32 pb-40 px-6">
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
                 
                 {/* CARD 01: PRIVACY */}
