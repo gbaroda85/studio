@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import ImageToTextConverter from '@/components/image-to-text-converter';
 import { HowToGuide } from '@/components/how-to-guide';
@@ -25,7 +26,7 @@ export default function ImageToTextPage() {
     },
     {
       title: "AI Analysis",
-      description: "Click 'Extract Text'. Gemini 2.5 Flash performs a multi-layer semantic scan to understand characters, symbols, and formatting with 99% accuracy.",
+      description: "Click 'Extract Text'. Tesseract.js performs a multi-layer semantic scan to understand characters, symbols, and formatting with 99% accuracy.",
       icon: "BrainCircuit"
     },
     {
@@ -45,7 +46,7 @@ export default function ImageToTextPage() {
         <ToolNavigation href="/tools?tab=image" label="Back to Image Tools" />
 
         <div className="w-full flex flex-col items-center mb-12 px-4 max-w-[1600px] mx-auto">
-            {/* RESTORED HEADER SECTION */}
+            {/* CENTERED HEADER SECTION */}
             <div className="w-full text-center mb-10 space-y-4 animate-in fade-in slide-in-from-top-4 duration-500 flex flex-col items-center">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl tracking-tighter leading-tight flex flex-wrap items-baseline justify-center gap-x-3 md:gap-x-5 mb-2">
                     <span className="font-['Dancing_Script'] font-bold text-primary normal-case">
@@ -142,7 +143,7 @@ export default function ImageToTextPage() {
                     <AccordionItem value="item-3" className="border-b-2 py-2">
                         <AccordionTrigger className="text-xl font-bold text-left">Is it safe to extract text from legal documents?</AccordionTrigger>
                         <AccordionContent className="text-muted-foreground text-lg leading-relaxed pt-2">
-                            Absolutely. **GR7 Tools** uses a "Private Sandbox" architecture. Unlike other online OCR tools, we do not send your images to an external API. Everything happens locally on your own CPU.
+                            Absolutely. **GR7 Tools** uses a "Private Sandbox" architecture. Unlike other online OCR tools, we do not send your images to an external API. Everything happens locally on your own device.
                         </AccordionContent>
                     </AccordionItem>
                 </Accordion>
@@ -151,3 +152,4 @@ export default function ImageToTextPage() {
     </main>
   );
 }
+

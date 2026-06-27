@@ -65,7 +65,6 @@ import {
   Waves,
   FileArchive,
   UserCircle,
-  ShieldAlert,
   Cpu,
   Globe
 } from 'lucide-react';
@@ -397,20 +396,23 @@ export default function Page() {
 
       {/* WHY USERS LOVE GR7 TOOLS SECTION - EXACT RESTORATION FROM SCREENSHOT */}
       <section className="w-full transform-gpu bg-slate-950 pt-20 pb-40 relative overflow-hidden">
-        {/* Abstract Background Elements from screenshot */}
+        {/* Abstract Background Overlay */}
         <div className="absolute inset-0 opacity-20 pointer-events-none">
             <div className="absolute top-0 left-0 w-full h-full bg-[url('https://picsum.photos/seed/office/1920/1080')] bg-cover bg-center grayscale mix-blend-overlay" />
             <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-slate-950" />
         </div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
-            <div className="flex items-center gap-3 text-primary font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-4 md:mb-6 font-body transform-gpu">
-                <div className="w-12 md:w-16 h-2.5 bg-primary rounded-full shrink-0" /> <span className="text-white/60">OUR VALUES</span>
+            {/* Header Badge */}
+            <div className="mb-8">
+                <div className="px-6 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
+                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80">OUR VALUES</span>
+                </div>
             </div>
             
             <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none">
                 Why Users Love <br />
-                <span className="text-[#9A1750]">GR7 Tools</span>
+                <span className="text-primary">GR7 Tools</span>
             </h2>
             <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center">
                 Fast, Secure and Reliable
@@ -421,15 +423,15 @@ export default function Page() {
                 {/* CARD 1: VALUES */}
                 <div className="relative group">
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#1e40af] text-white px-8 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl">Values</div>
+                        <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">VALUES</div>
                     </div>
                     <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-slate-50 pointer-events-none select-none">01</div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-100/50 pointer-events-none select-none">01</div>
                         <div className="relative z-10 space-y-4">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Privacy Policy</p>
                             <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">100% <br/> Private</h3>
-                            <div className="h-1 w-12 bg-[#9A1750] mx-auto my-4" />
-                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                            <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
+                            <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight">
                                 Your data never leaves your device. All processing happens locally in your browser RAM.
                             </p>
                         </div>
@@ -444,15 +446,15 @@ export default function Page() {
                 {/* CARD 2: VISION */}
                 <div className="relative group">
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#0ea5e9] text-white px-8 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl">Vision</div>
+                        <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">VISION</div>
                     </div>
                     <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-slate-50 pointer-events-none select-none">02</div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-100/50 pointer-events-none select-none">02</div>
                         <div className="relative z-10 space-y-4">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">System Core</p>
                             <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">Native <br/> Speed</h3>
-                            <div className="h-1 w-12 bg-[#9A1750] mx-auto my-4" />
-                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                            <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
+                            <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight">
                                 Using WebAssembly technology for hardware-level performance without any server-side lag.
                             </p>
                         </div>
@@ -467,15 +469,15 @@ export default function Page() {
                 {/* CARD 3: MISSION */}
                 <div className="relative group">
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#10b981] text-white px-8 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl">Mission</div>
+                        <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">MISSION</div>
                     </div>
                     <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-slate-50 pointer-events-none select-none">03</div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-100/50 pointer-events-none select-none">03</div>
                         <div className="relative z-10 space-y-4">
                             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Output Standards</p>
                             <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">HD <br/> Quality</h3>
-                            <div className="h-1 w-12 bg-[#9A1750] mx-auto my-4" />
-                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                            <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
+                            <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight">
                                 Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.
                             </p>
                         </div>
@@ -499,3 +501,4 @@ export default function Page() {
     </div>
   );
 }
+
