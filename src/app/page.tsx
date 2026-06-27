@@ -408,7 +408,7 @@ export default function Page() {
                 {/* Header Badge */}
                 <div className="mb-6">
                     <div className="px-6 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
-                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80">OUR VALUES</span>
+                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80 font-headline">OUR VALUES</span>
                     </div>
                 </div>
                 
@@ -416,7 +416,7 @@ export default function Page() {
                     WHY USERS LOVE <br />
                     <span className="text-primary font-headline">GR7 Tools</span>
                 </h2>
-                <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center">
+                <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center font-headline">
                     FAST, SECURE AND RELIABLE
                 </p>
             </div>
@@ -427,73 +427,85 @@ export default function Page() {
             <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
                 
                 {/* CARD 01: PRIVACY */}
-                <div className="relative">
+                <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VALUES</div>
                     </div>
                     
-                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">PRIVACY POLICY</p>
-                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">100% <br/> PRIVATE</h3>
-                        <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
-                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                            YOUR DATA NEVER LEAVES YOUR DEVICE. ALL PROCESSING HAPPENS LOCALLY IN YOUR BROWSER RAM.
-                        </p>
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
+                        {/* Two-Part Background */}
+                        <div className="absolute top-0 left-0 w-full h-1/3 bg-slate-50 dark:bg-white/5 pointer-events-none" />
+                        <div className="relative z-10">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">PRIVACY POLICY</p>
+                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">100% <br/> PRIVATE</h3>
+                            <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
+                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                YOUR DATA NEVER LEAVES YOUR DEVICE. ALL PROCESSING HAPPENS LOCALLY IN YOUR BROWSER RAM.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Bottom Overlapping Icon */}
-                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
-                        <div className="size-16 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#1e40af]">
-                            <ShieldCheck className="size-8" />
+                    {/* Bottom Overlapping Icon - SQUARE ROUNDED ON THE LINE */}
+                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30">
+                        <div className="size-20 rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#1e40af] transition-transform duration-500 group-hover/card:scale-110 group-hover/card:rotate-6">
+                            <ShieldCheck className="size-10" />
                         </div>
                     </div>
                 </div>
 
                 {/* CARD 02: SPEED */}
-                <div className="relative">
+                <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VISION</div>
                     </div>
                     
-                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SYSTEM CORE</p>
-                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">NATIVE <br/> SPEED</h3>
-                        <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
-                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                            USING WEBASSEMBLY TECHNOLOGY FOR HARDWARE-LEVEL PERFORMANCE WITHOUT ANY SERVER-SIDE LAG.
-                        </p>
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
+                        {/* Two-Part Background */}
+                        <div className="absolute top-0 left-0 w-full h-1/3 bg-slate-50 dark:bg-white/5 pointer-events-none" />
+                        <div className="relative z-10">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SYSTEM CORE</p>
+                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">NATIVE <br/> SPEED</h3>
+                            <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
+                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                USING WEBASSEMBLY TECHNOLOGY FOR HARDWARE-LEVEL PERFORMANCE WITHOUT ANY SERVER-SIDE LAG.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Bottom Overlapping Icon */}
-                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
-                        <div className="size-16 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#f59e0b]">
-                            <Zap className="size-8 fill-yellow-400 text-yellow-400" />
+                    {/* Bottom Overlapping Icon - SQUARE ROUNDED ON THE LINE */}
+                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30">
+                        <div className="size-20 rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#f59e0b] transition-transform duration-500 group-hover/card:scale-110 group-hover/card:rotate-6">
+                            <Zap className="size-10 fill-yellow-400 text-yellow-400" />
                         </div>
                     </div>
                 </div>
 
                 {/* CARD 03: QUALITY */}
-                <div className="relative">
+                <div className="relative group/card">
                     {/* Top Overlapping Badge - CENTERED ON TOP LINE */}
                     <div className="absolute top-0 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">MISSION</div>
                     </div>
                     
-                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
-                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OUTPUT STANDARDS</p>
-                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">HD <br/> QUALITY</h3>
-                        <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
-                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                            INDUSTRIAL-GRADE 300 DPI RENDERING ENSURING EVERY PIXEL IS OPTIMIZED FOR OFFICIAL FORM SUBMISSIONS.
-                        </p>
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-24 shadow-xl flex flex-col items-center text-center space-y-4 border-2 border-transparent transition-all duration-500 hover:scale-[1.05] hover:shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] transform-gpu relative overflow-hidden">
+                        {/* Two-Part Background */}
+                        <div className="absolute top-0 left-0 w-full h-1/3 bg-slate-50 dark:bg-white/5 pointer-events-none" />
+                        <div className="relative z-10">
+                            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OUTPUT STANDARDS</p>
+                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none font-headline">HD <br/> QUALITY</h3>
+                            <div className="h-1.5 w-12 bg-primary/20 rounded-full mx-auto my-4" />
+                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                INDUSTRIAL-GRADE 300 DPI RENDERING ENSURING EVERY PIXEL IS OPTIMIZED FOR OFFICIAL FORM SUBMISSIONS.
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Bottom Overlapping Icon */}
-                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
-                        <div className="size-16 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#10b981]">
-                            <Target className="size-8" />
+                    {/* Bottom Overlapping Icon - SQUARE ROUNDED ON THE LINE */}
+                    <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30">
+                        <div className="size-20 rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#10b981] transition-transform duration-500 group-hover/card:scale-110 group-hover/card:rotate-6">
+                            <Target className="size-10" />
                         </div>
                     </div>
                 </div>
