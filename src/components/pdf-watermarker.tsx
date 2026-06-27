@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from 'react';
@@ -36,7 +37,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Smartphone,
-    ListFilter
+    ListFilter,
+    MousePointer2
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from './ui/label';
@@ -132,10 +134,11 @@ export default function PdfWatermarker() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [renderingProgress, setRenderingProgress] = useState(0);
   
+  // Custom Controls (Global)
   const [wType, setWType] = useState<WatermarkType>('text');
   const [watermarkText, setWatermarkText] = useState('CONFIDENTIAL');
   const [imageWatermarkSrc, setImageWatermarkSrc] = useState<string | null>(null);
-  const [position, setPosition] = useState<WatermarkPosition>('center-center');
+  const [globalPosition, setGlobalPosition] = useState<WatermarkPosition>('center-center');
   const [opacity, setOpacity] = useState([30]);
   const [fontSize, setFontSize] = useState(60);
   const [imageScale, setImageScale] = useState([30]);
@@ -148,6 +151,10 @@ export default function PdfWatermarker() {
   const [textColor, setTextColor] = useState("#808080");
   const [isBold, setIsBold] = useState(true);
   const [isItalic, setIsItalic] = useState(false);
+  
+  // Per-Page Overrides (Same as Page Numberer)
+  const [selectedPageIdx, setSelectedPageIdx] = useState<number | null>(null);
+  const [pageOverrides, setPageOverrides] = useState<Record<number, { position: WatermarkPosition }>>({});
   
   const [watermarkedPdfUrl, setWatermarkedPdfUrl] = useState<string | null>(null);
   const [previewPages, setPreviewPages] = useState<string[]>([]);
@@ -167,6 +174,8 @@ export default function PdfWatermarker() {
       setPdfFile(file);
       setWatermarkedPdfUrl(null);
       setPreviewPages([]);
+      setSelectedPageIdx(null);
+      setPageOverrides({});
       setIsGeneratingPreview(true);
       setRenderingProgress(0);
 
@@ -188,7 +197,7 @@ export default function PdfWatermarker() {
         }
         
         const imgs: string[] = [];
-        const pagesToRender = Math.min(count, 10); 
+        const pagesToRender = Math.min(count, 15); 
 
         for (let i = 1; i <= pagesToRender; i++) {
             const page = await pdf.getPage(i);
@@ -221,6 +230,35 @@ export default function PdfWatermarker() {
   const onDragOver = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(true); };
   const onDragLeave = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); };
   const onDrop = (e: DragEvent<HTMLDivElement>) => { e.preventDefault(); setIsDragOver(false); handleFileChange(e.dataTransfer.files?.[0] || null); };
+
+  const handlePositionChange = (pos: WatermarkPosition) => {
+    if (selectedPageIdx !== null) {
+        setPageOverrides(prev => ({
+            ...prev,
+            [selectedPageIdx]: { position: pos }
+        }));
+    } else {
+        setGlobalPosition(pos);
+    }
+    if (watermarkedPdfUrl) setWatermarkedPdfUrl(null);
+  };
+
+  const handleApplyToAll = () => {
+    if (selectedPageIdx === null) return;
+    const currentPos = pageOverrides[selectedPageIdx]?.position || globalPosition;
+    setGlobalPosition(currentPos);
+    setPageOverrides({});
+    toast({ title: "Global Sync", description: "Position applied to all pages." });
+  };
+
+  const handleResetSelectedPage = () => {
+    if (selectedPageIdx === null) return;
+    setPageOverrides(prev => {
+        const next = { ...prev };
+        delete next[selectedPageIdx];
+        return next;
+    });
+  };
 
   const handleImageWatermarkUpload = (e: ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -304,8 +342,11 @@ export default function PdfWatermarker() {
                 th = tw * aspect;
             }
 
+            // Use override if exists, otherwise global
+            const targetPos = pageOverrides[index]?.position || globalPosition;
+
             let vcx, vcy;
-            switch (position) {
+            switch (targetPos) {
                 case 'top-left': vcx = curMargin + tw/2; vcy = vh - curMargin - th/2; break;
                 case 'top-center': vcx = vw / 2; vcy = vh - curMargin - th/2; break;
                 case 'top-right': vcx = vw - curMargin - tw/2; vcy = vh - curMargin - th/2; break;
@@ -398,10 +439,12 @@ export default function PdfWatermarker() {
       setMargin([40]);
       setPageRangeMode('all');
       setCustomRange('');
+      setSelectedPageIdx(null);
+      setPageOverrides({});
       if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const getPreviewStyle = (): React.CSSProperties => {
+  const getPreviewStyle = (index: number): React.CSSProperties => {
       const containerWidth = 550; 
       const scale = containerWidth / pageSize.width;
       
@@ -414,15 +457,16 @@ export default function PdfWatermarker() {
           fontWeight: isBold ? '900' : '500',
           fontStyle: isItalic ? 'italic' : 'normal',
           textAlign: 'center',
-          transition: 'all 0.1s linear',
+          transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
           zIndex: 50,
           whiteSpace: 'nowrap',
           transformOrigin: 'center center'
       };
 
       const m = `${(margin[0] / pageSize.width) * 100}%`; 
+      const targetPos = pageOverrides[index]?.position || globalPosition;
       
-      switch (position) {
+      switch (targetPos) {
           case 'top-left': styles.top = m; styles.left = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
           case 'top-center': styles.top = m; styles.left = '50%'; styles.transform = `translate(-50%, 0) rotate(${-rotation[0]}deg)`; break;
           case 'top-right': styles.top = m; styles.right = m; styles.transform = `rotate(${-rotation[0]}deg)`; break;
@@ -437,7 +481,7 @@ export default function PdfWatermarker() {
   };
 
   return (
-    <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24">
+    <div className="w-full flex flex-col items-center justify-center gap-6 px-4 pb-24 mx-auto">
       {!pdfFile ? (
         <Card
             className={cn(
@@ -465,18 +509,26 @@ export default function PdfWatermarker() {
             </CardContent>
             <CardFooter className="justify-center gap-6 text-[8px] md:text-[10px] text-muted-foreground font-black uppercase tracking-widest pb-8 bg-muted/10 pt-6 px-4">
                 <div className="flex items-center gap-1.5"><ShieldCheck className="size-3 text-green-600" /> SECURE RAM</div>
-                <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> LIVE PREVIEW</div>
+                <div className="flex items-center gap-1.5"><Eye className="size-3 text-primary" /> VISUAL EDIT</div>
                 <div className="flex items-center gap-1.5"><Sparkles className="size-3 text-purple-500" /> PRO OVERLAYS</div>
             </CardFooter>
         </Card>
       ) : (
         <div className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch animate-in fade-in duration-500">
+            {/* Sidebar: Controls */}
             <div className="lg:col-span-5 space-y-6 no-print">
                 <Card className="border-2 shadow-2xl border-primary/10 overflow-hidden rounded-[2.5rem] bg-white dark:bg-slate-950 transition-all hover:border-primary/30 h-full flex flex-col">
                     <CardHeader className="bg-primary/5 border-b p-4 md:p-6 text-left">
-                        <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary">
-                            <Palette className="size-5 text-primary" /> Configuration
-                        </CardTitle>
+                        <div className="flex items-center justify-between">
+                            <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-3 text-primary leading-none">
+                                <Palette className="size-5 text-primary" /> Configuration
+                            </CardTitle>
+                            {selectedPageIdx !== null && (
+                                <Badge className="bg-primary text-white font-black text-[8px] px-3 py-1 rounded-full border-2 border-white shadow-lg animate-in zoom-in-95">
+                                    EDITING PAGE {selectedPageIdx + 1}
+                                </Badge>
+                            )}
+                        </div>
                     </CardHeader>
                     <CardContent className="p-4 md:p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
                         <Tabs value={wType} onValueChange={(v) => setWType(v as WatermarkType)} className="w-full">
@@ -536,25 +588,47 @@ export default function PdfWatermarker() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-6 border-t-2 border-dashed text-left">
                              <div className="space-y-2">
-                                <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2 mb-2">
-                                    <LayoutGrid className="size-3" /> Position
-                                </Label>
-                                <div className="grid grid-cols-3 gap-1 p-2 bg-muted/20 border-2 border-dashed rounded-xl w-fit mx-auto">
-                                    {POSITIONS.map((pos) => (
-                                        <button
-                                            key={pos}
-                                            onClick={() => setPosition(pos)}
-                                            className={cn(
-                                                "size-8 rounded-md border-2 transition-all flex items-center justify-center relative",
-                                                position === pos ? "bg-primary border-primary text-white shadow-md scale-105" : "bg-white/50 border-border hover:border-primary/40",
-                                                "!ring-[3px] !ring-slate-950 dark:!ring-white"
-                                            )}
-                                            title={pos}
-                                        >
-                                            <div className={cn("size-2 rounded-full", position === pos ? "bg-white" : "bg-muted-foreground/20")} />
-                                        </button>
-                                    ))}
+                                <div className="flex justify-between items-center mb-2">
+                                    <Label className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-2">
+                                        <LayoutGrid className="size-3" /> {selectedPageIdx !== null ? "Page Position" : "Global Position"}
+                                    </Label>
+                                    {selectedPageIdx !== null && pageOverrides[selectedPageIdx] && (
+                                        <Button variant="ghost" size="sm" className="h-6 text-[8px] font-black text-destructive" onClick={handleResetSelectedPage}>
+                                            <RefreshCcw className="size-2 mr-1" /> Reset
+                                        </Button>
+                                    )}
                                 </div>
+                                <div className="grid grid-cols-3 gap-1 p-2 bg-muted/20 border-2 border-dashed rounded-xl w-fit mx-auto">
+                                    {POSITIONS.map((pos) => {
+                                        const currentPos = selectedPageIdx !== null 
+                                            ? (pageOverrides[selectedPageIdx]?.position || globalPosition)
+                                            : globalPosition;
+                                        return (
+                                            <button
+                                                key={pos}
+                                                onClick={() => handlePositionChange(pos)}
+                                                className={cn(
+                                                    "size-8 rounded-md border-2 transition-all flex items-center justify-center relative transform active:scale-95",
+                                                    currentPos === pos ? "bg-primary border-primary text-white shadow-md scale-105" : "bg-white/50 border-border hover:border-primary/40",
+                                                    "!ring-[3px] !ring-slate-950 dark:!ring-white"
+                                                )}
+                                                title={pos}
+                                            >
+                                                <div className={cn("size-2 rounded-full", currentPos === pos ? "bg-white" : "bg-muted-foreground/20")} />
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                {selectedPageIdx !== null && (
+                                    <div className="flex gap-2 mt-4">
+                                        <Button variant="outline" className="flex-1 h-9 rounded-xl border-2 font-black text-[9px] uppercase" onClick={handleApplyToAll}>
+                                            <Layers className="size-3.5 mr-1.5 text-primary" /> Apply to All
+                                        </Button>
+                                        <Button variant="ghost" className="flex-1 h-9 rounded-xl text-[9px] font-black uppercase" onClick={() => setSelectedPageIdx(null)}>
+                                            <X className="size-3.5 mr-1.5" /> Back to Global
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                             <div className="space-y-6">
                                  <div className="space-y-3">
@@ -624,10 +698,10 @@ export default function PdfWatermarker() {
                         </div>
 
                     </CardContent>
-                    <CardFooter className="p-6 bg-muted/10 border-t flex flex-col gap-3">
+                    <CardFooter className="p-6 bg-muted/10 border-t flex flex-col gap-3 shrink-0">
                          {!watermarkedPdfUrl ? (
                             <Button 
-                                className="magic-button w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95 disabled:opacity-50"
+                                className="magic-button w-full h-16 text-lg font-black bg-primary hover:bg-primary/90 shadow-2xl rounded-2xl group transition-all active:scale-95 disabled:opacity-50 border-none"
                                 onClick={handleApplyWatermark}
                                 disabled={isProcessing || (wType === 'image' && !imageWatermarkSrc)}
                             >
@@ -648,7 +722,7 @@ export default function PdfWatermarker() {
                             <div className="space-y-3 w-full animate-in zoom-in-95">
                                 <Button 
                                     size="lg" 
-                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
+                                    className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-16 shadow-[0_8px_20px_-10px_rgba(34,197,94,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(34,197,94,0.6)] hover:-translate-y-1 active:scale-95 border-none w-full" 
                                     onClick={handleDownload}
                                 >
                                     <div className="absolute left-4 w-0.5 h-6 md:h-8 bg-white/40 rounded-full" />
@@ -658,22 +732,25 @@ export default function PdfWatermarker() {
                                         <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                                     </div>
                                 </Button>
-                                <Button variant="outline" onClick={resetState} className="w-full h-11 border-2 font-black text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-2" /> Start Over</Button>
+                                <Button variant="outline" onClick={resetState} className="w-full h-11 border-2 font-black uppercase text-[10px] rounded-xl hover:bg-destructive/5 hover:text-destructive"><RefreshCcw className="size-3 mr-2" /> Start Over</Button>
                             </div>
                         )}
                     </CardFooter>
                 </Card>
             </div>
 
+            {/* Workspace: Live Preview */}
             <div className="lg:col-span-7 h-full flex flex-col no-print">
-                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[3rem] h-[650px] lg:h-[850px] flex flex-col">
+                <Card className="overflow-hidden glass-card border-none shadow-2xl relative rounded-[2.5rem] h-[700px] lg:h-[900px] flex flex-col">
                     <CardHeader className="bg-muted/30 border-b p-5 md:p-7 flex flex-row items-center justify-between shrink-0">
                         <div className="flex items-center gap-2">
-                            <Eye className="size-4 text-primary" />
-                            <CardTitle className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Studio Viewport</CardTitle>
+                            <Eye className="size-5 text-primary" />
+                            <CardTitle className="text-[11px] font-black uppercase tracking-widest text-muted-foreground">Live HD Studio View</CardTitle>
                         </div>
-                        {watermarkedPdfUrl && (
-                             <Badge variant="secondary" className="bg-green-600 text-white font-black text-[10px] px-4 py-2 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER READY</Badge>
+                        {previewPages.length > 0 && (
+                             <div className="flex items-center gap-3">
+                                <Badge variant="secondary" className="bg-green-600 text-white font-black text-[9px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">HD CANVAS</Badge>
+                             </div>
                         )}
                     </CardHeader>
                     <CardContent className="p-0 bg-slate-200 dark:bg-slate-900 shadow-inner overflow-hidden relative flex-1 flex flex-col">
@@ -692,11 +769,18 @@ export default function PdfWatermarker() {
                                     </div>
                                 ) : previewPages.length > 0 ? (
                                     previewPages.map((src, i) => (
-                                        <div key={i} className="relative group w-full max-w-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-4 md:border-[12px] border-white bg-white rounded-sm animate-in slide-in-from-bottom-6 duration-700 overflow-hidden">
+                                        <div 
+                                            key={i} 
+                                            onClick={() => setSelectedPageIdx(i)}
+                                            className={cn(
+                                                "relative group w-full max-w-[550px] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] border-4 md:border-[12px] rounded-sm bg-white animate-in slide-in-from-bottom-6 duration-700 overflow-hidden cursor-pointer transition-all",
+                                                selectedPageIdx === i ? "border-primary scale-[1.03] ring-[15px] ring-primary/10 z-[60]" : "border-white hover:border-primary/20"
+                                            )}
+                                        >
                                             <img src={src} alt={`P${i+1}`} className="w-full h-auto block" />
                                             
                                             <div className="absolute inset-0 z-10 select-none overflow-hidden pointer-events-none p-1">
-                                                <div style={getPreviewStyle()}>
+                                                <div style={getPreviewStyle(i)}>
                                                     {wType === 'text' ? (
                                                         <span>{watermarkText}</span>
                                                     ) : imageWatermarkSrc ? (
@@ -709,9 +793,16 @@ export default function PdfWatermarker() {
                                                 </div>
                                             </div>
                                             
-                                            <div className="absolute top-2 right-2 opacity-20 flex items-center gap-1.5">
-                                                <Badge variant="outline" className="text-[7px] border-black font-black uppercase">PAGE {i+1} PREVIEW</Badge>
+                                            <div className="absolute top-2 right-2 opacity-20 flex items-center gap-1.5 z-20">
+                                                <Badge className={cn(
+                                                    "text-[7px] font-black uppercase px-2 py-0.5 shadow-lg border-2 border-white",
+                                                    selectedPageIdx === i ? "bg-primary text-white" : "bg-black/60 text-white"
+                                                )}>
+                                                    {selectedPageIdx === i ? 'EDITING' : `PAGE ${i+1}`}
+                                                </Badge>
                                             </div>
+
+                                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                                         </div>
                                     ))
                                 ) : (
@@ -728,14 +819,15 @@ export default function PdfWatermarker() {
                         </ScrollArea>
                         
                         {previewPages.length > 0 && (
-                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 backdrop-blur-xl rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-40 transition-all hover:scale-105">
-                                <Sparkles className="size-4 text-primary animate-pulse" /> Real-time Studio Mapping Active
+                            <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 px-10 py-3.5 bg-black/80 backdrop-blur-xl rounded-full text-white text-[11px] font-black uppercase tracking-widest border border-white/10 shadow-3xl z-[100] hover:scale-105 transition-transform cursor-default">
+                                <MousePointer2 className="size-4 text-primary animate-pulse" /> Click a page to change its watermark position individually
                             </div>
                         )}
                     </CardContent>
-                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/40 shrink-0">
+                    <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 md:p-8 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 shrink-0">
                          <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM PROCESSING</div>
                         <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> 300 DPI RENDER</div>
+                        <div className="flex items-center gap-2"><Settings2 className="size-4 text-primary" /> PER-PAGE LOGIC</div>
                     </CardFooter>
                 </Card>
             </div>
@@ -744,3 +836,4 @@ export default function PdfWatermarker() {
     </div>
   );
 }
+
