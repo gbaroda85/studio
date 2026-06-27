@@ -414,7 +414,7 @@ export default function Page() {
                 
                 <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none font-headline">
                     WHY USERS LOVE <br />
-                    <span className="font-['Dancing_Script'] text-primary normal-case tracking-normal text-5xl md:text-8xl">GR7 Tools</span>
+                    <span className="text-primary">GR7 Tools</span>
                 </h2>
                 <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center">
                     FAST, SECURE AND RELIABLE
