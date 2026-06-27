@@ -139,7 +139,7 @@ export default function FdRdCalculator() {
                     </div>
                     <div>
                         <CardTitle className="text-xl md:text-2xl font-black uppercase tracking-tighter">Investment Studio</CardTitle>
-                        <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest">FD & RD Wealth Estimator</CardDescription>
+                        <CardDescription className="text-[10px] font-bold uppercase opacity-50 tracking-widest text-left">FD & RD Wealth Estimator</CardDescription>
                     </div>
                 </div>
                 <Button variant="ghost" size="icon" onClick={handleReset} className="size-8 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/5"><RefreshCcw className="size-4" /></Button>
@@ -149,13 +149,13 @@ export default function FdRdCalculator() {
           <CardContent className="p-0">
              <Tabs value={mode} onValueChange={(v) => setMode(v as CalcMode)} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 h-14 bg-muted/30 p-1.5 border-b">
-                    <TabsTrigger value="fd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-lg">Fixed Deposit (FD)</TabsTrigger>
-                    <TabsTrigger value="rd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:bg-white data-[state=active]:shadow-lg">Recurring (RD)</TabsTrigger>
+                    <TabsTrigger value="fd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:shadow-lg">Fixed Deposit (FD)</TabsTrigger>
+                    <TabsTrigger value="rd" className="font-black text-[10px] uppercase tracking-widest rounded-xl data-[state=active]:shadow-lg">Recurring (RD)</TabsTrigger>
                 </TabsList>
 
                 <div className="p-6 md:p-8 space-y-10">
                     {/* Country Selector */}
-                    <div className="space-y-3 pb-4 border-b border-dashed">
+                    <div className="space-y-3 pb-4 border-b border-dashed text-left">
                         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-2">
                             <Globe className="size-3" /> Select Country
                         </Label>
@@ -170,7 +170,7 @@ export default function FdRdCalculator() {
                     </div>
 
                     <TabsContent value="fd" className="m-0 space-y-8 animate-in slide-in-from-left duration-300">
-                        <div className="space-y-4">
+                        <div className="space-y-4 text-left">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Investment Amount</Label>
                                 <Badge variant="secondary" className="font-black px-3">{formatCurrency(fdPrincipal)}</Badge>
@@ -180,11 +180,11 @@ export default function FdRdCalculator() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-3">
+                            <div className="space-y-3 text-left">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Interest Rate (% p.a.)</Label>
                                 <Input type="number" step="0.1" value={fdRate} onChange={(e) => setFdRate(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-3 text-left">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Tenure (Years)</Label>
                                 <Input type="number" value={fdTenure} onChange={(e) => setFdTenure(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
@@ -192,7 +192,7 @@ export default function FdRdCalculator() {
                     </TabsContent>
 
                     <TabsContent value="rd" className="m-0 space-y-8 animate-in slide-in-from-right duration-300">
-                        <div className="space-y-4">
+                        <div className="space-y-4 text-left">
                             <div className="flex justify-between items-center">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Monthly Installment</Label>
                                 <Badge variant="secondary" className="font-black px-3">{formatCurrency(rdMonthly)}</Badge>
@@ -202,18 +202,18 @@ export default function FdRdCalculator() {
                         </div>
 
                         <div className="grid grid-cols-2 gap-6">
-                            <div className="space-y-3">
+                            <div className="space-y-3 text-left">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Rate of Return (%)</Label>
                                 <Input type="number" step="0.1" value={rdRate} onChange={(e) => setRdRate(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
-                            <div className="space-y-3">
+                            <div className="space-y-3 text-left">
                                 <Label className="text-[10px] font-black uppercase opacity-60">Tenure (Years)</Label>
                                 <Input type="number" value={rdTenure} onChange={(e) => setRdTenure(Number(e.target.value))} className="h-12 border-2 font-black text-lg text-center rounded-xl" />
                             </div>
                         </div>
                     </TabsContent>
 
-                    <div className="p-5 bg-blue-500/5 rounded-[1.5rem] border-2 border-blue-500/10 flex gap-4">
+                    <div className="p-5 bg-blue-500/5 rounded-[1.5rem] border-2 border-blue-500/10 flex gap-4 text-left">
                         <div className="size-10 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0 border border-blue-500/20">
                             <Info className="size-5 text-blue-600" />
                         </div>
@@ -264,7 +264,7 @@ export default function FdRdCalculator() {
                             </div>
                         </div>
 
-                        <div className="space-y-3">
+                        <div className="space-y-3 text-left">
                             <div className="flex justify-between items-center px-1">
                                 <span className="text-[10px] font-black uppercase text-muted-foreground">Return Ratio</span>
                                 <Badge className="bg-primary text-white font-black text-[10px]">{( (result.interest / result.invested) * 100).toFixed(1)}% GAIN</Badge>
