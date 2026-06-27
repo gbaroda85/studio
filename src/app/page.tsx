@@ -397,7 +397,7 @@ export default function Page() {
       {/* WHY USERS LOVE GR7 TOOLS SECTION - EXACT RESTORATION FROM SCREENSHOT */}
       <section className="w-full bg-white dark:bg-slate-950 flex flex-col items-center no-print">
         {/* Top Dark Header Part */}
-        <div className="w-full bg-slate-950 pt-20 pb-40 relative overflow-hidden flex flex-col items-center">
+        <div className="w-full bg-slate-950 pt-12 pb-40 relative overflow-hidden flex flex-col items-center">
             {/* Abstract Background Overlay */}
             <div className="absolute inset-0 opacity-20 pointer-events-none">
                 <div className="absolute top-0 left-0 w-full h-full bg-[url('https://picsum.photos/seed/cityscape/1920/1080')] bg-cover bg-center grayscale mix-blend-overlay" />
@@ -406,7 +406,7 @@ export default function Page() {
 
             <div className="relative z-10 flex flex-col items-center">
                 {/* Header Badge */}
-                <div className="mb-8">
+                <div className="mb-6">
                     <div className="px-6 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
                         <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80">OUR VALUES</span>
                     </div>
@@ -504,4 +504,3 @@ export default function Page() {
     </div>
   );
 }
-
