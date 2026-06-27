@@ -37,6 +37,7 @@ import {
   PiggyBank,
   Layers,
   CalendarDays,
+  ScanLine as ScanLineIcon,
   Palette,
   Banknote,
   Volume2,
@@ -81,7 +82,7 @@ const ALL_TOOLS = [
   { icon: Eraser, title: "BACKGROUND REMOVER", description: "Automatically remove background from any image.", href: "/remove-background", colorClass: "bg-gradient-to-br from-rose-400 to-rose-600", lightBg: "bg-rose-50", category: "featured" },
   { icon: FileDigit, title: "IMAGE TO PDF", description: "Convert multiple images into a single PDF file.", href: "/image-to-pdf", colorClass: "bg-gradient-to-br from-sky-400 to-sky-600", lightBg: "bg-sky-50", category: "featured" },
   { icon: QrCode, title: "QR CODE GENERATOR", description: "Create custom QR codes with logos and gradients.", href: "/qr-code-generator", colorClass: "bg-gradient-to-br from-indigo-500 to-indigo-700", lightBg: "bg-indigo-50", category: "featured" },
-  { icon: ScanLine, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic Color filters.", href: "/document-scan", colorClass: "bg-gradient-to-br from-emerald-400 to-emerald-600", lightBg: "bg-emerald-50", category: "featured" },
+  { icon: ScanLineIcon, title: "DOCUMENT SCAN", description: "Premium scanner with BW PRO and Magic Color filters.", href: "/document-scan", colorClass: "bg-gradient-to-br from-emerald-400 to-emerald-600", lightBg: "bg-emerald-50", category: "featured" },
   { icon: Shrink, title: "IMAGE COMPRESS", description: "Reduce image file size without losing quality.", href: "/image-compress", colorClass: "bg-gradient-to-br from-emerald-500 to-emerald-700", lightBg: "bg-[#fefce8]", category: "featured" },
   { icon: PenTool, title: "SIGNATURE RESIZER", description: "Resize signature to exact CM/Pixel and KB size.", href: "/signature-resizer", colorClass: "bg-orange-600", lightBg: "bg-orange-50", category: "featured" },
   
@@ -410,7 +411,7 @@ export default function Page() {
                 </div>
             </div>
             
-            <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none">
+            <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none font-headline">
                 Why Users Love <br />
                 <span className="text-primary">GR7 Tools</span>
             </h2>
@@ -420,20 +421,26 @@ export default function Page() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mt-32 w-full">
                 
-                {/* CARD 1: VALUES */}
+                {/* CARD 01: PRIVACY */}
                 <div className="relative group">
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">VALUES</div>
                     </div>
-                    <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-100/50 pointer-events-none select-none">01</div>
-                        <div className="relative z-10 space-y-4">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Privacy Policy</p>
-                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">100% <br/> Private</h3>
-                            <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
-                            <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight">
-                                Your data never leaves your device. All processing happens locally in your browser RAM.
-                            </p>
+                    <Card className="bg-white border-none rounded-[3.5rem] overflow-hidden text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col relative">
+                        {/* Two-Part Background */}
+                        <div className="h-1/3 bg-slate-50 w-full" />
+                        <div className="h-2/3 bg-white w-full" />
+                        
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-10 z-10">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-200/40 pointer-events-none select-none">01</div>
+                            <div className="relative z-10 space-y-4">
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Privacy Policy</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none font-headline">100% <br/> Private</h3>
+                                <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
+                                <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                    Your data never leaves your device. All processing happens locally in your browser RAM.
+                                </p>
+                            </div>
                         </div>
                     </Card>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
@@ -443,20 +450,26 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* CARD 2: VISION */}
+                {/* CARD 02: SPEED */}
                 <div className="relative group">
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">VISION</div>
                     </div>
-                    <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-100/50 pointer-events-none select-none">02</div>
-                        <div className="relative z-10 space-y-4">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">System Core</p>
-                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">Native <br/> Speed</h3>
-                            <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
-                            <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight">
-                                Using WebAssembly technology for hardware-level performance without any server-side lag.
-                            </p>
+                    <Card className="bg-white border-none rounded-[3.5rem] overflow-hidden text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col relative">
+                        {/* Two-Part Background */}
+                        <div className="h-1/3 bg-slate-50 w-full" />
+                        <div className="h-2/3 bg-white w-full" />
+                        
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-10 z-10">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-200/40 pointer-events-none select-none">02</div>
+                            <div className="relative z-10 space-y-4">
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">System Core</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none font-headline">Native <br/> Speed</h3>
+                                <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
+                                <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                    Using WebAssembly technology for hardware-level performance without any server-side lag.
+                                </p>
+                            </div>
                         </div>
                     </Card>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
@@ -466,20 +479,26 @@ export default function Page() {
                     </div>
                 </div>
 
-                {/* CARD 3: MISSION */}
+                {/* CARD 03: QUALITY */}
                 <div className="relative group">
                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
                         <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">MISSION</div>
                     </div>
-                    <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-100/50 pointer-events-none select-none">03</div>
-                        <div className="relative z-10 space-y-4">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Output Standards</p>
-                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">HD <br/> Quality</h3>
-                            <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
-                            <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight">
-                                Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.
-                            </p>
+                    <Card className="bg-white border-none rounded-[3.5rem] overflow-hidden text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col relative">
+                        {/* Two-Part Background */}
+                        <div className="h-1/3 bg-slate-50 w-full" />
+                        <div className="h-2/3 bg-white w-full" />
+                        
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-10 z-10">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-200/40 pointer-events-none select-none">03</div>
+                            <div className="relative z-10 space-y-4">
+                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Output Standards</p>
+                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none font-headline">HD <br/> Quality</h3>
+                                <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
+                                <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
+                                    Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.
+                                </p>
+                            </div>
                         </div>
                     </Card>
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
@@ -501,4 +520,3 @@ export default function Page() {
     </div>
   );
 }
-
