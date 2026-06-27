@@ -1,4 +1,3 @@
-
 'use client';
 
 import Link from 'next/link';
@@ -396,113 +395,104 @@ export default function Page() {
       </section>
 
       {/* WHY USERS LOVE GR7 TOOLS SECTION - EXACT RESTORATION FROM SCREENSHOT */}
-      <section className="w-full transform-gpu bg-slate-950 pt-20 pb-40 relative overflow-hidden">
-        {/* Abstract Background Overlay */}
-        <div className="absolute inset-0 opacity-20 pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://picsum.photos/seed/office/1920/1080')] bg-cover bg-center grayscale mix-blend-overlay" />
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-slate-950" />
+      <section className="w-full bg-white dark:bg-slate-950 flex flex-col items-center no-print">
+        {/* Top Dark Header Part */}
+        <div className="w-full bg-slate-950 pt-20 pb-40 relative overflow-hidden flex flex-col items-center">
+            {/* Abstract Background Overlay */}
+            <div className="absolute inset-0 opacity-20 pointer-events-none">
+                <div className="absolute top-0 left-0 w-full h-full bg-[url('https://picsum.photos/seed/cityscape/1920/1080')] bg-cover bg-center grayscale mix-blend-overlay" />
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-950/80 to-slate-950" />
+            </div>
+
+            <div className="relative z-10 flex flex-col items-center">
+                {/* Header Badge */}
+                <div className="mb-8">
+                    <div className="px-6 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
+                        <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80">OUR VALUES</span>
+                    </div>
+                </div>
+                
+                <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none font-headline">
+                    WHY USERS LOVE <br />
+                    <span className="font-['Dancing_Script'] text-primary normal-case tracking-normal text-5xl md:text-8xl">GR7 Tools</span>
+                </h2>
+                <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center">
+                    FAST, SECURE AND RELIABLE
+                </p>
+            </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
-            {/* Header Badge */}
-            <div className="mb-8">
-                <div className="px-6 py-1.5 rounded-full bg-white/10 border border-white/20 backdrop-blur-md">
-                    <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.3em] text-white/80">OUR VALUES</span>
-                </div>
-            </div>
-            
-            <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none font-headline">
-                Why Users Love <br />
-                <span className="text-primary">GR7 Tools</span>
-            </h2>
-            <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center">
-                Fast, Secure and Reliable
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mt-32 w-full">
+        {/* Cards Section with Light Mauve Gradient Background */}
+        <div className="w-full bg-gradient-to-b from-[#f8f7ff] to-white dark:from-slate-900 dark:to-slate-950 -mt-24 pb-40 px-6">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-8">
                 
                 {/* CARD 01: PRIVACY */}
-                <div className="relative group">
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">VALUES</div>
+                <div className="relative pt-6">
+                    {/* Top Overlapping Badge */}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                        <div className="bg-[#1e40af] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VALUES</div>
                     </div>
-                    <Card className="bg-white border-none rounded-[3.5rem] overflow-hidden text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col relative">
-                        {/* Two-Part Background */}
-                        <div className="h-1/3 bg-slate-50 w-full" />
-                        <div className="h-2/3 bg-white w-full" />
-                        
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-10 z-10">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-200/40 pointer-events-none select-none">01</div>
-                            <div className="relative z-10 space-y-4">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Privacy Policy</p>
-                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none font-headline">100% <br/> Private</h3>
-                                <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
-                                <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                                    Your data never leaves your device. All processing happens locally in your browser RAM.
-                                </p>
-                            </div>
-                        </div>
-                    </Card>
+                    
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">PRIVACY POLICY</p>
+                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none">100% <br/> PRIVATE</h3>
+                        <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
+                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                            YOUR DATA NEVER LEAVES YOUR DEVICE. ALL PROCESSING HAPPENS LOCALLY IN YOUR BROWSER RAM.
+                        </p>
+                    </div>
+
+                    {/* Bottom Overlapping Icon */}
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
-                        <div className="size-16 rounded-full bg-white shadow-2xl border-4 border-slate-50 flex items-center justify-center text-[#1e40af]">
+                        <div className="size-16 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#1e40af]">
                             <ShieldCheck className="size-8" />
                         </div>
                     </div>
                 </div>
 
                 {/* CARD 02: SPEED */}
-                <div className="relative group">
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">VISION</div>
+                <div className="relative pt-6">
+                    {/* Top Overlapping Badge */}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                        <div className="bg-[#0ea5e9] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">VISION</div>
                     </div>
-                    <Card className="bg-white border-none rounded-[3.5rem] overflow-hidden text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col relative">
-                        {/* Two-Part Background */}
-                        <div className="h-1/3 bg-slate-50 w-full" />
-                        <div className="h-2/3 bg-white w-full" />
-                        
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-10 z-10">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-200/40 pointer-events-none select-none">02</div>
-                            <div className="relative z-10 space-y-4">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">System Core</p>
-                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none font-headline">Native <br/> Speed</h3>
-                                <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
-                                <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                                    Using WebAssembly technology for hardware-level performance without any server-side lag.
-                                </p>
-                            </div>
-                        </div>
-                    </Card>
+                    
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">SYSTEM CORE</p>
+                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none">NATIVE <br/> SPEED</h3>
+                        <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
+                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                            USING WEBASSEMBLY TECHNOLOGY FOR HARDWARE-LEVEL PERFORMANCE WITHOUT ANY SERVER-SIDE LAG.
+                        </p>
+                    </div>
+
+                    {/* Bottom Overlapping Icon */}
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
-                        <div className="size-16 rounded-full bg-white shadow-2xl border-4 border-slate-50 flex items-center justify-center text-[#f59e0b]">
+                        <div className="size-16 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#f59e0b]">
                             <Zap className="size-8 fill-yellow-400 text-yellow-400" />
                         </div>
                     </div>
                 </div>
 
                 {/* CARD 03: QUALITY */}
-                <div className="relative group">
-                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
-                        <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20">MISSION</div>
+                <div className="relative pt-6">
+                    {/* Top Overlapping Badge */}
+                    <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-30">
+                        <div className="bg-[#10b981] text-white px-10 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl border-2 border-white/20 min-w-[140px] text-center">MISSION</div>
                     </div>
-                    <Card className="bg-white border-none rounded-[3.5rem] overflow-hidden text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col relative">
-                        {/* Two-Part Background */}
-                        <div className="h-1/3 bg-slate-50 w-full" />
-                        <div className="h-2/3 bg-white w-full" />
-                        
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-10 z-10">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[150px] font-black text-slate-200/40 pointer-events-none select-none">03</div>
-                            <div className="relative z-10 space-y-4">
-                                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Output Standards</p>
-                                <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none font-headline">HD <br/> Quality</h3>
-                                <div className="h-1.5 w-12 bg-primary mx-auto my-4 rounded-full" />
-                                <p className="text-[11px] font-black uppercase leading-relaxed text-slate-500 tracking-tight font-jakarta">
-                                    Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.
-                                </p>
-                            </div>
-                        </div>
-                    </Card>
+                    
+                    <div className="bg-white dark:bg-slate-900 rounded-[3rem] p-10 pt-16 pb-20 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.15)] flex flex-col items-center text-center space-y-4 border-2 border-transparent">
+                        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">OUTPUT STANDARDS</p>
+                        <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-800 dark:text-white leading-none">HD <br/> QUALITY</h3>
+                        <div className="h-1.5 w-12 bg-primary/20 rounded-full" />
+                        <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                            INDUSTRIAL-GRADE 300 DPI RENDERING ENSURING EVERY PIXEL IS OPTIMIZED FOR OFFICIAL FORM SUBMISSIONS.
+                        </p>
+                    </div>
+
+                    {/* Bottom Overlapping Icon */}
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
-                        <div className="size-16 rounded-full bg-white shadow-2xl border-4 border-slate-50 flex items-center justify-center text-[#10b981]">
+                        <div className="size-16 rounded-full bg-white dark:bg-slate-800 shadow-2xl border-4 border-slate-50 dark:border-slate-800 flex items-center justify-center text-[#10b981]">
                             <Target className="size-8" />
                         </div>
                     </div>
