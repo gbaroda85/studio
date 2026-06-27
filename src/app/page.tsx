@@ -257,8 +257,8 @@ export default function Page() {
     <div className="w-full flex flex-col items-center transform-gpu">
       <section className="relative w-full max-w-[2000px] pt-4 pb-10 overflow-hidden z-10 transform-gpu mx-auto bg-[#FDFBFC] dark:bg-[#001D39] border-b-2 border-slate-200/50 dark:border-primary/10 rounded-b-[2.5rem] md:rounded-b-[3.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.08)] dark:shadow-[0_45px_100px_-20px_rgba(0,0,0,0.7)] transition-colors duration-500">
         <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none transform-gpu">
-          <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] dark:bg-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '1s' }} />
-          <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] dark:bg-accent/10 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ animationDelay: '2s' }} />
+          <div className="absolute top-[10%] left-[5%] size-[400px] bg-[#FDE7D8] dark:bg-primary/10 rounded-full blur-[100px] opacity-60 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ UsefulDelay: '1s' }} />
+          <div className="absolute top-[5%] right-[10%] size-[500px] bg-[#FBE3EA] dark:bg-accent/10 rounded-full blur-[120px] opacity-50 mix-blend-multiply dark:mix-blend-overlay animate-pulse transform-gpu" style={{ UsefulDelay: '2s' }} />
         </div>
 
         <div className="w-full px-6 md:px-16 relative z-10 transform-gpu">
@@ -333,7 +333,7 @@ export default function Page() {
         </div>
       </section>
 
-      <section className="pt-8 md:pt-12 pb-24 md:pb-24 bg-transparent w-full transform-gpu">
+      <section className="pt-8 md:pt-12 pb-12 md:pb-16 bg-transparent w-full transform-gpu">
         <div className="w-full px-5 md:px-12 transform-gpu">
           {isSearching ? (
             <div className="animate-in fade-in slide-in-from-bottom-2 duration-300 transform-gpu">
@@ -390,64 +390,108 @@ export default function Page() {
                         {ALL_TOOLS.filter(t => t.category === 'calculator').slice(0, 10).map((tool, i) => <ToolCard key={i} {...tool} />)}
                     </div>
                 </div>
-
-                {/* WHY USERS LOVE GR7 TOOLS SECTION */}
-                <div className="mb-24 md:mb-32 transform-gpu animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                    <div className="flex items-center gap-3 text-emerald-500 font-black text-[9px] md:text-[11px] uppercase tracking-[0.3em] md:tracking-[0.4em] mb-3 md:mb-4 font-body transform-gpu">
-                        <div className="w-12 md:w-16 h-2.5 bg-emerald-500 rounded-full shrink-0" /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">THE STUDIO ADVANTAGE</span>
-                    </div>
-                    <div className="flex items-center justify-between gap-4 mb-8 md:mb-12 transform-gpu">
-                        <h2 className="text-xl md:text-5xl font-semibold text-slate-900 dark:text-white tracking-tighter font-body uppercase text-left">Why Professionals Choose GR7</h2>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 transform-gpu">
-                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
-                            <CardContent className="p-8 space-y-4">
-                                <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform shadow-inner">
-                                    <ShieldCheck className="size-8" />
-                                </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-primary">100% Private</h3>
-                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">Everything happens in your local RAM. We never store or upload your sensitive documents.</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
-                            <CardContent className="p-8 space-y-4">
-                                <div className="size-14 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-inner">
-                                    <Zap className="size-8" />
-                                </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-blue-600">Hardware Speed</h3>
-                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">Using WebAssembly technology, processing is executed at native hardware speed without cloud delays.</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
-                            <CardContent className="p-8 space-y-4">
-                                <div className="size-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform shadow-inner">
-                                    <Maximize className="size-8" />
-                                </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-emerald-600">Portal Optimized</h3>
-                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">Specifically designed for SSC, UPSC, and IBPS portals with strict KB and pixel size constraints.</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card className="rounded-[2rem] border-2 border-primary/10 shadow-xl overflow-hidden hover:-translate-y-2 transition-all duration-300 group">
-                            <CardContent className="p-8 space-y-4">
-                                <div className="size-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform shadow-inner">
-                                    <Sparkles className="size-8" />
-                                </div>
-                                <h3 className="font-black uppercase text-sm tracking-widest text-purple-600">HD Precision</h3>
-                                <p className="text-[11px] text-muted-foreground font-bold uppercase leading-relaxed opacity-60">High-fidelity 300DPI rendering ensures that text and signatures remain crisp for professional printing.</p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
             </>
           )}
         </div>
       </section>
 
-      <div className="w-full mt-12 pt-12 border-t border-border/50 text-center pb-20">
+      {/* WHY USERS LOVE GR7 TOOLS SECTION - EXACT RESTORATION FROM SCREENSHOT */}
+      <section className="w-full transform-gpu bg-slate-950 pt-20 pb-40 relative overflow-hidden">
+        {/* Abstract Background Elements from screenshot */}
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://picsum.photos/seed/office/1920/1080')] bg-cover bg-center grayscale mix-blend-overlay" />
+            <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-slate-950" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 relative z-10 flex flex-col items-center">
+            <div className="mb-4 inline-flex items-center px-6 py-1.5 rounded-full border border-white/20 bg-white/5 backdrop-blur-md">
+                <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Our Values</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-7xl font-black text-center text-white tracking-tighter uppercase leading-none">
+                Why Users Love <br />
+                <span className="text-[#9A1750]">GR7 Tools</span>
+            </h2>
+            <p className="mt-6 text-[10px] md:text-sm font-black uppercase tracking-[0.5em] text-slate-400 text-center">
+                Fast, Secure and Reliable
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mt-32 w-full">
+                
+                {/* CARD 1: VALUES */}
+                <div className="relative group">
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
+                        <div className="bg-[#1e40af] text-white px-8 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl">Values</div>
+                    </div>
+                    <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-slate-50 pointer-events-none select-none">01</div>
+                        <div className="relative z-10 space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Privacy Policy</p>
+                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">100% <br/> Private</h3>
+                            <div className="h-1 w-12 bg-[#9A1750] mx-auto my-4" />
+                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                                Your data never leaves your device. All processing happens locally in your browser RAM.
+                            </p>
+                        </div>
+                    </Card>
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
+                        <div className="size-16 rounded-full bg-white shadow-2xl border-4 border-slate-50 flex items-center justify-center text-[#1e40af]">
+                            <ShieldCheck className="size-8" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* CARD 2: VISION */}
+                <div className="relative group">
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
+                        <div className="bg-[#0ea5e9] text-white px-8 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl">Vision</div>
+                    </div>
+                    <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-slate-50 pointer-events-none select-none">02</div>
+                        <div className="relative z-10 space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">System Core</p>
+                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">Native <br/> Speed</h3>
+                            <div className="h-1 w-12 bg-[#9A1750] mx-auto my-4" />
+                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                                Using WebAssembly technology for hardware-level performance without any server-side lag.
+                            </p>
+                        </div>
+                    </Card>
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
+                        <div className="size-16 rounded-full bg-white shadow-2xl border-4 border-slate-50 flex items-center justify-center text-[#f59e0b]">
+                            <Zap className="size-8 fill-yellow-400 text-yellow-400" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* CARD 3: MISSION */}
+                <div className="relative group">
+                    <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-30">
+                        <div className="bg-[#10b981] text-white px-8 py-2 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl">Mission</div>
+                    </div>
+                    <Card className="bg-white border-none rounded-[3.5rem] pt-16 pb-16 px-10 text-center shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] transform transition-transform group-hover:-translate-y-2 h-full flex flex-col justify-center relative">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[120px] font-black text-slate-50 pointer-events-none select-none">03</div>
+                        <div className="relative z-10 space-y-4">
+                            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Output Standards</p>
+                            <h3 className="text-3xl font-black uppercase tracking-tighter text-slate-900 leading-none">HD <br/> Quality</h3>
+                            <div className="h-1 w-12 bg-[#9A1750] mx-auto my-4" />
+                            <p className="text-[11px] font-bold uppercase leading-relaxed text-slate-500 tracking-tight">
+                                Industrial-grade 300 DPI rendering ensuring every pixel is optimized for official form submissions.
+                            </p>
+                        </div>
+                    </Card>
+                    <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 z-30">
+                        <div className="size-16 rounded-full bg-white shadow-2xl border-4 border-slate-50 flex items-center justify-center text-[#10b981]">
+                            <Target className="size-8" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+      </section>
+
+      <div className="w-full mt-0 pt-12 border-t border-border/50 text-center pb-20 bg-background dark:bg-slate-950">
           <p className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] md:tracking-[0.3em]">
               © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB Studio
           </p>
@@ -455,4 +499,3 @@ export default function Page() {
     </div>
   );
 }
-
