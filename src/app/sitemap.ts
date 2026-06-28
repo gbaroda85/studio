@@ -50,6 +50,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/merge-audio',
     '/mp3-cutter',
     '/audio-converter',
+    // Video Tools
+    '/rotate-video',
+    '/video-to-mp3',
     // Calculators
     '/salary-slip',
     '/gst-invoice',
@@ -75,7 +78,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/aadhaar-printer',
     '/create-zip',
     '/unzip-file',
-    '/video-to-mp3',
   ];
 
   // Defensive check to ensure rules is an array

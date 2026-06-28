@@ -145,6 +145,7 @@ const CATEGORIES = [
     icon: Video,
     color: "text-indigo-500",
     tools: [
+      { href: '/rotate-video', label: 'rotate_video_label', icon: RotateCw },
       { href: '/video-to-mp3', label: 'video_to_mp3_label', icon: Music },
     ]
   },

@@ -66,7 +66,8 @@ import {
   FileArchive,
   UserCircle,
   Cpu,
-  Globe
+  Globe,
+  Video
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -107,6 +108,10 @@ const ALL_TOOLS = [
   { icon: Printer, title: "AADHAAR CARD PRINTER", description: "Auto-crop and arrange e-Aadhaar for easy printing.", href: "/aadhaar-printer", colorClass: "bg-orange-600", lightBg: "bg-[#fff7ed]", category: "file" },
   { icon: Archive, title: "CREATE ZIP", description: "Bundle multiple files into a single ZIP archive.", href: "/create-zip", colorClass: "bg-violet-500", lightBg: "bg-[#f5f3ff]", category: "file" },
   { icon: ArchiveRestore, title: "UNZIP FILE", description: "Extract files from any ZIP archive locally.", href: "/unzip-file", colorClass: "bg-stone-500", lightBg: "bg-[#f8fafc]", category: "file" },
+
+  // VIDEO TOOLS
+  { icon: RotateCw, title: "ROTATE VIDEO", description: "Permanently rotate video files 90, 180, or 270 degrees.", href: "/rotate-video", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "video" },
+  { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from video files instantly.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "video" },
 
   // OTHER SEARCHABLE TOOLS
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },

@@ -349,6 +349,14 @@ function ToolsPageContent() {
 
   const videoFeatures = [
     {
+      href: '/rotate-video',
+      labelKey: 'rotate_video_label',
+      descriptionKey: 'rotate_video_description',
+      icon: RotateCw,
+      color: 'bg-indigo-600',
+      lightBg: 'bg-indigo-50'
+    },
+    {
       href: '/video-to-mp3',
       labelKey: 'video_to_mp3_label',
       descriptionKey: 'video_to_mp3_description',
