@@ -11,8 +11,6 @@ import {
     Zap, 
     ScanLine,
     Sparkles,
-    Maximize,
-    Move,
     FileText,
     ChevronRight,
     Trash2,
@@ -24,7 +22,6 @@ import {
     Smartphone,
     Wand2,
     Eye,
-    Droplets,
     Highlighter,
     Scan,
     Monitor,
@@ -32,16 +29,13 @@ import {
     ShieldCheck,
     Archive,
     FileArchive,
-    Edit3,
-    CheckCircle,
-    LayoutGrid,
-    Share2,
-    Square,
     RotateCw,
-    Baseline,
+    ChevronLeft,
     Sun,
     Contrast,
-    ArrowLeft
+    ArrowLeft,
+    LayoutGrid,
+    Move
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
@@ -90,9 +84,6 @@ const StarIcons = () => (
     </>
 );
 
-/**
- * HELPER: PERSPECTIVE WARP SOLVER (Homography)
- */
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
     for (let i = 0; i < 4; i++) {
@@ -124,6 +115,7 @@ export default function DocumentScanner() {
   
   const [pendingPages, setPendingPages] = useState<ScannedPage[]>([]);
   const [scannedPages, setScannedPages] = useState<ScannedPage[]>([]);
+  const [activePendingIndex, setActivePendingIndex] = useState<number>(0);
   
   const [activeFilter, setActiveFilter] = useState<FilterType>('magic');
   const [brightness, setBrightness] = useState([100]);
@@ -132,14 +124,11 @@ export default function DocumentScanner() {
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   
   const [currentRawImage, setCurrentRawImage] = useState<string | null>(null);
   const [flattenedSrc, setFlattenedSrc] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isCameraStarting, setIsCameraStarting] = useState(false);
 
   const [points, setPoints] = useState<Point[]>([
     { x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }
@@ -151,16 +140,11 @@ export default function DocumentScanner() {
 
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
 
-  /**
-   * CORE: FRAMEDOC FILTER ENGINE
-   * Strictly implementing the provided logic: Shadow Removal & Color Dodge
-   */
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
-            // 1. Rotation Handler
             const rotCanvas = document.createElement('canvas');
             if (rotation === 90 || rotation === 270) {
               rotCanvas.width = img.height;
@@ -174,7 +158,6 @@ export default function DocumentScanner() {
             rotCtx.rotate((rotation * Math.PI) / 180);
             rotCtx.drawImage(img, -img.width / 2, -img.height / 2);
 
-            // 2. Initial Adjustments (Brightness & Contrast)
             const adjCanvas = document.createElement('canvas');
             adjCanvas.width = rotCanvas.width;
             adjCanvas.height = rotCanvas.height;
@@ -194,7 +177,6 @@ export default function DocumentScanner() {
                 return resolve(pCanvas.toDataURL('image/jpeg', 0.95));
             }
 
-            // --- Advanced Illumination Correction (Shadow Removal) ---
             const scale = 0.1;
             const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
             const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
@@ -202,11 +184,8 @@ export default function DocumentScanner() {
             const smallCanvas = document.createElement('canvas');
             smallCanvas.width = smallW; smallCanvas.height = smallH;
             const smallCtx = smallCanvas.getContext('2d')!;
-            
             smallCtx.filter = 'blur(4px)';
             smallCtx.drawImage(adjCanvas, 0, 0, smallW, smallH);
-            
-            // Background inversion (difference with white)
             smallCtx.globalCompositeOperation = 'difference';
             smallCtx.fillStyle = 'white';
             smallCtx.fillRect(0, 0, smallW, smallH);
@@ -214,12 +193,8 @@ export default function DocumentScanner() {
             const normCanvas = document.createElement('canvas');
             normCanvas.width = adjCanvas.width; normCanvas.height = adjCanvas.height;
             const normCtx = normCanvas.getContext('2d')!;
-            
             normCtx.drawImage(adjCanvas, 0, 0);
-            // Apply color-dodge composite to mitigate shadows
             normCtx.globalCompositeOperation = 'color-dodge';
-            normCtx.imageSmoothingEnabled = true;
-            normCtx.imageSmoothingQuality = 'high';
             normCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, adjCanvas.width, adjCanvas.height);
 
             const imageData = normCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height);
@@ -231,14 +206,11 @@ export default function DocumentScanner() {
 
             if (filterType === 'magic') { blackPoint = 60; whitePoint = 245; }
             else if (filterType === 'bw') { blackPoint = 140; whitePoint = 220; }
-            
             const range = whitePoint - blackPoint;
 
-            // Pixel-level adaptive thresholding
             for (let i = 0; i < data.length; i += 4) {
                 let r = data[i], g = data[i+1], b = data[i+2];
                 let lum = r * 0.299 + g * 0.587 + b * 0.114;
-                
                 if (filterType === 'bw') {
                     let v = lum < blackPoint ? 0 : lum > whitePoint ? 255 : (lum - blackPoint) * 255 / range;
                     data[i] = data[i+1] = data[i+2] = v;
@@ -260,20 +232,15 @@ export default function DocumentScanner() {
     });
   };
 
-  /**
-   * PERSPECTIVE WARP (FLATTEN) LOGIC
-   */
   const handleFlatten = async () => {
       const image = imgRef.current;
       if (!image || !currentRawImage) return;
       setIsProcessing(true);
-
       try {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
           const w = image.naturalWidth;
           const h = image.naturalHeight;
-
           const srcPoints = points.map(p => ({ x: p.x * (w / 100), y: p.y * (h / 100) }));
           const w1 = Math.hypot(srcPoints[1].x - srcPoints[0].x, srcPoints[1].y - srcPoints[0].y);
           const w2 = Math.hypot(srcPoints[2].x - srcPoints[3].x, srcPoints[2].y - srcPoints[3].y);
@@ -281,25 +248,22 @@ export default function DocumentScanner() {
           const h2 = Math.hypot(srcPoints[2].x - srcPoints[1].x, srcPoints[2].y - srcPoints[1].y);
           const tw = Math.max(10, Math.floor(Math.max(w1, w2)));
           const th = Math.max(10, Math.floor(Math.max(h1, h2)));
-
           canvas.width = tw; canvas.height = th;
           const dstPoints = [{ x: 0, y: 0 }, { x: tw, y: 0 }, { x: tw, y: th }, { x: 0, y: th }];
           const matrix = solvePerspective(dstPoints, srcPoints);
           const imgData = ctx.createImageData(tw, th);
-
           const srcCanvas = document.createElement('canvas');
           srcCanvas.width = w; srcCanvas.height = h;
           const srcCtx = srcCanvas.getContext('2d')!;
           srcCtx.drawImage(image, 0, 0);
           const srcPixels = srcCtx.getImageData(0, 0, w, h).data;
-
           for (let y = 0; y < th; y++) {
               for (let x = 0; x < tw; x++) {
                   const z = matrix[6] * x + matrix[7] * y + 1;
                   const sx = Math.floor((matrix[0] * x + matrix[1] * y + matrix[2]) / z);
                   const sy = Math.floor((matrix[3] * x + matrix[4] * y + matrix[5]) / z);
                   if (sx >= 0 && sx < w && sy >= 0 && sy < h) {
-                      const di = (y * tw + x) * 4, si = (sy * w + sx) * 4;
+                      const di = (y * tw + x) * 4; const si = (sy * w + sx) * 4;
                       imgData.data[di] = srcPixels[si]; imgData.data[di+1] = srcPixels[si+1];
                       imgData.data[di+2] = srcPixels[si+2]; imgData.data[di+3] = srcPixels[si+3];
                   }
@@ -308,15 +272,10 @@ export default function DocumentScanner() {
           ctx.putImageData(imgData, 0, 0);
           const flattened = canvas.toDataURL('image/jpeg', 1.0);
           setFlattenedSrc(flattened);
-          
           const filtered = await applyFrameDocFilter(flattened, activeFilter);
           setLiveResultSrc(filtered);
           setStage('studio');
-      } catch (err) {
-          toast({ variant: 'destructive', title: 'Warp Error' });
-      } finally {
-          setIsProcessing(false);
-      }
+      } catch (err) { toast({ variant: 'destructive', title: 'Warp Error' }); } finally { setIsProcessing(false); }
   };
 
   useEffect(() => {
@@ -330,18 +289,13 @@ export default function DocumentScanner() {
   }, [activeFilter, brightness, contrast, rotation, flattenedSrc, stage]);
 
   const startCamera = async () => {
-    setIsCameraStarting(true);
     setStage('camera');
     try {
         const stream = await navigator.mediaDevices.getUserMedia({ 
             video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
         });
         if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; }
-    } catch (err) {
-        cameraInputRef.current?.click();
-    } finally {
-        setIsCameraStarting(false);
-    }
+    } catch (err) { toast({ variant: 'destructive', title: 'Camera Failed' }); setStage('viewfinder'); }
   };
 
   const captureFrame = () => {
@@ -352,7 +306,10 @@ export default function DocumentScanner() {
     const ctx = canvas.getContext('2d');
     if (ctx) {
         ctx.drawImage(video, 0, 0);
-        setCurrentRawImage(canvas.toDataURL('image/jpeg', 1.0));
+        const src = canvas.toDataURL('image/jpeg', 1.0);
+        setCurrentRawImage(src);
+        setPendingPages([{ id: 'cam-1', originalSrc: src, processedSrc: src, points: [...points], isScanned: false, originalIndex: 1, rotation: 0 }]);
+        setActivePendingIndex(0);
         setStage('adjust');
         if (video.srcObject) (video.srcObject as MediaStream).getTracks().forEach(t => t.stop());
     }
@@ -364,23 +321,11 @@ export default function DocumentScanner() {
     setIsProcessing(true);
     const filesArray = Array.from(filesList);
     const newPages: ScannedPage[] = [];
-
-    for (let i = 0; i < filesArray.length; i++) {
-        const file = filesArray[i];
-        const reader = new FileReader();
+    for (const file of filesArray) {
         const dataUrl = await new Promise<string>((res) => { 
-            reader.onload = (ev) => res(ev.target?.result as string); 
-            reader.readAsDataURL(file); 
+            const reader = new FileReader(); reader.onload = (ev) => res(ev.target?.result as string); reader.readAsDataURL(file); 
         });
-        newPages.push({ 
-            id: Math.random().toString(36).substr(2, 9), 
-            originalSrc: dataUrl, 
-            processedSrc: dataUrl, 
-            points: [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }], 
-            isScanned: false, 
-            originalIndex: scannedPages.length + newPages.length + 1, 
-            rotation: 0 
-        });
+        newPages.push({ id: Math.random().toString(36).substr(2, 9), originalSrc: dataUrl, processedSrc: dataUrl, points: [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }], isScanned: false, originalIndex: scannedPages.length + newPages.length + 1, rotation: 0 });
     }
     setPendingPages(prev => [...prev, ...newPages]);
     setIsProcessing(false);
@@ -388,12 +333,46 @@ export default function DocumentScanner() {
 
   const handleConfirmSave = () => {
       if (!liveResultSrc) return;
-      const id = editingId || Math.random().toString(36).substr(2, 9);
-      const newPage: ScannedPage = { id, originalSrc: currentRawImage!, processedSrc: liveResultSrc, points, isScanned: true, originalIndex: scannedPages.length + 1, rotation };
-      setScannedPages(prev => [...prev.filter(p => p.id !== id), newPage].sort((a,b) => a.originalIndex - b.originalIndex));
-      setPendingPages(prev => prev.filter(p => p.id !== id));
-      setStage('viewfinder');
-      setCurrentRawImage(null); setLiveResultSrc(null); setFlattenedSrc(null);
+      const currentPage = pendingPages[activePendingIndex];
+      const newPage: ScannedPage = { ...currentPage, processedSrc: liveResultSrc, isScanned: true, points, rotation };
+      setScannedPages(prev => [...prev.filter(p => p.id !== currentPage.id), newPage].sort((a,b) => a.originalIndex - b.originalIndex));
+      toast({ title: "Page Saved" });
+      
+      // Auto-navigation or go back
+      if (activePendingIndex < pendingPages.length - 1) {
+          handleNextPending();
+      } else {
+          setStage('viewfinder');
+          setPendingPages(prev => prev.filter(p => p.id !== currentPage.id));
+      }
+  };
+
+  const handleDownloadJpg = () => {
+      if (!liveResultSrc) return;
+      const link = document.createElement('a');
+      link.href = liveResultSrc;
+      link.download = `GR7-Scan-${Date.now()}.jpg`;
+      link.click();
+  };
+
+  const handleNextPending = () => {
+      if (activePendingIndex < pendingPages.length - 1) {
+          const nextIdx = activePendingIndex + 1;
+          setActivePendingIndex(nextIdx);
+          setCurrentRawImage(pendingPages[nextIdx].originalSrc);
+          setStage('adjust');
+          setLiveResultSrc(null); setFlattenedSrc(null);
+      }
+  };
+
+  const handlePrevPending = () => {
+      if (activePendingIndex > 0) {
+          const prevIdx = activePendingIndex - 1;
+          setActivePendingIndex(prevIdx);
+          setCurrentRawImage(pendingPages[prevIdx].originalSrc);
+          setStage('adjust');
+          setLiveResultSrc(null); setFlattenedSrc(null);
+      }
   };
 
   const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
@@ -412,21 +391,19 @@ export default function DocumentScanner() {
     const pdf = new jsPDF('p', 'mm', 'a4');
     for (let i = 0; i < scannedPages.length; i++) {
         if (i > 0) pdf.addPage();
-        const img = scannedPages[i].processedSrc;
-        pdf.addImage(img, 'JPEG', 0, 0, 210, 297);
+        pdf.addImage(scannedPages[i].processedSrc, 'JPEG', 0, 0, 210, 297);
     }
     pdf.save(`Scan-${Date.now()}.pdf`);
     setIsGenerating(false);
   };
 
   return (
-    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative mt-4">
-        
+    <div className="w-full flex flex-col gap-6 animate-in fade-in duration-700 relative">
         {stage === 'viewfinder' && (
             <div className="grid lg:grid-cols-12 gap-8 px-4 min-h-[70vh]">
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <Card className="border-2 shadow-lg bg-card/50 rounded-[3rem] flex-1">
-                        <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center">
+                        <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center text-left">
                             <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><LayoutGrid className="size-4 text-primary" /> QUEUE</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
@@ -434,8 +411,8 @@ export default function DocumentScanner() {
                                 <div className="flex flex-col items-center py-20 opacity-20"><ImageIcon className="size-12 mb-4" /><p className="text-[10px] font-black uppercase">Drop Files to Start</p></div>
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
-                                    {pendingPages.map((p) => (
-                                        <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2 cursor-pointer" onClick={() => { setCurrentRawImage(p.originalSrc); setEditingId(p.id); setStage('adjust'); }}>
+                                    {pendingPages.map((p, idx) => (
+                                        <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2 cursor-pointer" onClick={() => { setCurrentRawImage(p.originalSrc); setActivePendingIndex(idx); setStage('adjust'); }}>
                                             <img src={p.originalSrc} className="size-full object-cover grayscale opacity-50" alt="p" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center backdrop-blur-sm transition-all"><Button size="sm" className="font-black text-[9px] uppercase"><Scan className="size-3 mr-1" /> SCAN</Button></div>
                                         </div>
@@ -462,8 +439,8 @@ export default function DocumentScanner() {
 
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <Card className="border-2 shadow-lg bg-card/50 rounded-[3rem] flex-1">
-                        <CardHeader className="bg-emerald-500/5 border-b p-6 flex justify-between items-center text-emerald-600">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><CheckCircle className="size-4" /> FINISHED</CardTitle>
+                        <CardHeader className="bg-emerald-500/5 border-b p-6 flex justify-between items-center text-emerald-600 text-left">
+                            <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><CheckCircle2 className="size-4" /> FINISHED</CardTitle>
                         </CardHeader>
                         <CardContent className="p-6">
                             {scannedPages.length === 0 ? (
@@ -505,9 +482,20 @@ export default function DocumentScanner() {
         {stage === 'adjust' && currentRawImage && (
             <div className="flex flex-col items-center justify-start p-4 animate-in slide-in-from-bottom-6 duration-500">
                 <Card className="w-full max-w-5xl border-2 shadow-2xl rounded-[3rem] overflow-hidden bg-card">
-                    <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center">
-                        <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><ScanLine className="size-5 text-primary" /> 1. CORNER MAPPING</CardTitle>
-                        <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
+                    <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center text-left">
+                        <div className="flex items-center gap-4">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><ScanLine className="size-5 text-primary" /> 1. CORNER MAPPING</CardTitle>
+                            {pendingPages.length > 1 && <Badge variant="secondary" className="font-black text-[10px] px-3 py-1 rounded-full uppercase">ITEM {activePendingIndex + 1} OF {pendingPages.length}</Badge>}
+                        </div>
+                        <div className="flex items-center gap-2">
+                            {pendingPages.length > 1 && (
+                                <>
+                                    <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={handlePrevPending} disabled={activePendingIndex === 0}><ChevronLeft className="size-5" /></Button>
+                                    <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={handleNextPending} disabled={activePendingIndex === pendingPages.length - 1}><ChevronRight className="size-5" /></Button>
+                                </>
+                            )}
+                            <Button variant="ghost" size="icon" onClick={() => setStage('viewfinder')} className="text-destructive"><X /></Button>
+                        </div>
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200 dark:bg-black/40 min-h-[600px] relative overflow-hidden select-none" 
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
@@ -531,26 +519,43 @@ export default function DocumentScanner() {
         )}
 
         {stage === 'studio' && liveResultSrc && (
-            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto">
+            <div className="grid lg:grid-cols-12 gap-8 items-stretch animate-in slide-in-from-bottom-6 duration-500 w-full px-4 max-w-[1800px] mx-auto text-left">
                 <Card className="lg:col-span-8 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col">
-                    <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center">
-                        <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><Eye className="size-5 text-primary" /> 2. HD PREVIEW</CardTitle>
-                        <Badge className="bg-green-600 text-white font-black text-[9px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER READY</Badge>
+                    <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center text-left">
+                        <div className="flex items-center gap-4">
+                            <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><Eye className="size-5 text-primary" /> 2. HD PREVIEW</CardTitle>
+                            {pendingPages.length > 1 && <Badge variant="secondary" className="font-black text-[10px] px-3 py-1 rounded-full uppercase">ITEM {activePendingIndex + 1} OF {pendingPages.length}</Badge>}
+                        </div>
+                        <div className="flex items-center gap-3">
+                             <div className="flex items-center gap-2 no-print">
+                                {pendingPages.length > 1 && (
+                                    <>
+                                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={handlePrevPending} disabled={activePendingIndex === 0}><ChevronLeft className="size-5" /></Button>
+                                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={handleNextPending} disabled={activePendingIndex === pendingPages.length - 1}><ChevronRight className="size-5" /></Button>
+                                    </>
+                                )}
+                            </div>
+                            <Badge className="bg-green-600 text-white font-black text-[9px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER READY</Badge>
+                        </div>
                     </CardHeader>
                     <CardContent className="p-8 md:p-12 flex-1 flex items-center justify-center bg-slate-100 dark:bg-slate-900 shadow-inner relative overflow-hidden">
                         <div className="relative bg-white shadow-3xl border-[12px] border-white max-w-full">
                             {isProcessing ? <Loader2 className="animate-spin size-12 text-primary opacity-20" /> : <img src={liveResultSrc} className="max-h-[65vh] w-auto object-contain block animate-in zoom-in-95 duration-500" alt="result" />}
                         </div>
                     </CardContent>
-                    <CardFooter className="bg-white dark:bg-slate-950 p-6 border-t flex justify-center gap-8 text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest">
-                         <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
-                         <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT RENDER</div>
-                         <div className="flex items-center gap-2"><Sparkles className="size-4 text-primary" /> HD OUTPUT</div>
+                    <CardFooter className="bg-white dark:bg-slate-950 p-6 border-t flex flex-col sm:flex-row justify-between items-center gap-6">
+                        <div className="flex items-center gap-8 text-[10px] font-black text-muted-foreground/30 uppercase tracking-widest">
+                             <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
+                             <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT RENDER</div>
+                        </div>
+                        <Button variant="outline" onClick={handleDownloadJpg} className="h-12 px-8 border-2 font-black text-[10px] uppercase rounded-xl hover:bg-primary hover:text-white transition-all shadow-sm">
+                            <ImageIcon className="mr-2 size-4" /> SAVE THIS AS JPG
+                        </Button>
                     </CardFooter>
                 </Card>
 
                 <Card className="lg:col-span-4 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full no-print">
-                    <CardHeader className="bg-primary/5 border-b p-6"><CardTitle className="text-base font-black uppercase tracking-tighter text-primary flex items-center gap-2"><Settings2 className="size-5" /> STUDIO CONTROLS</CardTitle></CardHeader>
+                    <CardHeader className="bg-primary/5 border-b p-6 text-left"><CardTitle className="text-base font-black uppercase tracking-tighter text-primary flex items-center gap-2"><Settings2 className="size-5" /> STUDIO CONTROLS</CardTitle></CardHeader>
                     <CardContent className="p-8 space-y-10 flex-1 text-left">
                         <div className="space-y-6">
                             <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">Fidelity Filters</Label>
@@ -569,11 +574,11 @@ export default function DocumentScanner() {
                         <Separator className="opacity-10" />
                         <div className="space-y-8">
                              <div className="space-y-4">
-                                <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Exposure</Label><Badge variant="secondary" className="font-mono text-[9px]">{brightness[0]}%</Badge></div>
+                                <div className="flex justify-between items-center px-1"><Label className="text-[10px] font-black uppercase opacity-60">Exposure</Label><Badge variant="secondary" className="font-mono text-[9px]">{brightness[0]}%</Badge></div>
                                 <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
                             </div>
                             <div className="space-y-4">
-                                <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Contrast</Label><Badge variant="secondary" className="font-mono text-[9px]">{contrast[0]}%</Badge></div>
+                                <div className="flex justify-between items-center px-1"><Label className="text-[10px] font-black uppercase opacity-60">Contrast</Label><Badge variant="secondary" className="font-mono text-[9px]">{contrast[0]}%</Badge></div>
                                 <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
                             </div>
                         </div>
@@ -581,7 +586,7 @@ export default function DocumentScanner() {
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
                          <Button onClick={handleConfirmSave} className="magic-button w-full h-16 rounded-[1.5rem] bg-primary text-white font-black text-lg shadow-2xl active:scale-95 transition-all border-none">
                             <StarIcons />
-                            <CheckCircle2 className="size-6 mr-3" /> CONFIRM & SAVE
+                            <CheckCircle2 className="size-6 mr-3" /> CONFIRM & NEXT
                         </Button>
                         <Button variant="outline" className="w-full h-12 border-2 rounded-xl font-black text-[10px] uppercase" onClick={() => setStage('adjust')}><RefreshCcw className="size-4 mr-2" /> RE-CROP</Button>
                     </CardFooter>
@@ -589,7 +594,6 @@ export default function DocumentScanner() {
             </div>
         )}
 
-        <input ref={cameraInputRef} type="file" className="hidden" accept="image/*" capture="environment" onChange={handleFilesUpload} />
         <input ref={fileInputRef} type="file" className="hidden" accept="image/*,application/pdf" multiple onChange={handleFilesUpload} />
     </div>
   );
@@ -603,3 +607,4 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
+
