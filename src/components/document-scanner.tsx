@@ -145,7 +145,6 @@ export default function DocumentScanner() {
     { x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
-  const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -161,37 +160,51 @@ export default function DocumentScanner() {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
-            const canvas = document.createElement('canvas');
-            canvas.width = img.width; canvas.height = img.height;
-            const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
-            
-            // 1. Initial Adjustments (Brightness & Contrast)
-            ctx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%)`;
-            ctx.drawImage(img, 0, 0);
-            ctx.filter = 'none';
+            // 1. Rotation Handler
+            const rotCanvas = document.createElement('canvas');
+            if (rotation === 90 || rotation === 270) {
+              rotCanvas.width = img.height;
+              rotCanvas.height = img.width;
+            } else {
+              rotCanvas.width = img.width;
+              rotCanvas.height = img.height;
+            }
+            const rotCtx = rotCanvas.getContext('2d')!;
+            rotCtx.translate(rotCanvas.width / 2, rotCanvas.height / 2);
+            rotCtx.rotate((rotation * Math.PI) / 180);
+            rotCtx.drawImage(img, -img.width / 2, -img.height / 2);
 
-            if (filterType === 'original') return resolve(canvas.toDataURL('image/jpeg', 0.95));
+            // 2. Initial Adjustments (Brightness & Contrast)
+            const adjCanvas = document.createElement('canvas');
+            adjCanvas.width = rotCanvas.width;
+            adjCanvas.height = rotCanvas.height;
+            const adjCtx = adjCanvas.getContext('2d')!;
+            adjCtx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%)`;
+            adjCtx.drawImage(rotCanvas, 0, 0);
+            adjCtx.filter = 'none';
+
+            if (filterType === 'original') return resolve(adjCanvas.toDataURL('image/jpeg', 0.95));
             
             if (filterType === 'photo') {
                 const pCanvas = document.createElement('canvas');
-                pCanvas.width = canvas.width; pCanvas.height = canvas.height;
+                pCanvas.width = adjCanvas.width; pCanvas.height = adjCanvas.height;
                 const pCtx = pCanvas.getContext('2d')!;
                 pCtx.filter = 'saturate(1.2) contrast(1.1)';
-                pCtx.drawImage(canvas, 0, 0);
+                pCtx.drawImage(adjCanvas, 0, 0);
                 return resolve(pCanvas.toDataURL('image/jpeg', 0.95));
             }
 
             // --- Advanced Illumination Correction (Shadow Removal) ---
             const scale = 0.1;
-            const smallW = Math.max(1, Math.floor(canvas.width * scale));
-            const smallH = Math.max(1, Math.floor(canvas.height * scale));
+            const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
+            const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
             
             const smallCanvas = document.createElement('canvas');
             smallCanvas.width = smallW; smallCanvas.height = smallH;
             const smallCtx = smallCanvas.getContext('2d')!;
             
             smallCtx.filter = 'blur(4px)';
-            smallCtx.drawImage(canvas, 0, 0, smallW, smallH);
+            smallCtx.drawImage(adjCanvas, 0, 0, smallW, smallH);
             
             // Background inversion (difference with white)
             smallCtx.globalCompositeOperation = 'difference';
@@ -199,17 +212,17 @@ export default function DocumentScanner() {
             smallCtx.fillRect(0, 0, smallW, smallH);
 
             const normCanvas = document.createElement('canvas');
-            normCanvas.width = canvas.width; normCanvas.height = canvas.height;
+            normCanvas.width = adjCanvas.width; normCanvas.height = adjCanvas.height;
             const normCtx = normCanvas.getContext('2d')!;
             
-            normCtx.drawImage(canvas, 0, 0);
+            normCtx.drawImage(adjCanvas, 0, 0);
             // Apply color-dodge composite to mitigate shadows
             normCtx.globalCompositeOperation = 'color-dodge';
             normCtx.imageSmoothingEnabled = true;
             normCtx.imageSmoothingQuality = 'high';
-            normCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, canvas.width, canvas.height);
+            normCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, adjCanvas.width, adjCanvas.height);
 
-            const imageData = normCtx.getImageData(0, 0, canvas.width, canvas.height);
+            const imageData = normCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height);
             const data = imageData.data;
 
             let blackPoint = 120;
@@ -314,7 +327,7 @@ export default function DocumentScanner() {
           }, 50);
           return () => clearTimeout(timer);
       }
-  }, [activeFilter, brightness, contrast, flattenedSrc, stage]);
+  }, [activeFilter, brightness, contrast, rotation, flattenedSrc, stage]);
 
   const startCamera = async () => {
     setIsCameraStarting(true);
@@ -547,6 +560,10 @@ export default function DocumentScanner() {
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => setActiveFilter('bw')} />
                                 <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => setActiveFilter('photo')} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={X} onClick={() => setActiveFilter('original')} />
+                                <div className="flex flex-col items-center gap-2">
+                                  <Button variant="outline" className="size-14 rounded-2xl shadow-lg border-2 transition-all p-0 bg-white/50 border-white/20 hover:border-primary/40" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-6"/></Button>
+                                  <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Rotate</span>
+                                </div>
                             </div>
                         </div>
                         <Separator className="opacity-10" />
