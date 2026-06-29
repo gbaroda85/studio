@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -16,7 +15,6 @@ import {
     Move,
     FileText,
     ChevronRight,
-    ChevronLeft,
     Trash2,
     RefreshCcw,
     Settings2,
@@ -47,8 +45,6 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import JSZip from 'jszip';
-import * as pdfjs from 'pdfjs-dist';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -58,13 +54,9 @@ import { Progress } from '@/components/ui/progress';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Separator } from "@/components/ui/separator";
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
-
-const PDF_JS_VERSION = '4.2.67';
-if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
-    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${PDF_JS_VERSION}/pdf.worker.min.mjs`;
-}
 
 // --- TYPES ---
 export type FilterType = 'original' | 'photo' | 'bw' | 'document' | 'magic';
@@ -99,7 +91,7 @@ const StarIcons = () => (
 );
 
 /**
- * HELPER: PERSPECTIVE WARP SOLVER
+ * HELPER: PERSPECTIVE WARP SOLVER (Homography)
  */
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
@@ -153,13 +145,16 @@ export default function DocumentScanner() {
     { x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
+  const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
+  const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
+
   /**
    * CORE: FRAMEDOC FILTER ENGINE
-   * Implements the provided shadow removal and color-dodge logic.
+   * Strictly implementing the provided logic: Shadow Removal & Color Dodge
    */
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -170,12 +165,13 @@ export default function DocumentScanner() {
             canvas.width = img.width; canvas.height = img.height;
             const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
             
-            // 1. Initial Adjustments
+            // 1. Initial Adjustments (Brightness & Contrast)
             ctx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%)`;
             ctx.drawImage(img, 0, 0);
             ctx.filter = 'none';
 
             if (filterType === 'original') return resolve(canvas.toDataURL('image/jpeg', 0.95));
+            
             if (filterType === 'photo') {
                 const pCanvas = document.createElement('canvas');
                 pCanvas.width = canvas.width; pCanvas.height = canvas.height;
@@ -185,15 +181,19 @@ export default function DocumentScanner() {
                 return resolve(pCanvas.toDataURL('image/jpeg', 0.95));
             }
 
-            // 2. Advanced Shadow Removal Logic
+            // --- Advanced Illumination Correction (Shadow Removal) ---
             const scale = 0.1;
             const smallW = Math.max(1, Math.floor(canvas.width * scale));
             const smallH = Math.max(1, Math.floor(canvas.height * scale));
+            
             const smallCanvas = document.createElement('canvas');
             smallCanvas.width = smallW; smallCanvas.height = smallH;
             const smallCtx = smallCanvas.getContext('2d')!;
+            
             smallCtx.filter = 'blur(4px)';
             smallCtx.drawImage(canvas, 0, 0, smallW, smallH);
+            
+            // Background inversion (difference with white)
             smallCtx.globalCompositeOperation = 'difference';
             smallCtx.fillStyle = 'white';
             smallCtx.fillRect(0, 0, smallW, smallH);
@@ -201,7 +201,9 @@ export default function DocumentScanner() {
             const normCanvas = document.createElement('canvas');
             normCanvas.width = canvas.width; normCanvas.height = canvas.height;
             const normCtx = normCanvas.getContext('2d')!;
+            
             normCtx.drawImage(canvas, 0, 0);
+            // Apply color-dodge composite to mitigate shadows
             normCtx.globalCompositeOperation = 'color-dodge';
             normCtx.imageSmoothingEnabled = true;
             normCtx.imageSmoothingQuality = 'high';
@@ -219,6 +221,7 @@ export default function DocumentScanner() {
             
             const range = whitePoint - blackPoint;
 
+            // Pixel-level adaptive thresholding
             for (let i = 0; i < data.length; i += 4) {
                 let r = data[i], g = data[i+1], b = data[i+2];
                 let lum = r * 0.299 + g * 0.587 + b * 0.114;
@@ -245,7 +248,7 @@ export default function DocumentScanner() {
   };
 
   /**
-   * PERSPECTIVE WARP (FLATTEN)
+   * PERSPECTIVE WARP (FLATTEN) LOGIC
    */
   const handleFlatten = async () => {
       const image = imgRef.current;
@@ -303,14 +306,12 @@ export default function DocumentScanner() {
       }
   };
 
-  const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
-
   useEffect(() => {
       if (stage === 'studio' && flattenedSrc) {
           const timer = setTimeout(async () => {
               const res = await applyFrameDocFilter(flattenedSrc, activeFilter);
               setLiveResultSrc(res);
-          }, 100);
+          }, 50);
           return () => clearTimeout(timer);
       }
   }, [activeFilter, brightness, contrast, flattenedSrc, stage]);
@@ -319,7 +320,9 @@ export default function DocumentScanner() {
     setIsCameraStarting(true);
     setStage('camera');
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } } 
+        });
         if (videoRef.current) { videoRef.current.srcObject = stream; videoRef.current.muted = true; }
     } catch (err) {
         cameraInputRef.current?.click();
@@ -351,23 +354,20 @@ export default function DocumentScanner() {
 
     for (let i = 0; i < filesArray.length; i++) {
         const file = filesArray[i];
-        if (file.type === 'application/pdf') {
-            const arrayBuffer = await file.arrayBuffer();
-            const pdf = await pdfjs.getDocument({ data: new Uint8Array(arrayBuffer) }).promise;
-            for (let p = 1; p <= pdf.numPages; p++) {
-                const page = await pdf.getPage(p);
-                const vp = page.getViewport({ scale: 2.0 });
-                const canvas = document.createElement('canvas');
-                canvas.width = vp.width; canvas.height = vp.height;
-                await page.render({ canvasContext: canvas.getContext('2d')!, viewport: vp }).promise;
-                const data = canvas.toDataURL('image/jpeg', 0.9);
-                newPages.push({ id: Math.random().toString(36).substr(2, 9), originalSrc: data, processedSrc: data, points: [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }], isScanned: false, originalIndex: p, rotation: 0 });
-            }
-        } else if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            const dataUrl = await new Promise<string>((res) => { reader.onload = (ev) => res(ev.target?.result as string); reader.readAsDataURL(file); });
-            newPages.push({ id: Math.random().toString(36).substr(2, 9), originalSrc: dataUrl, processedSrc: dataUrl, points: [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }], isScanned: false, originalIndex: scannedPages.length + newPages.length + 1, rotation: 0 });
-        }
+        const reader = new FileReader();
+        const dataUrl = await new Promise<string>((res) => { 
+            reader.onload = (ev) => res(ev.target?.result as string); 
+            reader.readAsDataURL(file); 
+        });
+        newPages.push({ 
+            id: Math.random().toString(36).substr(2, 9), 
+            originalSrc: dataUrl, 
+            processedSrc: dataUrl, 
+            points: [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }], 
+            isScanned: false, 
+            originalIndex: scannedPages.length + newPages.length + 1, 
+            rotation: 0 
+        });
     }
     setPendingPages(prev => [...prev, ...newPages]);
     setIsProcessing(false);
@@ -390,7 +390,6 @@ export default function DocumentScanner() {
     const cy = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
-    setMagnifierPos({ x, y });
     setPoints(prev => { const next = [...prev]; next[draggingPoint] = { x, y }; return next; });
   };
 
@@ -508,12 +507,6 @@ export default function DocumentScanner() {
                                 <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center bg-white", draggingPoint === i && "scale-125")}
                                     style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={() => setDraggingPoint(i)} onTouchStart={() => setDraggingPoint(i)}><div className="size-2.5 bg-primary rounded-full" /></div>
                             ))}
-                            {draggingPoint !== null && (
-                                <div className="absolute top-2 left-1/2 -translate-x-1/2 size-40 rounded-full border-4 border-primary shadow-3xl bg-white animate-in zoom-in-50 overflow-hidden z-50">
-                                    <img src={currentRawImage} className="absolute max-w-none origin-top-left" style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
-                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none"><div className="w-full h-px bg-primary/40 absolute"/><div className="h-full w-px bg-primary/40 absolute"/></div>
-                                </div>
-                            )}
                         </div>
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 rounded-full text-white text-[10px] font-black uppercase tracking-widest shadow-3xl"><Move className="size-4 text-primary animate-pulse" /> MAP ALL 4 CORNERS</div>
                     </CardContent>
@@ -593,4 +586,3 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
-
