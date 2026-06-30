@@ -156,46 +156,24 @@ export default function AddAudioToVideo() {
         wavesurferRef.current = ws;
     }, []);
 
-    // --- DIRECT VOLUME UPDATES ---
-    const updateVolumesDirectly = useCallback(() => {
-        const video = videoRef.current;
-        const audio = audioRef.current;
-        if (!video || !audio) return;
-
-        // Video Audio Handling
-        const shouldPlayVideoAudio = (audioMode === 'mix' || audioMode === 'keep');
-        video.volume = shouldPlayVideoAudio ? (videoVolume[0] / 100) : 0;
-
-        // Added Audio Handling (Preview range 0-1)
-        const shouldPlayAdded = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
-        if (!shouldPlayAdded) {
-            audio.volume = 0;
-        } else {
-            let baseVol = audioVolume[0] / 100;
-            audio.volume = Math.min(1, Math.max(0, baseVol));
-        }
-    }, [audioMode, videoVolume, audioVolume]);
-
-    useEffect(() => {
-        updateVolumesDirectly();
-    }, [updateVolumesDirectly]);
-
     // --- SYNC PLAYBACK MASTER ---
-    const updateSync = useCallback(() => {
+    const syncAudioWithVideo = useCallback(() => {
         const video = videoRef.current;
         const audio = audioRef.current;
-        if (!video || !audio) return;
+        if (!video || !audio || !audioUrl) return;
 
         const vt = video.currentTime;
         setCurrentTime(vt);
 
+        // Determine if audio should be active
         const relTime = vt - audioOffset;
         const clipDuration = audioTrimEnd - audioTrimStart;
-        const inBounds = relTime >= 0 && (isLooping || relTime <= clipDuration);
+        const shouldBeActive = relTime >= 0 && (isLooping || relTime <= clipDuration);
+        
+        // Mode logic
+        const shouldHearAudio = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
 
-        const shouldPlayAdded = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
-
-        if (inBounds && shouldPlayAdded) {
+        if (shouldBeActive && shouldHearAudio) {
             let targetAudioTime;
             if (isLooping) {
                 targetAudioTime = audioTrimStart + (relTime % Math.max(0.1, clipDuration));
@@ -203,48 +181,52 @@ export default function AddAudioToVideo() {
                 targetAudioTime = audioTrimStart + relTime;
             }
 
-            // Sync seek if playing or just scrubbed
+            // Hard sync seek if drift > 0.1s
             if (Math.abs(audio.currentTime - targetAudioTime) > 0.1) {
                 audio.currentTime = targetAudioTime;
             }
 
+            // Ensure matching play/pause state
             if (isPlaying) {
                 if (audio.paused) audio.play().catch(() => {});
             } else {
                 if (!audio.paused) audio.pause();
             }
 
-            // Apply Fades to Preview
-            let currentAudioGain = audioVolume[0] / 100;
+            // Apply Volume & Fades (0.0 to 1.0)
+            let vol = audioVolume[0] / 100;
             if (fadeIn[0] > 0 && relTime < fadeIn[0]) {
-                currentAudioGain *= (relTime / fadeIn[0]);
+                vol *= (relTime / fadeIn[0]);
             }
             if (!isLooping && fadeOut[0] > 0 && relTime > (clipDuration - fadeOut[0])) {
                 const fadeProgress = (clipDuration - relTime) / fadeOut[0];
-                currentAudioGain *= Math.max(0, fadeProgress);
+                vol *= Math.max(0, fadeProgress);
             }
-            audio.volume = Math.min(1, Math.max(0, currentAudioGain));
+            audio.volume = Math.min(1, Math.max(0, vol));
         } else {
             if (!audio.paused) audio.pause();
         }
 
+        // Sync video volume (0.0 to 1.0)
+        const shouldHearVideo = (audioMode === 'mix' || audioMode === 'keep');
+        video.volume = shouldHearVideo ? (videoVolume[0] / 100) : 0;
+
         if (isPlaying) {
-            masterSyncTimer.current = requestAnimationFrame(updateSync);
+            masterSyncTimer.current = requestAnimationFrame(syncAudioWithVideo);
         }
-    }, [isPlaying, audioOffset, audioTrimStart, audioTrimEnd, isLooping, audioVolume, audioMode, fadeIn, fadeOut]);
+    }, [isPlaying, audioOffset, audioTrimStart, audioTrimEnd, isLooping, audioVolume, videoVolume, audioMode, fadeIn, fadeOut, audioUrl]);
 
     useEffect(() => {
         if (isPlaying) {
-            masterSyncTimer.current = requestAnimationFrame(updateSync);
+            masterSyncTimer.current = requestAnimationFrame(syncAudioWithVideo);
         } else {
             if (masterSyncTimer.current) cancelAnimationFrame(masterSyncTimer.current);
-            // Even if paused, we want to update the time once for scrubbing
-            updateSync();
+            syncAudioWithVideo();
         }
         return () => {
             if (masterSyncTimer.current) cancelAnimationFrame(masterSyncTimer.current);
         };
-    }, [isPlaying, updateSync]);
+    }, [isPlaying, syncAudioWithVideo]);
 
     const togglePlayback = () => {
         const v = videoRef.current;
@@ -252,7 +234,9 @@ export default function AddAudioToVideo() {
         if (!v || !a) return;
 
         if (v.paused) {
-            // Unify playback trigger to satisfy browser autplay policy
+            // Unmute and play both in a single gesture to bypass autoplay restrictions
+            v.muted = false;
+            a.muted = false;
             v.play().catch(() => {});
             
             const relTime = v.currentTime - audioOffset;
@@ -282,7 +266,7 @@ export default function AddAudioToVideo() {
         videoRef.current.currentTime = finalTime;
         setCurrentTime(finalTime);
         
-        // Manual audio seek on timeline click
+        // Manual audio seek sync on scrub
         const rel = finalTime - audioOffset;
         const clipDuration = audioTrimEnd - audioTrimStart;
         if (rel >= 0 && (isLooping || rel <= clipDuration)) {
@@ -290,7 +274,6 @@ export default function AddAudioToVideo() {
         }
     };
 
-    // --- FILE HANDLERS ---
     const onVideoInputChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file && file.type.startsWith('video/')) {
