@@ -59,6 +59,10 @@ import confetti from 'canvas-confetti';
 
 // --- TYPES ---
 export type FilterType = 'original' | 'photo' | 'bw' | 'document' | 'magic';
+export type WatermarkPosition = 
+    | 'top-left' | 'top-center' | 'top-right' 
+    | 'center-left' | 'center-center' | 'center-right' 
+    | 'bottom-left' | 'bottom-center' | 'bottom-right';
 
 export interface Point {
   x: number;
@@ -88,6 +92,12 @@ const StarIcons = () => (
         ))}
     </>
 );
+
+const WATERMARK_POSITIONS: WatermarkPosition[] = [
+    'top-left', 'top-center', 'top-right',
+    'center-left', 'center-center', 'center-right',
+    'bottom-left', 'bottom-center', 'bottom-right'
+];
 
 function solvePerspective(src: Point[], dst: Point[]) {
     const p = [];
@@ -130,6 +140,7 @@ export default function DocumentScanner() {
   // Watermark States
   const [watermarkText, setWatermarkText] = useState("");
   const [watermarkOpacity, setWatermarkOpacity] = useState([30]);
+  const [watermarkPosition, setWatermarkPosition] = useState<WatermarkPosition>('center-center');
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -239,21 +250,41 @@ export default function DocumentScanner() {
                 finalCanvas = normCanvas;
             }
 
-            // --- WATERMARK STAGE ---
+            // --- WATERMARK STAGE (9 Positions) ---
             if (watermarkText.trim()) {
                 const wCtx = finalCanvas.getContext('2d')!;
-                const fontSize = Math.floor(finalCanvas.width / 15);
+                const fontSize = Math.floor(finalCanvas.width / 18);
+                const margin = Math.floor(finalCanvas.width / 20);
                 wCtx.font = `bold ${fontSize}px sans-serif`;
                 wCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
-                wCtx.textAlign = 'center';
-                wCtx.textBaseline = 'middle';
                 
-                // Draw diagonal watermark
-                wCtx.save();
-                wCtx.translate(finalCanvas.width / 2, finalCanvas.height / 2);
-                wCtx.rotate(-Math.PI / 4);
-                wCtx.fillText(watermarkText.toUpperCase(), 0, 0);
-                wCtx.restore();
+                const text = watermarkText.toUpperCase();
+                const textMetrics = wCtx.measureText(text);
+                const tw = textMetrics.width;
+                const th = fontSize;
+
+                let x, y;
+                switch (watermarkPosition) {
+                    case 'top-left': x = margin; y = margin + th; wCtx.textAlign = 'left'; break;
+                    case 'top-center': x = finalCanvas.width / 2; y = margin + th; wCtx.textAlign = 'center'; break;
+                    case 'top-right': x = finalCanvas.width - margin; y = margin + th; wCtx.textAlign = 'right'; break;
+                    case 'center-left': x = margin; y = finalCanvas.height / 2; wCtx.textAlign = 'left'; break;
+                    case 'center-center': x = finalCanvas.width / 2; y = finalCanvas.height / 2; wCtx.textAlign = 'center'; break;
+                    case 'center-right': x = finalCanvas.width - margin; y = finalCanvas.height / 2; wCtx.textAlign = 'right'; break;
+                    case 'bottom-left': x = margin; y = finalCanvas.height - margin; wCtx.textAlign = 'left'; break;
+                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - margin; wCtx.textAlign = 'center'; break;
+                    case 'bottom-right': x = finalCanvas.width - margin; y = finalCanvas.height - margin; wCtx.textAlign = 'right'; break;
+                }
+
+                if (watermarkPosition === 'center-center') {
+                    wCtx.save();
+                    wCtx.translate(x, y);
+                    wCtx.rotate(-Math.PI / 4);
+                    wCtx.fillText(text, 0, 0);
+                    wCtx.restore();
+                } else {
+                    wCtx.fillText(text, x, y);
+                }
             }
 
             resolve(finalCanvas.toDataURL('image/jpeg', 0.95));
@@ -317,7 +348,7 @@ export default function DocumentScanner() {
           }, 50);
           return () => clearTimeout(timer);
       }
-  }, [activeFilter, brightness, contrast, rotation, watermarkText, watermarkOpacity, flattenedSrc, stage]);
+  }, [activeFilter, brightness, contrast, rotation, watermarkText, watermarkOpacity, watermarkPosition, flattenedSrc, stage]);
 
   const startCamera = async () => {
     setStage('camera');
@@ -367,17 +398,13 @@ export default function DocumentScanner() {
       const currentPage = pendingPages[activePendingIndex];
       const newPage: ScannedPage = { ...currentPage, processedSrc: liveResultSrc, isScanned: true, points, rotation };
       
-      // Add to scannedPages
       setScannedPages(prev => [...prev, newPage].sort((a,b) => a.originalIndex - b.originalIndex));
-      
-      // REMOVE FROM PENDING QUEUE
       const remainingPending = pendingPages.filter(p => p.id !== currentPage.id);
       setPendingPages(remainingPending);
       
-      toast({ title: "Page Scanned & Removed from Queue" });
+      toast({ title: "Page Saved" });
       
       if (remainingPending.length > 0) {
-          // If there are more pages in queue, go to next one or stay at 0
           const nextIdx = activePendingIndex >= remainingPending.length ? 0 : activePendingIndex;
           setActivePendingIndex(nextIdx);
           setCurrentRawImage(remainingPending[nextIdx].originalSrc);
@@ -637,7 +664,7 @@ export default function DocumentScanner() {
 
                 <Card className="lg:col-span-4 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full no-print">
                     <CardHeader className="bg-primary/5 border-b p-6 text-left"><CardTitle className="text-base font-black uppercase tracking-tighter text-primary flex items-center gap-2"><Settings2 className="size-5" /> STUDIO CONTROLS</CardTitle></CardHeader>
-                    <CardContent className="p-8 space-y-10 flex-1 text-left overflow-y-auto custom-scrollbar">
+                    <CardContent className="p-8 space-y-8 flex-1 text-left overflow-y-auto custom-scrollbar">
                         <div className="space-y-6">
                             <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">Fidelity Filters</Label>
                             <div className="grid grid-cols-3 gap-3">
@@ -655,7 +682,7 @@ export default function DocumentScanner() {
 
                         <Separator className="opacity-10" />
 
-                        <div className="space-y-8">
+                        <div className="space-y-6">
                              <div className="space-y-4">
                                 <div className="flex justify-between items-center px-1"><Label className="text-[10px] font-black uppercase opacity-60">Exposure</Label><Badge variant="secondary" className="font-mono text-[9px]">{brightness[0]}%</Badge></div>
                                 <Slider min={50} max={150} step={1} value={brightness} onValueChange={setBrightness} />
@@ -670,7 +697,7 @@ export default function DocumentScanner() {
 
                         <div className="space-y-6">
                             <Label className="text-[10px] font-black uppercase tracking-widest opacity-60 flex items-center gap-2"><Copyright className="size-3.5 text-primary" /> Overlay Watermark</Label>
-                            <div className="space-y-4">
+                            <div className="space-y-6">
                                 <div className="relative group">
                                     <Input 
                                         placeholder="Enter Watermark Text..." 
@@ -680,10 +707,33 @@ export default function DocumentScanner() {
                                     />
                                     <Type className="absolute right-4 top-1/2 -translate-y-1/2 size-4 opacity-20" />
                                 </div>
+
                                 {watermarkText.trim() && (
-                                    <div className="space-y-3 animate-in slide-in-from-top-2">
-                                        <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Opacity</Label><Badge className="text-[8px] h-4">{watermarkOpacity[0]}%</Badge></div>
-                                        <Slider min={5} max={100} step={5} value={watermarkOpacity} onValueChange={setWatermarkOpacity} />
+                                    <div className="space-y-6 animate-in slide-in-from-top-2">
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Opacity</Label><Badge className="text-[8px] h-4">{watermarkOpacity[0]}%</Badge></div>
+                                            <Slider min={5} max={100} step={5} value={watermarkOpacity} onValueChange={setWatermarkOpacity} />
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <Label className="text-[9px] font-black uppercase opacity-50">Watermark Position</Label>
+                                            <div className="grid grid-cols-3 gap-1.5 p-3 bg-muted/20 border-2 border-dashed rounded-2xl w-fit mx-auto">
+                                                {WATERMARK_POSITIONS.map((pos) => (
+                                                    <button
+                                                        key={pos}
+                                                        onClick={() => setWatermarkPosition(pos)}
+                                                        className={cn(
+                                                            "size-9 rounded-lg border-2 transition-all flex items-center justify-center relative transform active:scale-95 shadow-sm",
+                                                            watermarkPosition === pos ? "bg-primary border-primary text-white scale-110 z-10" : "bg-white/50 border-border hover:border-primary/40",
+                                                            "!ring-[2px] !ring-slate-950 dark:!ring-white"
+                                                        )}
+                                                        title={pos}
+                                                    >
+                                                        <div className={cn("size-1.5 rounded-full", watermarkPosition === pos ? "bg-white" : "bg-muted-foreground/20")} />
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
                             </div>
