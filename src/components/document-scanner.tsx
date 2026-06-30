@@ -140,6 +140,8 @@ export default function DocumentScanner() {
   // Watermark States
   const [watermarkText, setWatermarkText] = useState("");
   const [watermarkOpacity, setWatermarkOpacity] = useState([30]);
+  const [watermarkSize, setWatermarkSize] = useState([60]);
+  const [watermarkMargin, setWatermarkMargin] = useState([40]);
   const [watermarkPosition, setWatermarkPosition] = useState<WatermarkPosition>('center-center');
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -250,38 +252,38 @@ export default function DocumentScanner() {
                 finalCanvas = normCanvas;
             }
 
-            // --- WATERMARK STAGE (9 Positions) ---
+            // --- WATERMARK STAGE (Final Layer) ---
             if (watermarkText.trim()) {
                 const wCtx = finalCanvas.getContext('2d')!;
-                // Reset state to ensure clean text draw
                 wCtx.setTransform(1, 0, 0, 1, 0, 0);
                 wCtx.globalCompositeOperation = 'source-over';
                 wCtx.filter = 'none';
 
-                const fontSize = Math.floor(finalCanvas.width / 16);
-                const margin = Math.floor(finalCanvas.width / 25);
-                wCtx.font = `bold ${fontSize}px sans-serif`;
+                // Size mapping: User input is 10-200. We map to relative document width.
+                const mappedFontSize = Math.floor((watermarkSize[0] / 1000) * finalCanvas.width);
+                const mappedMargin = Math.floor((watermarkMargin[0] / 1000) * finalCanvas.width);
+                
+                wCtx.font = `bold ${mappedFontSize}px sans-serif`;
                 wCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
                 wCtx.textBaseline = 'middle';
                 
                 const text = watermarkText.toUpperCase();
                 const textMetrics = wCtx.measureText(text);
-                const tw = textMetrics.width;
-                const th = fontSize;
+                const th = mappedFontSize;
 
                 let x = 0, y = 0;
                 let textAlign: CanvasTextAlign = 'center';
 
                 switch (watermarkPosition) {
-                    case 'top-left': x = margin; y = margin + th/2; textAlign = 'left'; break;
-                    case 'top-center': x = finalCanvas.width / 2; y = margin + th/2; textAlign = 'center'; break;
-                    case 'top-right': x = finalCanvas.width - margin; y = margin + th/2; textAlign = 'right'; break;
-                    case 'center-left': x = margin; y = finalCanvas.height / 2; textAlign = 'left'; break;
+                    case 'top-left': x = mappedMargin; y = mappedMargin + th/2; textAlign = 'left'; break;
+                    case 'top-center': x = finalCanvas.width / 2; y = mappedMargin + th/2; textAlign = 'center'; break;
+                    case 'top-right': x = finalCanvas.width - mappedMargin; y = mappedMargin + th/2; textAlign = 'right'; break;
+                    case 'center-left': x = mappedMargin; y = finalCanvas.height / 2; textAlign = 'left'; break;
                     case 'center-center': x = finalCanvas.width / 2; y = finalCanvas.height / 2; textAlign = 'center'; break;
-                    case 'center-right': x = finalCanvas.width - margin; y = finalCanvas.height / 2; textAlign = 'right'; break;
-                    case 'bottom-left': x = margin; y = finalCanvas.height - margin - th/2; textAlign = 'left'; break;
-                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - margin - th/2; textAlign = 'center'; break;
-                    case 'bottom-right': x = finalCanvas.width - margin; y = finalCanvas.height - margin - th/2; textAlign = 'right'; break;
+                    case 'center-right': x = finalCanvas.width - mappedMargin; y = finalCanvas.height / 2; textAlign = 'right'; break;
+                    case 'bottom-left': x = mappedMargin; y = finalCanvas.height - mappedMargin - th/2; textAlign = 'left'; break;
+                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - mappedMargin - th/2; textAlign = 'center'; break;
+                    case 'bottom-right': x = finalCanvas.width - mappedMargin; y = finalCanvas.height - mappedMargin - th/2; textAlign = 'right'; break;
                 }
 
                 wCtx.textAlign = textAlign;
@@ -358,7 +360,7 @@ export default function DocumentScanner() {
           }, 50);
           return () => clearTimeout(timer);
       }
-  }, [activeFilter, brightness, contrast, rotation, watermarkText, watermarkOpacity, watermarkPosition, flattenedSrc, stage]);
+  }, [activeFilter, brightness, contrast, rotation, watermarkText, watermarkOpacity, watermarkSize, watermarkMargin, watermarkPosition, flattenedSrc, stage]);
 
   const startCamera = async () => {
     setStage('camera');
@@ -723,6 +725,16 @@ export default function DocumentScanner() {
                                         <div className="space-y-3">
                                             <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Opacity</Label><Badge className="text-[8px] h-4">{watermarkOpacity[0]}%</Badge></div>
                                             <Slider min={5} max={100} step={5} value={watermarkOpacity} onValueChange={setWatermarkOpacity} />
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Text Size</Label><Badge className="text-[8px] h-4">{watermarkSize[0]}</Badge></div>
+                                            <Slider min={10} max={200} step={2} value={watermarkSize} onValueChange={setWatermarkSize} />
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Corner Margin</Label><Badge className="text-[8px] h-4">{watermarkMargin[0]}</Badge></div>
+                                            <Slider min={0} max={200} step={2} value={watermarkMargin} onValueChange={setWatermarkMargin} />
                                         </div>
 
                                         <div className="space-y-3">
