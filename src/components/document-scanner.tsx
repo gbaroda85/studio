@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
@@ -35,7 +36,8 @@ import {
     Contrast,
     ArrowLeft,
     LayoutGrid,
-    Move
+    Move,
+    Share2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
@@ -140,6 +142,7 @@ export default function DocumentScanner() {
 
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
 
+  // --- PRE-DEFINED ENGINE LOGIC ---
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -338,7 +341,6 @@ export default function DocumentScanner() {
       setScannedPages(prev => [...prev.filter(p => p.id !== currentPage.id), newPage].sort((a,b) => a.originalIndex - b.originalIndex));
       toast({ title: "Page Saved" });
       
-      // Auto-navigation or go back
       if (activePendingIndex < pendingPages.length - 1) {
           handleNextPending();
       } else {
@@ -385,16 +387,73 @@ export default function DocumentScanner() {
     setPoints(prev => { const next = [...prev]; next[draggingPoint] = { x, y }; return next; });
   };
 
-  const handleDownloadPdf = async () => {
-    if (scannedPages.length === 0) return;
-    setIsGenerating(true);
-    const pdf = new jsPDF('p', 'mm', 'a4');
+  // --- REFINED PDF GENERATION (AUTO-ORIENTATION FIX) ---
+  const generatePdfBlob = async (): Promise<Blob | null> => {
+    if (scannedPages.length === 0) return null;
+    
+    // Create master doc
+    const pdf = new jsPDF({ orientation: 'p', unit: 'mm' });
+
     for (let i = 0; i < scannedPages.length; i++) {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(scannedPages[i].processedSrc, 'JPEG', 0, 0, 210, 297);
+        const page = scannedPages[i];
+        
+        // Helper to get image dims correctly
+        const img = new Image();
+        img.src = page.processedSrc;
+        await new Promise(r => img.onload = r);
+
+        const isLandscape = img.width > img.height;
+        const orientation = isLandscape ? 'l' : 'p';
+        
+        // A4 Paper Mapping
+        const pageWidth = isLandscape ? 297 : 210;
+        const pageHeight = isLandscape ? 210 : 297;
+
+        if (i === 0) {
+            // First page special handling (jsPDF creates one by default)
+            pdf.deletePage(1); 
+        }
+        
+        pdf.addPage([pageWidth, pageHeight], orientation);
+        pdf.addImage(page.processedSrc, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
     }
-    pdf.save(`Scan-${Date.now()}.pdf`);
-    setIsGenerating(false);
+    
+    return pdf.output('blob');
+  };
+
+  const handleDownloadPdf = async () => {
+    setIsGenerating(true);
+    try {
+        const blob = await generatePdfBlob();
+        if (blob) {
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Scan-${Date.now()}.pdf`;
+            link.click();
+            URL.revokeObjectURL(link.href);
+        }
+    } catch (e) { toast({ variant: 'destructive', title: 'Export Failed' }); }
+    finally { setIsGenerating(false); }
+  };
+
+  const handleSharePdf = async () => {
+    if (!navigator.share) {
+        toast({ title: "Sharing not supported", description: "Browser sharing is disabled." });
+        return;
+    }
+    setIsGenerating(true);
+    try {
+        const blob = await generatePdfBlob();
+        if (blob) {
+            const file = new File([blob], `Scan_${Date.now()}.pdf`, { type: 'application/pdf' });
+            await navigator.share({
+                files: [file],
+                title: 'Scanned Document',
+                text: 'Shared from GR7 Tools Hub'
+            });
+        }
+    } catch (e) { console.error(e); }
+    finally { setIsGenerating(false); }
   };
 
   return (
@@ -446,7 +505,7 @@ export default function DocumentScanner() {
                             {scannedPages.length === 0 ? (
                                 <div className="flex flex-col items-center py-20 opacity-20"><FileArchive className="size-12 mb-4" /><p className="text-[10px] font-black uppercase">No Results Yet</p></div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                     {scannedPages.map((p) => (
                                         <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2">
                                             <img src={p.processedSrc} className="size-full object-cover" alt="p" />
@@ -461,6 +520,11 @@ export default function DocumentScanner() {
                             <Button onClick={handleDownloadPdf} disabled={scannedPages.length === 0} className="w-full h-14 rounded-2xl bg-[#00aeef] text-white font-black uppercase text-xs shadow-xl active:scale-95 border-none">
                                 {isGenerating ? <Loader2 className="animate-spin mr-2" /> : <Download className="size-4 mr-2" />} SAVE PDF BUNDLE
                             </Button>
+                            {scannedPages.length > 0 && (
+                                <Button onClick={handleSharePdf} variant="outline" className="w-full h-12 rounded-2xl border-2 font-black uppercase text-[10px] shadow-sm">
+                                    <Share2 className="size-4 mr-2" /> SHARE AS PDF
+                                </Button>
+                            )}
                         </CardFooter>
                     </Card>
                 </div>
@@ -501,8 +565,8 @@ export default function DocumentScanner() {
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
                         <div ref={containerRef} className="relative shadow-3xl border-4 border-white bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                             <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block pointer-events-none" />
-                            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                <polygon points={`${points[0].x},${points[0].y} ${points[1].x},${points[1].y} ${points[2].x},${points[2].y} ${points[3].x},${points[3].y}`} className="fill-primary/10 stroke-primary stroke-[0.8] dash-array-[5,5]" />
+                            <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 1000" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                                <polygon points={`${points[0].x * 10},${points[0].y * 10} ${points[1].x * 10},${points[1].y * 10} ${points[2].x * 10},${points[2].y * 10} ${points[3].x * 10},${points[3].y * 10}`} className="fill-primary/10 stroke-primary stroke-[2] dash-array-[5,5]" />
                             </svg>
                             {points.map((p, i) => (
                                 <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center bg-white", draggingPoint === i && "scale-125")}
@@ -607,4 +671,3 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
-
