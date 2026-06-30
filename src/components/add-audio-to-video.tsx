@@ -156,7 +156,7 @@ export default function AddAudioToVideo() {
         wavesurferRef.current = ws;
     }, []);
 
-    // --- DIRECT VOLUME UPDATES (Smoothness Fix) ---
+    // --- DIRECT VOLUME UPDATES ---
     const updateVolumesDirectly = useCallback(() => {
         const video = videoRef.current;
         const audio = audioRef.current;
@@ -166,12 +166,11 @@ export default function AddAudioToVideo() {
         const shouldPlayVideoAudio = (audioMode === 'mix' || audioMode === 'keep');
         video.volume = shouldPlayVideoAudio ? (videoVolume[0] / 100) : 0;
 
-        // Added Audio Handling
+        // Added Audio Handling (Preview range 0-1)
         const shouldPlayAdded = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
         if (!shouldPlayAdded) {
             audio.volume = 0;
         } else {
-            // Volume clamping for preview
             let baseVol = audioVolume[0] / 100;
             audio.volume = Math.min(1, Math.max(0, baseVol));
         }
@@ -185,7 +184,7 @@ export default function AddAudioToVideo() {
     const updateSync = useCallback(() => {
         const video = videoRef.current;
         const audio = audioRef.current;
-        if (!video || !audio || !isPlaying) return;
+        if (!video || !audio) return;
 
         const vt = video.currentTime;
         setCurrentTime(vt);
@@ -199,17 +198,23 @@ export default function AddAudioToVideo() {
         if (inBounds && shouldPlayAdded) {
             let targetAudioTime;
             if (isLooping) {
-                targetAudioTime = audioTrimStart + (relTime % clipDuration);
+                targetAudioTime = audioTrimStart + (relTime % Math.max(0.1, clipDuration));
             } else {
                 targetAudioTime = audioTrimStart + relTime;
             }
 
-            if (audio.paused) audio.play().catch(() => {});
-            if (Math.abs(audio.currentTime - targetAudioTime) > 0.15) {
+            // Sync seek if playing or just scrubbed
+            if (Math.abs(audio.currentTime - targetAudioTime) > 0.1) {
                 audio.currentTime = targetAudioTime;
             }
 
-            // Preview Volume & Fades (Calculated but volume set in separate effect for smoothness)
+            if (isPlaying) {
+                if (audio.paused) audio.play().catch(() => {});
+            } else {
+                if (!audio.paused) audio.pause();
+            }
+
+            // Apply Fades to Preview
             let currentAudioGain = audioVolume[0] / 100;
             if (fadeIn[0] > 0 && relTime < fadeIn[0]) {
                 currentAudioGain *= (relTime / fadeIn[0]);
@@ -223,7 +228,9 @@ export default function AddAudioToVideo() {
             if (!audio.paused) audio.pause();
         }
 
-        masterSyncTimer.current = requestAnimationFrame(updateSync);
+        if (isPlaying) {
+            masterSyncTimer.current = requestAnimationFrame(updateSync);
+        }
     }, [isPlaying, audioOffset, audioTrimStart, audioTrimEnd, isLooping, audioVolume, audioMode, fadeIn, fadeOut]);
 
     useEffect(() => {
@@ -231,7 +238,8 @@ export default function AddAudioToVideo() {
             masterSyncTimer.current = requestAnimationFrame(updateSync);
         } else {
             if (masterSyncTimer.current) cancelAnimationFrame(masterSyncTimer.current);
-            if (audioRef.current) audioRef.current.pause();
+            // Even if paused, we want to update the time once for scrubbing
+            updateSync();
         }
         return () => {
             if (masterSyncTimer.current) cancelAnimationFrame(masterSyncTimer.current);
@@ -240,32 +248,45 @@ export default function AddAudioToVideo() {
 
     const togglePlayback = () => {
         const v = videoRef.current;
-        if (!v) return;
+        const a = audioRef.current;
+        if (!v || !a) return;
+
         if (v.paused) {
+            // Unify playback trigger to satisfy browser autplay policy
             v.play().catch(() => {});
+            
+            const relTime = v.currentTime - audioOffset;
+            const clipDuration = audioTrimEnd - audioTrimStart;
+            const shouldPlayAdded = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
+            const inBounds = relTime >= 0 && (isLooping || relTime <= clipDuration);
+
+            if (inBounds && shouldPlayAdded) {
+                a.play().catch(() => {});
+            }
             setIsPlaying(true);
         } else {
             v.pause();
+            a.pause();
             setIsPlaying(false);
         }
     };
 
     const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!timelineRef.current || !videoRef.current) return;
+        if (!timelineRef.current || !videoRef.current || !audioRef.current) return;
         const rect = timelineRef.current.getBoundingClientRect();
         const scrollLeft = timelineRef.current.scrollLeft;
         const clickX = e.clientX - rect.left + scrollLeft;
         const targetTime = clickX / zoom;
         
-        videoRef.current.currentTime = Math.max(0, Math.min(videoDuration, targetTime));
-        setCurrentTime(videoRef.current.currentTime);
+        const finalTime = Math.max(0, Math.min(videoDuration, targetTime));
+        videoRef.current.currentTime = finalTime;
+        setCurrentTime(finalTime);
         
-        if (audioRef.current) {
-            const rel = videoRef.current.currentTime - audioOffset;
-            const clipDuration = audioTrimEnd - audioTrimStart;
-            if (rel >= 0 && (isLooping || rel <= clipDuration)) {
-                audioRef.current.currentTime = audioTrimStart + (isLooping ? (rel % clipDuration) : rel);
-            }
+        // Manual audio seek on timeline click
+        const rel = finalTime - audioOffset;
+        const clipDuration = audioTrimEnd - audioTrimStart;
+        if (rel >= 0 && (isLooping || rel <= clipDuration)) {
+            audioRef.current.currentTime = audioTrimStart + (isLooping ? (rel % Math.max(0.1, clipDuration)) : rel);
         }
     };
 
@@ -586,7 +607,7 @@ export default function AddAudioToVideo() {
                                                     <Music className="size-4 text-primary shrink-0" />
                                                     <p className="text-[10px] font-black uppercase truncate">{audioFile.name}</p>
                                                 </div>
-                                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => { setAudioFile(null); setAudioUrl(null); }}><X size={14}/></Button>
+                                                <button className="h-7 w-7 rounded-full flex items-center justify-center text-destructive hover:bg-destructive/10" onClick={() => { setAudioFile(null); setAudioUrl(null); }}><X size={14}/></button>
                                             </div>
 
                                             <div className="space-y-6">
