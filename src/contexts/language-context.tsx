@@ -83,6 +83,8 @@ const translations = {
     video_to_mp3_description: 'Extract high-quality audio from video files instantly.',
     rotate_video_label: 'ROTATE VIDEO',
     rotate_video_description: 'Permanently rotate video files 90, 180, or 270 degrees.',
+    add_audio_to_video_label: 'ADD AUDIO TO VIDEO',
+    add_audio_to_video_description: 'Replace or merge background audio with any video file.',
     video_splitter_label: 'VIDEO SPLITTER',
     video_splitter_description: 'Split video files into smaller clips by duration or parts.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -148,7 +150,7 @@ const translations = {
     qr_code_generator_label: 'QR CODE GENERATOR',
     qr_code_generator_description: 'Generate custom QR codes with logos and gradients instantly.',
     ai_upscaler_label: 'AI UPSCALER',
-    ai_upscaler_description: 'Aumente la escala de las imágenes a 2x y 4x utilizando la IA del navegador.',
+    ai_upscaler_description: 'Upscale images to 2x and 4x using browser-side AI.',
     privacy_policy: 'Privacy Policy',
     terms_of_service: 'Terms of Service',
   },
@@ -224,6 +226,8 @@ const translations = {
     video_to_mp3_description: 'वीडियो फ़ाइलों से तुरंत ऑडियो निकालें।',
     rotate_video_label: 'ROTATE VIDEO',
     rotate_video_description: 'वीडियो को 90, 180 या 270 डिग्री घुमाएं।',
+    add_audio_to_video_label: 'ADD AUDIO TO VIDEO',
+    add_audio_to_video_description: 'वीडियो में अपना मनपसंद बैकग्राउंड म्यूजिक जोड़ें।',
     video_splitter_label: 'वीडियो स्प्लिटर',
     video_splitter_description: 'वीडियो फ़ाइलों को अवधि या भागों के अनुसार छोटे क्लिप में विभाजित करें।',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -365,6 +369,8 @@ const translations = {
     video_to_mp3_description: 'Extrae audio de alta calidad de videos.',
     rotate_video_label: 'ROTAR VIDEO',
     rotate_video_description: 'Gira archivos de video 90, 180 o 270 grados permanentemente.',
+    add_audio_to_video_label: 'ADD AUDIO TO VIDEO',
+    add_audio_to_video_description: 'Combine audio y video localmente en su navegador.',
     video_splitter_label: 'DIVISOR DE VÍDEO',
     video_splitter_description: 'Divida archivos de vídeo en clips más pequeños por duración o partes.',
     mp3_cutter_label: 'MP3 CUTTER & AUDIO STUDIO',
@@ -442,18 +448,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>('en');
 
   const t = (key: string) => {
-    const langDict = (translations[language] || translations['en']) as Record<string, string>;
-    return langDict[key] || key;
-  };
-
-  const value = {
-    language,
-    setLanguage,
-    t
+    return translations[language][key as keyof typeof translations['en']] || key;
   };
 
   return (
-    <LanguageContext.Provider value={value}>
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

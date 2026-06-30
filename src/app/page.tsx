@@ -112,6 +112,7 @@ const ALL_TOOLS = [
   // VIDEO TOOLS
   { icon: RotateCw, title: "ROTATE VIDEO", description: "Permanently rotate video files 90, 180, or 270 degrees.", href: "/rotate-video", colorClass: "bg-indigo-600", lightBg: "bg-indigo-50", category: "video" },
   { icon: Music, title: "VIDEO TO MP3", description: "Extract high-quality audio from video files instantly.", href: "/video-to-mp3", colorClass: "bg-indigo-500", lightBg: "bg-[#eff6ff]", category: "video" },
+  { icon: Music, title: "ADD AUDIO TO VIDEO", description: "Replace or merge audio with any video file.", href: "/add-audio-to-video", colorClass: "bg-gradient-to-br from-purple-500 to-indigo-700", lightBg: "bg-purple-50", category: "video" },
 
   // OTHER SEARCHABLE TOOLS
   { icon: Palette, title: "COLOR PICKER STUDIO", description: "Identify colors, check contrast and generate palettes.", href: "/color-picker", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "converters" },

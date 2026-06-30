@@ -363,6 +363,14 @@ function ToolsPageContent() {
       icon: Music,
       color: 'bg-indigo-500',
       lightBg: 'bg-[#eff6ff]'
+    },
+    {
+      href: '/add-audio-to-video',
+      labelKey: 'add_audio_to_video_label',
+      descriptionKey: 'add_audio_to_video_description',
+      icon: Music,
+      color: 'bg-purple-600',
+      lightBg: 'bg-purple-50'
     }
   ];
 
