@@ -78,16 +78,20 @@ export default function AddAudioToVideo() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
 
-    // REAL-TIME PREVIEW SYNC
+    // REAL-TIME PREVIEW SYNC - FIXED VOLUME RANGE ERROR
     useEffect(() => {
         if (videoRef.current) {
-            videoRef.current.volume = videoVolume[0] / 100;
+            // HTMLMediaElement volume must be [0, 1]
+            const vol = videoVolume[0] / 100;
+            videoRef.current.volume = Math.min(1, Math.max(0, vol));
         }
     }, [videoVolume]);
 
     useEffect(() => {
         if (audioRef.current) {
-            audioRef.current.volume = audioVolume[0] / 100;
+            // HTMLMediaElement volume must be [0, 1]
+            const vol = audioVolume[0] / 100;
+            audioRef.current.volume = Math.min(1, Math.max(0, vol));
             audioRef.current.loop = isLooping;
         }
     }, [audioVolume, isLooping]);
@@ -132,7 +136,7 @@ export default function AddAudioToVideo() {
             const ctx = canvas.getContext('2d', { alpha: false });
             if (!ctx) throw new Error("Canvas failure");
 
-            // Audio Context Setup
+            // Audio Context Setup - Gain values can exceed 1.0 for processing
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const videoSrc = audioCtx.createMediaElementSource(video);
             const audioSrc = audioCtx.createMediaElementSource(audio);
@@ -344,7 +348,7 @@ export default function AddAudioToVideo() {
                         <div className="lg:col-span-4 space-y-6">
                             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                                 <CardHeader className="bg-primary/5 border-b p-6">
-                                    <CardTitle className="text-base flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
+                                    <CardTitle className="text-base flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
                                         <Settings2 className="size-5" /> Audio Mixer
                                     </CardTitle>
                                 </CardHeader>
