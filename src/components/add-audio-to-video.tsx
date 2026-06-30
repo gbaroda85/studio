@@ -29,7 +29,8 @@ import {
     VolumeX,
     GripVertical,
     MoveHorizontal,
-    Type
+    Type,
+    ArrowLeft
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,9 @@ import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 import WaveSurfer from 'wavesurfer.js';
+import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.js';
+import { FFmpeg } from '@ffmpeg/ffmpeg';
+import { fetchFile, toBlobURL } from '@ffmpeg/util';
 
 const StarIcons = () => (
     <>
@@ -108,6 +112,7 @@ export default function AddAudioToVideo() {
     const [progress, setProgress] = useState(0);
     const [isDragOver, setIsDragOver] = useState(false);
     const [zoom, setZoom] = useState(50); 
+    const [isFFmpegReady, setIsFFmpegReady] = useState(false);
 
     // --- REFS ---
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -117,7 +122,24 @@ export default function AddAudioToVideo() {
     const timelineRef = useRef<HTMLDivElement>(null);
     const waveformRef = useRef<HTMLDivElement>(null);
     const wavesurferRef = useRef<WaveSurfer | null>(null);
-    const masterSyncTimer = useRef<number | null>(null);
+    const ffmpegRef = useRef<FFmpeg | null>(null);
+    const syncFrameRef = useRef<number | null>(null);
+
+    // --- FFMPEG LOADER ---
+    useEffect(() => {
+        const load = async () => {
+            const ffmpeg = new FFmpeg();
+            ffmpegRef.current = ffmpeg;
+            
+            const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd';
+            await ffmpeg.load({
+                coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+                wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+            });
+            setIsFFmpegReady(true);
+        };
+        load();
+    }, []);
 
     // --- CLEANUP ---
     useEffect(() => {
@@ -126,6 +148,7 @@ export default function AddAudioToVideo() {
             if (audioUrl) URL.revokeObjectURL(audioUrl);
             if (resultUrl) URL.revokeObjectURL(resultUrl);
             if (wavesurferRef.current) wavesurferRef.current.destroy();
+            if (syncFrameRef.current) cancelAnimationFrame(syncFrameRef.current);
         };
     }, [videoUrl, audioUrl, resultUrl]);
 
@@ -140,8 +163,8 @@ export default function AddAudioToVideo() {
             progressColor: 'hsl(var(--primary))',
             cursorColor: 'transparent',
             barWidth: 2,
-            barGap: 1,
-            height: 40,
+            barGap: 3,
+            height: 56,
             normalize: true,
             interact: false
         });
@@ -156,24 +179,22 @@ export default function AddAudioToVideo() {
         wavesurferRef.current = ws;
     }, []);
 
-    // --- SYNC PLAYBACK MASTER ---
-    const syncAudioWithVideo = useCallback(() => {
+    // --- REAL-TIME SYNC LOGIC ---
+    const updateSync = useCallback(() => {
         const video = videoRef.current;
         const audio = audioRef.current;
-        if (!video || !audio || !audioUrl) return;
+        if (!video || !audio) return;
 
         const vt = video.currentTime;
         setCurrentTime(vt);
 
-        // Determine if audio should be active
+        // 1. Determine if audio should be audible
         const relTime = vt - audioOffset;
         const clipDuration = audioTrimEnd - audioTrimStart;
-        const shouldBeActive = relTime >= 0 && (isLooping || relTime <= clipDuration);
-        
-        // Mode logic
-        const shouldHearAudio = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
+        const inBounds = relTime >= 0 && (isLooping || relTime <= clipDuration);
+        const shouldHearAudio = inBounds && audioUrl && (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
 
-        if (shouldBeActive && shouldHearAudio) {
+        if (shouldHearAudio) {
             let targetAudioTime;
             if (isLooping) {
                 targetAudioTime = audioTrimStart + (relTime % Math.max(0.1, clipDuration));
@@ -181,52 +202,40 @@ export default function AddAudioToVideo() {
                 targetAudioTime = audioTrimStart + relTime;
             }
 
-            // Hard sync seek if drift > 0.1s
+            // Sync seek if drift > 0.1s
             if (Math.abs(audio.currentTime - targetAudioTime) > 0.1) {
                 audio.currentTime = targetAudioTime;
             }
 
-            // Ensure matching play/pause state
-            if (isPlaying) {
-                if (audio.paused) audio.play().catch(() => {});
-            } else {
+            // Sync playback state
+            if (video.paused) {
                 if (!audio.paused) audio.pause();
+            } else {
+                if (audio.paused) audio.play().catch(() => {});
             }
 
-            // Apply Volume & Fades (0.0 to 1.0)
+            // Apply Individual Volume & Fades (0.0 to 1.0 limit for elements)
             let vol = audioVolume[0] / 100;
-            if (fadeIn[0] > 0 && relTime < fadeIn[0]) {
-                vol *= (relTime / fadeIn[0]);
-            }
+            if (fadeIn[0] > 0 && relTime < fadeIn[0]) vol *= (relTime / fadeIn[0]);
             if (!isLooping && fadeOut[0] > 0 && relTime > (clipDuration - fadeOut[0])) {
-                const fadeProgress = (clipDuration - relTime) / fadeOut[0];
-                vol *= Math.max(0, fadeProgress);
+                vol *= Math.max(0, (clipDuration - relTime) / fadeOut[0]);
             }
             audio.volume = Math.min(1, Math.max(0, vol));
         } else {
             if (!audio.paused) audio.pause();
         }
 
-        // Sync video volume (0.0 to 1.0)
+        // 2. Sync Video Volume
         const shouldHearVideo = (audioMode === 'mix' || audioMode === 'keep');
         video.volume = shouldHearVideo ? (videoVolume[0] / 100) : 0;
 
-        if (isPlaying) {
-            masterSyncTimer.current = requestAnimationFrame(syncAudioWithVideo);
-        }
-    }, [isPlaying, audioOffset, audioTrimStart, audioTrimEnd, isLooping, audioVolume, videoVolume, audioMode, fadeIn, fadeOut, audioUrl]);
+        syncFrameRef.current = requestAnimationFrame(updateSync);
+    }, [audioOffset, audioTrimStart, audioTrimEnd, isLooping, audioVolume, videoVolume, audioMode, fadeIn, fadeOut, audioUrl]);
 
     useEffect(() => {
-        if (isPlaying) {
-            masterSyncTimer.current = requestAnimationFrame(syncAudioWithVideo);
-        } else {
-            if (masterSyncTimer.current) cancelAnimationFrame(masterSyncTimer.current);
-            syncAudioWithVideo();
-        }
-        return () => {
-            if (masterSyncTimer.current) cancelAnimationFrame(masterSyncTimer.current);
-        };
-    }, [isPlaying, syncAudioWithVideo]);
+        syncFrameRef.current = requestAnimationFrame(updateSync);
+        return () => { if (syncFrameRef.current) cancelAnimationFrame(syncFrameRef.current); };
+    }, [updateSync]);
 
     const togglePlayback = () => {
         const v = videoRef.current;
@@ -234,19 +243,7 @@ export default function AddAudioToVideo() {
         if (!v || !a) return;
 
         if (v.paused) {
-            // Unmute and play both in a single gesture to bypass autoplay restrictions
-            v.muted = false;
-            a.muted = false;
             v.play().catch(() => {});
-            
-            const relTime = v.currentTime - audioOffset;
-            const clipDuration = audioTrimEnd - audioTrimStart;
-            const shouldPlayAdded = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
-            const inBounds = relTime >= 0 && (isLooping || relTime <= clipDuration);
-
-            if (inBounds && shouldPlayAdded) {
-                a.play().catch(() => {});
-            }
             setIsPlaying(true);
         } else {
             v.pause();
@@ -256,22 +253,14 @@ export default function AddAudioToVideo() {
     };
 
     const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!timelineRef.current || !videoRef.current || !audioRef.current) return;
+        if (!timelineRef.current || !videoRef.current) return;
         const rect = timelineRef.current.getBoundingClientRect();
         const scrollLeft = timelineRef.current.scrollLeft;
         const clickX = e.clientX - rect.left + scrollLeft;
         const targetTime = clickX / zoom;
         
-        const finalTime = Math.max(0, Math.min(videoDuration, targetTime));
-        videoRef.current.currentTime = finalTime;
-        setCurrentTime(finalTime);
-        
-        // Manual audio seek sync on scrub
-        const rel = finalTime - audioOffset;
-        const clipDuration = audioTrimEnd - audioTrimStart;
-        if (rel >= 0 && (isLooping || rel <= clipDuration)) {
-            audioRef.current.currentTime = audioTrimStart + (isLooping ? (rel % Math.max(0.1, clipDuration)) : rel);
-        }
+        videoRef.current.currentTime = Math.max(0, Math.min(videoDuration, targetTime));
+        setCurrentTime(videoRef.current.currentTime);
     };
 
     const onVideoInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -284,7 +273,6 @@ export default function AddAudioToVideo() {
             setResultUrl(null);
             setIsPlaying(false);
             setVideoDuration(0);
-            setCurrentTime(0);
         }
     };
 
@@ -297,108 +285,68 @@ export default function AddAudioToVideo() {
             setAudioUrl(url);
             initWaveform(url);
             setResultUrl(null);
-            setIsPlaying(false);
             setAudioOffset(0);
             setAudioTrimStart(0);
-            setAudioTrimEnd(0);
         }
     };
 
-    // --- FUSION EXPORT ENGINE ---
+    // --- INDUSTRIAL FFMPEG EXPORT ENGINE ---
     const startFusion = async () => {
-        if (!videoRef.current || !audioFile) return;
-        const video = videoRef.current;
+        if (!ffmpegRef.current || !videoFile || !audioFile) return;
+        const ffmpeg = ffmpegRef.current;
         
         setIsProcessing(true);
         setProgress(0);
 
         try {
-            const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-            const dest = audioCtx.createMediaStreamDestination();
+            // Write source files to virtual FS
+            await ffmpeg.writeFile('input_v.mp4', await fetchFile(videoFile));
+            await ffmpeg.writeFile('input_a.mp3', await fetchFile(audioFile));
+
+            const vVol = videoVolume[0] / 100;
+            const aVol = audioVolume[0] / 100;
+            const delayMs = Math.round(audioOffset * 1000);
             
-            if (audioMode === 'mix' || audioMode === 'keep') {
-                const vSrc = audioCtx.createMediaElementSource(video);
-                const vGain = audioCtx.createGain();
-                vGain.gain.value = videoVolume[0] / 100;
-                vSrc.connect(vGain);
-                vGain.connect(dest);
-            }
+            // Generate Advanced Filter Complex
+            // 1. Process Video Audio
+            const vStream = (audioMode === 'mix' || audioMode === 'keep') 
+                ? `[0:a]volume=${vVol}[va];` 
+                : `anullsrc=r=44100:cl=stereo,atrim=duration=${videoDuration}[va];`;
+            
+            // 2. Process Added Audio (Trim -> Offset/Delay -> Volume/Fades)
+            let aFilter = `[1:a]atrim=start=${audioTrimStart}:end=${audioTrimEnd},asetpts=PTS-STARTPTS`;
+            if (fadeIn[0] > 0) aFilter += `,afade=t=in:st=0:d=${fadeIn[0]}`;
+            if (fadeOut[0] > 0) aFilter += `,afade=t=out:st=${audioTrimEnd - audioTrimStart - fadeOut[0]}:d=${fadeOut[0]}`;
+            if (isLooping) aFilter += `,aloop=loop=-1:size=${(audioTrimEnd - audioTrimStart) * 44100}`;
+            
+            aFilter += `,adelay=${delayMs}|${delayMs},volume=${aVol}[aa];`;
 
-            if (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute') {
-                const aBuffer = await audioFile.arrayBuffer();
-                const decoded = await audioCtx.decodeAudioData(aBuffer);
-                
-                const bufferSource = audioCtx.createBufferSource();
-                bufferSource.buffer = decoded;
-                bufferSource.loop = isLooping;
-                
-                const aGain = audioCtx.createGain();
-                const targetVolume = audioVolume[0] / 100;
-                const clipDuration = audioTrimEnd - audioTrimStart;
+            const mixFilter = `${vStream}${aFilter}[va][aa]amix=inputs=2:duration=first[aout]`;
 
-                if (fadeIn[0] > 0) {
-                    aGain.gain.setValueAtTime(0, audioCtx.currentTime + audioOffset);
-                    aGain.gain.linearRampToValueAtTime(targetVolume, audioCtx.currentTime + audioOffset + fadeIn[0]);
-                } else {
-                    aGain.gain.setValueAtTime(targetVolume, audioCtx.currentTime + audioOffset);
-                }
+            ffmpeg.on('progress', ({ progress }) => setProgress(Math.round(progress * 100)));
 
-                if (!isLooping && fadeOut[0] > 0) {
-                    aGain.gain.setValueAtTime(targetVolume, audioCtx.currentTime + audioOffset + clipDuration - fadeOut[0]);
-                    aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioOffset + clipDuration);
-                }
-                
-                bufferSource.connect(aGain);
-                aGain.connect(dest);
-                bufferSource.start(audioCtx.currentTime + audioOffset, audioTrimStart);
-            }
+            await ffmpeg.exec([
+                '-i', 'input_v.mp4',
+                '-i', 'input_a.mp3',
+                '-filter_complex', mixFilter,
+                '-map', '0:v',
+                '-map', '[aout]',
+                '-c:v', 'copy', // Preserve original video quality
+                '-c:a', 'aac',
+                '-b:a', '192k',
+                'output.mp4'
+            ]);
 
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d', { alpha: false });
-            if (!ctx) throw new Error("Canvas Init Error");
-
-            const videoStream = (canvas as any).captureStream ? (canvas as any).captureStream(30) : (canvas as any).mozCaptureStream(30);
-            const tracks = [videoStream.getVideoTracks()[0]];
-            if (dest.stream.getAudioTracks().length > 0) tracks.push(dest.stream.getAudioTracks()[0]);
-
-            const combinedStream = new MediaStream(tracks);
-            const recorder = new MediaRecorder(combinedStream, { 
-                mimeType: 'video/webm;codecs=vp9',
-                videoBitsPerSecond: 8000000 
-            });
-
-            const chunks: Blob[] = [];
-            recorder.ondataavailable = (e) => chunks.push(e.data);
-            recorder.onstop = () => {
-                const blob = new Blob(chunks, { type: 'video/webm' });
-                setResultUrl(URL.createObjectURL(blob));
-                setIsProcessing(false);
-                setProgress(100);
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-                audioCtx.close();
-            };
-
-            video.muted = true; 
-            video.currentTime = 0;
-            recorder.start();
-            await video.play();
-
-            const renderLoop = () => {
-                if (recorder.state !== 'recording') return;
-                if (video.ended) {
-                    recorder.stop();
-                    return;
-                }
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-                setProgress(Math.round((video.currentTime / video.duration) * 98));
-                requestAnimationFrame(renderLoop);
-            };
-            renderLoop();
+            const data = await ffmpeg.readFile('output.mp4');
+            const blob = new Blob([data], { type: 'video/mp4' });
+            setResultUrl(URL.createObjectURL(blob));
+            setIsProcessing(false);
+            setProgress(100);
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 
         } catch (e) {
-            toast({ variant: 'destructive', title: "Fusion Failed" });
+            console.error(e);
+            toast({ variant: 'destructive', title: "Fusion Failed", description: "Format error or resource limit." });
             setIsProcessing(false);
         }
     };
@@ -407,7 +355,7 @@ export default function AddAudioToVideo() {
         if (!resultUrl) return;
         const link = document.createElement('a');
         link.href = resultUrl;
-        link.download = `GR7-Fusion-${Date.now()}.webm`;
+        link.download = `GR7-Studio-Fusion-${Date.now()}.mp4`;
         link.click();
     };
 
@@ -417,10 +365,7 @@ export default function AddAudioToVideo() {
         setVideoFile(null);
         setAudioFile(null);
         setResultUrl(null);
-        setCurrentTime(0);
         setAudioOffset(0);
-        setAudioTrimStart(0);
-        setAudioTrimEnd(0);
         setIsPlaying(false);
     };
 
@@ -448,6 +393,8 @@ export default function AddAudioToVideo() {
                     </motion.div>
                 ) : (
                     <motion.div key="studio" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-[1600px] grid grid-cols-1 lg:grid-cols-12 gap-6 items-start px-4">
+                        
+                        {/* MAIN EDITOR COLUMN */}
                         <div className="lg:col-span-8 flex flex-col gap-4">
                             <Card className="overflow-hidden border-2 shadow-2xl bg-card/50 rounded-[2.5rem] relative">
                                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex items-center justify-between shrink-0">
@@ -457,7 +404,7 @@ export default function AddAudioToVideo() {
                                     </div>
                                     <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 text-destructive hover:bg-destructive/10"><X size={16}/></Button>
                                 </CardHeader>
-                                <CardContent className="p-4 md:p-8 flex flex-col items-center justify-center bg-black/5 dark:bg-black/40 min-h-[300px] relative overflow-hidden">
+                                <CardContent className="p-4 md:p-8 flex flex-col items-center justify-center bg-black/5 dark:bg-black/40 min-h-[350px] relative overflow-hidden">
                                     <div className="relative group w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-3xl border-4 border-white dark:border-slate-800 bg-black aspect-video flex items-center justify-center">
                                         <video 
                                             ref={videoRef} 
@@ -485,7 +432,7 @@ export default function AddAudioToVideo() {
                                                     <div className="w-full max-w-[280px] space-y-3">
                                                         <p className="text-sm font-black uppercase text-white tracking-[0.3em] text-center animate-pulse">Encoding Fusion</p>
                                                         <Progress value={progress} className="h-1 shadow-inner" />
-                                                        <p className="text-[8px] font-bold text-white/40 text-center uppercase tracking-widest">Processing in Local RAM</p>
+                                                        <p className="text-[8px] font-bold text-white/40 text-center uppercase tracking-widest">FFmpeg.WASM Powered Rendering</p>
                                                     </div>
                                                 </motion.div>
                                             )}
@@ -493,6 +440,7 @@ export default function AddAudioToVideo() {
                                     </div>
                                 </CardContent>
                                 
+                                {/* INDUSTRIAL TIMELINE */}
                                 <div className="border-t bg-muted/20 select-none no-print">
                                     <div className="h-8 border-b flex items-center justify-between px-4 bg-background/50">
                                         <div className="flex items-center gap-4 text-left">
@@ -509,24 +457,27 @@ export default function AddAudioToVideo() {
 
                                     <div 
                                         ref={timelineRef}
-                                        className="h-40 overflow-x-auto overflow-y-hidden relative bg-slate-100 dark:bg-black/20 custom-scrollbar"
+                                        className="h-44 overflow-x-auto overflow-y-hidden relative bg-slate-100 dark:bg-black/20 custom-scrollbar"
                                         onClick={handleTimelineClick}
                                     >
+                                        {/* Time Ruler */}
                                         <div className="h-6 border-b border-dashed border-primary/10 relative" style={{ width: `${Math.max(videoDuration, audioDuration + audioOffset) * zoom}px` }}>
                                             {Array.from({ length: Math.ceil(Math.max(videoDuration, audioDuration + audioOffset)) + 1 }).map((_, i) => (
                                                 <div key={i} className="absolute top-0 flex flex-col items-center" style={{ left: `${i * zoom}px` }}>
                                                     <div className="h-2 w-px bg-muted-foreground/30" />
-                                                    {i % 2 === 0 && <span className="text-[7px] font-black opacity-30 mt-1">{i}s</span>}
+                                                    {i % 5 === 0 && <span className="text-[7px] font-black opacity-30 mt-1">{i}s</span>}
                                                 </div>
                                             ))}
                                         </div>
 
+                                        {/* Video Track */}
                                         <div className="h-10 mt-2 px-0 relative">
                                             <div className="h-full bg-slate-300 dark:bg-slate-700 rounded-md border shadow-sm mx-0 opacity-40 flex items-center px-4" style={{ width: `${videoDuration * zoom}px` }}>
                                                 <span className="text-[8px] font-black uppercase tracking-widest flex items-center gap-2"><FileVideo size={10}/> Main Video Stream</span>
                                             </div>
                                         </div>
 
+                                        {/* Audio Track with Waveform */}
                                         <div className="h-14 mt-2 relative">
                                             {audioUrl ? (
                                                 <motion.div 
@@ -551,8 +502,9 @@ export default function AddAudioToVideo() {
                                             )}
                                         </div>
 
+                                        {/* Playhead */}
                                         <div 
-                                            className="absolute top-0 bottom-0 w-0.5 bg-accent z-50 shadow-[0_0_10px_rgba(238,76,124,0.5)] transition-transform duration-75"
+                                            className="absolute top-0 bottom-0 w-0.5 bg-accent z-50 shadow-[0_0_10px_rgba(238,76,124,0.5)] transition-transform duration-75 pointer-events-none"
                                             style={{ left: `${currentTime * zoom}px` }}
                                         >
                                             <div className="absolute -top-1 -left-1.5 size-3.5 bg-accent rounded-full border-2 border-white shadow-xl" />
@@ -564,7 +516,7 @@ export default function AddAudioToVideo() {
                                 <Card className="border-2 border-dashed rounded-[2rem] bg-indigo-500/5 hover:border-indigo-500/50 transition-all cursor-pointer group shadow-lg overflow-hidden animate-in slide-in-from-top-4" onClick={() => audioInputRef.current?.click()}>
                                     <CardContent className="p-8 flex items-center gap-6 text-left">
                                         <div className="size-14 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform"><Music className="size-6" /></div>
-                                        <div className="flex-1">
+                                        <div className="flex-1 text-left">
                                             <p className="text-lg font-black uppercase tracking-tighter">Add Audio Track</p>
                                             <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">MP3, WAV, M4A background music</p>
                                         </div>
@@ -575,11 +527,12 @@ export default function AddAudioToVideo() {
                             )}
                         </div>
 
+                        {/* CONFIGURATION COLUMN */}
                         <div className="lg:col-span-4 space-y-6">
                             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                                 <CardHeader className="bg-primary/5 border-b p-6">
-                                    <CardTitle className="text-base flex items-center gap-3 font-black uppercase tracking-tighter text-primary">
-                                        <Settings2 className="size-5" /> Audio Mixer
+                                    <CardTitle className="text-base flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
+                                        <Settings2 className="size-5" /> Studio Actions
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-6 md:p-8 space-y-8 text-left">
@@ -601,7 +554,7 @@ export default function AddAudioToVideo() {
                                                         <SelectContent className="rounded-xl border-2 shadow-2xl z-[200]">
                                                             <SelectItem value="mix" className="font-bold py-3 uppercase text-[10px]">Mix Both Tracks</SelectItem>
                                                             <SelectItem value="replace" className="font-bold py-3 uppercase text-[10px]">Replace Original</SelectItem>
-                                                            <SelectItem value="mute" className="font-bold py-3 uppercase text-[10px]">Mute Video Audio</SelectItem>
+                                                            <SelectItem value="mute" className="font-bold py-3 uppercase text-[10px]">Mute Original</SelectItem>
                                                             <SelectItem value="keep" className="font-bold py-3 uppercase text-[10px]">Keep Original Only</SelectItem>
                                                         </SelectContent>
                                                     </Select>
@@ -650,7 +603,7 @@ export default function AddAudioToVideo() {
                                 </CardContent>
                                 <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
                                     {!resultUrl ? (
-                                        <Button className="magic-button w-full h-18 rounded-[1.5rem] bg-primary text-white font-black transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 shadow-3xl border-none" onClick={startFusion} disabled={isProcessing || !audioFile}>
+                                        <Button className="magic-button w-full h-18 rounded-[1.5rem] bg-primary text-white font-black transition-all active:scale-95 disabled:opacity-50 group flex items-center justify-center gap-4 shadow-3xl border-none" onClick={startFusion} disabled={isProcessing || !audioFile || !isFFmpegReady}>
                                             <StarIcons />
                                             {isProcessing ? <><Loader2 className="size-6 animate-spin" /><span className="uppercase font-black text-sm tracking-widest">Fusing...</span></> : <><Zap className="size-7 group-hover:scale-125 transition-transform" /><span className="uppercase tracking-tighter text-lg font-black">START FUSION</span></>}
                                         </Button>
@@ -658,7 +611,7 @@ export default function AddAudioToVideo() {
                                         <div className="w-full space-y-3">
                                             <Button size="lg" className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-2xl border-none active:scale-95 w-full" onClick={handleDownload}>
                                                 <div className="absolute left-4 w-0.5 h-6 md:h-10 bg-white/40 rounded-full" />
-                                                <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD HD</span>
+                                                <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD MP4</span>
                                                 <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}><Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" /></div>
                                             </Button>
                                             <Button variant="outline" className="w-full h-10 border-2 font-black uppercase text-[10px]" onClick={handleReset}>START OVER</Button>
