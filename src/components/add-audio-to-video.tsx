@@ -350,8 +350,6 @@ export default function AddAudioToVideo() {
                 
                 // Schedule start
                 bufferSource.start(audioCtx.currentTime + audioOffset, audioTrimStart);
-            } else if (audioMode === 'keep') {
-                // If keep original only, we don't need a bufferSource for added audio
             }
 
             // 3. Canvas for Video Stream Capture
@@ -388,15 +386,22 @@ export default function AddAudioToVideo() {
             };
 
             // Start everything
+            // CRITICAL FIX: Ensure video doesn't auto-pause or stop render loop
+            video.muted = true; // Mute for encoding to avoid browser playback restrictions
             video.currentTime = 0;
             recorder.start();
             await video.play();
 
             const renderLoop = () => {
-                if (video.paused || video.ended) {
-                    if (recorder.state === 'recording') recorder.stop();
+                // If recorder is not active, kill loop
+                if (recorder.state !== 'recording') return;
+
+                if (video.ended) {
+                    recorder.stop();
                     return;
                 }
+
+                // If video is paused (buffering), we still draw the current frame to keep the stream alive
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 setProgress(Math.round((video.currentTime / video.duration) * 98));
                 requestAnimationFrame(renderLoop);
@@ -488,7 +493,7 @@ export default function AddAudioToVideo() {
                                             {isProcessing && (
                                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/80 backdrop-blur-xl z-50 flex flex-col items-center justify-center gap-6">
                                                     <div className="relative">
-                                                        <Loader2 className="size-16 animate-spin text-primary stroke-[3]" />
+                                                        <Loader2 className="size-16 animate-spin text-primary opacity-80 stroke-[3]" />
                                                         <Zap className="absolute inset-0 m-auto size-8 text-primary animate-pulse" />
                                                     </div>
                                                     <div className="w-full max-w-[280px] space-y-3">
