@@ -413,7 +413,7 @@ export default function AddAudioToVideo() {
                                             onClick={togglePlayback}
                                             onEnded={() => setIsPlaying(false)}
                                         />
-                                        <audio ref={audioRef} src={audioUrl || ""} />
+                                        <audio ref={audioRef} src={audioUrl || undefined} />
                                         
                                         {!isPlaying && (
                                             <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none group-hover:bg-black/40 transition-all">
@@ -520,7 +520,7 @@ export default function AddAudioToVideo() {
                                         <div className="size-14 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                                             <Music className="size-6" />
                                         </div>
-                                        <div className="flex-1">
+                                        <div className="flex-1 text-left">
                                             <p className="text-lg font-black uppercase tracking-tighter">Add Audio Track</p>
                                             <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">MP3, WAV, M4A background music</p>
                                         </div>
@@ -542,7 +542,7 @@ export default function AddAudioToVideo() {
                                     {audioFile ? (
                                         <div className="space-y-8 animate-in fade-in">
                                             <div className="p-4 bg-muted/30 rounded-2xl border flex items-center justify-between">
-                                                <div className="flex items-center gap-3 truncate">
+                                                <div className="flex items-center gap-3 truncate text-left">
                                                     <Music className="size-4 text-primary shrink-0" />
                                                     <p className="text-[10px] font-black uppercase truncate">{audioFile.name}</p>
                                                 </div>
@@ -550,7 +550,7 @@ export default function AddAudioToVideo() {
                                             </div>
 
                                             <div className="space-y-6">
-                                                <div className="space-y-4">
+                                                <div className="space-y-4 text-left">
                                                     <Label className="text-[10px] font-black uppercase opacity-60">Mixing Protocol</Label>
                                                     <Select value={audioMode} onValueChange={(v) => setAudioMode(v as AudioMode)}>
                                                         <SelectTrigger className="h-11 border-2 font-bold rounded-xl bg-background"><SelectValue /></SelectTrigger>
@@ -565,7 +565,7 @@ export default function AddAudioToVideo() {
 
                                                 <Separator className="opacity-10" />
 
-                                                <div className="space-y-6">
+                                                <div className="space-y-6 text-left">
                                                     <div className="space-y-4">
                                                         <div className="flex justify-between items-center"><Label className="text-[9px] font-black uppercase opacity-60">Original Video Sound</Label><Badge variant="secondary" className="font-mono text-[9px]">{videoVolume[0]}%</Badge></div>
                                                         <Slider min={0} max={100} value={videoVolume} onValueChange={setVideoVolume} disabled={audioMode === 'replace' || audioMode === 'mute'} />
@@ -576,7 +576,7 @@ export default function AddAudioToVideo() {
                                                     </div>
                                                 </div>
 
-                                                <div className="grid grid-cols-2 gap-4">
+                                                <div className="grid grid-cols-2 gap-4 text-left">
                                                     <div className="space-y-2">
                                                         <Label className="text-[8px] font-black uppercase opacity-40 ml-1">Fade In (s)</Label>
                                                         <Input type="number" step="0.1" value={fadeIn[0]} onChange={(e) => setFadeIn([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
@@ -587,7 +587,7 @@ export default function AddAudioToVideo() {
                                                     </div>
                                                 </div>
 
-                                                <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-dashed border-primary/20">
+                                                <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-dashed border-primary/20 text-left">
                                                     <div className="flex items-center gap-3">
                                                         <RefreshCcw className="size-4 text-primary" />
                                                         <div className="text-left">
@@ -650,4 +650,3 @@ export default function AddAudioToVideo() {
         </div>
     );
 }
-
