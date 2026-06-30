@@ -253,28 +253,38 @@ export default function DocumentScanner() {
             // --- WATERMARK STAGE (9 Positions) ---
             if (watermarkText.trim()) {
                 const wCtx = finalCanvas.getContext('2d')!;
-                const fontSize = Math.floor(finalCanvas.width / 18);
-                const margin = Math.floor(finalCanvas.width / 20);
+                // Reset state to ensure clean text draw
+                wCtx.setTransform(1, 0, 0, 1, 0, 0);
+                wCtx.globalCompositeOperation = 'source-over';
+                wCtx.filter = 'none';
+
+                const fontSize = Math.floor(finalCanvas.width / 16);
+                const margin = Math.floor(finalCanvas.width / 25);
                 wCtx.font = `bold ${fontSize}px sans-serif`;
                 wCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
+                wCtx.textBaseline = 'middle';
                 
                 const text = watermarkText.toUpperCase();
                 const textMetrics = wCtx.measureText(text);
                 const tw = textMetrics.width;
                 const th = fontSize;
 
-                let x, y;
+                let x = 0, y = 0;
+                let textAlign: CanvasTextAlign = 'center';
+
                 switch (watermarkPosition) {
-                    case 'top-left': x = margin; y = margin + th; wCtx.textAlign = 'left'; break;
-                    case 'top-center': x = finalCanvas.width / 2; y = margin + th; wCtx.textAlign = 'center'; break;
-                    case 'top-right': x = finalCanvas.width - margin; y = margin + th; wCtx.textAlign = 'right'; break;
-                    case 'center-left': x = margin; y = finalCanvas.height / 2; wCtx.textAlign = 'left'; break;
-                    case 'center-center': x = finalCanvas.width / 2; y = finalCanvas.height / 2; wCtx.textAlign = 'center'; break;
-                    case 'center-right': x = finalCanvas.width - margin; y = finalCanvas.height / 2; wCtx.textAlign = 'right'; break;
-                    case 'bottom-left': x = margin; y = finalCanvas.height - margin; wCtx.textAlign = 'left'; break;
-                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - margin; wCtx.textAlign = 'center'; break;
-                    case 'bottom-right': x = finalCanvas.width - margin; y = finalCanvas.height - margin; wCtx.textAlign = 'right'; break;
+                    case 'top-left': x = margin; y = margin + th/2; textAlign = 'left'; break;
+                    case 'top-center': x = finalCanvas.width / 2; y = margin + th/2; textAlign = 'center'; break;
+                    case 'top-right': x = finalCanvas.width - margin; y = margin + th/2; textAlign = 'right'; break;
+                    case 'center-left': x = margin; y = finalCanvas.height / 2; textAlign = 'left'; break;
+                    case 'center-center': x = finalCanvas.width / 2; y = finalCanvas.height / 2; textAlign = 'center'; break;
+                    case 'center-right': x = finalCanvas.width - margin; y = finalCanvas.height / 2; textAlign = 'right'; break;
+                    case 'bottom-left': x = margin; y = finalCanvas.height - margin - th/2; textAlign = 'left'; break;
+                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - margin - th/2; textAlign = 'center'; break;
+                    case 'bottom-right': x = finalCanvas.width - margin; y = finalCanvas.height - margin - th/2; textAlign = 'right'; break;
                 }
+
+                wCtx.textAlign = textAlign;
 
                 if (watermarkPosition === 'center-center') {
                     wCtx.save();
