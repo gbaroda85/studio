@@ -213,40 +213,42 @@ export default function AddAudioToVideo() {
     return (
         <div className="w-full flex flex-col items-center gap-8 py-4">
             <AnimatePresence mode="wait">
-                {!videoFile || !audioFile ? (
-                    <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95 }} className="w-full max-w-4xl grid md:grid-cols-2 gap-6 px-4">
-                        {/* Video Upload */}
-                        <Card className={cn(
-                            "glass-card overflow-hidden border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
-                            videoFile ? "border-green-500/40 bg-green-500/5" : "bg-card/50"
-                        )} onClick={() => videoInputRef.current?.click()}>
-                            <CardContent className="p-10 flex flex-col items-center justify-center gap-4">
-                                <div className={cn("size-16 rounded-2xl flex items-center justify-center shadow-xl transition-all", videoFile ? "bg-green-500 text-white" : "bg-primary/10 text-primary")}>
-                                    <FileVideo className="size-8" />
+                {!videoFile ? (
+                    <motion.div 
+                        key="upload-video" 
+                        initial={{ opacity: 0, y: 20 }} 
+                        animate={{ opacity: 1, y: 0 }} 
+                        exit={{ opacity: 0, scale: 0.95 }} 
+                        className="w-full max-w-2xl px-4"
+                    >
+                        {/* Centered Video Upload */}
+                        <Card 
+                            className={cn(
+                                "glass-card overflow-hidden border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none bg-card/50",
+                                isDragOver && "border-primary bg-primary/5 ring-4 ring-primary/20 scale-[1.01]"
+                            )} 
+                            onClick={() => videoInputRef.current?.click()}
+                            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                            onDragLeave={() => setIsDragOver(false)}
+                            onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleVideoChange(e.dataTransfer.files?.[0] || null); }}
+                        >
+                            <CardHeader className="bg-muted/30 border-b p-6 text-center">
+                                <CardTitle className="text-sm font-black uppercase tracking-widest text-muted-foreground">STEP 1: SELECT VIDEO</CardTitle>
+                            </CardHeader>
+                            <CardContent className="p-16 flex flex-col items-center justify-center gap-6">
+                                <div className="size-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center shadow-xl transition-all group-hover:scale-110">
+                                    <FileVideo className="size-10" />
                                 </div>
                                 <div className="text-center">
-                                    <p className="font-black uppercase tracking-widest text-xs">{videoFile ? 'VIDEO LOADED' : 'UPLOAD VIDEO'}</p>
-                                    {videoFile && <p className="text-[8px] font-mono opacity-50 mt-1 uppercase">{videoFile.name}</p>}
+                                    <p className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Upload Video File</p>
+                                    <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP4, WebM, MOV (Max 500MB)</p>
                                 </div>
                                 <input ref={videoInputRef} type="file" className="hidden" accept="video/*" onChange={(e) => handleVideoChange(e.target.files?.[0] || null)} />
                             </CardContent>
-                        </Card>
-
-                        {/* Audio Upload */}
-                        <Card className={cn(
-                            "glass-card overflow-hidden border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none",
-                            audioFile ? "border-green-500/40 bg-green-500/5" : "bg-card/50"
-                        )} onClick={() => audioInputRef.current?.click()}>
-                            <CardContent className="p-10 flex flex-col items-center justify-center gap-4">
-                                <div className={cn("size-16 rounded-2xl flex items-center justify-center shadow-xl transition-all", audioFile ? "bg-green-500 text-white" : "bg-indigo-500/10 text-indigo-500")}>
-                                    <Music className="size-8" />
-                                </div>
-                                <div className="text-center">
-                                    <p className="font-black uppercase tracking-widest text-xs">{audioFile ? 'AUDIO LOADED' : 'UPLOAD MUSIC'}</p>
-                                    {audioFile && <p className="text-[8px] font-mono opacity-50 mt-1 uppercase">{audioFile.name}</p>}
-                                </div>
-                                <input ref={audioInputRef} type="file" className="hidden" accept="audio/*" onChange={(e) => handleAudioChange(e.target.files?.[0] || null)} />
-                            </CardContent>
+                            <CardFooter className="bg-muted/10 p-4 flex justify-center gap-8 text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">
+                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
+                                <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> 100% PRIVATE</div>
+                            </CardFooter>
                         </Card>
                     </motion.div>
                 ) : (
@@ -256,7 +258,9 @@ export default function AddAudioToVideo() {
                                 <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between shrink-0">
                                     <div className="flex items-center gap-3">
                                         <MonitorPlay className="size-5 text-primary" />
-                                        <CardTitle className="text-[10px] font-black uppercase tracking-widest">Mixer Viewport</CardTitle>
+                                        <div className="text-left">
+                                            <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate max-w-[200px]">{videoFile.name}</CardTitle>
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Badge variant="secondary" className="font-mono text-[9px]">{formatBytes(videoFile.size)}</Badge>
@@ -269,7 +273,7 @@ export default function AddAudioToVideo() {
                                             ref={videoRef} 
                                             src={videoUrl!} 
                                             controls 
-                                            className="w-full max-h-[45vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" 
+                                            className="w-full max-h-[40vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" 
                                         />
                                         <audio ref={audioRef} src={audioUrl!} className="hidden" />
                                         
@@ -295,6 +299,26 @@ export default function AddAudioToVideo() {
                                     <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT MIX</div>
                                 </CardFooter>
                             </Card>
+
+                            {/* Sequential Step 2: Add Audio Below Video */}
+                            {!audioFile && (
+                                <Card 
+                                    className="border-2 border-dashed rounded-[2rem] bg-indigo-500/5 hover:border-indigo-500/50 transition-all cursor-pointer group shadow-lg overflow-hidden animate-in slide-in-from-top-4"
+                                    onClick={() => audioInputRef.current?.click()}
+                                >
+                                    <CardContent className="p-8 flex items-center gap-6">
+                                        <div className="size-14 rounded-2xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                                            <Music className="size-6" />
+                                        </div>
+                                        <div className="flex-1 text-left">
+                                            <p className="text-lg font-black uppercase tracking-tighter">Step 2: Add Audio Track</p>
+                                            <p className="text-[10px] font-bold text-muted-foreground uppercase opacity-60">Select MP3, WAV or M4A background music</p>
+                                        </div>
+                                        <Plus className="size-6 text-indigo-500 opacity-20 group-hover:opacity-100 transition-opacity" />
+                                    </CardContent>
+                                    <input ref={audioInputRef} type="file" className="hidden" accept="audio/*" onChange={(e) => handleAudioChange(e.target.files?.[0] || null)} />
+                                </Card>
+                            )}
                         </div>
 
                         <div className="lg:col-span-4 space-y-6">
@@ -305,33 +329,50 @@ export default function AddAudioToVideo() {
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="p-8 space-y-10 text-left">
-                                    <div className="space-y-6">
-                                        <div className="space-y-4">
-                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Original Video Sound</Label><Badge variant="secondary" className="font-mono text-[9px]">{videoVolume[0]}%</Badge></div>
-                                            <Slider min={0} max={100} step={1} value={videoVolume} onValueChange={setVideoVolume} />
-                                        </div>
-                                        <div className="space-y-4">
-                                            <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">New Audio Track</Label><Badge variant="secondary" className="font-mono text-[9px]">{audioVolume[0]}%</Badge></div>
-                                            <Slider min={0} max={200} step={1} value={audioVolume} onValueChange={setAudioVolume} />
-                                        </div>
-                                        <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border-2 border-dashed">
-                                            <div className="flex items-center gap-3">
-                                                <RefreshCcw className="size-4 text-primary" />
-                                                <div className="text-left">
-                                                    <p className="text-[10px] font-black uppercase leading-none">Loop Audio</p>
-                                                    <p className="text-[7px] font-bold opacity-40 uppercase mt-1">Repeat track if short</p>
+                                    {audioFile ? (
+                                        <div className="space-y-8 animate-in fade-in">
+                                            <div className="p-4 bg-indigo-500/5 rounded-2xl border-2 border-indigo-100 dark:border-indigo-900/30 flex items-center justify-between gap-4">
+                                                <div className="flex items-center gap-3 truncate">
+                                                    <Music className="size-4 text-indigo-600 shrink-0" />
+                                                    <p className="text-[10px] font-black uppercase truncate tracking-tight">{audioFile.name}</p>
+                                                </div>
+                                                <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => setAudioFile(null)}><X size={14}/></Button>
+                                            </div>
+
+                                            <div className="space-y-6">
+                                                <div className="space-y-4">
+                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Original Video Sound</Label><Badge variant="secondary" className="font-mono text-[9px]">{videoVolume[0]}%</Badge></div>
+                                                    <Slider min={0} max={100} step={1} value={videoVolume} onValueChange={setVideoVolume} />
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">New Audio Track</Label><Badge variant="secondary" className="font-mono text-[9px]">{audioVolume[0]}%</Badge></div>
+                                                    <Slider min={0} max={200} step={1} value={audioVolume} onValueChange={setAudioVolume} />
+                                                </div>
+                                                <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border-2 border-dashed">
+                                                    <div className="flex items-center gap-3">
+                                                        <RefreshCcw className="size-4 text-primary" />
+                                                        <div className="text-left">
+                                                            <p className="text-[10px] font-black uppercase leading-none">Loop Audio</p>
+                                                            <p className="text-[7px] font-bold opacity-40 uppercase mt-1">Repeat track if short</p>
+                                                        </div>
+                                                    </div>
+                                                    <Switch checked={isLooping} onCheckedChange={setIsLooping} />
                                                 </div>
                                             </div>
-                                            <Switch checked={isLooping} onCheckedChange={setIsLooping} />
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="py-20 flex flex-col items-center justify-center text-center opacity-20 gap-4">
+                                            <Music className="size-16" />
+                                            <p className="text-[11px] font-black uppercase tracking-widest leading-relaxed">Please add an audio<br/>track to unlock mixer</p>
+                                        </div>
+                                    )}
                                 </CardContent>
                                 <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
                                     {!resultUrl ? (
                                         <Button 
                                             className="magic-button w-full h-18 rounded-[1.5rem] bg-primary hover:bg-transparent border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-3xl" 
                                             onClick={startMerge}
-                                            disabled={isProcessing}
+                                            disabled={isProcessing || !audioFile}
                                         >
                                             <StarIcons />
                                             {isProcessing ? "MIXING..." : (
