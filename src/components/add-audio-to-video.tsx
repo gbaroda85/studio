@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback } from "react";
@@ -77,12 +78,27 @@ export default function AddAudioToVideo() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
 
+    // REAL-TIME PREVIEW SYNC
+    useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.volume = videoVolume[0] / 100;
+        }
+    }, [videoVolume]);
+
+    useEffect(() => {
+        if (audioRef.current) {
+            audioRef.current.volume = audioVolume[0] / 100;
+            audioRef.current.loop = isLooping;
+        }
+    }, [audioVolume, isLooping]);
+
     const handleVideoChange = (file: File | null) => {
         if (file && file.type.startsWith('video/')) {
             if (file.size > 500 * 1024 * 1024) {
                 toast({ variant: 'destructive', title: 'Video Too Large', description: 'Max 500MB for local merge.' });
                 return;
             }
+            if (videoUrl) URL.revokeObjectURL(videoUrl);
             setVideoFile(file);
             setVideoUrl(URL.createObjectURL(file));
             setResultUrl(null);
@@ -91,6 +107,7 @@ export default function AddAudioToVideo() {
 
     const handleAudioChange = (file: File | null) => {
         if (file && file.type.startsWith('audio/')) {
+            if (audioUrl) URL.revokeObjectURL(audioUrl);
             setAudioFile(file);
             setAudioUrl(URL.createObjectURL(file));
             setResultUrl(null);
@@ -150,11 +167,13 @@ export default function AddAudioToVideo() {
 
             recorder.onstop = () => {
                 const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+                if (resultUrl) URL.revokeObjectURL(resultUrl);
                 setResultUrl(URL.createObjectURL(blob));
                 setIsProcessing(false);
                 setProgress(100);
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
                 toast({ title: "Merge Complete!", description: "Video bitstream re-mapped with new audio." });
+                audioCtx.close();
             };
 
             // Start Playback and Recording
@@ -208,6 +227,9 @@ export default function AddAudioToVideo() {
         setAudioUrl(null);
         setResultUrl(null);
         setProgress(0);
+        setVideoVolume([100]);
+        setAudioVolume([100]);
+        setIsLooping(false);
     };
 
     return (
@@ -221,7 +243,6 @@ export default function AddAudioToVideo() {
                         exit={{ opacity: 0, scale: 0.95 }} 
                         className="w-full max-w-2xl px-4"
                     >
-                        {/* Centered Video Upload */}
                         <Card 
                             className={cn(
                                 "glass-card overflow-hidden border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer select-none bg-card/50",
@@ -300,7 +321,6 @@ export default function AddAudioToVideo() {
                                 </CardFooter>
                             </Card>
 
-                            {/* Sequential Step 2: Add Audio Below Video */}
                             {!audioFile && (
                                 <Card 
                                     className="border-2 border-dashed rounded-[2rem] bg-indigo-500/5 hover:border-indigo-500/50 transition-all cursor-pointer group shadow-lg overflow-hidden animate-in slide-in-from-top-4"
@@ -388,7 +408,7 @@ export default function AddAudioToVideo() {
                                             className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] hover:shadow-[0_12px_25px_-10px_rgba(0,174,239,0.6)] hover:-translate-y-1 active:scale-95 border-none animate-in zoom-in-95" 
                                             onClick={handleDownload}
                                         >
-                                            <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
+                                            <div className="absolute left-4 w-0.5 h-6 md:h-10 bg-white/40 rounded-full" />
                                             <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD HD MIX</span>
                                             <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                                 <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
