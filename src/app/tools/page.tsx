@@ -250,7 +250,7 @@ function ToolsPageContent() {
       href: '/document-scan',
       labelKey: 'document_scan_label',
       descriptionKey: 'document_scan_description',
-      icon: Sparkles,
+      icon: ScanLine,
       color: 'bg-primary',
       lightBg: 'bg-[#f0fdf4]'
     },

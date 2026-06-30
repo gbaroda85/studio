@@ -216,7 +216,7 @@ const ToolCard = ({ icon: Icon, title, description, href, colorClass, lightBg }:
           <Icon className="size-6 md:size-7 drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
         </div>
         <div className="flex-1 flex flex-col transform-gpu">
-          <h3 className="text-base md:text-xl font-medium mb-2 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight whitespace-normal md:whitespace-nowrap">{title}</h3>
+          <h3 className="text-base md:text-xl font-semibold mb-2 text-slate-900 dark:text-slate-100 tracking-tighter uppercase leading-tight whitespace-normal md:whitespace-nowrap">{title}</h3>
           <p className="text-[10px] md:text-[12px] text-slate-600 dark:text-slate-400 font-bold leading-snug uppercase opacity-60 tracking-tight line-clamp-3 md:line-clamp-2 lg:line-clamp-3">{description}</p>
           
           <div className="flex flex-wrap gap-2 mt-auto pt-4 md:pt-6 transform-gpu">

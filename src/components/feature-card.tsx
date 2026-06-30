@@ -40,7 +40,7 @@ export function FeatureCard({
             <Icon className="h-6 w-6 md:h-7 md:w-7 text-white drop-shadow-[2px_2px_4px_rgba(0,0,0,0.4)]" />
           </div>
           <div className="flex-1 flex flex-col mt-5 md:mt-6">
-            <CardTitle className="text-base md:text-xl font-medium mb-2 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors duration-200 uppercase font-body tracking-tighter whitespace-normal md:whitespace-nowrap">
+            <CardTitle className="text-base md:text-xl font-semibold mb-2 leading-tight text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors duration-200 uppercase font-body tracking-tighter whitespace-normal md:whitespace-nowrap">
               {title}
             </CardTitle>
             <CardDescription className="text-[10px] md:text-[12px] text-slate-600 dark:text-slate-400 leading-snug font-bold uppercase opacity-60 tracking-tight line-clamp-3 md:line-clamp-2 lg:line-clamp-3">
