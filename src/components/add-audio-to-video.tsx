@@ -170,7 +170,10 @@ export default function AddAudioToVideo() {
         const clipDuration = audioTrimEnd - audioTrimStart;
         const inBounds = relTime >= 0 && (isLooping || relTime <= clipDuration);
 
-        if (inBounds && audioMode !== 'keep' && audioMode !== 'mute') {
+        // SHOULD WE PLAY THE ADDED AUDIO?
+        const shouldPlayAdded = (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute');
+
+        if (inBounds && shouldPlayAdded) {
             let targetAudioTime;
             if (isLooping) {
                 targetAudioTime = audioTrimStart + (relTime % clipDuration);
@@ -202,8 +205,9 @@ export default function AddAudioToVideo() {
             if (!audio.paused) audio.pause();
         }
 
-        // Apply Original Video Volume
-        if (audioMode === 'replace' || audioMode === 'mute') {
+        // SHOULD WE PLAY THE VIDEO AUDIO?
+        const shouldPlayVideoAudio = (audioMode === 'mix' || audioMode === 'keep');
+        if (!shouldPlayVideoAudio) {
             video.volume = 0;
         } else {
             video.volume = Math.min(1, Math.max(0, videoVolume[0] / 100));
@@ -305,7 +309,7 @@ export default function AddAudioToVideo() {
             const dest = audioCtx.createMediaStreamDestination();
             
             // 1. Setup Original Audio Source
-            if (audioMode !== 'replace' && audioMode !== 'mute') {
+            if (audioMode === 'mix' || audioMode === 'keep') {
                 const vSrc = audioCtx.createMediaElementSource(video);
                 const vGain = audioCtx.createGain();
                 vGain.gain.value = videoVolume[0] / 100;
@@ -314,33 +318,41 @@ export default function AddAudioToVideo() {
             }
 
             // 2. Setup New Audio Source with Fades/Trim
-            const aBuffer = await audioFile.arrayBuffer();
-            const decoded = await audioCtx.decodeAudioData(aBuffer);
-            
-            const bufferSource = audioCtx.createBufferSource();
-            bufferSource.buffer = decoded;
-            bufferSource.loop = isLooping;
-            
-            const aGain = audioCtx.createGain();
-            aGain.gain.setValueAtTime(0, audioCtx.currentTime); // Start silent
+            if (audioMode === 'mix' || audioMode === 'replace' || audioMode === 'mute') {
+                const aBuffer = await audioFile.arrayBuffer();
+                const decoded = await audioCtx.decodeAudioData(aBuffer);
+                
+                const bufferSource = audioCtx.createBufferSource();
+                bufferSource.buffer = decoded;
+                bufferSource.loop = isLooping;
+                
+                const aGain = audioCtx.createGain();
+                aGain.gain.setValueAtTime(0, audioCtx.currentTime); // Start silent
 
-            const clipDuration = audioTrimEnd - audioTrimStart;
-            
-            // Apply Fade In
-            if (fadeIn[0] > 0) {
-                aGain.gain.linearRampToValueAtTime(audioVolume[0] / 100, audioCtx.currentTime + audioOffset + fadeIn[0]);
-            } else {
-                aGain.gain.setValueAtTime(audioVolume[0] / 100, audioCtx.currentTime + audioOffset);
-            }
+                const clipDuration = audioTrimEnd - audioTrimStart;
+                const targetVolume = audioVolume[0] / 100;
+                
+                // Apply Fade In
+                if (fadeIn[0] > 0) {
+                    aGain.gain.linearRampToValueAtTime(targetVolume, audioCtx.currentTime + audioOffset + fadeIn[0]);
+                } else {
+                    aGain.gain.setValueAtTime(targetVolume, audioCtx.currentTime + audioOffset);
+                }
 
-            // Apply Fade Out (if not looping)
-            if (!isLooping && fadeOut[0] > 0) {
-                aGain.gain.setValueAtTime(audioVolume[0] / 100, audioCtx.currentTime + audioOffset + clipDuration - fadeOut[0]);
-                aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioOffset + clipDuration);
+                // Apply Fade Out (if not looping)
+                if (!isLooping && fadeOut[0] > 0) {
+                    aGain.gain.setValueAtTime(targetVolume, audioCtx.currentTime + audioOffset + clipDuration - fadeOut[0]);
+                    aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioOffset + clipDuration);
+                }
+                
+                bufferSource.connect(aGain);
+                aGain.connect(dest);
+                
+                // Schedule start
+                bufferSource.start(audioCtx.currentTime + audioOffset, audioTrimStart);
+            } else if (audioMode === 'keep') {
+                // If keep original only, we don't need a bufferSource for added audio
             }
-            
-            bufferSource.connect(aGain);
-            aGain.connect(dest);
 
             // 3. Canvas for Video Stream Capture
             const canvas = document.createElement('canvas');
@@ -350,10 +362,14 @@ export default function AddAudioToVideo() {
             if (!ctx) throw new Error("Canvas Init Error");
 
             const videoStream = (canvas as any).captureStream ? (canvas as any).captureStream(30) : (canvas as any).mozCaptureStream(30);
-            const combinedStream = new MediaStream([
-                videoStream.getVideoTracks()[0],
-                dest.stream.getAudioTracks()[0]
-            ]);
+            
+            // Collect tracks
+            const tracks = [videoStream.getVideoTracks()[0]];
+            if (dest.stream.getAudioTracks().length > 0) {
+                tracks.push(dest.stream.getAudioTracks()[0]);
+            }
+
+            const combinedStream = new MediaStream(tracks);
 
             const recorder = new MediaRecorder(combinedStream, { 
                 mimeType: 'video/webm;codecs=vp9',
@@ -375,12 +391,10 @@ export default function AddAudioToVideo() {
             video.currentTime = 0;
             recorder.start();
             await video.play();
-            bufferSource.start(audioCtx.currentTime + audioOffset, audioTrimStart);
 
             const renderLoop = () => {
                 if (video.paused || video.ended) {
                     if (recorder.state === 'recording') recorder.stop();
-                    bufferSource.stop();
                     return;
                 }
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -391,7 +405,7 @@ export default function AddAudioToVideo() {
 
         } catch (e) {
             console.error(e);
-            toast({ variant: 'destructive', title: "Fusion Failed", description: "Browser processing limit reached." });
+            toast({ variant: 'destructive', title: "Fusion Failed", description: "Hardware interaction limit reached." });
             setIsProcessing(false);
         }
     };
@@ -458,8 +472,6 @@ export default function AddAudioToVideo() {
                                             className="w-full h-full object-contain"
                                             onLoadedMetadata={(e) => {
                                                 setVideoDuration(e.currentTarget.duration);
-                                                // Sync preview audio duration if exists
-                                                if (audioRef.current) audioRef.current.currentTime = 0;
                                             }}
                                             onClick={togglePlayback}
                                             onEnded={() => setIsPlaying(false)}
@@ -637,11 +649,11 @@ export default function AddAudioToVideo() {
                                                 <div className="grid grid-cols-2 gap-4 text-left">
                                                     <div className="space-y-2">
                                                         <Label className="text-[8px] font-black uppercase opacity-40 ml-1">Fade In (s)</Label>
-                                                        <Input type="number" step="0.1" max="30" value={fadeIn[0]} onChange={(e) => setFadeIn([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
+                                                        <Input type="number" step="0.1" value={fadeIn[0]} onChange={(e) => setFadeIn([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
                                                     </div>
                                                     <div className="space-y-2">
                                                         <Label className="text-[8px] font-black uppercase opacity-40 ml-1">Fade Out (s)</Label>
-                                                        <Input type="number" step="0.1" max="30" value={fadeOut[0]} onChange={(e) => setFadeOut([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
+                                                        <Input type="number" step="0.1" value={fadeOut[0]} onChange={(e) => setFadeOut([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
                                                     </div>
                                                 </div>
 
