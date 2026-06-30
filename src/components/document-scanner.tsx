@@ -37,7 +37,9 @@ import {
     ArrowLeft,
     LayoutGrid,
     Move,
-    Share2
+    Share2,
+    Copyright,
+    Type
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
@@ -51,6 +53,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 
@@ -124,6 +127,10 @@ export default function DocumentScanner() {
   const [contrast, setContrast] = useState([100]);
   const [rotation, setRotation] = useState(0);
 
+  // Watermark States
+  const [watermarkText, setWatermarkText] = useState("");
+  const [watermarkOpacity, setWatermarkOpacity] = useState([30]);
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -142,7 +149,7 @@ export default function DocumentScanner() {
 
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
 
-  // --- PRE-DEFINED ENGINE LOGIC ---
+  // --- FILTER ENGINE LOGIC ---
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -169,66 +176,87 @@ export default function DocumentScanner() {
             adjCtx.drawImage(rotCanvas, 0, 0);
             adjCtx.filter = 'none';
 
-            if (filterType === 'original') return resolve(adjCanvas.toDataURL('image/jpeg', 0.95));
-            
-            if (filterType === 'photo') {
+            let finalCanvas: HTMLCanvasElement;
+
+            if (filterType === 'original') {
+                finalCanvas = adjCanvas;
+            } else if (filterType === 'photo') {
                 const pCanvas = document.createElement('canvas');
                 pCanvas.width = adjCanvas.width; pCanvas.height = adjCanvas.height;
                 const pCtx = pCanvas.getContext('2d')!;
                 pCtx.filter = 'saturate(1.2) contrast(1.1)';
                 pCtx.drawImage(adjCanvas, 0, 0);
-                return resolve(pCanvas.toDataURL('image/jpeg', 0.95));
-            }
+                finalCanvas = pCanvas;
+            } else {
+                const scale = 0.1;
+                const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
+                const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
+                
+                const smallCanvas = document.createElement('canvas');
+                smallCanvas.width = smallW; smallCanvas.height = smallH;
+                const smallCtx = smallCanvas.getContext('2d')!;
+                smallCtx.filter = 'blur(4px)';
+                smallCtx.drawImage(adjCanvas, 0, 0, smallW, smallH);
+                smallCtx.globalCompositeOperation = 'difference';
+                smallCtx.fillStyle = 'white';
+                smallCtx.fillRect(0, 0, smallW, smallH);
 
-            const scale = 0.1;
-            const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
-            const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
-            
-            const smallCanvas = document.createElement('canvas');
-            smallCanvas.width = smallW; smallCanvas.height = smallH;
-            const smallCtx = smallCanvas.getContext('2d')!;
-            smallCtx.filter = 'blur(4px)';
-            smallCtx.drawImage(adjCanvas, 0, 0, smallW, smallH);
-            smallCtx.globalCompositeOperation = 'difference';
-            smallCtx.fillStyle = 'white';
-            smallCtx.fillRect(0, 0, smallW, smallH);
+                const normCanvas = document.createElement('canvas');
+                normCanvas.width = adjCanvas.width; normCanvas.height = adjCanvas.height;
+                const normCtx = normCanvas.getContext('2d')!;
+                normCtx.drawImage(adjCanvas, 0, 0);
+                normCtx.globalCompositeOperation = 'color-dodge';
+                normCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, adjCanvas.width, adjCanvas.height);
 
-            const normCanvas = document.createElement('canvas');
-            normCanvas.width = adjCanvas.width; normCanvas.height = adjCanvas.height;
-            const normCtx = normCanvas.getContext('2d')!;
-            normCtx.drawImage(adjCanvas, 0, 0);
-            normCtx.globalCompositeOperation = 'color-dodge';
-            normCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, adjCanvas.width, adjCanvas.height);
+                const imageData = normCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height);
+                const data = imageData.data;
 
-            const imageData = normCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height);
-            const data = imageData.data;
+                let blackPoint = 120;
+                let whitePoint = 230;
+                const satBoost = filterType === 'magic' ? 1.5 : 1.1;
 
-            let blackPoint = 120;
-            let whitePoint = 230;
-            const satBoost = filterType === 'magic' ? 1.5 : 1.1;
+                if (filterType === 'magic') { blackPoint = 60; whitePoint = 245; }
+                else if (filterType === 'bw') { blackPoint = 140; whitePoint = 220; }
+                const range = whitePoint - blackPoint;
 
-            if (filterType === 'magic') { blackPoint = 60; whitePoint = 245; }
-            else if (filterType === 'bw') { blackPoint = 140; whitePoint = 220; }
-            const range = whitePoint - blackPoint;
-
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i], g = data[i+1], b = data[i+2];
-                let lum = r * 0.299 + g * 0.587 + b * 0.114;
-                if (filterType === 'bw') {
-                    let v = lum < blackPoint ? 0 : lum > whitePoint ? 255 : (lum - blackPoint) * 255 / range;
-                    data[i] = data[i+1] = data[i+2] = v;
-                } else {
-                    let s = lum < blackPoint ? 0 : lum > whitePoint ? 255 / lum : ((lum - blackPoint) * 255 / range) / lum;
-                    r = (r - lum) * satBoost + lum * s;
-                    g = (g - lum) * satBoost + lum * s;
-                    b = (b - lum) * satBoost + lum * s;
-                    data[i] = Math.min(255, Math.max(0, r));
-                    data[i+1] = Math.min(255, Math.max(0, g));
-                    data[i+2] = Math.min(255, Math.max(0, b));
+                for (let i = 0; i < data.length; i += 4) {
+                    let r = data[i], g = data[i+1], b = data[i+2];
+                    let lum = r * 0.299 + g * 0.587 + b * 0.114;
+                    if (filterType === 'bw') {
+                        let v = lum < blackPoint ? 0 : lum > whitePoint ? 255 : (lum - blackPoint) * 255 / range;
+                        data[i] = data[i+1] = data[i+2] = v;
+                    } else {
+                        let s = lum < blackPoint ? 0 : lum > whitePoint ? 255 / lum : ((lum - blackPoint) * 255 / range) / lum;
+                        r = (r - lum) * satBoost + lum * s;
+                        g = (g - lum) * satBoost + lum * s;
+                        b = (b - lum) * satBoost + lum * s;
+                        data[i] = Math.min(255, Math.max(0, r));
+                        data[i+1] = Math.min(255, Math.max(0, g));
+                        data[i+2] = Math.min(255, Math.max(0, b));
+                    }
                 }
+                normCtx.putImageData(imageData, 0, 0);
+                finalCanvas = normCanvas;
             }
-            normCtx.putImageData(imageData, 0, 0);
-            resolve(normCanvas.toDataURL('image/jpeg', 0.95));
+
+            // --- WATERMARK STAGE ---
+            if (watermarkText.trim()) {
+                const wCtx = finalCanvas.getContext('2d')!;
+                const fontSize = Math.floor(finalCanvas.width / 15);
+                wCtx.font = `bold ${fontSize}px sans-serif`;
+                wCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
+                wCtx.textAlign = 'center';
+                wCtx.textBaseline = 'middle';
+                
+                // Draw diagonal watermark
+                wCtx.save();
+                wCtx.translate(finalCanvas.width / 2, finalCanvas.height / 2);
+                wCtx.rotate(-Math.PI / 4);
+                wCtx.fillText(watermarkText.toUpperCase(), 0, 0);
+                wCtx.restore();
+            }
+
+            resolve(finalCanvas.toDataURL('image/jpeg', 0.95));
         };
         img.onerror = () => reject("Load failed");
         img.src = imageSrc;
@@ -289,7 +317,7 @@ export default function DocumentScanner() {
           }, 50);
           return () => clearTimeout(timer);
       }
-  }, [activeFilter, brightness, contrast, rotation, flattenedSrc, stage]);
+  }, [activeFilter, brightness, contrast, rotation, watermarkText, watermarkOpacity, flattenedSrc, stage]);
 
   const startCamera = async () => {
     setStage('camera');
@@ -338,14 +366,25 @@ export default function DocumentScanner() {
       if (!liveResultSrc) return;
       const currentPage = pendingPages[activePendingIndex];
       const newPage: ScannedPage = { ...currentPage, processedSrc: liveResultSrc, isScanned: true, points, rotation };
-      setScannedPages(prev => [...prev.filter(p => p.id !== currentPage.id), newPage].sort((a,b) => a.originalIndex - b.originalIndex));
-      toast({ title: "Page Saved" });
       
-      if (activePendingIndex < pendingPages.length - 1) {
-          handleNextPending();
+      // Add to scannedPages
+      setScannedPages(prev => [...prev, newPage].sort((a,b) => a.originalIndex - b.originalIndex));
+      
+      // REMOVE FROM PENDING QUEUE
+      const remainingPending = pendingPages.filter(p => p.id !== currentPage.id);
+      setPendingPages(remainingPending);
+      
+      toast({ title: "Page Scanned & Removed from Queue" });
+      
+      if (remainingPending.length > 0) {
+          // If there are more pages in queue, go to next one or stay at 0
+          const nextIdx = activePendingIndex >= remainingPending.length ? 0 : activePendingIndex;
+          setActivePendingIndex(nextIdx);
+          setCurrentRawImage(remainingPending[nextIdx].originalSrc);
+          setStage('adjust');
+          setLiveResultSrc(null); setFlattenedSrc(null);
       } else {
           setStage('viewfinder');
-          setPendingPages(prev => prev.filter(p => p.id !== currentPage.id));
       }
   };
 
@@ -387,37 +426,22 @@ export default function DocumentScanner() {
     setPoints(prev => { const next = [...prev]; next[draggingPoint] = { x, y }; return next; });
   };
 
-  // --- REFINED PDF GENERATION (AUTO-ORIENTATION FIX) ---
   const generatePdfBlob = async (): Promise<Blob | null> => {
     if (scannedPages.length === 0) return null;
-    
-    // Create master doc
     const pdf = new jsPDF({ orientation: 'p', unit: 'mm' });
-
     for (let i = 0; i < scannedPages.length; i++) {
         const page = scannedPages[i];
-        
-        // Helper to get image dims correctly
         const img = new Image();
         img.src = page.processedSrc;
         await new Promise(r => img.onload = r);
-
         const isLandscape = img.width > img.height;
         const orientation = isLandscape ? 'l' : 'p';
-        
-        // A4 Paper Mapping
         const pageWidth = isLandscape ? 297 : 210;
         const pageHeight = isLandscape ? 210 : 297;
-
-        if (i === 0) {
-            // First page special handling (jsPDF creates one by default)
-            pdf.deletePage(1); 
-        }
-        
+        if (i === 0) pdf.deletePage(1); 
         pdf.addPage([pageWidth, pageHeight], orientation);
         pdf.addImage(page.processedSrc, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
     }
-    
     return pdf.output('blob');
   };
 
@@ -464,6 +488,7 @@ export default function DocumentScanner() {
                     <Card className="border-2 shadow-lg bg-card/50 rounded-[3rem] flex-1">
                         <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center text-left">
                             <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><LayoutGrid className="size-4 text-primary" /> QUEUE</CardTitle>
+                            {pendingPages.length > 0 && <Badge variant="secondary" className="bg-primary/10 text-primary">{pendingPages.length} PENDING</Badge>}
                         </CardHeader>
                         <CardContent className="p-6">
                             {pendingPages.length === 0 ? (
@@ -500,6 +525,7 @@ export default function DocumentScanner() {
                     <Card className="border-2 shadow-lg bg-card/50 rounded-[3rem] flex-1">
                         <CardHeader className="bg-emerald-500/5 border-b p-6 flex justify-between items-center text-emerald-600 text-left">
                             <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><CheckCircle2 className="size-4" /> FINISHED</CardTitle>
+                            {scannedPages.length > 0 && <Badge className="bg-green-600 text-white">{scannedPages.length}</Badge>}
                         </CardHeader>
                         <CardContent className="p-6">
                             {scannedPages.length === 0 ? (
@@ -507,10 +533,10 @@ export default function DocumentScanner() {
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                     {scannedPages.map((p) => (
-                                        <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2">
+                                        <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2 shadow-md">
                                             <img src={p.processedSrc} className="size-full object-cover" alt="p" />
                                             <div className="absolute top-2 left-2 size-6 rounded-md bg-green-600 text-white flex items-center justify-center text-[8px] font-black">✓ P{p.originalIndex}</div>
-                                            <button className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover:opacity-100" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3" /></button>
+                                            <button className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3" /></button>
                                         </div>
                                     ))}
                                 </div>
@@ -535,7 +561,7 @@ export default function DocumentScanner() {
             <div className="flex flex-col items-center justify-center p-4 animate-in zoom-in-95 duration-500 min-h-[60vh]">
                 <Card className="w-full max-w-3xl border-none shadow-3xl rounded-[3rem] overflow-hidden bg-black relative">
                     <video ref={videoRef} autoPlay playsInline muted className="w-full h-auto object-contain max-h-[75vh]" />
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-6">
+                    <div className="absolute bottom-10 left-1/2 -translate-y-1/2 z-20 flex flex-col items-center gap-6">
                         <Button className="size-20 rounded-full bg-white text-black p-0 shadow-3xl hover:scale-110 active:scale-95 border-8 border-slate-900 ring-8 ring-white/10" onClick={captureFrame}><Camera className="size-10"/></Button>
                         <Button variant="ghost" onClick={() => setStage('viewfinder')} className="bg-black/40 text-white rounded-full px-6 uppercase font-black text-[10px] border border-white/10">Cancel</Button>
                     </div>
@@ -563,7 +589,7 @@ export default function DocumentScanner() {
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200 dark:bg-black/40 min-h-[600px] relative overflow-hidden select-none" 
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
-                        <div ref={containerRef} className="relative shadow-3xl border-4 border-white bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
+                        <div ref={containerRef} className="relative shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                             <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block pointer-events-none" />
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 1000" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
                                 <polygon points={`${points[0].x * 10},${points[0].y * 10} ${points[1].x * 10},${points[1].y * 10} ${points[2].x * 10},${points[2].y * 10} ${points[3].x * 10},${points[3].y * 10}`} className="fill-primary/10 stroke-primary stroke-[2] dash-array-[5,5]" />
@@ -588,17 +614,8 @@ export default function DocumentScanner() {
                     <CardHeader className="bg-muted/30 border-b p-6 flex justify-between items-center text-left">
                         <div className="flex items-center gap-4">
                             <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3"><Eye className="size-5 text-primary" /> 2. HD PREVIEW</CardTitle>
-                            {pendingPages.length > 1 && <Badge variant="secondary" className="font-black text-[10px] px-3 py-1 rounded-full uppercase">ITEM {activePendingIndex + 1} OF {pendingPages.length}</Badge>}
                         </div>
                         <div className="flex items-center gap-3">
-                             <div className="flex items-center gap-2 no-print">
-                                {pendingPages.length > 1 && (
-                                    <>
-                                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={handlePrevPending} disabled={activePendingIndex === 0}><ChevronLeft className="size-5" /></Button>
-                                        <Button variant="outline" size="icon" className="h-9 w-9 rounded-xl border-2" onClick={handleNextPending} disabled={activePendingIndex === pendingPages.length - 1}><ChevronRight className="size-5" /></Button>
-                                    </>
-                                )}
-                            </div>
                             <Badge className="bg-green-600 text-white font-black text-[9px] px-4 py-1.5 rounded-full border-2 border-white shadow-lg animate-pulse uppercase">RENDER READY</Badge>
                         </div>
                     </CardHeader>
@@ -620,7 +637,7 @@ export default function DocumentScanner() {
 
                 <Card className="lg:col-span-4 border-2 shadow-xl overflow-hidden rounded-[3rem] bg-card flex flex-col h-full no-print">
                     <CardHeader className="bg-primary/5 border-b p-6 text-left"><CardTitle className="text-base font-black uppercase tracking-tighter text-primary flex items-center gap-2"><Settings2 className="size-5" /> STUDIO CONTROLS</CardTitle></CardHeader>
-                    <CardContent className="p-8 space-y-10 flex-1 text-left">
+                    <CardContent className="p-8 space-y-10 flex-1 text-left overflow-y-auto custom-scrollbar">
                         <div className="space-y-6">
                             <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">Fidelity Filters</Label>
                             <div className="grid grid-cols-3 gap-3">
@@ -635,7 +652,9 @@ export default function DocumentScanner() {
                                 </div>
                             </div>
                         </div>
+
                         <Separator className="opacity-10" />
+
                         <div className="space-y-8">
                              <div className="space-y-4">
                                 <div className="flex justify-between items-center px-1"><Label className="text-[10px] font-black uppercase opacity-60">Exposure</Label><Badge variant="secondary" className="font-mono text-[9px]">{brightness[0]}%</Badge></div>
@@ -646,11 +665,34 @@ export default function DocumentScanner() {
                                 <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
                             </div>
                         </div>
+
+                        <Separator className="opacity-10" />
+
+                        <div className="space-y-6">
+                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-60 flex items-center gap-2"><Copyright className="size-3.5 text-primary" /> Overlay Watermark</Label>
+                            <div className="space-y-4">
+                                <div className="relative group">
+                                    <Input 
+                                        placeholder="Enter Watermark Text..." 
+                                        value={watermarkText} 
+                                        onChange={(e) => setWatermarkText(e.target.value)}
+                                        className="h-11 rounded-xl font-bold border-2 focus:ring-primary/20"
+                                    />
+                                    <Type className="absolute right-4 top-1/2 -translate-y-1/2 size-4 opacity-20" />
+                                </div>
+                                {watermarkText.trim() && (
+                                    <div className="space-y-3 animate-in slide-in-from-top-2">
+                                        <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Opacity</Label><Badge className="text-[8px] h-4">{watermarkOpacity[0]}%</Badge></div>
+                                        <Slider min={5} max={100} step={5} value={watermarkOpacity} onValueChange={setWatermarkOpacity} />
+                                    </div>
+                                )}
+                            </div>
+                        </div>
                     </CardContent>
                     <CardFooter className="bg-muted/10 p-8 border-t flex flex-col gap-4">
                          <Button onClick={handleConfirmSave} className="magic-button w-full h-16 rounded-[1.5rem] bg-primary text-white font-black text-lg shadow-2xl active:scale-95 transition-all border-none">
                             <StarIcons />
-                            <CheckCircle2 className="size-6 mr-3" /> CONFIRM & NEXT
+                            <CheckCircle2 className="size-6 mr-3" /> CONFIRM & SAVE
                         </Button>
                         <Button variant="outline" className="w-full h-12 border-2 rounded-xl font-black text-[10px] uppercase" onClick={() => setStage('adjust')}><RefreshCcw className="size-4 mr-2" /> RE-CROP</Button>
                     </CardFooter>
