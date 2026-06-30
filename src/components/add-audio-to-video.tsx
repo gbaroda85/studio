@@ -4,33 +4,29 @@
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback, useMemo } from "react";
 import { 
     UploadCloud, 
-    Music, 
     FileVideo, 
     Download, 
     Loader2, 
     ShieldCheck, 
     Zap, 
-    RefreshCcw, 
     CheckCircle2, 
     Sparkles,
-    Eye,
     X,
     Settings2,
     MonitorPlay,
-    Volume2,
-    Plus,
-    RotateCcw,
-    Monitor,
+    Music,
     Play,
     Pause,
-    GripVertical,
+    Volume2,
+    Plus,
+    RefreshCcw,
+    Monitor,
     Scissors,
     Clock,
     Activity,
-    SlidersHorizontal,
-    VolumeX,
     ZoomIn,
-    ZoomOut
+    ZoomOut,
+    VolumeX
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -43,6 +39,7 @@ import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
 import confetti from 'canvas-confetti';
 import WaveSurfer from 'wavesurfer.js';
@@ -176,7 +173,7 @@ export default function AddAudioToVideo() {
                 targetAudioTime = audioTrimStart + relTime;
             }
 
-            if (audio.paused) audio.play();
+            if (audio.paused) audio.play().catch(() => {});
             if (Math.abs(audio.currentTime - targetAudioTime) > 0.15) {
                 audio.currentTime = targetAudioTime;
             }
@@ -210,7 +207,7 @@ export default function AddAudioToVideo() {
         const v = videoRef.current;
         if (!v) return;
         if (v.paused) {
-            v.play();
+            v.play().catch(() => {});
             setIsPlaying(true);
         } else {
             v.pause();
@@ -401,7 +398,7 @@ export default function AddAudioToVideo() {
                                         <MonitorPlay className="size-4 text-primary" />
                                         <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate max-w-[200px]">{videoFile.name}</CardTitle>
                                     </div>
-                                    <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 text-destructive"><X size={16}/></Button>
+                                    <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 text-destructive hover:bg-destructive/10"><X size={16}/></Button>
                                 </CardHeader>
                                 <CardContent className="p-4 md:p-8 flex flex-col items-center justify-center bg-black/5 dark:bg-black/40 min-h-[300px] relative overflow-hidden">
                                     <div className="relative group w-full max-w-2xl mx-auto rounded-2xl overflow-hidden shadow-3xl border-4 border-white dark:border-slate-800 bg-black aspect-video flex items-center justify-center">
@@ -441,7 +438,7 @@ export default function AddAudioToVideo() {
                                 
                                 <div className="border-t bg-muted/20 select-none no-print">
                                     <div className="h-8 border-b flex items-center justify-between px-4 bg-background/50">
-                                        <div className="flex items-center gap-4">
+                                        <div className="flex items-center gap-4 text-left">
                                             <span className="text-[9px] font-black font-mono text-primary">{formatTime(currentTime)}</span>
                                             <Separator orientation="vertical" className="h-3" />
                                             <span className="text-[9px] font-black font-mono opacity-30">{formatTime(videoDuration)}</span>
@@ -486,12 +483,10 @@ export default function AddAudioToVideo() {
                                                     style={{ left: `${audioOffset * zoom}px`, width: `${(audioTrimEnd - audioTrimStart) * zoom}px` }}
                                                 >
                                                     <div ref={waveformRef} className="w-full pointer-events-none opacity-60" />
-                                                    <div className="absolute inset-y-0 left-0 w-2 bg-primary/20 cursor-ew-resize border-r border-primary/20" />
-                                                    <div className="absolute inset-y-0 right-0 w-2 bg-primary/20 cursor-ew-resize border-l border-primary/20" />
                                                 </motion.div>
                                             ) : (
                                                 <div className="h-full border-2 border-dashed border-muted-foreground/20 rounded-xl mx-4 flex items-center justify-center bg-muted/10">
-                                                    <p className="text-[8px] font-black uppercase opacity-20">No Audio Track Selected</p>
+                                                    <p className="text-[8px] font-black uppercase opacity-20 text-center">No Audio Track Selected</p>
                                                 </div>
                                             )}
                                         </div>
@@ -546,7 +541,7 @@ export default function AddAudioToVideo() {
                                                     <Music className="size-4 text-primary shrink-0" />
                                                     <p className="text-[10px] font-black uppercase truncate">{audioFile.name}</p>
                                                 </div>
-                                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleAudioChange(null)}><X size={14}/></Button>
+                                                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:bg-destructive/10" onClick={() => handleAudioChange(null)}><X size={14}/></Button>
                                             </div>
 
                                             <div className="space-y-6">
@@ -650,3 +645,4 @@ export default function AddAudioToVideo() {
         </div>
     );
 }
+
