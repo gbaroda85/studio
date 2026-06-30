@@ -26,7 +26,10 @@ import {
     Activity,
     ZoomIn,
     ZoomOut,
-    VolumeX
+    VolumeX,
+    GripVertical,
+    MoveHorizontal,
+    Type
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -95,6 +98,7 @@ export default function AddAudioToVideo() {
     const [isLooping, setIsLooping] = useState(false);
     const [fadeIn, setFadeIn] = useState([0]);
     const [fadeOut, setFadeOut] = useState([0]);
+    
     const [audioOffset, setAudioOffset] = useState(0); 
     const [audioTrimStart, setAudioTrimStart] = useState(0);
     const [audioTrimEnd, setAudioTrimEnd] = useState(0);
@@ -103,7 +107,7 @@ export default function AddAudioToVideo() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isDragOver, setIsDragOver] = useState(false);
-    const [zoom, setZoom] = useState(50); 
+    const [zoom, setZoom] = useState(50); // px per second
 
     // --- REFS ---
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -161,6 +165,7 @@ export default function AddAudioToVideo() {
         const vt = video.currentTime;
         setCurrentTime(vt);
 
+        // Logic for Audio Playback based on Offset, Trim, and Loop
         const relTime = vt - audioOffset;
         const clipDuration = audioTrimEnd - audioTrimStart;
         const inBounds = relTime >= 0 && (isLooping || relTime <= clipDuration);
@@ -173,15 +178,31 @@ export default function AddAudioToVideo() {
                 targetAudioTime = audioTrimStart + relTime;
             }
 
+            // Sync audio with video
             if (audio.paused) audio.play().catch(() => {});
             if (Math.abs(audio.currentTime - targetAudioTime) > 0.15) {
                 audio.currentTime = targetAudioTime;
             }
-            audio.volume = Math.min(1, Math.max(0, audioVolume[0] / 100));
+
+            // Apply Preview Volume & Fades
+            let currentAudioGain = audioVolume[0] / 100;
+            
+            // Apply Fade In
+            if (fadeIn[0] > 0 && relTime < fadeIn[0]) {
+                currentAudioGain *= (relTime / fadeIn[0]);
+            }
+            // Apply Fade Out (If not looping)
+            if (!isLooping && fadeOut[0] > 0 && relTime > (clipDuration - fadeOut[0])) {
+                const fadeProgress = (clipDuration - relTime) / fadeOut[0];
+                currentAudioGain *= Math.max(0, fadeProgress);
+            }
+
+            audio.volume = Math.min(1, Math.max(0, currentAudioGain));
         } else {
             if (!audio.paused) audio.pause();
         }
 
+        // Apply Original Video Volume
         if (audioMode === 'replace' || audioMode === 'mute') {
             video.volume = 0;
         } else {
@@ -189,7 +210,7 @@ export default function AddAudioToVideo() {
         }
 
         masterSyncTimer.current = requestAnimationFrame(updateSync);
-    }, [isPlaying, audioOffset, audioTrimStart, audioTrimEnd, isLooping, audioVolume, videoVolume, audioMode]);
+    }, [isPlaying, audioOffset, audioTrimStart, audioTrimEnd, isLooping, audioVolume, videoVolume, audioMode, fadeIn, fadeOut]);
 
     useEffect(() => {
         if (isPlaying) {
@@ -225,6 +246,7 @@ export default function AddAudioToVideo() {
         videoRef.current.currentTime = Math.max(0, Math.min(videoDuration, targetTime));
         setCurrentTime(videoRef.current.currentTime);
         
+        // Sync audio seek
         if (audioRef.current) {
             const rel = videoRef.current.currentTime - audioOffset;
             const clipDuration = audioTrimEnd - audioTrimStart;
@@ -234,14 +256,17 @@ export default function AddAudioToVideo() {
         }
     };
 
-    // --- UPLOAD HANDLERS ---
+    // --- FILE HANDLERS ---
     const handleVideoChange = (file: File | null) => {
         if (file && file.type.startsWith('video/')) {
             if (videoUrl) URL.revokeObjectURL(videoUrl);
             setVideoFile(file);
-            setVideoUrl(URL.createObjectURL(file));
+            const url = URL.createObjectURL(file);
+            setVideoUrl(url);
             setResultUrl(null);
             setIsPlaying(false);
+            setVideoDuration(0);
+            setCurrentTime(0);
         }
     };
 
@@ -255,13 +280,19 @@ export default function AddAudioToVideo() {
             setResultUrl(null);
             setIsPlaying(false);
             setAudioOffset(0);
+            setAudioTrimStart(0);
+            setAudioTrimEnd(0);
+        } else if (!file) {
+            setAudioFile(null);
+            setAudioUrl(null);
+            if (wavesurferRef.current) wavesurferRef.current.destroy();
         }
     };
 
     const onVideoInputChange = (e: ChangeEvent<HTMLInputElement>) => handleVideoChange(e.target.files?.[0] || null);
     const onAudioInputChange = (e: ChangeEvent<HTMLInputElement>) => handleAudioChange(e.target.files?.[0] || null);
 
-    // --- RENDER EXPORT ---
+    // --- FUSION EXPORT ENGINE ---
     const startFusion = async () => {
         if (!videoRef.current || !audioFile) return;
         const video = videoRef.current;
@@ -270,15 +301,10 @@ export default function AddAudioToVideo() {
         setProgress(0);
 
         try {
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            const ctx = canvas.getContext('2d', { alpha: false });
-            if (!ctx) throw new Error("Canvas Error");
-
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const dest = audioCtx.createMediaStreamDestination();
             
+            // 1. Setup Original Audio Source
             if (audioMode !== 'replace' && audioMode !== 'mute') {
                 const vSrc = audioCtx.createMediaElementSource(video);
                 const vGain = audioCtx.createGain();
@@ -287,6 +313,7 @@ export default function AddAudioToVideo() {
                 vGain.connect(dest);
             }
 
+            // 2. Setup New Audio Source with Fades/Trim
             const aBuffer = await audioFile.arrayBuffer();
             const decoded = await audioCtx.decodeAudioData(aBuffer);
             
@@ -295,17 +322,34 @@ export default function AddAudioToVideo() {
             bufferSource.loop = isLooping;
             
             const aGain = audioCtx.createGain();
-            aGain.gain.value = audioVolume[0] / 100;
+            aGain.gain.setValueAtTime(0, audioCtx.currentTime); // Start silent
 
+            const clipDuration = audioTrimEnd - audioTrimStart;
+            
+            // Apply Fade In
             if (fadeIn[0] > 0) {
-                aGain.gain.setValueAtTime(0, audioCtx.currentTime);
-                aGain.gain.linearRampToValueAtTime(audioVolume[0] / 100, audioCtx.currentTime + fadeIn[0]);
+                aGain.gain.linearRampToValueAtTime(audioVolume[0] / 100, audioCtx.currentTime + audioOffset + fadeIn[0]);
+            } else {
+                aGain.gain.setValueAtTime(audioVolume[0] / 100, audioCtx.currentTime + audioOffset);
+            }
+
+            // Apply Fade Out (if not looping)
+            if (!isLooping && fadeOut[0] > 0) {
+                aGain.gain.setValueAtTime(audioVolume[0] / 100, audioCtx.currentTime + audioOffset + clipDuration - fadeOut[0]);
+                aGain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + audioOffset + clipDuration);
             }
             
             bufferSource.connect(aGain);
             aGain.connect(dest);
 
-            const videoStream = (video as any).captureStream ? (video as any).captureStream() : (video as any).mozCaptureStream();
+            // 3. Canvas for Video Stream Capture
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext('2d', { alpha: false });
+            if (!ctx) throw new Error("Canvas Init Error");
+
+            const videoStream = (canvas as any).captureStream ? (canvas as any).captureStream(30) : (canvas as any).mozCaptureStream(30);
             const combinedStream = new MediaStream([
                 videoStream.getVideoTracks()[0],
                 dest.stream.getAudioTracks()[0]
@@ -327,6 +371,7 @@ export default function AddAudioToVideo() {
                 audioCtx.close();
             };
 
+            // Start everything
             video.currentTime = 0;
             recorder.start();
             await video.play();
@@ -346,7 +391,7 @@ export default function AddAudioToVideo() {
 
         } catch (e) {
             console.error(e);
-            toast({ variant: 'destructive', title: "Fusion Failed" });
+            toast({ variant: 'destructive', title: "Fusion Failed", description: "Browser processing limit reached." });
             setIsProcessing(false);
         }
     };
@@ -355,16 +400,21 @@ export default function AddAudioToVideo() {
         if (!resultUrl) return;
         const link = document.createElement('a');
         link.href = resultUrl;
-        link.download = `Fusion_${Date.now()}.webm`;
+        link.download = `GR7-Fusion-${Date.now()}.webm`;
         link.click();
     };
 
     const handleReset = () => {
+        if (videoUrl) URL.revokeObjectURL(videoUrl);
+        if (audioUrl) URL.revokeObjectURL(audioUrl);
         setVideoFile(null);
         setAudioFile(null);
         setResultUrl(null);
         setCurrentTime(0);
         setAudioOffset(0);
+        setAudioTrimStart(0);
+        setAudioTrimEnd(0);
+        setIsPlaying(false);
     };
 
     return (
@@ -380,7 +430,7 @@ export default function AddAudioToVideo() {
                             onDrop={(e) => { e.preventDefault(); setIsDragOver(false); handleVideoChange(e.dataTransfer.files?.[0] || null); }}
                         >
                             <CardContent className="p-16 flex flex-col items-center justify-center gap-6">
-                                <div className="size-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center shadow-xl transition-all"><FileVideo className="size-10" /></div>
+                                <div className="size-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center shadow-xl transition-all group-hover:scale-110"><FileVideo className="size-10" /></div>
                                 <div className="text-center">
                                     <p className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Upload Original Video</p>
                                     <p className="text-[10px] text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">MP4, MOV, WebM (Max 500MB)</p>
@@ -406,14 +456,18 @@ export default function AddAudioToVideo() {
                                             ref={videoRef} 
                                             src={videoUrl!} 
                                             className="w-full h-full object-contain"
-                                            onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
+                                            onLoadedMetadata={(e) => {
+                                                setVideoDuration(e.currentTarget.duration);
+                                                // Sync preview audio duration if exists
+                                                if (audioRef.current) audioRef.current.currentTime = 0;
+                                            }}
                                             onClick={togglePlayback}
                                             onEnded={() => setIsPlaying(false)}
                                         />
-                                        <audio ref={audioRef} src={audioUrl || undefined} />
+                                        <audio ref={audioRef} src={audioUrl || undefined} preload="auto" />
                                         
                                         {!isPlaying && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none group-hover:bg-black/40 transition-all">
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/20 pointer-events-none group-hover:bg-black/40 transition-all cursor-pointer">
                                                 <div className="size-20 rounded-full bg-white/20 backdrop-blur-xl border-4 border-white/30 flex items-center justify-center shadow-3xl"><Play className="size-10 text-white fill-white ml-1" /></div>
                                             </div>
                                         )}
@@ -436,45 +490,50 @@ export default function AddAudioToVideo() {
                                     </div>
                                 </CardContent>
                                 
+                                {/* INDUSTRIAL TIMELINE VIEW */}
                                 <div className="border-t bg-muted/20 select-none no-print">
                                     <div className="h-8 border-b flex items-center justify-between px-4 bg-background/50">
                                         <div className="flex items-center gap-4 text-left">
-                                            <span className="text-[9px] font-black font-mono text-primary">{formatTime(currentTime)}</span>
+                                            <span className="text-[9px] font-black font-mono text-primary bg-primary/5 px-2 py-0.5 rounded">{formatTime(currentTime)}</span>
                                             <Separator orientation="vertical" className="h-3" />
                                             <span className="text-[9px] font-black font-mono opacity-30">{formatTime(videoDuration)}</span>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="flex items-center gap-2">
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setZoom(z => Math.max(10, z - 10))}><ZoomOut size={12}/></Button>
+                                            <div className="w-16 h-1 bg-muted rounded-full relative overflow-hidden"><div className="absolute inset-0 bg-primary opacity-20" style={{ width: `${zoom}%` }} /></div>
                                             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setZoom(z => Math.min(200, z + 10))}><ZoomIn size={12}/></Button>
                                         </div>
                                     </div>
 
                                     <div 
                                         ref={timelineRef}
-                                        className="h-32 overflow-x-auto overflow-y-hidden relative bg-slate-100 dark:bg-black/20 custom-scrollbar"
+                                        className="h-40 overflow-x-auto overflow-y-hidden relative bg-slate-100 dark:bg-black/20 custom-scrollbar"
                                         onClick={handleTimelineClick}
                                     >
-                                        <div className="h-6 border-b border-dashed border-primary/10 relative" style={{ width: `${videoDuration * zoom}px` }}>
-                                            {Array.from({ length: Math.ceil(videoDuration) + 1 }).map((_, i) => (
+                                        {/* Ruler */}
+                                        <div className="h-6 border-b border-dashed border-primary/10 relative" style={{ width: `${Math.max(videoDuration, audioDuration + audioOffset) * zoom}px` }}>
+                                            {Array.from({ length: Math.ceil(Math.max(videoDuration, audioDuration + audioOffset)) + 1 }).map((_, i) => (
                                                 <div key={i} className="absolute top-0 flex flex-col items-center" style={{ left: `${i * zoom}px` }}>
                                                     <div className="h-2 w-px bg-muted-foreground/30" />
-                                                    {i % 5 === 0 && <span className="text-[7px] font-black opacity-30 mt-1">{i}s</span>}
+                                                    {i % 2 === 0 && <span className="text-[7px] font-black opacity-30 mt-1">{i}s</span>}
                                                 </div>
                                             ))}
                                         </div>
 
+                                        {/* Video Track */}
                                         <div className="h-10 mt-2 px-0 relative">
                                             <div className="h-full bg-slate-300 dark:bg-slate-700 rounded-md border shadow-sm mx-0 opacity-40 flex items-center px-4" style={{ width: `${videoDuration * zoom}px` }}>
                                                 <span className="text-[8px] font-black uppercase tracking-widest flex items-center gap-2"><FileVideo size={10}/> Main Video Stream</span>
                                             </div>
                                         </div>
 
-                                        <div className="h-10 mt-2 relative">
+                                        {/* Audio Track */}
+                                        <div className="h-14 mt-2 relative">
                                             {audioUrl ? (
                                                 <motion.div 
                                                     drag="x"
                                                     dragMomentum={false}
-                                                    dragConstraints={timelineRef}
+                                                    dragConstraints={{ left: 0, right: videoDuration * zoom }}
                                                     onDrag={(e, info) => {
                                                         const delta = info.delta.x / zoom;
                                                         setAudioOffset(prev => Math.max(0, Math.min(videoDuration - 0.5, prev + delta)));
@@ -482,20 +541,23 @@ export default function AddAudioToVideo() {
                                                     className="h-full bg-primary/10 border-2 border-primary/30 rounded-xl cursor-move flex items-center overflow-hidden shadow-lg absolute"
                                                     style={{ left: `${audioOffset * zoom}px`, width: `${(audioTrimEnd - audioTrimStart) * zoom}px` }}
                                                 >
-                                                    <div ref={waveformRef} className="w-full pointer-events-none opacity-60" />
+                                                    <div className="absolute inset-y-0 left-0 w-2 bg-primary/20 flex items-center justify-center cursor-ew-resize hover:bg-primary/40 transition-colors z-20"><GripVertical size={8} /></div>
+                                                    <div ref={waveformRef} className="w-full pointer-events-none opacity-60 px-2" />
+                                                    <div className="absolute inset-y-0 right-0 w-2 bg-primary/20 flex items-center justify-center cursor-ew-resize hover:bg-primary/40 transition-colors z-20"><GripVertical size={8} /></div>
                                                 </motion.div>
                                             ) : (
                                                 <div className="h-full border-2 border-dashed border-muted-foreground/20 rounded-xl mx-4 flex items-center justify-center bg-muted/10">
-                                                    <p className="text-[8px] font-black uppercase opacity-20 text-center">No Audio Track Selected</p>
+                                                    <p className="text-[8px] font-black uppercase opacity-20 text-center flex items-center gap-2"><Music size={10}/> No Audio Track Selected</p>
                                                 </div>
                                             )}
                                         </div>
 
+                                        {/* Playhead */}
                                         <div 
-                                            className="absolute top-0 bottom-0 w-0.5 bg-accent z-50 shadow-[0_0_10px_rgba(238,76,124,0.5)]"
+                                            className="absolute top-0 bottom-0 w-0.5 bg-accent z-50 shadow-[0_0_10px_rgba(238,76,124,0.5)] transition-transform duration-75"
                                             style={{ left: `${currentTime * zoom}px` }}
                                         >
-                                            <div className="absolute -top-1 -left-1 size-3 bg-accent rounded-full border-2 border-white" />
+                                            <div className="absolute -top-1 -left-1.5 size-3.5 bg-accent rounded-full border-2 border-white shadow-xl" />
                                         </div>
                                     </div>
                                 </div>
@@ -526,6 +588,7 @@ export default function AddAudioToVideo() {
                             )}
                         </div>
 
+                        {/* MIXER SETTINGS SIDEBAR */}
                         <div className="lg:col-span-4 space-y-6">
                             <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[2.5rem]">
                                 <CardHeader className="bg-primary/5 border-b p-6">
@@ -549,7 +612,7 @@ export default function AddAudioToVideo() {
                                                     <Label className="text-[10px] font-black uppercase opacity-60">Mixing Protocol</Label>
                                                     <Select value={audioMode} onValueChange={(v) => setAudioMode(v as AudioMode)}>
                                                         <SelectTrigger className="h-11 border-2 font-bold rounded-xl bg-background"><SelectValue /></SelectTrigger>
-                                                        <SelectContent className="rounded-xl border-2 shadow-2xl">
+                                                        <SelectContent className="rounded-xl border-2 shadow-2xl z-[200]">
                                                             <SelectItem value="mix" className="font-bold py-3 uppercase text-[10px]">Mix Both Tracks</SelectItem>
                                                             <SelectItem value="replace" className="font-bold py-3 uppercase text-[10px]">Replace Original</SelectItem>
                                                             <SelectItem value="mute" className="font-bold py-3 uppercase text-[10px]">Mute Video Audio</SelectItem>
@@ -574,11 +637,11 @@ export default function AddAudioToVideo() {
                                                 <div className="grid grid-cols-2 gap-4 text-left">
                                                     <div className="space-y-2">
                                                         <Label className="text-[8px] font-black uppercase opacity-40 ml-1">Fade In (s)</Label>
-                                                        <Input type="number" step="0.1" value={fadeIn[0]} onChange={(e) => setFadeIn([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
+                                                        <Input type="number" step="0.1" max="30" value={fadeIn[0]} onChange={(e) => setFadeIn([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
                                                     </div>
                                                     <div className="space-y-2">
                                                         <Label className="text-[8px] font-black uppercase opacity-40 ml-1">Fade Out (s)</Label>
-                                                        <Input type="number" step="0.1" value={fadeOut[0]} onChange={(e) => setFadeOut([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
+                                                        <Input type="number" step="0.1" max="30" value={fadeOut[0]} onChange={(e) => setFadeOut([parseFloat(e.target.value) || 0])} className="h-10 rounded-xl font-bold border-2 text-center" />
                                                     </div>
                                                 </div>
 
@@ -622,17 +685,20 @@ export default function AddAudioToVideo() {
                                             )}
                                         </Button>
                                     ) : (
-                                        <Button 
-                                            size="lg" 
-                                            className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-2xl border-none active:scale-95" 
-                                            onClick={handleDownload}
-                                        >
-                                            <div className="absolute left-4 w-0.5 h-6 md:h-10 bg-white/40 rounded-full" />
-                                            <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD HD</span>
-                                            <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                                                <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
-                                            </div>
-                                        </Button>
+                                        <div className="w-full space-y-3">
+                                            <Button 
+                                                size="lg" 
+                                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-14 md:h-18 shadow-2xl border-none active:scale-95 w-full" 
+                                                onClick={handleDownload}
+                                            >
+                                                <div className="absolute left-4 w-0.5 h-6 md:h-10 bg-white/40 rounded-full" />
+                                                <span className="flex-1 px-10 text-center tracking-widest text-base md:text-xl uppercase">DOWNLOAD HD</span>
+                                                <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
+                                                    <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
+                                                </div>
+                                            </Button>
+                                            <Button variant="outline" className="w-full h-10 border-2 font-black uppercase text-[10px]" onClick={handleReset}>START OVER</Button>
+                                        </div>
                                     )}
                                     <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center mt-2">Industrial Export Precision Active</p>
                                 </CardFooter>
@@ -645,4 +711,3 @@ export default function AddAudioToVideo() {
         </div>
     );
 }
-
