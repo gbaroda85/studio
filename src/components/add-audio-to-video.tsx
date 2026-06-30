@@ -253,7 +253,7 @@ export default function AddAudioToVideo() {
                     <motion.div key="studio" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-12 gap-8 items-start px-4">
                         <div className="lg:col-span-8 space-y-6">
                             <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem] relative">
-                                <CardHeader className="bg-muted/30 border-b py-4 px-6 flex flex-row items-center justify-between">
+                                <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between shrink-0">
                                     <div className="flex items-center gap-3">
                                         <MonitorPlay className="size-5 text-primary" />
                                         <CardTitle className="text-[10px] font-black uppercase tracking-widest">Mixer Viewport</CardTitle>
@@ -263,9 +263,14 @@ export default function AddAudioToVideo() {
                                         <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 text-destructive"><X size={16}/></Button>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-6 md:p-10 flex flex-col items-center justify-center bg-black/5 dark:bg-black/40 min-h-[450px] relative overflow-hidden">
-                                    <div className="relative group w-full max-w-2xl">
-                                        <video ref={videoRef} src={videoUrl!} muted className="w-full h-auto rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" />
+                                <CardContent className="p-6 md:p-8 flex flex-col items-center justify-center bg-black/5 dark:bg-black/40 min-h-[300px] relative overflow-hidden">
+                                    <div className="relative group w-full max-w-xl">
+                                        <video 
+                                            ref={videoRef} 
+                                            src={videoUrl!} 
+                                            controls 
+                                            className="w-full max-h-[45vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" 
+                                        />
                                         <audio ref={audioRef} src={audioUrl!} className="hidden" />
                                         
                                         <AnimatePresence>
@@ -285,7 +290,7 @@ export default function AddAudioToVideo() {
                                         </AnimatePresence>
                                     </div>
                                 </CardContent>
-                                <CardFooter className="bg-white dark:bg-slate-950 border-t p-6 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30">
+                                <CardFooter className="bg-white dark:bg-slate-950 border-t p-4 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 shrink-0">
                                     <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
                                     <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT MIX</div>
                                 </CardFooter>
