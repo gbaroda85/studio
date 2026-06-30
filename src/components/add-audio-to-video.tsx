@@ -20,7 +20,9 @@ import {
     Volume2,
     Plus,
     RotateCcw,
-    Monitor
+    Monitor,
+    Play,
+    Pause
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -63,6 +65,7 @@ export default function AddAudioToVideo() {
     const [resultUrl, setResultUrl] = useState<string | null>(null);
     
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [isDragOver, setIsDragOver] = useState(false);
 
@@ -78,20 +81,39 @@ export default function AddAudioToVideo() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const chunksRef = useRef<Blob[]>([]);
 
-    // REAL-TIME PREVIEW SYNC - FIXED VOLUME RANGE ERROR
+    // --- SYNC PLAYBACK LOGIC ---
+    const toggleSyncPlayback = () => {
+        const video = videoRef.current;
+        const audio = audioRef.current;
+        if (!video) return;
+
+        if (video.paused) {
+            video.play();
+            if (audio) {
+                // Ensure audio matches video time if not looping or just starting
+                if (!isLooping && audio.currentTime >= audio.duration) {
+                    audio.currentTime = 0;
+                }
+                audio.play();
+            }
+            setIsPlaying(true);
+        } else {
+            video.pause();
+            if (audio) audio.pause();
+            setIsPlaying(false);
+        }
+    };
+
+    // --- REAL-TIME VOLUME SYNC ---
     useEffect(() => {
         if (videoRef.current) {
-            // HTMLMediaElement volume must be [0, 1]
-            const vol = videoVolume[0] / 100;
-            videoRef.current.volume = Math.min(1, Math.max(0, vol));
+            videoRef.current.volume = Math.min(1, videoVolume[0] / 100);
         }
     }, [videoVolume]);
 
     useEffect(() => {
         if (audioRef.current) {
-            // HTMLMediaElement volume must be [0, 1]
-            const vol = audioVolume[0] / 100;
-            audioRef.current.volume = Math.min(1, Math.max(0, vol));
+            audioRef.current.volume = Math.min(1, audioVolume[0] / 100);
             audioRef.current.loop = isLooping;
         }
     }, [audioVolume, isLooping]);
@@ -106,6 +128,7 @@ export default function AddAudioToVideo() {
             setVideoFile(file);
             setVideoUrl(URL.createObjectURL(file));
             setResultUrl(null);
+            setIsPlaying(false);
         }
     };
 
@@ -115,19 +138,20 @@ export default function AddAudioToVideo() {
             setAudioFile(file);
             setAudioUrl(URL.createObjectURL(file));
             setResultUrl(null);
+            setIsPlaying(false);
         }
     };
 
     const startMerge = async () => {
         if (!videoUrl || !audioUrl) return;
 
-        setIsProcessing(true);
-        setProgress(5);
-        chunksRef.current = [];
-
         const video = videoRef.current;
         const audio = audioRef.current;
         if (!video || !audio) return;
+
+        setIsProcessing(true);
+        setProgress(0);
+        chunksRef.current = [];
 
         try {
             const canvas = document.createElement('canvas');
@@ -136,7 +160,7 @@ export default function AddAudioToVideo() {
             const ctx = canvas.getContext('2d', { alpha: false });
             if (!ctx) throw new Error("Canvas failure");
 
-            // Audio Context Setup - Gain values can exceed 1.0 for processing
+            // Audio Context Setup for recording
             const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const videoSrc = audioCtx.createMediaElementSource(video);
             const audioSrc = audioCtx.createMediaElementSource(audio);
@@ -144,6 +168,7 @@ export default function AddAudioToVideo() {
             const videoGain = audioCtx.createGain();
             const audioGain = audioCtx.createGain();
             
+            // Allow up to 2.0 gain for extraction even if preview is capped at 1.0
             videoGain.gain.value = videoVolume[0] / 100;
             audioGain.gain.value = audioVolume[0] / 100;
 
@@ -154,6 +179,10 @@ export default function AddAudioToVideo() {
             audioSrc.connect(audioGain);
             audioGain.connect(dest);
 
+            // Important: Connect to physical speakers too so we can hear during processing
+            videoGain.connect(audioCtx.destination);
+            audioGain.connect(audioCtx.destination);
+
             // Combine Video Track + Mixed Audio Track
             const videoStream = (video as any).captureStream ? (video as any).captureStream() : (video as any).mozCaptureStream();
             const mixedStream = new MediaStream([
@@ -162,7 +191,11 @@ export default function AddAudioToVideo() {
             ]);
 
             const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9' : 'video/webm';
-            const recorder = new MediaRecorder(mixedStream, { mimeType, videoBitsPerSecond: 8000000 });
+            const recorder = new MediaRecorder(mixedStream, { 
+                mimeType, 
+                videoBitsPerSecond: 8000000 
+            });
+            
             mediaRecorderRef.current = recorder;
 
             recorder.ondataavailable = (e) => {
@@ -175,25 +208,28 @@ export default function AddAudioToVideo() {
                 setResultUrl(URL.createObjectURL(blob));
                 setIsProcessing(false);
                 setProgress(100);
+                setIsPlaying(false);
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
                 toast({ title: "Merge Complete!", description: "Video bitstream re-mapped with new audio." });
                 audioCtx.close();
             };
 
-            // Start Playback and Recording
-            audio.loop = isLooping;
+            // Start Playback and Recording from beginning
             video.currentTime = 0;
             audio.currentTime = 0;
+            audio.loop = isLooping;
             
             recorder.start();
             await video.play();
             await audio.play();
+            setIsPlaying(true);
 
             const renderLoop = () => {
                 if (video.paused || video.ended) {
                     if (recorder.state === 'recording') {
                         recorder.stop();
                         audio.pause();
+                        setIsPlaying(false);
                     }
                     return;
                 }
@@ -217,7 +253,7 @@ export default function AddAudioToVideo() {
         const link = document.createElement('a');
         link.href = resultUrl;
         const name = videoFile.name.split('.').slice(0, -1).join('.');
-        link.download = `Fused-${name}.webm`;
+        link.download = `Fusion-${name}.webm`;
         link.click();
     };
 
@@ -231,13 +267,14 @@ export default function AddAudioToVideo() {
         setAudioUrl(null);
         setResultUrl(null);
         setProgress(0);
+        setIsPlaying(false);
         setVideoVolume([100]);
         setAudioVolume([100]);
         setIsLooping(false);
     };
 
     return (
-        <div className="w-full flex flex-col items-center gap-8 py-4">
+        <div className="w-full flex flex-col items-center gap-8 py-4 text-left">
             <AnimatePresence mode="wait">
                 {!videoFile ? (
                     <motion.div 
@@ -266,14 +303,10 @@ export default function AddAudioToVideo() {
                                 </div>
                                 <div className="text-center">
                                     <p className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Upload Video File</p>
-                                    <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase">MP4, WebM, MOV (Max 500MB)</p>
+                                    <p className="text-xs text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">MP4, WebM, MOV (Max 500MB)</p>
                                 </div>
                                 <input ref={videoInputRef} type="file" className="hidden" accept="video/*" onChange={(e) => handleVideoChange(e.target.files?.[0] || null)} />
                             </CardContent>
-                            <CardFooter className="bg-muted/10 p-4 flex justify-center gap-8 text-[9px] font-black uppercase tracking-widest text-muted-foreground/30">
-                                <div className="flex items-center gap-1.5"><ShieldCheck className="size-3.5 text-green-500" /> SECURE RAM</div>
-                                <div className="flex items-center gap-1.5"><Zap className="size-3.5 text-yellow-500" /> 100% PRIVATE</div>
-                            </CardFooter>
                         </Card>
                     </motion.div>
                 ) : (
@@ -284,7 +317,7 @@ export default function AddAudioToVideo() {
                                     <div className="flex items-center gap-3">
                                         <MonitorPlay className="size-5 text-primary" />
                                         <div className="text-left">
-                                            <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate max-w-[200px]">{videoFile.name}</CardTitle>
+                                            <CardTitle className="text-[10px] font-black uppercase tracking-widest truncate max-w-[150px] md:max-w-[300px]">{videoFile.name}</CardTitle>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
@@ -292,16 +325,29 @@ export default function AddAudioToVideo() {
                                         <Button variant="ghost" size="icon" onClick={handleReset} className="h-8 w-8 text-destructive"><X size={16}/></Button>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="p-6 md:p-8 flex flex-col items-center justify-center bg-black/5 dark:bg-black/40 min-h-[300px] relative overflow-hidden">
-                                    <div className="relative group w-full max-w-xl">
+                                <CardContent className="p-6 md:p-10 flex flex-col items-center justify-center bg-black/5 dark:bg-black/40 min-h-[300px] relative overflow-hidden">
+                                    <div className="relative group w-full max-w-2xl">
                                         <video 
                                             ref={videoRef} 
                                             src={videoUrl!} 
-                                            controls 
-                                            className="w-full max-h-[40vh] rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" 
+                                            className="w-full h-auto rounded-2xl shadow-2xl border-4 border-white dark:border-slate-800 bg-black" 
+                                            onPlay={() => setIsPlaying(true)}
+                                            onPause={() => setIsPlaying(false)}
+                                            onEnded={() => setIsPlaying(false)}
                                         />
                                         <audio ref={audioRef} src={audioUrl!} className="hidden" />
                                         
+                                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4">
+                                            <Button 
+                                                variant="secondary" 
+                                                size="icon" 
+                                                className="size-16 rounded-full border-4 shadow-3xl bg-white/80 backdrop-blur-xl text-primary hover:scale-110 active:scale-95 transition-all"
+                                                onClick={toggleSyncPlayback}
+                                            >
+                                                {isPlaying ? <Pause className="size-8" /> : <Play className="size-8 ml-1" />}
+                                            </Button>
+                                        </div>
+
                                         <AnimatePresence>
                                             {isProcessing && (
                                                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/70 backdrop-blur-md rounded-2xl flex flex-col items-center justify-center z-50 gap-6">
@@ -322,6 +368,7 @@ export default function AddAudioToVideo() {
                                 <CardFooter className="bg-white dark:bg-slate-950 border-t p-4 flex justify-center gap-12 text-[10px] font-black uppercase tracking-widest text-muted-foreground/30 shrink-0">
                                     <div className="flex items-center gap-2"><ShieldCheck className="size-4 text-green-500" /> SECURE RAM</div>
                                     <div className="flex items-center gap-2"><Zap className="size-4 text-yellow-500" /> INSTANT MIX</div>
+                                    <div className="flex items-center gap-2 text-primary font-bold"><Monitor className="size-4" /> LOCAL PREVIEW</div>
                                 </CardFooter>
                             </Card>
 
@@ -360,24 +407,24 @@ export default function AddAudioToVideo() {
                                                     <Music className="size-4 text-indigo-600 shrink-0" />
                                                     <p className="text-[10px] font-black uppercase truncate tracking-tight">{audioFile.name}</p>
                                                 </div>
-                                                <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => setAudioFile(null)}><X size={14}/></Button>
+                                                <Button variant="ghost" size="icon" className="size-7 text-destructive" onClick={() => { setAudioFile(null); setAudioUrl(null); }}><X size={14}/></Button>
                                             </div>
 
                                             <div className="space-y-6">
                                                 <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Original Video Sound</Label><Badge variant="secondary" className="font-mono text-[9px]">{videoVolume[0]}%</Badge></div>
+                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Video Audio Level</Label><Badge variant="secondary" className="font-mono text-[9px]">{videoVolume[0]}%</Badge></div>
                                                     <Slider min={0} max={100} step={1} value={videoVolume} onValueChange={setVideoVolume} />
                                                 </div>
                                                 <div className="space-y-4">
-                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">New Audio Track</Label><Badge variant="secondary" className="font-mono text-[9px]">{audioVolume[0]}%</Badge></div>
+                                                    <div className="flex justify-between items-center"><Label className="text-[10px] font-black uppercase opacity-60">Music Track Level</Label><Badge variant="secondary" className="font-mono text-[9px]">{audioVolume[0]}%</Badge></div>
                                                     <Slider min={0} max={200} step={1} value={audioVolume} onValueChange={setAudioVolume} />
                                                 </div>
                                                 <div className="flex items-center justify-between p-4 bg-muted/20 rounded-2xl border-2 border-dashed">
                                                     <div className="flex items-center gap-3">
                                                         <RefreshCcw className="size-4 text-primary" />
                                                         <div className="text-left">
-                                                            <p className="text-[10px] font-black uppercase leading-none">Loop Audio</p>
-                                                            <p className="text-[7px] font-bold opacity-40 uppercase mt-1">Repeat track if short</p>
+                                                            <p className="text-[10px] font-black uppercase leading-none">Auto Loop</p>
+                                                            <p className="text-[7px] font-bold opacity-40 uppercase mt-1">Repeat track for full duration</p>
                                                         </div>
                                                     </div>
                                                     <Switch checked={isLooping} onCheckedChange={setIsLooping} />
@@ -387,7 +434,7 @@ export default function AddAudioToVideo() {
                                     ) : (
                                         <div className="py-20 flex flex-col items-center justify-center text-center opacity-20 gap-4">
                                             <Music className="size-16" />
-                                            <p className="text-[11px] font-black uppercase tracking-widest leading-relaxed">Please add an audio<br/>track to unlock mixer</p>
+                                            <p className="text-[11px] font-black uppercase tracking-widest leading-relaxed">Add an audio track<br/>to unlock mixer</p>
                                         </div>
                                     )}
                                 </CardContent>
@@ -399,10 +446,15 @@ export default function AddAudioToVideo() {
                                             disabled={isProcessing || !audioFile}
                                         >
                                             <StarIcons />
-                                            {isProcessing ? "MIXING..." : (
+                                            {isProcessing ? (
+                                                <div className="flex items-center gap-3">
+                                                    <Loader2 className="size-6 animate-spin" />
+                                                    <span className="uppercase font-black text-sm tracking-widest">RENDERING...</span>
+                                                </div>
+                                            ) : (
                                                 <div className="flex items-center gap-3">
                                                     <Zap className="size-7 group-hover:scale-125 transition-transform" />
-                                                    <span className="uppercase tracking-tighter text-lg md:text-xl">START FUSION</span>
+                                                    <span className="uppercase tracking-tighter text-lg md:text-xl font-black">START FUSION</span>
                                                 </div>
                                             )}
                                         </Button>
@@ -413,14 +465,14 @@ export default function AddAudioToVideo() {
                                             onClick={handleDownload}
                                         >
                                             <div className="absolute left-4 w-0.5 h-6 md:h-10 bg-white/40 rounded-full" />
-                                            <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD HD MIX</span>
+                                            <span className="flex-1 px-10 text-center tracking-widest text-[11px] md:text-xs uppercase">DOWNLOAD HD VIDEO</span>
                                             <div className="bg-white h-full pl-6 pr-8 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-7 group-hover:pr-9 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
                                                 <Download className="size-6 md:size-8 group-hover:scale-110 transition-transform" />
                                                 <div className="absolute right-3 w-0.5 h-6 bg-[#00aeef]/20 rounded-full" />
                                             </div>
                                         </Button>
                                     )}
-                                    <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center mt-2">Local Workspace Mapping Active</p>
+                                    <p className="text-[8px] font-black uppercase tracking-[0.4em] opacity-30 text-center mt-2">Workstation Precision Active</p>
                                 </CardFooter>
                             </Card>
                         </div>
