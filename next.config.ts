@@ -26,7 +26,7 @@ const nextConfig: NextConfig = {
     ];
   },
   experimental: {
-    serverExternalPackages: ['@imgly/background-removal', '@huggingface/transformers'],
+    serverExternalPackages: ['@imgly/background-removal', '@huggingface/transformers', '@ffmpeg/ffmpeg', '@ffmpeg/util'],
     allowedDevOrigins: [
       '*.cloudworkstations.dev',
       '*.idx.google.com',

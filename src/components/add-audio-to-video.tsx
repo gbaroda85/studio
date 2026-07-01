@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useEffect, useCallback, useMemo } from "react";
@@ -27,13 +26,11 @@ import {
     ZoomIn,
     ZoomOut,
     VolumeX,
-    GripVertical,
-    MoveHorizontal,
-    Type,
-    ArrowLeft,
     AlignLeft,
     AlignRight,
-    ArrowRight
+    ArrowRight,
+    Layers,
+    Type
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -53,7 +50,6 @@ import WaveSurfer from 'wavesurfer.js';
 
 // --- TYPES ---
 type AudioMode = 'keep' | 'replace' | 'mix' | 'mute';
-type Stage = 'upload' | 'studio';
 
 const StarIcons = () => (
     <>
@@ -128,12 +124,12 @@ export default function AddAudioToVideo() {
     const syncFrameRef = useRef<number | null>(null);
 
     // --- FFMPEG DYNAMIC LOADER ---
-    // Fixing "Module not found: Can't resolve <dynamic>" by importing dynamically in useEffect
     useEffect(() => {
         const load = async () => {
             try {
                 const { FFmpeg } = await import('@ffmpeg/ffmpeg');
                 const { toBlobURL } = await import('@ffmpeg/util');
+                
                 const ffmpeg = new FFmpeg();
                 const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd';
                 
@@ -231,7 +227,7 @@ export default function AddAudioToVideo() {
                 if (audio.paused) audio.play().catch(() => {});
             }
 
-            // Apply Individual Volume & Fades (Strict 0.0 - 1.0 clamping for HTMLMediaElement)
+            // Apply Individual Volume & Fades
             let vol = audioVolume[0] / 100;
             if (fadeIn[0] > 0 && relTime < fadeIn[0]) vol *= (relTime / fadeIn[0]);
             if (!isLooping && fadeOut[0] > 0 && relTime > (clipDuration - fadeOut[0])) {
@@ -242,7 +238,6 @@ export default function AddAudioToVideo() {
             if (!audio.paused) audio.pause();
         }
 
-        // Video Volume Logic (Mixing Protocol)
         const shouldHearVideo = (audioMode === 'mix' || audioMode === 'keep');
         video.volume = shouldHearVideo ? Math.min(1, videoVolume[0] / 100) : 0;
 
@@ -256,12 +251,21 @@ export default function AddAudioToVideo() {
 
     const togglePlayback = () => {
         const v = videoRef.current;
-        if (!v) return;
+        const a = audioRef.current;
+        if (!v || !a) return;
+
         if (v.paused) {
             v.play().catch(() => {});
+            // Important: Trigger audio play on same user interaction to bypass autoplay block
+            const relTime = v.currentTime - audioOffset;
+            const clipDuration = audioTrimEnd - audioTrimStart;
+            if (relTime >= 0 && (isLooping || relTime <= clipDuration) && audioUrl) {
+                a.play().catch(() => {});
+            }
             setIsPlaying(true);
         } else {
             v.pause();
+            a.pause();
             setIsPlaying(false);
         }
     };
@@ -273,6 +277,19 @@ export default function AddAudioToVideo() {
         const clickX = e.clientX - rect.left + scrollLeft;
         const targetTime = clickX / zoom[0];
         videoRef.current.currentTime = Math.max(0, Math.min(videoDuration, targetTime));
+        
+        // Sync audio seek instantly
+        if (audioRef.current && audioUrl) {
+            const relTime = videoRef.current.currentTime - audioOffset;
+            const clipDuration = audioTrimEnd - audioTrimStart;
+            if (relTime >= 0 && (isLooping || relTime <= clipDuration)) {
+                if (isLooping) {
+                    audioRef.current.currentTime = audioTrimStart + (relTime % Math.max(0.1, clipDuration));
+                } else {
+                    audioRef.current.currentTime = audioTrimStart + relTime;
+                }
+            }
+        }
     };
 
     const onVideoInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -296,12 +313,10 @@ export default function AddAudioToVideo() {
         }
     };
 
-    // --- INDUSTRIAL EXPORT ENGINE (FFmpeg.WASM) ---
+    // --- INDUSTRIAL EXPORT ENGINE ---
     const startFusion = async () => {
         if (!ffmpegRef.current || !videoFile || !audioFile) return;
         const ffmpeg = ffmpegRef.current;
-        
-        // Dynamically import fetchFile to avoid build errors
         const { fetchFile } = await import('@ffmpeg/util');
         
         setIsProcessing(true);
@@ -312,16 +327,13 @@ export default function AddAudioToVideo() {
             await ffmpeg.writeFile('input_a.mp3', await fetchFile(audioFile));
 
             const vVol = Math.min(1, videoVolume[0] / 100);
-            const aVol = Math.min(2, audioVolume[0] / 100); // Allow up to 200% gain in export
+            const aVol = Math.min(2, audioVolume[0] / 100); 
             const delayMs = Math.round(audioOffset * 1000);
             
-            // Build Complex Filter based on Mixing Protocol
-            // [0:a] is video audio, [1:a] is added audio
             let vStream = "";
             if (audioMode === 'mix' || audioMode === 'keep') {
                 vStream = `[0:a]volume=${vVol}[va];`;
             } else {
-                // If replacing or muting, use silent source for video track
                 vStream = `anullsrc=r=44100:cl=stereo,atrim=duration=${videoDuration}[va];`;
             }
 
@@ -330,7 +342,6 @@ export default function AddAudioToVideo() {
             if (fadeOut[0] > 0) aFilter += `,afade=t=out:st=${audioTrimEnd - audioTrimStart - fadeOut[0]}:d=${fadeOut[0]}`;
             if (isLooping) aFilter += `,aloop=loop=-1:size=${(audioTrimEnd - audioTrimStart) * 44100}`;
             
-            // Apply delay and volume to added audio
             const aOutput = (audioMode === 'keep') ? "anullsrc=r=44100:cl=stereo,atrim=duration=1[aa];" : `${aFilter},adelay=${delayMs}|${delayMs},volume=${aVol}[aa];`;
 
             const mixFilter = `${vStream}${aOutput}[va][aa]amix=inputs=2:duration=first[aout]`;
@@ -382,7 +393,7 @@ export default function AddAudioToVideo() {
                     <Card className="glass-card border-2 border-dashed shadow-2xl rounded-[2.5rem] hover:border-primary/50 cursor-pointer bg-card/50" onClick={() => videoInputRef.current?.click()}>
                         <CardContent className="p-16 flex flex-col items-center justify-center gap-6">
                             <div className="size-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center shadow-xl transition-all group-hover:scale-110"><FileVideo className="size-10" /></div>
-                            <div className="text-center text-left">
+                            <div className="text-center">
                                 <p className="text-xl font-black uppercase tracking-tighter text-slate-800 dark:text-white">Upload Original Video</p>
                                 <p className="text-[10px] text-muted-foreground mt-2 font-bold opacity-60 uppercase tracking-widest">MP4, MOV, WebM (Max 500MB)</p>
                             </div>
@@ -405,7 +416,7 @@ export default function AddAudioToVideo() {
                             <CardContent className="p-4 md:p-8 flex flex-col items-center justify-center bg-black min-h-[350px] relative overflow-hidden">
                                 <video 
                                     ref={videoRef} 
-                                    src={videoUrl!} 
+                                    src={videoUrl || undefined} 
                                     className="max-h-[50vh] w-auto rounded-xl shadow-2xl"
                                     onLoadedMetadata={(e) => setVideoDuration(e.currentTarget.duration)}
                                     onClick={togglePlayback}
@@ -435,7 +446,7 @@ export default function AddAudioToVideo() {
                                 </AnimatePresence>
                             </CardContent>
                             
-                            {/* PROFESSIONAL TIMELINE */}
+                            {/* TIMELINE */}
                             <div className="border-t bg-muted/20 select-none">
                                 <div className="h-8 border-b flex items-center justify-between px-4 bg-background/50">
                                     <div className="flex items-center gap-4">
@@ -460,7 +471,6 @@ export default function AddAudioToVideo() {
                                         ))}
                                     </div>
 
-                                    {/* Tracks */}
                                     <div className="p-2 space-y-2">
                                         <div className="h-10 bg-indigo-500/10 border border-indigo-500/20 rounded-lg flex items-center px-4 relative" style={{ width: `${videoDuration * zoom[0]}px` }}>
                                             <span className="text-[8px] font-black uppercase tracking-widest opacity-40">Main Video Stream</span>
@@ -483,7 +493,6 @@ export default function AddAudioToVideo() {
                                         </div>
                                     </div>
 
-                                    {/* Playhead */}
                                     <div className="absolute top-0 bottom-0 w-0.5 bg-red-500 z-50 shadow-[0_0_10px_red] transition-transform duration-75 pointer-events-none" style={{ left: `${currentTime * zoom[0]}px` }}>
                                         <div className="absolute -top-1 -left-1.5 size-3.5 bg-red-500 rounded-full border-2 border-white shadow-xl" />
                                     </div>
@@ -578,4 +587,3 @@ export default function AddAudioToVideo() {
         </div>
     );
 }
-
