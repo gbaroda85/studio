@@ -245,8 +245,8 @@ export default function DocumentScanner() {
                         bestPoints = [
                             { x: (top[0].x / src.cols) * 100, y: (top[0].y / src.rows) * 100 },
                             { x: (top[1].x / src.cols) * 100, y: (top[1].y / src.rows) * 100 },
-                            { x: (bottom[1].x / src.cols) * 100, y: (bottom[1].y / src.rows) * 100 },
-                            { x: (bottom[0].x / src.cols) * 100, y: (bottom[0].y / src.rows) * 100 }
+                            { x: (bottom[0].x / src.cols) * 100, y: (bottom[0].y / src.rows) * 100 },
+                            { x: (bottom[1].x / src.cols) * 100, y: (bottom[1].y / src.rows) * 100 }
                         ];
                     }
                 }
@@ -405,6 +405,35 @@ export default function DocumentScanner() {
         img.onerror = () => reject("Load failed");
         img.src = imageSrc;
     });
+  };
+
+  const handleMouseMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if (draggingPoint === null || !containerRef.current || !points[draggingPoint]) return;
+    if (e.cancelable) e.preventDefault();
+    const rect = containerRef.current.getBoundingClientRect();
+    let cx, cy;
+    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+
+    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
+
+    setMagnifierPos({ x, y });
+    setPoints(prev => {
+        const next = [...prev];
+        next[draggingPoint] = { x, y };
+        return next;
+    });
+  }, [draggingPoint]);
+
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+      setDraggingPoint(idx);
+      const rect = containerRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      let cx, cy;
+      if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+      else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+      setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
   };
 
   const handleFlatten = async () => {
