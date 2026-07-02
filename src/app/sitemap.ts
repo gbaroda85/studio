@@ -53,7 +53,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // Video Tools
     '/rotate-video',
     '/video-to-mp3',
-    '/add-audio-to-video',
     // Calculators
     '/salary-slip',
     '/gst-invoice',
