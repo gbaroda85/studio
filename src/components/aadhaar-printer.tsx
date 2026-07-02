@@ -589,7 +589,7 @@ export default function AadhaarPrinter() {
             <CardContent className="p-5 space-y-4 text-left">
                 <Label className="text-[9px] font-black uppercase tracking-widest text-muted-foreground opacity-50 ml-1">Enter PDF Password</Label>
                 <div className="relative group text-left">
-                    <Input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="h-11 text-xl font-black tracking-[0.1em] text-center border-2 rounded-xl pr-12 bg-background shadow-inner" placeholder="••••••••" autoFocus />
+                    <input type={showPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} className="flex h-11 w-full text-xl font-black tracking-[0.1em] text-center border-2 rounded-xl pr-12 bg-background shadow-inner focus-visible:ring-2 focus-visible:ring-primary outline-none" placeholder="••••••••" autoFocus />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition-colors">{showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}</button>
                 </div>
                 <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30 flex gap-3 text-left shadow-inner">
@@ -638,10 +638,10 @@ export default function AadhaarPrinter() {
                                 <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 rounded-full border-4 border-green-500 shadow-3xl bg-white animate-in zoom-in-50 ring-4 ring-white/50">
                                     <img src={(workflow === 'a4' ? originalA4Src : (refiningSide === 'front' ? frontRaw : backRaw)) || undefined} alt="mag" className="absolute max-w-none origin-top-left"
                                         style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
-                                    {/* CROSSHAIR ADDED HERE */}
                                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                                         <div className="w-full h-0.5 bg-green-500/50 absolute" />
                                         <div className="h-full w-0.5 bg-green-500/50 absolute" />
+                                        <div className="size-6 border-2 border-green-500 rounded-full flex items-center justify-center text-green-500 font-bold text-xl leading-none bg-green-500/10">+</div>
                                     </div>
                                 </div>
                             )}

@@ -157,6 +157,7 @@ export default function DocumentScanner() {
     { x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }
   ]);
   const [draggingPoint, setDraggingPoint] = useState<number | null>(null);
+  const [magnifierPos, setMagnifierPos] = useState({ x: 0, y: 0 });
   
   const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -189,18 +190,23 @@ export default function DocumentScanner() {
             let gray = new cv.Mat();
             let blurred = new cv.Mat();
             let edges = new cv.Mat();
+            let dilated = new cv.Mat();
             let contours = new cv.MatVector();
             let hierarchy = new cv.Mat();
 
             // 1. Pre-processing
             cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-            cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
+            cv.GaussianBlur(gray, blurred, new cv.Size(7, 7), 0);
             
-            // 2. Edge Detection
-            cv.Canny(blurred, edges, 75, 200);
+            // 2. Edge Detection with lower thresholds for sensitivity
+            cv.Canny(blurred, edges, 50, 150);
             
-            // 3. Contour Detection
-            cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+            // 3. Dilation to connect broken edges
+            const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(5, 5));
+            cv.dilate(edges, dilated, kernel);
+            
+            // 4. Contour Detection
+            cv.findContours(dilated, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
 
             let maxArea = 0;
             let bestPoints: Point[] | null = null;
@@ -209,15 +215,15 @@ export default function DocumentScanner() {
                 let cnt = contours.get(i);
                 let perimeter = cv.arcLength(cnt, true);
                 let approx = new cv.Mat();
+                // Smaller epsilon for tighter fit
                 cv.approxPolyDP(cnt, approx, 0.02 * perimeter, true);
 
                 if (approx.rows === 4) {
                     let area = cv.contourArea(approx);
-                    // Minimal area check (confidence threshold: at least 15% of image area)
-                    if (area > maxArea && area > (src.rows * src.cols * 0.15)) {
+                    // Confidence threshold: covers at least 10% of image area
+                    if (area > maxArea && area > (src.rows * src.cols * 0.10)) {
                         maxArea = area;
                         
-                        // Extract and order points
                         let tempPoints = [];
                         for (let j = 0; j < 4; j++) {
                             tempPoints.push({
@@ -244,6 +250,7 @@ export default function DocumentScanner() {
 
             // Cleanup
             src.delete(); gray.delete(); blurred.delete(); edges.delete();
+            dilated.delete(); kernel.delete();
             contours.delete(); hierarchy.delete();
 
             resolve(bestPoints);
@@ -570,7 +577,18 @@ export default function DocumentScanner() {
     const cy = 'touches' in e ? e.touches[0].clientY : e.clientY;
     const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
     const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
+    setMagnifierPos({ x, y });
     setPoints(prev => { const next = [...prev]; next[draggingPoint] = { x, y }; return next; });
+  };
+
+  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
+    setDraggingPoint(idx);
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    let cx, cy;
+    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
+    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
+    setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
   };
 
   const generatePdfBlob = async (): Promise<Blob | null> => {
@@ -749,8 +767,19 @@ export default function DocumentScanner() {
                             </svg>
                             {points.map((p, i) => (
                                 <div key={i} className={cn("absolute size-10 -ml-5 -mt-5 rounded-full border-4 border-primary shadow-2xl cursor-grab active:cursor-grabbing z-20 flex items-center justify-center bg-white", draggingPoint === i && "scale-125")}
-                                    style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={() => setDraggingPoint(i)} onTouchStart={() => setDraggingPoint(i)}><div className="size-2.5 bg-primary rounded-full" /></div>
+                                    style={{ left: `${p.x}%`, top: `${p.y}%`, touchAction: 'none' }} onMouseDown={(e) => handlePointDown(i, e)} onTouchStart={(e) => handlePointDown(i, e)}><div className="size-2.5 bg-primary rounded-full" /></div>
                             ))}
+                            {draggingPoint !== null && (
+                                <div className="absolute top-4 left-1/2 -translate-x-1/2 pointer-events-none z-50 overflow-hidden size-40 md:size-48 rounded-full border-4 border-green-500 shadow-3xl bg-white ring-4 ring-white/50 animate-in zoom-in-50">
+                                    <img src={currentRawImage} alt="mag" className="absolute max-w-none origin-top-left"
+                                        style={{ width: `${(imgRef.current?.width || 0) * 4}px`, height: `${(imgRef.current?.height || 0) * 4}px`, left: `calc(50% - ${(magnifierPos.x / 100) * (imgRef.current?.width || 0) * 4}px)`, top: `calc(50% - ${(magnifierPos.y / 100) * (imgRef.current?.height || 0) * 4}px)` }} />
+                                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                        <div className="w-full h-0.5 bg-green-500/50 absolute" />
+                                        <div className="h-full w-0.5 bg-green-500/50 absolute" />
+                                        <div className="size-6 border-2 border-green-500 rounded-full flex items-center justify-center text-green-500 font-bold text-xl leading-none bg-green-500/10">+</div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 px-8 py-3 bg-black/80 rounded-full text-white text-[10px] font-black uppercase tracking-widest shadow-3xl"><Move className="size-4 text-primary animate-pulse" /> MAP ALL 4 CORNERS</div>
                     </CardContent>
