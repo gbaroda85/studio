@@ -39,7 +39,10 @@ import {
     Move,
     Share2,
     Copyright,
-    Type
+    Type,
+    Lock,
+    EyeOff,
+    Square
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
@@ -54,8 +57,10 @@ import { Slider } from '@/components/ui/slider';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
+import { lockPdf } from "@/lib/pdf-utils";
 
 // --- TYPES ---
 export type FilterType = 'original' | 'photo' | 'bw' | 'document' | 'magic';
@@ -77,6 +82,7 @@ interface ScannedPage {
     isScanned: boolean;
     originalIndex: number;
     rotation: number;
+    hasBorder?: boolean;
 }
 
 type Stage = 'viewfinder' | 'camera' | 'adjust' | 'studio';
@@ -136,6 +142,7 @@ export default function DocumentScanner() {
   const [brightness, setBrightness] = useState([100]);
   const [contrast, setContrast] = useState([100]);
   const [rotation, setRotation] = useState(0);
+  const [showBorder, setShowBorder] = useState(false);
 
   // Watermark States
   const [watermarkText, setWatermarkText] = useState("");
@@ -143,6 +150,11 @@ export default function DocumentScanner() {
   const [watermarkSize, setWatermarkSize] = useState([60]);
   const [watermarkMargin, setWatermarkMargin] = useState([40]);
   const [watermarkPosition, setWatermarkPosition] = useState<WatermarkPosition>('center-center');
+
+  // Security States
+  const [isSecured, setIsSecuring] = useState(false);
+  const [pdfPassword, setPdfPassword] = useState("");
+  const [showPdfPassword, setShowPdfPassword] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -194,18 +206,14 @@ export default function DocumentScanner() {
             let contours = new cv.MatVector();
             let hierarchy = new cv.Mat();
 
-            // 1. Pre-processing
             cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
             cv.GaussianBlur(gray, blurred, new cv.Size(7, 7), 0);
             
-            // 2. Edge Detection with lower thresholds for sensitivity
             cv.Canny(blurred, edges, 50, 150);
             
-            // 3. Dilation to connect broken edges
             const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(5, 5));
             cv.dilate(edges, dilated, kernel);
             
-            // 4. Contour Detection
             cv.findContours(dilated, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
 
             let maxArea = 0;
@@ -215,12 +223,10 @@ export default function DocumentScanner() {
                 let cnt = contours.get(i);
                 let perimeter = cv.arcLength(cnt, true);
                 let approx = new cv.Mat();
-                // Smaller epsilon for tighter fit
                 cv.approxPolyDP(cnt, approx, 0.02 * perimeter, true);
 
                 if (approx.rows === 4) {
                     let area = cv.contourArea(approx);
-                    // Confidence threshold: covers at least 10% of image area
                     if (area > maxArea && area > (src.rows * src.cols * 0.10)) {
                         maxArea = area;
                         
@@ -232,7 +238,6 @@ export default function DocumentScanner() {
                             });
                         }
 
-                        // Order points: Top-Left, Top-Right, Bottom-Right, Bottom-Left
                         tempPoints.sort((a, b) => a.y - b.y);
                         let top = tempPoints.slice(0, 2).sort((a, b) => a.x - b.x);
                         let bottom = tempPoints.slice(2, 4).sort((a, b) => b.x - a.x);
@@ -240,15 +245,14 @@ export default function DocumentScanner() {
                         bestPoints = [
                             { x: (top[0].x / src.cols) * 100, y: (top[0].y / src.rows) * 100 },
                             { x: (top[1].x / src.cols) * 100, y: (top[1].y / src.rows) * 100 },
-                            { x: (bottom[0].x / src.cols) * 100, y: (bottom[0].y / src.rows) * 100 },
-                            { x: (bottom[1].x / src.cols) * 100, y: (bottom[1].y / src.rows) * 100 }
+                            { x: (bottom[1].x / src.cols) * 100, y: (bottom[1].y / src.rows) * 100 },
+                            { x: (bottom[0].x / src.cols) * 100, y: (bottom[0].y / src.rows) * 100 }
                         ];
                     }
                 }
                 approx.delete();
             }
 
-            // Cleanup
             src.delete(); gray.delete(); blurred.delete(); edges.delete();
             dilated.delete(); kernel.delete();
             contours.delete(); hierarchy.delete();
@@ -349,7 +353,16 @@ export default function DocumentScanner() {
                 finalCanvas = normCanvas;
             }
 
-            // --- WATERMARK STAGE (Final Layer) ---
+            // --- BORDER STAGE ---
+            if (showBorder) {
+                const borderCtx = finalCanvas.getContext('2d')!;
+                const bp = Math.max(1, Math.floor(finalCanvas.width * 0.005));
+                borderCtx.strokeStyle = "#000000";
+                borderCtx.lineWidth = bp * 2;
+                borderCtx.strokeRect(0, 0, finalCanvas.width, finalCanvas.height);
+            }
+
+            // --- WATERMARK STAGE ---
             if (watermarkText.trim()) {
                 const wCtx = finalCanvas.getContext('2d')!;
                 wCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -381,11 +394,7 @@ export default function DocumentScanner() {
 
                 wCtx.textAlign = textAlign;
                 if (watermarkPosition === 'center-center') {
-                    wCtx.save();
-                    wCtx.translate(x, y);
-                    wCtx.rotate(-Math.PI / 4);
-                    wCtx.fillText(text, 0, 0);
-                    wCtx.restore();
+                    wCtx.save(); wCtx.translate(x, y); wCtx.rotate(-Math.PI / 4); wCtx.fillText(text, 0, 0); wCtx.restore();
                 } else {
                     wCtx.fillText(text, x, y);
                 }
@@ -452,7 +461,7 @@ export default function DocumentScanner() {
           }, 50);
           return () => clearTimeout(timer);
       }
-  }, [activeFilter, brightness, contrast, rotation, watermarkText, watermarkOpacity, watermarkSize, watermarkMargin, watermarkPosition, flattenedSrc, stage]);
+  }, [activeFilter, brightness, contrast, rotation, showBorder, watermarkText, watermarkOpacity, watermarkSize, watermarkMargin, watermarkPosition, flattenedSrc, stage]);
 
   const startCamera = async () => {
     setStage('camera');
@@ -480,7 +489,8 @@ export default function DocumentScanner() {
         const initialPoints = detected || [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }];
         setPoints(initialPoints);
         
-        setPendingPages([{ id: 'cam-1', originalSrc: src, processedSrc: src, points: [...initialPoints], isScanned: false, originalIndex: 1, rotation: 0 }]);
+        const newPage: ScannedPage = { id: Math.random().toString(36).substr(2, 9), originalSrc: src, processedSrc: src, points: [...initialPoints], isScanned: false, originalIndex: scannedPages.length + 1, rotation: 0 };
+        setPendingPages([newPage]);
         setActivePendingIndex(0);
         setStage('adjust');
         setIsProcessing(false);
@@ -499,10 +509,8 @@ export default function DocumentScanner() {
         const dataUrl = await new Promise<string>((res) => { 
             const reader = new FileReader(); reader.onload = (ev) => res(ev.target?.result as string); reader.readAsDataURL(file); 
         });
-        
         const detected = await autoDetectDocument(dataUrl);
         const initialPoints = detected || [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }];
-        
         newPages.push({ 
             id: Math.random().toString(36).substr(2, 9), 
             originalSrc: dataUrl, 
@@ -520,7 +528,7 @@ export default function DocumentScanner() {
   const handleConfirmSave = () => {
       if (!liveResultSrc) return;
       const currentPage = pendingPages[activePendingIndex];
-      const newPage: ScannedPage = { ...currentPage, processedSrc: liveResultSrc, isScanned: true, points, rotation };
+      const newPage: ScannedPage = { ...currentPage, processedSrc: liveResultSrc, isScanned: true, points: [...points], rotation, hasBorder: showBorder };
       
       setScannedPages(prev => [...prev, newPage].sort((a,b) => a.originalIndex - b.originalIndex));
       const remainingPending = pendingPages.filter(p => p.id !== currentPage.id);
@@ -538,6 +546,19 @@ export default function DocumentScanner() {
       } else {
           setStage('viewfinder');
       }
+  };
+
+  const handleRescan = (page: ScannedPage) => {
+      setScannedPages(prev => prev.filter(p => p.id !== page.id));
+      const pPage = { ...page, isScanned: false };
+      setPendingPages(prev => [...prev, pPage]);
+      setCurrentRawImage(page.originalSrc);
+      setPoints(page.points);
+      setRotation(page.rotation);
+      setShowBorder(!!page.hasBorder);
+      setActivePendingIndex(pendingPages.length); 
+      setStage('adjust');
+      setLiveResultSrc(null); setFlattenedSrc(null);
   };
 
   const handleDownloadJpg = () => {
@@ -570,27 +591,6 @@ export default function DocumentScanner() {
       }
   };
 
-  const handleMouseMove = (e: React.MouseEvent | React.TouchEvent) => {
-    if (draggingPoint === null || !containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const cx = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const cy = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    const x = Math.max(0, Math.min(100, ((cx - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((cy - rect.top) / rect.height) * 100));
-    setMagnifierPos({ x, y });
-    setPoints(prev => { const next = [...prev]; next[draggingPoint] = { x, y }; return next; });
-  };
-
-  const handlePointDown = (idx: number, e: React.MouseEvent | React.TouchEvent) => {
-    setDraggingPoint(idx);
-    const rect = containerRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    let cx, cy;
-    if ('touches' in e) { cx = e.touches[0].clientX; cy = e.touches[0].clientY; }
-    else { cx = (e as React.MouseEvent).clientX; cy = (e as React.MouseEvent).clientY; }
-    setMagnifierPos({ x: ((cx - rect.left) / rect.width) * 100, y: ((cy - rect.top) / rect.height) * 100 });
-  };
-
   const generatePdfBlob = async (): Promise<Blob | null> => {
     if (scannedPages.length === 0) return null;
     const pdf = new jsPDF({ orientation: 'p', unit: 'mm' });
@@ -607,7 +607,14 @@ export default function DocumentScanner() {
         pdf.addPage([pageWidth, pageHeight], orientation);
         pdf.addImage(page.processedSrc, 'JPEG', 0, 0, pageWidth, pageHeight, undefined, 'FAST');
     }
-    return pdf.output('blob');
+    const pdfBlob = pdf.output('blob');
+    
+    if (isSecured && pdfPassword.trim()) {
+        const tempFile = new File([pdfBlob], 'temp.pdf', { type: 'application/pdf' });
+        return await lockPdf(tempFile, pdfPassword.trim());
+    }
+    
+    return pdfBlob;
   };
 
   const handleDownloadPdf = async () => {
@@ -687,27 +694,60 @@ export default function DocumentScanner() {
                 </div>
 
                 <div className="lg:col-span-4 flex flex-col gap-6">
-                    <Card className="border-2 shadow-lg bg-card/50 rounded-[3rem] flex-1">
-                        <CardHeader className="bg-emerald-500/5 border-b p-6 flex justify-between items-center text-emerald-600 text-left">
+                    <Card className="border-2 shadow-lg bg-card/50 rounded-[3rem] flex-1 flex flex-col">
+                        <CardHeader className="bg-emerald-500/5 border-b p-6 flex justify-between items-center text-emerald-600 text-left shrink-0">
                             <CardTitle className="text-sm font-black uppercase tracking-widest flex items-center gap-2"><CheckCircle2 className="size-4" /> FINISHED</CardTitle>
                             {scannedPages.length > 0 && <Badge className="bg-green-600 text-white">{scannedPages.length}</Badge>}
                         </CardHeader>
-                        <CardContent className="p-6">
+                        <CardContent className="p-6 flex-1 overflow-y-auto">
                             {scannedPages.length === 0 ? (
                                 <div className="flex flex-col items-center py-20 opacity-20"><FileArchive className="size-12 mb-4" /><p className="text-[10px] font-black uppercase">No Results Yet</p></div>
                             ) : (
-                                <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                <div className="grid grid-cols-2 gap-4">
                                     {scannedPages.map((p) => (
                                         <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2 shadow-md">
                                             <img src={p.processedSrc} className="size-full object-cover" alt="p" />
                                             <div className="absolute top-2 left-2 size-6 rounded-md bg-green-600 text-white flex items-center justify-center text-[8px] font-black">✓ P{p.originalIndex}</div>
-                                            <button className="absolute top-2 right-2 p-1.5 bg-rose-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3" /></button>
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition-opacity backdrop-blur-xs">
+                                                <Button size="icon" className="h-7 w-7 rounded-lg bg-primary" onClick={() => handleRescan(p)}><RefreshCcw className="size-3.5"/></Button>
+                                                <Button size="icon" variant="destructive" className="h-7 w-7 rounded-lg" onClick={() => setScannedPages(prev => prev.filter(pg => pg.id !== p.id))}><Trash2 className="size-3.5" /></Button>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
                             )}
                         </CardContent>
-                        <CardFooter className="p-6 border-t bg-muted/5 flex flex-col gap-3">
+                        <CardFooter className="p-6 border-t bg-muted/5 flex flex-col gap-4 shrink-0 text-left">
+                            {scannedPages.length > 0 && (
+                                <div className="w-full space-y-4 animate-in slide-in-from-bottom-2">
+                                    <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-3 rounded-2xl border shadow-sm">
+                                        <div className="flex items-center gap-3">
+                                            <Lock className={cn("size-4", isSecured ? "text-primary" : "text-muted-foreground/30")} />
+                                            <span className="text-[10px] font-black uppercase opacity-60">Secure PDF</span>
+                                        </div>
+                                        <Switch checked={isSecured} onCheckedChange={setIsSecuring} />
+                                    </div>
+                                    
+                                    {isSecured && (
+                                        <div className="space-y-1.5">
+                                            <Label className="text-[8px] font-black uppercase opacity-40 ml-1">PDF Password</Label>
+                                            <div className="relative group">
+                                                <Input 
+                                                    type={showPdfPassword ? "text" : "password"} 
+                                                    value={pdfPassword} 
+                                                    onChange={(e) => setPdfPassword(e.target.value)}
+                                                    placeholder="Enter Password..."
+                                                    className="h-10 border-2 rounded-xl font-bold bg-background pr-10"
+                                                />
+                                                <button onClick={() => setShowPdfPassword(!showPdfPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                                                    {showPdfPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <Button onClick={handleDownloadPdf} disabled={scannedPages.length === 0} className="w-full h-14 rounded-2xl bg-[#00aeef] text-white font-black uppercase text-xs shadow-xl active:scale-95 border-none">
                                 {isGenerating ? <Loader2 className="animate-spin mr-2" /> : <Download className="size-4 mr-2" />} SAVE PDF BUNDLE
                             </Button>
@@ -845,6 +885,13 @@ export default function DocumentScanner() {
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center px-1"><Label className="text-[10px] font-black uppercase opacity-60">Contrast</Label><Badge variant="secondary" className="font-mono text-[9px]">{contrast[0]}%</Badge></div>
                                 <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
+                            </div>
+                            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border-2 border-dashed">
+                                <div className="flex items-center gap-3">
+                                    <Square className={cn("size-4", showBorder ? "text-primary" : "text-muted-foreground/30")} />
+                                    <span className="text-[10px] font-black uppercase opacity-60">Page Border</span>
+                                </div>
+                                <Switch checked={showBorder} onCheckedChange={setShowBorder} />
                             </div>
                         </div>
 
