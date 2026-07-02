@@ -151,6 +151,7 @@ export default function DocumentScanner() {
   const [flattenedSrc, setFlattenedSrc] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [cvLoaded, setCvLoaded] = useState(false);
 
   const [points, setPoints] = useState<Point[]>([
     { x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }
@@ -161,6 +162,95 @@ export default function DocumentScanner() {
   const imgRef = useRef<HTMLImageElement>(null);
 
   const [liveResultSrc, setLiveResultSrc] = useState<string | null>(null);
+
+  // --- OPENCV LOADING ---
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !(window as any).cv) {
+        const script = document.createElement('script');
+        script.src = 'https://docs.opencv.org/4.10.0/opencv.js';
+        script.async = true;
+        script.onload = () => setCvLoaded(true);
+        document.head.appendChild(script);
+    } else if ((window as any).cv) {
+        setCvLoaded(true);
+    }
+  }, []);
+
+  // --- AUTOMATIC DOCUMENT DETECTION ENGINE (OpenCV.js) ---
+  const autoDetectDocument = async (imageSrc: string): Promise<Point[] | null> => {
+    return new Promise((resolve) => {
+        if (!(window as any).cv || !(window as any).cv.Mat) return resolve(null);
+        const cv = (window as any).cv;
+
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+            let src = cv.imread(img);
+            let gray = new cv.Mat();
+            let blurred = new cv.Mat();
+            let edges = new cv.Mat();
+            let contours = new cv.MatVector();
+            let hierarchy = new cv.Mat();
+
+            // 1. Pre-processing
+            cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
+            cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
+            
+            // 2. Edge Detection
+            cv.Canny(blurred, edges, 75, 200);
+            
+            // 3. Contour Detection
+            cv.findContours(edges, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
+
+            let maxArea = 0;
+            let bestPoints: Point[] | null = null;
+
+            for (let i = 0; i < contours.size(); ++i) {
+                let cnt = contours.get(i);
+                let perimeter = cv.arcLength(cnt, true);
+                let approx = new cv.Mat();
+                cv.approxPolyDP(cnt, approx, 0.02 * perimeter, true);
+
+                if (approx.rows === 4) {
+                    let area = cv.contourArea(approx);
+                    // Minimal area check (confidence threshold: at least 15% of image area)
+                    if (area > maxArea && area > (src.rows * src.cols * 0.15)) {
+                        maxArea = area;
+                        
+                        // Extract and order points
+                        let tempPoints = [];
+                        for (let j = 0; j < 4; j++) {
+                            tempPoints.push({
+                                x: approx.data32S[j * 2],
+                                y: approx.data32S[j * 2 + 1]
+                            });
+                        }
+
+                        // Order points: Top-Left, Top-Right, Bottom-Right, Bottom-Left
+                        tempPoints.sort((a, b) => a.y - b.y);
+                        let top = tempPoints.slice(0, 2).sort((a, b) => a.x - b.x);
+                        let bottom = tempPoints.slice(2, 4).sort((a, b) => b.x - a.x);
+                        
+                        bestPoints = [
+                            { x: (top[0].x / src.cols) * 100, y: (top[0].y / src.rows) * 100 },
+                            { x: (top[1].x / src.cols) * 100, y: (top[1].y / src.rows) * 100 },
+                            { x: (bottom[0].x / src.cols) * 100, y: (bottom[0].y / src.rows) * 100 },
+                            { x: (bottom[1].x / src.cols) * 100, y: (bottom[1].y / src.rows) * 100 }
+                        ];
+                    }
+                }
+                approx.delete();
+            }
+
+            // Cleanup
+            src.delete(); gray.delete(); blurred.delete(); edges.delete();
+            contours.delete(); hierarchy.delete();
+
+            resolve(bestPoints);
+        };
+        img.src = imageSrc;
+    });
+  };
 
   // --- FILTER ENGINE LOGIC ---
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
@@ -259,7 +349,6 @@ export default function DocumentScanner() {
                 wCtx.globalCompositeOperation = 'source-over';
                 wCtx.filter = 'none';
 
-                // Size mapping: User input is 10-200. We map to relative document width.
                 const mappedFontSize = Math.floor((watermarkSize[0] / 1000) * finalCanvas.width);
                 const mappedMargin = Math.floor((watermarkMargin[0] / 1000) * finalCanvas.width);
                 
@@ -268,26 +357,22 @@ export default function DocumentScanner() {
                 wCtx.textBaseline = 'middle';
                 
                 const text = watermarkText.toUpperCase();
-                const textMetrics = wCtx.measureText(text);
-                const th = mappedFontSize;
-
                 let x = 0, y = 0;
                 let textAlign: CanvasTextAlign = 'center';
 
                 switch (watermarkPosition) {
-                    case 'top-left': x = mappedMargin; y = mappedMargin + th/2; textAlign = 'left'; break;
-                    case 'top-center': x = finalCanvas.width / 2; y = mappedMargin + th/2; textAlign = 'center'; break;
-                    case 'top-right': x = finalCanvas.width - mappedMargin; y = mappedMargin + th/2; textAlign = 'right'; break;
+                    case 'top-left': x = mappedMargin; y = mappedMargin + mappedFontSize/2; textAlign = 'left'; break;
+                    case 'top-center': x = finalCanvas.width / 2; y = mappedMargin + mappedFontSize/2; textAlign = 'center'; break;
+                    case 'top-right': x = finalCanvas.width - mappedMargin; y = mappedMargin + mappedFontSize/2; textAlign = 'right'; break;
                     case 'center-left': x = mappedMargin; y = finalCanvas.height / 2; textAlign = 'left'; break;
                     case 'center-center': x = finalCanvas.width / 2; y = finalCanvas.height / 2; textAlign = 'center'; break;
                     case 'center-right': x = finalCanvas.width - mappedMargin; y = finalCanvas.height / 2; textAlign = 'right'; break;
-                    case 'bottom-left': x = mappedMargin; y = finalCanvas.height - mappedMargin - th/2; textAlign = 'left'; break;
-                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - mappedMargin - th/2; textAlign = 'center'; break;
-                    case 'bottom-right': x = finalCanvas.width - mappedMargin; y = finalCanvas.height - mappedMargin - th/2; textAlign = 'right'; break;
+                    case 'bottom-left': x = mappedMargin; y = finalCanvas.height - mappedMargin - mappedFontSize/2; textAlign = 'left'; break;
+                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - mappedMargin - mappedFontSize/2; textAlign = 'center'; break;
+                    case 'bottom-right': x = finalCanvas.width - mappedMargin; y = finalCanvas.height - mappedMargin - mappedFontSize/2; textAlign = 'right'; break;
                 }
 
                 wCtx.textAlign = textAlign;
-
                 if (watermarkPosition === 'center-center') {
                     wCtx.save();
                     wCtx.translate(x, y);
@@ -372,7 +457,7 @@ export default function DocumentScanner() {
     } catch (err) { toast({ variant: 'destructive', title: 'Camera Failed' }); setStage('viewfinder'); }
   };
 
-  const captureFrame = () => {
+  const captureFrame = async () => {
     const video = videoRef.current;
     if (!video) return;
     const canvas = document.createElement('canvas');
@@ -382,9 +467,17 @@ export default function DocumentScanner() {
         ctx.drawImage(video, 0, 0);
         const src = canvas.toDataURL('image/jpeg', 1.0);
         setCurrentRawImage(src);
-        setPendingPages([{ id: 'cam-1', originalSrc: src, processedSrc: src, points: [...points], isScanned: false, originalIndex: 1, rotation: 0 }]);
+        
+        setIsProcessing(true);
+        const detected = await autoDetectDocument(src);
+        const initialPoints = detected || [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }];
+        setPoints(initialPoints);
+        
+        setPendingPages([{ id: 'cam-1', originalSrc: src, processedSrc: src, points: [...initialPoints], isScanned: false, originalIndex: 1, rotation: 0 }]);
         setActivePendingIndex(0);
         setStage('adjust');
+        setIsProcessing(false);
+        
         if (video.srcObject) (video.srcObject as MediaStream).getTracks().forEach(t => t.stop());
     }
   };
@@ -399,7 +492,19 @@ export default function DocumentScanner() {
         const dataUrl = await new Promise<string>((res) => { 
             const reader = new FileReader(); reader.onload = (ev) => res(ev.target?.result as string); reader.readAsDataURL(file); 
         });
-        newPages.push({ id: Math.random().toString(36).substr(2, 9), originalSrc: dataUrl, processedSrc: dataUrl, points: [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }], isScanned: false, originalIndex: scannedPages.length + newPages.length + 1, rotation: 0 });
+        
+        const detected = await autoDetectDocument(dataUrl);
+        const initialPoints = detected || [{ x: 15, y: 15 }, { x: 85, y: 15 }, { x: 85, y: 85 }, { x: 15, y: 85 }];
+        
+        newPages.push({ 
+            id: Math.random().toString(36).substr(2, 9), 
+            originalSrc: dataUrl, 
+            processedSrc: dataUrl, 
+            points: initialPoints, 
+            isScanned: false, 
+            originalIndex: scannedPages.length + newPages.length + 1, 
+            rotation: 0 
+        });
     }
     setPendingPages(prev => [...prev, ...newPages]);
     setIsProcessing(false);
@@ -420,6 +525,7 @@ export default function DocumentScanner() {
           const nextIdx = activePendingIndex >= remainingPending.length ? 0 : activePendingIndex;
           setActivePendingIndex(nextIdx);
           setCurrentRawImage(remainingPending[nextIdx].originalSrc);
+          setPoints(remainingPending[nextIdx].points);
           setStage('adjust');
           setLiveResultSrc(null); setFlattenedSrc(null);
       } else {
@@ -440,6 +546,7 @@ export default function DocumentScanner() {
           const nextIdx = activePendingIndex + 1;
           setActivePendingIndex(nextIdx);
           setCurrentRawImage(pendingPages[nextIdx].originalSrc);
+          setPoints(pendingPages[nextIdx].points);
           setStage('adjust');
           setLiveResultSrc(null); setFlattenedSrc(null);
       }
@@ -450,6 +557,7 @@ export default function DocumentScanner() {
           const prevIdx = activePendingIndex - 1;
           setActivePendingIndex(prevIdx);
           setCurrentRawImage(pendingPages[prevIdx].originalSrc);
+          setPoints(pendingPages[prevIdx].points);
           setStage('adjust');
           setLiveResultSrc(null); setFlattenedSrc(null);
       }
@@ -535,7 +643,7 @@ export default function DocumentScanner() {
                             ) : (
                                 <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                                     {pendingPages.map((p, idx) => (
-                                        <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2 cursor-pointer" onClick={() => { setCurrentRawImage(p.originalSrc); setActivePendingIndex(idx); setStage('adjust'); }}>
+                                        <div key={p.id} className="relative group rounded-2xl overflow-hidden border-2 cursor-pointer" onClick={() => { setCurrentRawImage(p.originalSrc); setPoints(p.points); setActivePendingIndex(idx); setStage('adjust'); }}>
                                             <img src={p.originalSrc} className="size-full object-cover grayscale opacity-50" alt="p" />
                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center backdrop-blur-sm transition-all"><Button size="sm" className="font-black text-[9px] uppercase"><Scan className="size-3 mr-1" /> SCAN</Button></div>
                                         </div>
@@ -628,6 +736,12 @@ export default function DocumentScanner() {
                     </CardHeader>
                     <CardContent className="p-0 flex flex-col items-center justify-center bg-slate-200 dark:bg-black/40 min-h-[600px] relative overflow-hidden select-none" 
                                  onMouseMove={handleMouseMove} onTouchMove={handleMouseMove} onMouseUp={() => setDraggingPoint(null)} onTouchEnd={() => setDraggingPoint(null)}>
+                        {isProcessing && (
+                            <div className="absolute inset-0 z-50 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center text-white gap-4">
+                                <Loader2 className="h-12 w-12 animate-spin" />
+                                <p className="text-xs font-black uppercase tracking-widest">Processing Edges...</p>
+                            </div>
+                        )}
                         <div ref={containerRef} className="relative shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                             <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block pointer-events-none" />
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 1000" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
