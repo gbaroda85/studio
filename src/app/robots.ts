@@ -1,24 +1,31 @@
 import { MetadataRoute } from 'next'
 
 /**
- * @fileOverview Professional Robots.txt Generator for Next.js 15.
- * Uses an array for rules to ensure compatibility with internal Next.js array methods like .some().
+ * @fileOverview Infrastructure-Level Robots configuration.
+ * FIX: Allowing Googlebot to access /_next/ is CRITICAL for modern SEO rendering.
+ * Modern search engines need access to JS/CSS assets to generate the visual snapshot.
  */
 
 export default function robots(): MetadataRoute.Robots {
-  const rules = [
-    {
-      userAgent: '*',
-      allow: '/',
-      disallow: ['/api/', '/_next/', '/static/'],
-    },
-  ];
-
-  // Defensive check to ensure rules is an array
-  const safeRules = Array.isArray(rules) ? rules : [];
-
   return {
-    rules: safeRules,
+    rules: [
+      {
+        userAgent: '*',
+        allow: [
+          '/',
+          '/_next/static/css/',
+          '/_next/static/chunks/',
+          '/_next/static/media/',
+          '/icon.png',
+          '/manifest.json',
+        ],
+        disallow: [
+          '/api/',
+          '/admin/',
+          '/private/',
+        ],
+      },
+    ],
     sitemap: 'https://www.gr7imagepdf.com/sitemap.xml',
   }
 }

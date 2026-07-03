@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { userAgent } from 'next/server';
@@ -23,10 +22,16 @@ export function middleware(request: NextRequest) {
     
     // Force Infrastructure to prioritize static content delivery
     response.headers.set('X-Is-Bot', 'true');
+    
+    // Industrial Standard SEO Headers
     response.headers.set('X-Robots-Tag', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1');
     
     // Optimization: Bypass potential edge-side hydration delays for bots
+    // This forces a more "static-first" delivery mode at the Vercel/Firebase Edge
     response.headers.set('Cache-Control', 'public, s-maxage=3600, stale-while-revalidate=86400');
+    
+    // Ensure the browser/crawler knows the response varies by User-Agent
+    response.headers.set('Vary', 'User-Agent');
 
     return response;
   }
@@ -34,17 +39,16 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// Ensure middleware only runs on page routes and not static assets/api
+// Configuration for the middleware to match all page routes
 export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
      * - api (API routes)
-     * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - icon.png (icon file)
+     * - static assets
      */
-    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)',
+    '/((?!api|_next/image|favicon.ico|.*\\..*$).*)',
   ],
 };

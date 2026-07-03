@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -22,7 +21,7 @@ const nextConfig: NextConfig = {
             key: 'Cross-Origin-Embedder-Policy',
             value: 'require-corp',
           },
-          // INDUSTRIAL SEO HEADERS
+          // INDUSTRIAL SEO INFRASTRUCTURE HEADERS
           {
             key: 'X-Robots-Tag',
             value: 'index, follow',
@@ -30,6 +29,10 @@ const nextConfig: NextConfig = {
           {
             key: 'Vary',
             value: 'User-Agent',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
           }
         ],
       },
