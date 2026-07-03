@@ -83,67 +83,66 @@ const StarIcons = () => (
 
 export default function QrCodeGenerator() {
     const { toast } = useToast();
-    const [qrType, setQrType] = useState<QRType>('url');
-    const [inputData, setInputData] = useState("https://www.gr7imagepdf.com");
-    const [isProcessing, setIsProcessing] = useState(false);
-    const [isGenerating, setIsGenerating] = useState(false);
     
-    // Type-specific states
-    const [wifiData, setWifiData] = useState({ ssid: '', password: '', encryption: 'WPA' });
-    const [whatsappData, setWhatsappData] = useState({ phone: '', message: '' });
-    const [emailData, setEmailData] = useState({ to: '', subject: '', body: '' });
-    const [upiData, setUpiData] = useState({ pa: '', pn: '', am: '', tn: '', cu: 'INR' });
+    // 1. RAW INPUT STATES (FOR INSTANT UI RESPONSE)
+    const [qrType, setQrType] = useState<QRType>('url');
+    const [rawInputData, setRawInputData] = useState("https://www.gr7imagepdf.com");
+    const [rawWifiData, setRawWifiData] = useState({ ssid: '', password: '', encryption: 'WPA' });
+    const [rawWhatsappData, setRawWhatsappData] = useState({ phone: '', message: '' });
+    const [rawEmailData, setRawEmailData] = useState({ to: '', subject: '', body: '' });
+    const [rawUpiData, setRawUpiData] = useState({ pa: '', pn: '', am: '', tn: '', cu: 'INR' });
 
-    // Design states
+    // 2. DEBOUNCED DATA STATE (USED BY QR ENGINE)
+    const [debouncedFinalData, setDebouncedFinalData] = useState(rawInputData);
+
+    // 3. DESIGN STATES
     const [dotColor, setDotColor] = useState("#000000");
     const [bgColor, setBgColor] = useState("#ffffff");
     const [dotType, setDotType] = useState<DotType>("rounded");
     const [cornerType, setCornerType] = useState<CornerSquareType>("extra-rounded");
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
-
-    // Border and Label
     const [borderWidth, setBorderWidth] = useState([0]);
     const [borderColor, setBorderColor] = useState("#000000");
     const [showLabel, setShowLabel] = useState(false);
     const [customLabel, setCustomLabel] = useState("");
 
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+
     const qrContainerRef = useRef<HTMLDivElement>(null);
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
 
-    // --- DATA LOGIC ---
-    const finalData = useMemo(() => {
-        if (qrType === 'url') return inputData;
-        if (qrType === 'text') return inputData;
-        if (qrType === 'wifi') return `WIFI:T:${wifiData.encryption};S:${wifiData.ssid};P:${wifiData.password};;`;
-        if (qrType === 'whatsapp') return `https://wa.me/${whatsappData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(whatsappData.message)}`;
-        if (qrType === 'email') return `mailto:${emailData.to}?subject=${encodeURIComponent(emailData.subject)}&body=${encodeURIComponent(emailData.body)}`;
-        if (qrType === 'upi') {
-            let upi = `upi://pay?pa=${upiData.pa}`;
-            if (upiData.pn) upi += `&pn=${encodeURIComponent(upiData.pn)}`;
-            if (upiData.am) upi += `&am=${upiData.am}`;
-            if (upiData.cu) upi += `&cu=${upiData.cu}`;
-            if (upiData.tn) upi += `&tn=${encodeURIComponent(upiData.tn)}`;
-            return upi;
+    // --- DEBOUNCE LOGIC FOR DATA ---
+    useEffect(() => {
+        let final = "";
+        if (qrType === 'url' || qrType === 'text') final = rawInputData;
+        else if (qrType === 'wifi') final = `WIFI:T:${rawWifiData.encryption};S:${rawWifiData.ssid};P:${rawWifiData.password};;`;
+        else if (qrType === 'whatsapp') final = `https://wa.me/${rawWhatsappData.phone.replace(/\D/g, '')}?text=${encodeURIComponent(rawWhatsappData.message)}`;
+        else if (qrType === 'email') final = `mailto:${rawEmailData.to}?subject=${encodeURIComponent(rawEmailData.subject)}&body=${encodeURIComponent(rawEmailData.body)}`;
+        else if (qrType === 'upi') {
+            final = `upi://pay?pa=${rawUpiData.pa}${rawUpiData.pn ? `&pn=${encodeURIComponent(rawUpiData.pn)}` : ''}${rawUpiData.am ? `&am=${rawUpiData.am}` : ''}${rawUpiData.cu ? `&cu=${rawUpiData.cu}` : ''}${rawUpiData.tn ? `&tn=${encodeURIComponent(rawUpiData.tn)}` : ''}`;
         }
-        return inputData;
-    }, [inputData, qrType, wifiData, whatsappData, emailData, upiData]);
 
-    const activeLabel = useMemo(() => {
-        return customLabel || (qrType === 'url' ? inputData.replace(/^https?:\/\//i, '') : inputData.substring(0, 20));
-    }, [customLabel, qrType, inputData]);
+        const timer = setTimeout(() => {
+            setDebouncedFinalData(final);
+        }, 300); // 300ms debounce for typing
 
-    // --- PERSISTENT INITIALIZATION ---
+        return () => clearTimeout(timer);
+    }, [qrType, rawInputData, rawWifiData, rawWhatsappData, rawEmailData, rawUpiData]);
+
+    // --- INITIALIZE ENGINE ONCE ---
     useEffect(() => {
         if (typeof window !== 'undefined' && !qrCodeRef.current) {
             qrCodeRef.current = new QRCodeStyling({
                 width: 600,
                 height: 600,
                 type: 'canvas',
-                data: finalData,
-                dotsOptions: { type: 'rounded', color: '#000000' },
-                backgroundOptions: { color: '#ffffff' },
-                cornersSquareOptions: { type: 'extra-rounded', color: '#000000' },
+                data: debouncedFinalData,
+                dotsOptions: { type: dotType, color: dotColor },
+                backgroundOptions: { color: bgColor },
+                cornersSquareOptions: { type: cornerType, color: dotColor },
+                cornersDotOptions: { type: 'dot', color: dotColor },
                 imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 5, crossOrigin: 'anonymous' }
             });
             
@@ -153,30 +152,28 @@ export default function QrCodeGenerator() {
         }
     }, []);
 
-    // --- DEBOUNCED UPDATE ---
+    // --- SNAPSHOT UPDATES (STYLING + DATA) ---
     useEffect(() => {
-        const update = async () => {
-            if (!qrCodeRef.current) return;
-            setIsGenerating(true);
-            try {
-                await qrCodeRef.current.update({
-                    data: finalData || " ",
-                    image: logoUrl || undefined,
-                    dotsOptions: { color: dotColor, type: dotType },
-                    backgroundOptions: { color: bgColor },
-                    cornersSquareOptions: { color: dotColor, type: cornerType },
-                    cornersDotOptions: { color: dotColor, type: 'dot' }
-                });
-            } catch (e) {
-                console.error("QR Update Fail", e);
-            } finally {
-                setIsGenerating(false);
-            }
-        };
+        if (!qrCodeRef.current) return;
+        
+        setIsGenerating(true);
+        qrCodeRef.current.update({
+            data: debouncedFinalData || " ",
+            image: logoUrl || undefined,
+            dotsOptions: { color: dotColor, type: dotType },
+            backgroundOptions: { color: bgColor },
+            cornersSquareOptions: { color: dotColor, type: cornerType },
+            cornersDotOptions: { color: dotColor, type: 'dot' }
+        }).then(() => {
+            setIsGenerating(false);
+        }).catch(() => {
+            setIsGenerating(false);
+        });
+    }, [debouncedFinalData, logoUrl, dotColor, bgColor, dotType, cornerType]);
 
-        const timer = setTimeout(update, 100);
-        return () => clearTimeout(timer);
-    }, [finalData, logoUrl, dotColor, bgColor, dotType, cornerType]);
+    const activeLabel = useMemo(() => {
+        return customLabel || (qrType === 'url' ? rawInputData.replace(/^https?:\/\//i, '') : rawInputData.substring(0, 20));
+    }, [customLabel, qrType, rawInputData]);
 
     const handleLogoUpload = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -192,7 +189,6 @@ export default function QrCodeGenerator() {
 
     const getCompositeCanvas = async (): Promise<HTMLCanvasElement | null> => {
         if (!qrCodeRef.current) return null;
-        
         const blob = await qrCodeRef.current.getRawData('png');
         if (!blob) return null;
 
@@ -238,7 +234,6 @@ export default function QrCodeGenerator() {
         try {
             const composite = await getCompositeCanvas();
             if (!composite) throw new Error();
-
             if (ext === 'pdf') {
                 const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
                 const imgData = composite.toDataURL('image/jpeg', 1.0);
@@ -270,7 +265,7 @@ export default function QrCodeGenerator() {
     };
 
     const handleReset = () => {
-        setInputData("https://www.gr7imagepdf.com");
+        setRawInputData("https://www.gr7imagepdf.com");
         setLogoUrl(null);
         setDotColor("#000000");
         setBgColor("#ffffff");
@@ -316,7 +311,7 @@ export default function QrCodeGenerator() {
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[450px] md:min-h-[600px] flex flex-col items-center justify-center relative select-none">
                             <div className="flex flex-col items-center gap-10 w-full max-w-lg">
                                 <div 
-                                    className="p-4 md:p-8 rounded-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] border-4 border-white flex flex-col items-center justify-center relative transition-all duration-300"
+                                    className="p-4 md:p-8 rounded-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] border-4 border-white flex flex-col items-center justify-center relative transition-all duration-300 bg-white"
                                     style={{ 
                                         backgroundColor: bgColor, 
                                         border: `${borderWidth[0]}px solid ${borderColor}`,
@@ -369,14 +364,14 @@ export default function QrCodeGenerator() {
                                 </ScrollArea>
 
                                 <div className="space-y-6 text-left">
-                                    <TabsContent value="url" className="m-0 animate-in fade-in"><div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Website URL</Label><Input value={inputData} onChange={(e) => setInputData(e.target.value)} className="h-12 border-2 rounded-xl bg-background/50 font-bold" /></div></TabsContent>
+                                    <TabsContent value="url" className="m-0 animate-in fade-in"><div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Website URL</Label><Input value={rawInputData} onChange={(e) => setRawInputData(e.target.value)} className="h-12 border-2 rounded-xl bg-background/50 font-bold" /></div></TabsContent>
                                     
                                     <TabsContent value="upi" className="m-0 space-y-4 animate-in fade-in">
-                                        <Input value={upiData.pn} onChange={(e) => setUpiData(p => ({...p, pn: e.target.value}))} placeholder="Payee Name" className="h-10 border-2 rounded-xl" />
-                                        <Input value={upiData.pa} onChange={(e) => setUpiData(p => ({...p, pa: e.target.value}))} placeholder="UPI ID (e.g. user@bank)" className="h-10 border-2 rounded-xl" />
+                                        <Input value={rawUpiData.pn} onChange={(e) => setRawUpiData(p => ({...p, pn: e.target.value}))} placeholder="Payee Name" className="h-10 border-2 rounded-xl" />
+                                        <Input value={rawUpiData.pa} onChange={(e) => setRawUpiData(p => ({...p, pa: e.target.value}))} placeholder="UPI ID (e.g. user@bank)" className="h-10 border-2 rounded-xl" />
                                         <div className="grid grid-cols-2 gap-4">
-                                            <Input type="number" value={upiData.am} onChange={(e) => setUpiData(p => ({...p, am: e.target.value}))} placeholder="Amount (Optional)" className="h-10 border-2 rounded-xl" />
-                                            <Select value={upiData.cu} onValueChange={(v) => setUpiData(p => ({...p, cu: v}))}><SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl border-2"><SelectItem value="INR">INR (₹)</SelectItem><SelectItem value="USD">USD ($)</SelectItem></SelectContent></Select>
+                                            <Input type="number" value={rawUpiData.am} onChange={(e) => setRawUpiData(p => ({...p, am: e.target.value}))} placeholder="Amount (Optional)" className="h-10 border-2 rounded-xl" />
+                                            <Select value={rawUpiData.cu} onValueChange={(v) => setRawUpiData(p => ({...p, cu: v}))}><SelectTrigger className="h-10 border-2 font-bold rounded-xl"><SelectValue /></SelectTrigger><SelectContent className="rounded-xl border-2"><SelectItem value="INR">INR (₹)</SelectItem><SelectItem value="USD">USD ($)</SelectItem></SelectContent></Select>
                                         </div>
                                     </TabsContent>
 
@@ -384,28 +379,28 @@ export default function QrCodeGenerator() {
                                         <div className="space-y-2">
                                             <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Phone Number</Label>
                                             <div className="relative">
-                                                <Input value={whatsappData.phone} onChange={(e) => setWhatsappData(p => ({...p, phone: e.target.value}))} placeholder="e.g. 919876543210" className="h-12 pl-10 border-2 rounded-xl bg-background/50 font-bold" />
+                                                <Input value={rawWhatsappData.phone} onChange={(e) => setRawWhatsappData(p => ({...p, phone: e.target.value}))} placeholder="e.g. 919876543210" className="h-12 pl-10 border-2 rounded-xl bg-background/50 font-bold" />
                                                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
                                             </div>
                                         </div>
                                         <div className="space-y-2">
                                             <Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Pre-filled Message</Label>
-                                            <Textarea value={whatsappData.message} onChange={(e) => setWhatsappData(p => ({...p, message: e.target.value}))} placeholder="Hello! I'm interested in..." className="min-h-[80px] border-2 rounded-xl" />
+                                            <Textarea value={rawWhatsappData.message} onChange={(e) => setRawWhatsappData(p => ({...p, message: e.target.value}))} placeholder="Hello! I'm interested in..." className="min-h-[80px] border-2 rounded-xl" />
                                         </div>
                                     </TabsContent>
 
                                     <TabsContent value="wifi" className="m-0 space-y-4 animate-in fade-in">
-                                        <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">SSID (Network Name)</Label><Input value={wifiData.ssid} onChange={(e) => setWifiData(p => ({...p, ssid: e.target.value}))} placeholder="Network Name" className="h-10 border-2 rounded-xl" /></div>
-                                        <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Password</Label><Input type="password" value={wifiData.password} onChange={(e) => setWifiData(p => ({...p, password: e.target.value}))} placeholder="Network Password" className="h-10 border-2 rounded-xl" /></div>
+                                        <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">SSID (Network Name)</Label><Input value={rawWifiData.ssid} onChange={(e) => setRawWifiData(p => ({...p, ssid: e.target.value}))} placeholder="Network Name" className="h-10 border-2 rounded-xl" /></div>
+                                        <div className="space-y-2"><Label className="text-[10px] font-black uppercase text-muted-foreground opacity-60">Password</Label><Input type="password" value={rawWifiData.password} onChange={(e) => setRawWifiData(p => ({...p, password: e.target.value}))} placeholder="Network Password" className="h-10 border-2 rounded-xl" /></div>
                                     </TabsContent>
 
                                     <TabsContent value="email" className="m-0 space-y-4 animate-in fade-in">
-                                        <Input value={emailData.to} onChange={(e) => setEmailData(p => ({...p, to: e.target.value}))} placeholder="Recipient Email" className="h-10 border-2 rounded-xl" />
-                                        <Input value={emailData.subject} onChange={(e) => setEmailData(p => ({...p, subject: e.target.value}))} placeholder="Subject" className="h-10 border-2 rounded-xl" />
-                                        <Textarea value={emailData.body} onChange={(e) => setEmailData(p => ({...p, body: e.target.value}))} placeholder="Message body..." className="min-h-[80px] border-2 rounded-xl" />
+                                        <Input value={rawEmailData.to} onChange={(e) => setRawEmailData(p => ({...p, to: e.target.value}))} placeholder="Recipient Email" className="h-10 border-2 rounded-xl" />
+                                        <Input value={rawEmailData.subject} onChange={(e) => setRawEmailData(p => ({...p, subject: e.target.value}))} placeholder="Subject" className="h-10 border-2 rounded-xl" />
+                                        <Textarea value={rawEmailData.body} onChange={(e) => setRawEmailData(p => ({...p, body: e.target.value}))} placeholder="Message body..." className="min-h-[80px] border-2 rounded-xl" />
                                     </TabsContent>
 
-                                    <TabsContent value="text" className="m-0 animate-in fade-in"><Textarea value={inputData} onChange={(e) => setInputData(e.target.value)} className="min-h-[100px] border-2 rounded-2xl p-4 font-bold" placeholder="Enter custom text..." /></TabsContent>
+                                    <TabsContent value="text" className="m-0 animate-in fade-in"><Textarea value={rawInputData} onChange={(e) => setRawInputData(e.target.value)} className="min-h-[100px] border-2 rounded-2xl p-4 font-bold" placeholder="Enter custom text..." /></TabsContent>
 
                                     <div className="space-y-8 pt-8 border-t border-dashed">
                                         <div className="space-y-4">
