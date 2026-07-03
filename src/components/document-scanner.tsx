@@ -148,7 +148,9 @@ export default function DocumentScanner() {
   const [watermarkText, setWatermarkText] = useState("");
   const [watermarkOpacity, setWatermarkOpacity] = useState([30]);
   const [watermarkSize, setWatermarkSize] = useState([60]);
-  const [watermarkMargin, setWatermarkMargin] = useState([40]);
+  const [watermarkMarginX, setWatermarkMarginX] = useState([40]);
+  const [watermarkMarginY, setWatermarkMarginY] = useState([40]);
+  const [watermarkRotation, setWatermarkRotation] = useState([45]);
   const [watermarkPosition, setWatermarkPosition] = useState<WatermarkPosition>('center-center');
 
   // Security States
@@ -189,7 +191,6 @@ export default function DocumentScanner() {
     }
   }, []);
 
-  // --- AUTOMATIC DOCUMENT DETECTION ENGINE (OpenCV.js) ---
   const autoDetectDocument = async (imageSrc: string): Promise<Point[] | null> => {
     return new Promise((resolve) => {
         if (!(window as any).cv || !(window as any).cv.Mat) return resolve(null);
@@ -208,12 +209,10 @@ export default function DocumentScanner() {
 
             cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
             cv.GaussianBlur(gray, blurred, new cv.Size(7, 7), 0);
-            
             cv.Canny(blurred, edges, 50, 150);
             
             const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(5, 5));
             cv.dilate(edges, dilated, kernel);
-            
             cv.findContours(dilated, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
 
             let maxArea = 0;
@@ -263,7 +262,6 @@ export default function DocumentScanner() {
     });
   };
 
-  // --- FILTER ENGINE LOGIC ---
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
     return new Promise((resolve, reject) => {
         const img = new Image();
@@ -353,7 +351,6 @@ export default function DocumentScanner() {
                 finalCanvas = normCanvas;
             }
 
-            // --- BORDER STAGE ---
             if (showBorder) {
                 const borderCtx = finalCanvas.getContext('2d')!;
                 const bp = Math.max(1, Math.floor(finalCanvas.width * 0.005));
@@ -362,7 +359,6 @@ export default function DocumentScanner() {
                 borderCtx.strokeRect(0, 0, finalCanvas.width, finalCanvas.height);
             }
 
-            // --- WATERMARK STAGE ---
             if (watermarkText.trim()) {
                 const wCtx = finalCanvas.getContext('2d')!;
                 wCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -370,7 +366,8 @@ export default function DocumentScanner() {
                 wCtx.filter = 'none';
 
                 const mappedFontSize = Math.floor((watermarkSize[0] / 1000) * finalCanvas.width);
-                const mappedMargin = Math.floor((watermarkMargin[0] / 1000) * finalCanvas.width);
+                const mappedMarginX = Math.floor((watermarkMarginX[0] / 1000) * finalCanvas.width);
+                const mappedMarginY = Math.floor((watermarkMarginY[0] / 1000) * finalCanvas.width);
                 
                 wCtx.font = `bold ${mappedFontSize}px sans-serif`;
                 wCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
@@ -381,23 +378,23 @@ export default function DocumentScanner() {
                 let textAlign: CanvasTextAlign = 'center';
 
                 switch (watermarkPosition) {
-                    case 'top-left': x = mappedMargin; y = mappedMargin + mappedFontSize/2; textAlign = 'left'; break;
-                    case 'top-center': x = finalCanvas.width / 2; y = mappedMargin + mappedFontSize/2; textAlign = 'center'; break;
-                    case 'top-right': x = finalCanvas.width - mappedMargin; y = mappedMargin + mappedFontSize/2; textAlign = 'right'; break;
-                    case 'center-left': x = mappedMargin; y = finalCanvas.height / 2; textAlign = 'left'; break;
+                    case 'top-left': x = mappedMarginX; y = mappedMarginY + mappedFontSize/2; textAlign = 'left'; break;
+                    case 'top-center': x = finalCanvas.width / 2; y = mappedMarginY + mappedFontSize/2; textAlign = 'center'; break;
+                    case 'top-right': x = finalCanvas.width - mappedMarginX; y = mappedMarginY + mappedFontSize/2; textAlign = 'right'; break;
+                    case 'center-left': x = mappedMarginX; y = finalCanvas.height / 2; textAlign = 'left'; break;
                     case 'center-center': x = finalCanvas.width / 2; y = finalCanvas.height / 2; textAlign = 'center'; break;
-                    case 'center-right': x = finalCanvas.width - mappedMargin; y = finalCanvas.height / 2; textAlign = 'right'; break;
-                    case 'bottom-left': x = mappedMargin; y = finalCanvas.height - mappedMargin - mappedFontSize/2; textAlign = 'left'; break;
-                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - mappedMargin - mappedFontSize/2; textAlign = 'center'; break;
-                    case 'bottom-right': x = finalCanvas.width - mappedMargin; y = finalCanvas.height - mappedMargin - mappedFontSize/2; textAlign = 'right'; break;
+                    case 'center-right': x = finalCanvas.width - mappedMarginX; y = finalCanvas.height / 2; textAlign = 'right'; break;
+                    case 'bottom-left': x = mappedMarginX; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'left'; break;
+                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'center'; break;
+                    case 'bottom-right': x = finalCanvas.width - mappedMarginX; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'right'; break;
                 }
 
                 wCtx.textAlign = textAlign;
-                if (watermarkPosition === 'center-center') {
-                    wCtx.save(); wCtx.translate(x, y); wCtx.rotate(-Math.PI / 4); wCtx.fillText(text, 0, 0); wCtx.restore();
-                } else {
-                    wCtx.fillText(text, x, y);
-                }
+                wCtx.save();
+                wCtx.translate(x, y);
+                wCtx.rotate((-watermarkRotation[0] * Math.PI) / 180);
+                wCtx.fillText(text, 0, 0);
+                wCtx.restore();
             }
 
             resolve(finalCanvas.toDataURL('image/jpeg', 0.95));
@@ -490,7 +487,7 @@ export default function DocumentScanner() {
           }, 50);
           return () => clearTimeout(timer);
       }
-  }, [activeFilter, brightness, contrast, rotation, showBorder, watermarkText, watermarkOpacity, watermarkSize, watermarkMargin, watermarkPosition, flattenedSrc, stage]);
+  }, [activeFilter, brightness, contrast, rotation, showBorder, watermarkText, watermarkOpacity, watermarkSize, watermarkMarginX, watermarkMarginY, watermarkRotation, watermarkPosition, flattenedSrc, stage]);
 
   const startCamera = async () => {
     setStage('camera');
@@ -952,8 +949,19 @@ export default function DocumentScanner() {
                                         </div>
 
                                         <div className="space-y-3">
-                                            <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Corner Margin</Label><Badge className="text-[8px] h-4">{watermarkMargin[0]}</Badge></div>
-                                            <Slider min={0} max={200} step={2} value={watermarkMargin} onValueChange={setWatermarkMargin} />
+                                            <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Rotation</Label><Badge className="text-[8px] h-4">{watermarkRotation[0]}°</Badge></div>
+                                            <Slider min={-180} max={180} step={1} value={watermarkRotation} onValueChange={setWatermarkRotation} />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Margin X</Label><Badge className="text-[8px] h-4">{watermarkMarginX[0]}</Badge></div>
+                                                <Slider min={0} max={500} step={2} value={watermarkMarginX} onValueChange={setWatermarkMarginX} />
+                                            </div>
+                                            <div className="space-y-3">
+                                                <div className="flex justify-between items-center px-1"><Label className="text-[9px] font-black uppercase opacity-50">Margin Y</Label><Badge className="text-[8px] h-4">{watermarkMarginY[0]}</Badge></div>
+                                                <Slider min={0} max={500} step={2} value={watermarkMarginY} onValueChange={setWatermarkMarginY} />
+                                            </div>
                                         </div>
 
                                         <div className="space-y-3">
