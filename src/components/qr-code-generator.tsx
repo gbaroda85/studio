@@ -327,7 +327,7 @@ export default function QrCodeGenerator() {
                             </div>
                             <div className="flex items-center gap-3">
                                 {isGenerating && <Loader2 className="size-3 animate-spin text-primary opacity-50" />}
-                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md uppercase">RENDER READY</Badge>
+                                <Badge className="bg-primary text-white font-black text-[10px] px-3 py-1 rounded-full border-2 border-white shadow-md uppercase">RENDER READY</Badge>
                             </div>
                         </CardHeader>
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[500px] flex flex-col items-center justify-center relative select-none">
