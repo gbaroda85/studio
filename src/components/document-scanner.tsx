@@ -351,27 +351,28 @@ export default function DocumentScanner() {
                 finalCanvas = normCanvas;
             }
 
+            const finalCtx = finalCanvas.getContext('2d')!;
+            // CRITICAL: Reset composite operation to ensure black border is visible on white background
+            finalCtx.globalCompositeOperation = 'source-over';
+
             if (showBorder) {
-                const borderCtx = finalCanvas.getContext('2d')!;
                 const bp = Math.max(1, Math.floor(finalCanvas.width * 0.005));
-                borderCtx.strokeStyle = "#000000";
-                borderCtx.lineWidth = bp * 2;
-                borderCtx.strokeRect(0, 0, finalCanvas.width, finalCanvas.height);
+                finalCtx.strokeStyle = "#000000";
+                finalCtx.lineWidth = bp * 2;
+                finalCtx.strokeRect(0, 0, finalCanvas.width, finalCanvas.height);
             }
 
             if (watermarkText.trim()) {
-                const wCtx = finalCanvas.getContext('2d')!;
-                wCtx.setTransform(1, 0, 0, 1, 0, 0);
-                wCtx.globalCompositeOperation = 'source-over';
-                wCtx.filter = 'none';
+                finalCtx.setTransform(1, 0, 0, 1, 0, 0);
+                finalCtx.filter = 'none';
 
                 const mappedFontSize = Math.floor((watermarkSize[0] / 1000) * finalCanvas.width);
                 const mappedMarginX = Math.floor((watermarkMarginX[0] / 1000) * finalCanvas.width);
                 const mappedMarginY = Math.floor((watermarkMarginY[0] / 1000) * finalCanvas.width);
                 
-                wCtx.font = `bold ${mappedFontSize}px sans-serif`;
-                wCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
-                wCtx.textBaseline = 'middle';
+                finalCtx.font = `bold ${mappedFontSize}px sans-serif`;
+                finalCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
+                finalCtx.textBaseline = 'middle';
                 
                 const text = watermarkText.toUpperCase();
                 let x = 0, y = 0;
@@ -389,12 +390,12 @@ export default function DocumentScanner() {
                     case 'bottom-right': x = finalCanvas.width - mappedMarginX; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'right'; break;
                 }
 
-                wCtx.textAlign = textAlign;
-                wCtx.save();
-                wCtx.translate(x, y);
-                wCtx.rotate((-watermarkRotation[0] * Math.PI) / 180);
-                wCtx.fillText(text, 0, 0);
-                wCtx.restore();
+                finalCtx.textAlign = textAlign;
+                finalCtx.save();
+                finalCtx.translate(x, y);
+                finalCtx.rotate((-watermarkRotation[0] * Math.PI) / 180);
+                finalCtx.fillText(text, 0, 0);
+                finalCtx.restore();
             }
 
             resolve(finalCanvas.toDataURL('image/jpeg', 0.95));
