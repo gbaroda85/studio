@@ -84,7 +84,7 @@ const StarIcons = () => (
 export default function QrCodeGenerator() {
     const { toast } = useToast();
     
-    // 1. RAW INPUT STATES (FOR INSTANT UI RESPONSE)
+    // 1. INPUT STATES (FOR INSTANT UI RESPONSE)
     const [qrType, setQrType] = useState<QRType>('url');
     const [rawInputData, setRawInputData] = useState("https://www.gr7imagepdf.com");
     const [rawWifiData, setRawWifiData] = useState({ ssid: '', password: '', encryption: 'WPA' });
@@ -92,10 +92,8 @@ export default function QrCodeGenerator() {
     const [rawEmailData, setRawEmailData] = useState({ to: '', subject: '', body: '' });
     const [rawUpiData, setRawUpiData] = useState({ pa: '', pn: '', am: '', tn: '', cu: 'INR' });
 
-    // 2. DEBOUNCED DATA STATE (USED BY QR ENGINE)
+    // 2. ENGINE STATES
     const [debouncedFinalData, setDebouncedFinalData] = useState(rawInputData);
-
-    // 3. DESIGN STATES
     const [dotColor, setDotColor] = useState("#000000");
     const [bgColor, setBgColor] = useState("#ffffff");
     const [dotType, setDotType] = useState<DotType>("rounded");
@@ -126,12 +124,12 @@ export default function QrCodeGenerator() {
 
         const timer = setTimeout(() => {
             setDebouncedFinalData(final || " ");
-        }, 400); 
+        }, 350); // Industrial standard debounce
 
         return () => clearTimeout(timer);
     }, [qrType, rawInputData, rawWifiData, rawWhatsappData, rawEmailData, rawUpiData]);
 
-    // --- INITIALIZE ENGINE ONCE ---
+    // --- INITIALIZE PERSISTENT ENGINE ---
     useEffect(() => {
         if (typeof window !== 'undefined' && !qrCodeRef.current) {
             qrCodeRef.current = new QRCodeStyling({
@@ -143,22 +141,23 @@ export default function QrCodeGenerator() {
                 backgroundOptions: { color: bgColor },
                 cornersSquareOptions: { type: cornerType, color: dotColor },
                 cornersDotOptions: { type: 'dot', color: dotColor },
-                imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 5, crossOrigin: 'anonymous' }
+                imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 8, crossOrigin: 'anonymous' }
             });
             
             if (qrContainerRef.current) {
+                // Ensure container is empty before first append
+                qrContainerRef.current.innerHTML = "";
                 qrCodeRef.current.append(qrContainerRef.current);
             }
         }
     }, []);
 
-    // --- SNAPSHOT UPDATES (STYLING + DATA) ---
+    // --- SNAPSHOT UPDATES ---
     useEffect(() => {
         if (!qrCodeRef.current) return;
         
         setIsGenerating(true);
-        // FIX: Some versions of qr-code-styling don't return a Promise on update()
-        // Removing .then() to prevent "Cannot read properties of undefined" crash
+        // Using synchronous update to prevent "reading then of undefined" crash
         qrCodeRef.current.update({
             data: debouncedFinalData,
             image: logoUrl || undefined,
@@ -168,11 +167,8 @@ export default function QrCodeGenerator() {
             cornersDotOptions: { color: dotColor, type: 'dot' }
         });
         
-        // Use a small timeout to simulate the generating state for UX without relying on a promise
-        const timer = setTimeout(() => {
-            setIsGenerating(false);
-        }, 100);
-        
+        // Reset generating state after a short cycle
+        const timer = setTimeout(() => setIsGenerating(false), 50);
         return () => clearTimeout(timer);
     }, [debouncedFinalData, logoUrl, dotColor, bgColor, dotType, cornerType]);
 
@@ -206,7 +202,7 @@ export default function QrCodeGenerator() {
         const ctx = canvas.getContext('2d');
         if (!ctx) return null;
 
-        const baseSize = 800;
+        const baseSize = 800; // Export resolution
         const bWidth = (borderWidth[0] / 100) * baseSize;
         const labelSpace = showLabel ? 60 : 0;
         
@@ -282,8 +278,6 @@ export default function QrCodeGenerator() {
         setCustomLabel("");
     };
 
-    const selectedItem = debouncedFinalData;
-
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20 mx-auto text-left">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
@@ -292,7 +286,7 @@ export default function QrCodeGenerator() {
                         <Settings2 className="size-5 md:size-6" />
                     </div>
                     <div>
-                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter">Studio <span className="text-primary">Panel</span></h2>
+                        <h2 className="text-lg md:text-2xl font-black uppercase tracking-tighter leading-none text-left">Studio <span className="text-primary">Panel</span></h2>
                     </div>
                 </div>
                 <div className="flex gap-2 w-full md:w-auto">
@@ -303,6 +297,7 @@ export default function QrCodeGenerator() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
                 {/* Main Viewport */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
@@ -350,6 +345,7 @@ export default function QrCodeGenerator() {
                     </Card>
                 </div>
 
+                {/* Sidebar: Controls */}
                 <div className="lg:col-span-5 space-y-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[3rem] h-full flex flex-col">
                         <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
@@ -479,22 +475,6 @@ export default function QrCodeGenerator() {
                                 </div>
                             </Tabs>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 shrink-0">
-                            <Button 
-                                size="lg" 
-                                className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none w-full active:scale-95 disabled:opacity-50" 
-                                onClick={() => handleDownload('png')} 
-                                disabled={isProcessing}
-                            >
-                                <StarIcons />
-                                <div className="absolute left-6 w-0.5 h-10 bg-white/40 rounded-full" />
-                                <span className="flex-1 px-10 text-center tracking-widest text-lg md:text-xl font-black uppercase">DOWNLOAD QR</span>
-                                <div className="bg-white h-full pl-8 pr-10 flex items-center justify-center text-[#00aeef] transition-all group-hover:pl-9 group-hover:pr-11 relative" style={{ clipPath: 'polygon(20% 0, 100% 0, 100% 100%, 0% 100%)', marginLeft: '-15px' }}>
-                                    {isProcessing ? <Loader2 className="size-8 animate-spin" /> : <Download className="size-8 group-hover:scale-110 transition-transform" />}
-                                    <div className="absolute right-4 w-0.5 h-8 bg-[#00aeef]/20 rounded-full" />
-                                </div>
-                            </Button>
-                        </CardFooter>
                     </Card>
                 </div>
             </div>
