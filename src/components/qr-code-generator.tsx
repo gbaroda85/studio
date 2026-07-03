@@ -85,6 +85,7 @@ export default function QrCodeGenerator() {
     const [qrType, setQrType] = useState<QRType>('url');
     const [inputData, setInputData] = useState("https://www.gr7imagepdf.com");
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
     
     // Type-specific states
     const [wifiData, setWifiData] = useState({ ssid: '', password: '', encryption: 'WPA' });
@@ -99,7 +100,7 @@ export default function QrCodeGenerator() {
     const [cornerType, setCornerType] = useState<CornerSquareType>("extra-rounded");
     const [logoUrl, setLogoUrl] = useState<string | null>(null);
 
-    // New Features: Border and Label
+    // Border and Label
     const [borderWidth, setBorderWidth] = useState([0]);
     const [borderColor, setBorderColor] = useState("#000000");
     const [showLabel, setShowLabel] = useState(false);
@@ -109,7 +110,7 @@ export default function QrCodeGenerator() {
     const qrCodeRef = useRef<QRCodeStyling | null>(null);
     const logoInputRef = useRef<HTMLInputElement>(null);
 
-    // --- REFINED DATA LOGIC ---
+    // --- DATA LOGIC ---
     const finalData = useMemo(() => {
         if (qrType === 'url') return inputData;
         if (qrType === 'text') return inputData;
@@ -131,12 +132,14 @@ export default function QrCodeGenerator() {
         return customLabel || (qrType === 'url' ? inputData.replace(/^https?:\/\//i, '') : inputData.substring(0, 20));
     }, [customLabel, qrType, inputData]);
 
-    // --- ZERO-BLINK ENGINE ---
-    const updateQR = useCallback(() => {
+    // --- OPTIMIZED UPDATE ENGINE ---
+    const updateQR = useCallback(async () => {
         if (!qrCodeRef.current) return;
-
-        requestAnimationFrame(() => {
-            qrCodeRef.current?.update({
+        
+        setIsGenerating(true);
+        try {
+            // Using a high-performance update cycle
+            await qrCodeRef.current.update({
                 data: finalData || " ",
                 image: logoUrl || undefined,
                 dotsOptions: { color: dotColor, type: dotType },
@@ -151,15 +154,21 @@ export default function QrCodeGenerator() {
                     crossOrigin: 'anonymous'
                 }
             });
-        });
+        } catch (e) {
+            console.error("QR Update Error", e);
+        } finally {
+            setIsGenerating(false);
+        }
     }, [finalData, logoUrl, dotColor, bgColor, dotType, cornerType]);
 
+    // Initial load
     useEffect(() => {
         if (typeof window !== 'undefined' && !qrCodeRef.current) {
+            // PERFORMANCE: Using 'canvas' for live preview is significantly faster than SVG
             qrCodeRef.current = new QRCodeStyling({
                 width: 600, 
                 height: 600,
-                type: 'svg',
+                type: 'canvas',
                 dotsOptions: { type: 'rounded', color: '#000000' },
                 backgroundOptions: { color: '#ffffff' }
             });
@@ -170,8 +179,9 @@ export default function QrCodeGenerator() {
         }
     }, []);
 
+    // Optimized Debounce for Typing
     useEffect(() => {
-        const timer = setTimeout(updateQR, 50);
+        const timer = setTimeout(updateQR, 150);
         return () => clearTimeout(timer);
     }, [updateQR]);
 
@@ -179,7 +189,10 @@ export default function QrCodeGenerator() {
         const file = e.target.files?.[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = (event) => setLogoUrl(event.target?.result as string);
+            reader.onload = (event) => {
+                setLogoUrl(event.target?.result as string);
+                toast({ title: "Logo Uploaded", description: "Processing high-res logo..." });
+            };
             reader.readAsDataURL(file);
         }
     };
@@ -187,6 +200,7 @@ export default function QrCodeGenerator() {
     const getCompositeCanvas = async (): Promise<HTMLCanvasElement | null> => {
         if (!qrCodeRef.current) return null;
         
+        // High quality export
         const blob = await qrCodeRef.current.getRawData('png');
         if (!blob) return null;
 
@@ -286,7 +300,7 @@ export default function QrCodeGenerator() {
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20 mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 text-left">
                     <div className="size-10 md:size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-lg border border-primary/20 shrink-0">
                         <Settings2 className="size-5 md:size-6" />
                     </div>
@@ -306,25 +320,29 @@ export default function QrCodeGenerator() {
                 
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
-                        <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between">
+                        <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between shrink-0">
                             <div className="flex items-center gap-2">
                                 <Eye className="h-4 w-4 text-primary" />
                                 <CardTitle className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Studio Viewport</CardTitle>
                             </div>
-                            <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md uppercase">RENDER READY</Badge>
+                            <div className="flex items-center gap-3">
+                                {isGenerating && <Loader2 className="size-3 animate-spin text-primary opacity-50" />}
+                                <Badge className="bg-primary text-white font-black text-[9px] px-3 py-1 rounded-full border-2 border-white shadow-md uppercase">RENDER READY</Badge>
+                            </div>
                         </CardHeader>
                         <CardContent className="p-8 md:p-12 flex-1 bg-slate-100 dark:bg-slate-900/50 shadow-inner min-h-[500px] flex flex-col items-center justify-center relative select-none">
                             <div className="flex flex-col items-center gap-10 w-full max-w-lg">
                                 
                                 <div 
-                                    className="p-4 md:p-8 rounded-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] border-4 border-white flex flex-col items-center justify-center relative group overflow-hidden transition-all duration-300"
+                                    className="p-4 md:p-8 rounded-[2.5rem] shadow-[0_45px_100px_-20px_rgba(0,0,0,0.4)] border-4 border-white flex flex-col items-center justify-center relative group overflow-hidden transition-all duration-200"
                                     style={{ 
                                         backgroundColor: bgColor, 
                                         border: `${borderWidth[0]}px solid ${borderColor}`,
                                         paddingBottom: showLabel ? '40px' : '30px'
                                     }}
                                 >
-                                    <div ref={qrContainerRef} className="size-[280px] md:size-[320px] transition-transform group-hover:scale-[1.02] duration-500 flex items-center justify-center" />
+                                    {/* The QR Container - Canvas based for performance */}
+                                    <div ref={qrContainerRef} className="size-[280px] md:size-[320px] transition-transform group-hover:scale-[1.01] duration-300 flex items-center justify-center" />
                                     
                                     {showLabel && (
                                         <div className="absolute bottom-4 left-0 right-0 text-center animate-in slide-in-from-bottom-2">
@@ -355,12 +373,12 @@ export default function QrCodeGenerator() {
 
                 <div className="lg:col-span-5 space-y-6">
                     <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-[3rem]">
-                        <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8">
+                        <CardHeader className="bg-primary/5 border-b border-white/10 p-6 md:p-8 shrink-0">
                             <CardTitle className="text-base md:text-lg flex items-center gap-3 font-black uppercase tracking-tighter text-primary text-left">
                                 <Palette className="size-4 md:size-5 text-primary" /> Configuration
                             </CardTitle>
                         </CardHeader>
-                        <CardContent className="p-6 md:p-8">
+                        <CardContent className="p-6 md:p-8 flex-1 overflow-y-auto custom-scrollbar">
                             <Tabs value={qrType} onValueChange={(v) => setQrType(v as QRType)} className="w-full">
                                 <ScrollArea className="w-full whitespace-nowrap mb-8">
                                     <TabsList className="flex h-auto w-max p-1.5 bg-muted/40 rounded-2xl border-2">
@@ -505,7 +523,7 @@ export default function QrCodeGenerator() {
                                                     {logoUrl ? <CheckCircle2 className="size-4 mr-2 text-green-500" /> : <Plus className="size-4 mr-2 group-hover:scale-125 transition-transform" />} 
                                                     {logoUrl ? "CHANGE LOGO" : "UPLOAD LOGO"}
                                                 </Button>
-                                                {logoUrl && <Button variant="ghost" onClick={() => setLogoUrl(null)} className="h-8 text-rose-500 font-black text-[9px] uppercase"><Trash2 className="size-3 mr-1.5"/> REMOVE LOGO</Button>}
+                                                {logoUrl && <Button variant="ghost" onClick={() => setLogoUrl(null)} className="h-8 text-rose-500 font-black text-[9px] uppercase transition-colors hover:bg-rose-50"><Trash2 className="size-3 mr-1.5"/> REMOVE LOGO</Button>}
                                                 <input ref={logoInputRef} type="file" className="hidden" accept="image/*" onChange={handleLogoUpload} />
                                             </div>
                                         </div>
@@ -513,7 +531,7 @@ export default function QrCodeGenerator() {
                                 </div>
                             </Tabs>
                         </CardContent>
-                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10">
+                        <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 shrink-0">
                             <Button 
                                 size="lg" 
                                 className="relative flex items-center justify-between gap-0 p-0 overflow-hidden bg-[#00aeef] hover:bg-[#009bd1] text-white font-black rounded-xl transition-all duration-300 group h-16 md:h-20 shadow-[0_8px_20px_-10px_rgba(0,174,239,0.5)] border-none w-full active:scale-95 disabled:opacity-50" 
