@@ -125,8 +125,8 @@ export default function QrCodeGenerator() {
         }
 
         const timer = setTimeout(() => {
-            setDebouncedFinalData(final);
-        }, 300); // 300ms debounce for typing
+            setDebouncedFinalData(final || " ");
+        }, 400); 
 
         return () => clearTimeout(timer);
     }, [qrType, rawInputData, rawWifiData, rawWhatsappData, rawEmailData, rawUpiData]);
@@ -138,7 +138,7 @@ export default function QrCodeGenerator() {
                 width: 600,
                 height: 600,
                 type: 'canvas',
-                data: debouncedFinalData,
+                data: debouncedFinalData || " ",
                 dotsOptions: { type: dotType, color: dotColor },
                 backgroundOptions: { color: bgColor },
                 cornersSquareOptions: { type: cornerType, color: dotColor },
@@ -157,18 +157,23 @@ export default function QrCodeGenerator() {
         if (!qrCodeRef.current) return;
         
         setIsGenerating(true);
+        // FIX: Some versions of qr-code-styling don't return a Promise on update()
+        // Removing .then() to prevent "Cannot read properties of undefined" crash
         qrCodeRef.current.update({
-            data: debouncedFinalData || " ",
+            data: debouncedFinalData,
             image: logoUrl || undefined,
             dotsOptions: { color: dotColor, type: dotType },
             backgroundOptions: { color: bgColor },
             cornersSquareOptions: { color: dotColor, type: cornerType },
             cornersDotOptions: { color: dotColor, type: 'dot' }
-        }).then(() => {
-            setIsGenerating(false);
-        }).catch(() => {
-            setIsGenerating(false);
         });
+        
+        // Use a small timeout to simulate the generating state for UX without relying on a promise
+        const timer = setTimeout(() => {
+            setIsGenerating(false);
+        }, 100);
+        
+        return () => clearTimeout(timer);
     }, [debouncedFinalData, logoUrl, dotColor, bgColor, dotType, cornerType]);
 
     const activeLabel = useMemo(() => {
@@ -277,6 +282,8 @@ export default function QrCodeGenerator() {
         setCustomLabel("");
     };
 
+    const selectedItem = debouncedFinalData;
+
     return (
         <div className="w-full max-w-7xl animate-in fade-in duration-700 px-4 flex flex-col gap-6 pb-20 mx-auto text-left">
             <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
@@ -296,6 +303,7 @@ export default function QrCodeGenerator() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                {/* Main Viewport */}
                 <div className="lg:col-span-7 flex flex-col gap-6">
                     <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                         <CardHeader className="bg-muted/30 border-b py-3 px-6 flex flex-row items-center justify-between shrink-0">
