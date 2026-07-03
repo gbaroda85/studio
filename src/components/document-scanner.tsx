@@ -83,6 +83,7 @@ interface ScannedPage {
     originalIndex: number;
     rotation: number;
     hasBorder?: boolean;
+    borderSize?: number;
 }
 
 type Stage = 'viewfinder' | 'camera' | 'adjust' | 'studio';
@@ -143,6 +144,7 @@ export default function DocumentScanner() {
   const [contrast, setContrast] = useState([100]);
   const [rotation, setRotation] = useState(0);
   const [showBorder, setShowBorder] = useState(false);
+  const [borderWidth, setBorderWidth] = useState([5]); // Default thickness (0.5% scale)
 
   // Watermark States
   const [watermarkText, setWatermarkText] = useState("");
@@ -356,7 +358,8 @@ export default function DocumentScanner() {
             finalCtx.globalCompositeOperation = 'source-over';
 
             if (showBorder) {
-                const bp = Math.max(1, Math.floor(finalCanvas.width * 0.005));
+                // Map borderWidth array value (0-20) to actual pixels based on canvas width
+                const bp = (borderWidth[0] / 1000) * finalCanvas.width;
                 finalCtx.strokeStyle = "#000000";
                 finalCtx.lineWidth = bp * 2;
                 finalCtx.strokeRect(0, 0, finalCanvas.width, finalCanvas.height);
@@ -488,7 +491,7 @@ export default function DocumentScanner() {
           }, 50);
           return () => clearTimeout(timer);
       }
-  }, [activeFilter, brightness, contrast, rotation, showBorder, watermarkText, watermarkOpacity, watermarkSize, watermarkMarginX, watermarkMarginY, watermarkRotation, watermarkPosition, flattenedSrc, stage]);
+  }, [activeFilter, brightness, contrast, rotation, showBorder, borderWidth, watermarkText, watermarkOpacity, watermarkSize, watermarkMarginX, watermarkMarginY, watermarkRotation, watermarkPosition, flattenedSrc, stage]);
 
   const startCamera = async () => {
     setStage('camera');
@@ -555,7 +558,7 @@ export default function DocumentScanner() {
   const handleConfirmSave = () => {
       if (!liveResultSrc) return;
       const currentPage = pendingPages[activePendingIndex];
-      const newPage: ScannedPage = { ...currentPage, processedSrc: liveResultSrc, isScanned: true, points: [...points], rotation, hasBorder: showBorder };
+      const newPage: ScannedPage = { ...currentPage, processedSrc: liveResultSrc, isScanned: true, points: [...points], rotation, hasBorder: showBorder, borderSize: borderWidth[0] };
       
       setScannedPages(prev => [...prev, newPage].sort((a,b) => a.originalIndex - b.originalIndex));
       const remainingPending = pendingPages.filter(p => p.id !== currentPage.id);
@@ -583,6 +586,7 @@ export default function DocumentScanner() {
       setPoints(page.points);
       setRotation(page.rotation);
       setShowBorder(!!page.hasBorder);
+      setBorderWidth([page.borderSize || 5]);
       setActivePendingIndex(pendingPages.length); 
       setStage('adjust');
       setLiveResultSrc(null); setFlattenedSrc(null);
@@ -913,12 +917,23 @@ export default function DocumentScanner() {
                                 <div className="flex justify-between items-center px-1"><Label className="text-[10px] font-black uppercase opacity-60">Contrast</Label><Badge variant="secondary" className="font-mono text-[9px]">{contrast[0]}%</Badge></div>
                                 <Slider min={50} max={150} step={1} value={contrast} onValueChange={setContrast} />
                             </div>
-                            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border-2 border-dashed">
-                                <div className="flex items-center gap-3">
-                                    <Square className={cn("size-4", showBorder ? "text-primary" : "text-muted-foreground/30")} />
-                                    <span className="text-[10px] font-black uppercase opacity-60">Page Border</span>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between p-4 bg-muted/30 rounded-2xl border-2 border-dashed">
+                                    <div className="flex items-center gap-3">
+                                        <Square className={cn("size-4", showBorder ? "text-primary" : "text-muted-foreground/30")} />
+                                        <span className="text-[10px] font-black uppercase opacity-60">Page Border</span>
+                                    </div>
+                                    <Switch checked={showBorder} onCheckedChange={setShowBorder} />
                                 </div>
-                                <Switch checked={showBorder} onCheckedChange={setShowBorder} />
+                                {showBorder && (
+                                    <div className="space-y-4 px-2 animate-in slide-in-from-top-2">
+                                        <div className="flex justify-between items-center">
+                                            <Label className="text-[9px] font-black uppercase opacity-40">Border Thickness</Label>
+                                            <Badge variant="secondary" className="font-mono text-[8px]">{borderWidth[0]} units</Badge>
+                                        </div>
+                                        <Slider min={1} max={25} step={1} value={borderWidth} onValueChange={setBorderWidth} />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
