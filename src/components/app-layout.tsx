@@ -246,48 +246,52 @@ function NavDropdown({
 }) {
   const { t } = useLanguage();
   const pathname = usePathname();
-  const [hoverOpen, setHoverOpen] = useState(false);
-  const [justClosed, setJustClosed] = useState(false);
+  
+  const [isHovering, setIsHovering] = useState(false);
+  const [isForceClosed, setIsForceClosed] = useState(false);
 
-  // The dropdown is open if pinned (activeMenu matches) OR hovered (and not just manually closed)
   const isPinned = activeMenu === category.name;
-  const isOpen = isPinned || (hoverOpen && !justClosed);
+  
+  // The dropdown is open if pinned OR hovering (but not if explicitly closed via click while mouse is still over it)
+  const isOpen = isPinned || (isHovering && !isForceClosed);
 
   const handleToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
     if (isPinned) {
-      // If already pinned, unpin and set safety flag to prevent immediate hover re-open
+      // Toggle OFF and prevent immediate re-open via hover
       setActiveMenu(null);
-      setHoverOpen(false);
-      setJustClosed(true);
+      setIsForceClosed(true);
     } else {
-      // Pin it now
+      // Toggle ON (Pins this category and automatically closes any other pinned one)
       setActiveMenu(category.name);
-      setJustClosed(false);
+      setIsForceClosed(false);
     }
+  };
+
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+    setIsForceClosed(false); // Clear the forced-close state when re-entering the area
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    setIsForceClosed(false); // Reset on leave so next entrance works normally
   };
 
   return (
     <div 
       className="relative"
-      onMouseEnter={() => {
-        // Only allow hover to open if we didn't just close it via click
-        if (!justClosed) {
-            setHoverOpen(true);
-        }
-      }}
-      onMouseLeave={() => {
-        setHoverOpen(false);
-        setJustClosed(false); // Reset the guard when mouse actually leaves the hit area
-      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <DropdownMenu 
         open={isOpen} 
         onOpenChange={(val) => {
+          // If Radix tries to close it (e.g. clicking outside), sync our states
           if (!val) {
-              setHoverOpen(false);
+              setIsHovering(false);
               if (isPinned) setActiveMenu(null);
           }
         }}
@@ -297,7 +301,7 @@ function NavDropdown({
             variant="ghost" 
             onClick={handleToggle}
             onPointerDown={(e) => {
-               // CRITICAL: Block Radix default behavior to manage state strictly via isOpen
+               // Block Radix default dropdown toggle to strictly manage state via our controlled 'open' prop
                e.preventDefault();
             }}
             className={cn(
@@ -326,7 +330,7 @@ function NavDropdown({
                 asChild 
                 className="rounded-xl focus:bg-primary/5 focus:text-primary cursor-pointer transition-colors"
                 onClick={() => {
-                  setHoverOpen(false);
+                  setIsHovering(false);
                   setActiveMenu(null);
                 }}
             >
