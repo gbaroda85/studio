@@ -247,22 +247,27 @@ function NavDropdown({
   const { t } = useLanguage();
   const pathname = usePathname();
   const [hoverOpen, setHoverOpen] = useState(false);
+  const [justClosed, setJustClosed] = useState(false);
 
-  // The dropdown is open if it's hovered OR if it's the active persistent menu
-  const isOpen = hoverOpen || activeMenu === category.name;
+  // The dropdown is open if (pinned) OR (hovered AND not just forced closed)
+  const isOpen = (activeMenu === category.name) || (hoverOpen && !justClosed);
 
   return (
     <div 
       className="relative"
-      onMouseEnter={() => setHoverOpen(true)}
-      onMouseLeave={() => setHoverOpen(false)}
+      onMouseEnter={() => {
+        if (!justClosed) setHoverOpen(true);
+      }}
+      onMouseLeave={() => {
+        setHoverOpen(false);
+        setJustClosed(false); // Reset forced closure state when mouse leaves area
+      }}
     >
       <DropdownMenu 
         open={isOpen} 
         onOpenChange={(val) => {
           if (!val) {
               setHoverOpen(false);
-              // Only clear activeMenu if it was this specific menu
               if (activeMenu === category.name) setActiveMenu(null);
           }
         }}
@@ -272,13 +277,16 @@ function NavDropdown({
             variant="ghost" 
             onClick={(e) => {
               e.preventDefault();
-              // TOGGLE LOGIC: 
-              // If already active, set to null (closes it). 
-              // If not active, set to category name (opens/switches to it).
+              e.stopPropagation();
               if (activeMenu === category.name) {
+                // Was pinned, now unpin and force close (ignore hover)
                 setActiveMenu(null);
+                setHoverOpen(false);
+                setJustClosed(true);
               } else {
+                // Not pinned, pin it now
                 setActiveMenu(category.name);
+                setJustClosed(false);
               }
             }}
             className={cn(
