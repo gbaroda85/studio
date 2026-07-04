@@ -249,18 +249,38 @@ function NavDropdown({
   const [hoverOpen, setHoverOpen] = useState(false);
   const [justClosed, setJustClosed] = useState(false);
 
-  // The dropdown is open if (pinned) OR (hovered AND not just forced closed)
-  const isOpen = (activeMenu === category.name) || (hoverOpen && !justClosed);
+  // The dropdown is open if pinned (activeMenu matches) OR hovered (and not just manually closed)
+  const isPinned = activeMenu === category.name;
+  const isOpen = isPinned || (hoverOpen && !justClosed);
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isPinned) {
+      // If already pinned, unpin and set safety flag to prevent immediate hover re-open
+      setActiveMenu(null);
+      setHoverOpen(false);
+      setJustClosed(true);
+    } else {
+      // Pin it now
+      setActiveMenu(category.name);
+      setJustClosed(false);
+    }
+  };
 
   return (
     <div 
       className="relative"
       onMouseEnter={() => {
-        if (!justClosed) setHoverOpen(true);
+        // Only allow hover to open if we didn't just close it via click
+        if (!justClosed) {
+            setHoverOpen(true);
+        }
       }}
       onMouseLeave={() => {
         setHoverOpen(false);
-        setJustClosed(false); // Reset forced closure state when mouse leaves area
+        setJustClosed(false); // Reset the guard when mouse actually leaves the hit area
       }}
     >
       <DropdownMenu 
@@ -268,26 +288,17 @@ function NavDropdown({
         onOpenChange={(val) => {
           if (!val) {
               setHoverOpen(false);
-              if (activeMenu === category.name) setActiveMenu(null);
+              if (isPinned) setActiveMenu(null);
           }
         }}
       >
         <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              if (activeMenu === category.name) {
-                // Was pinned, now unpin and force close (ignore hover)
-                setActiveMenu(null);
-                setHoverOpen(false);
-                setJustClosed(true);
-              } else {
-                // Not pinned, pin it now
-                setActiveMenu(category.name);
-                setJustClosed(false);
-              }
+            onClick={handleToggle}
+            onPointerDown={(e) => {
+               // CRITICAL: Block Radix default behavior to manage state strictly via isOpen
+               e.preventDefault();
             }}
             className={cn(
                 "h-10 px-1.5 xl:px-2 font-black text-[10px] flex items-center gap-1 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group tracking-tighter",
