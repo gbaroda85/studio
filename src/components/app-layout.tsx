@@ -251,31 +251,36 @@ function NavDropdown({
   // The dropdown is open if it's hovered OR if it's the active persistent menu
   const isOpen = hoverOpen || activeMenu === category.name;
 
-  const handleToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (activeMenu === category.name) {
-      setActiveMenu(null);
-    } else {
-      setActiveMenu(category.name);
-    }
-  };
-
   return (
     <div 
       className="relative"
       onMouseEnter={() => setHoverOpen(true)}
       onMouseLeave={() => setHoverOpen(false)}
     >
-      <DropdownMenu open={isOpen} onOpenChange={(val) => {
+      <DropdownMenu 
+        open={isOpen} 
+        onOpenChange={(val) => {
           if (!val) {
               setHoverOpen(false);
               // Only clear activeMenu if it was this specific menu
               if (activeMenu === category.name) setActiveMenu(null);
           }
-      }}>
-        <DropdownMenuTrigger asChild onClick={handleToggle}>
+        }}
+      >
+        <DropdownMenuTrigger asChild>
           <Button 
             variant="ghost" 
+            onClick={(e) => {
+              e.preventDefault();
+              // TOGGLE LOGIC: 
+              // If already active, set to null (closes it). 
+              // If not active, set to category name (opens/switches to it).
+              if (activeMenu === category.name) {
+                setActiveMenu(null);
+              } else {
+                setActiveMenu(category.name);
+              }
+            }}
             className={cn(
                 "h-10 px-1.5 xl:px-2 font-black text-[10px] flex items-center gap-1 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group tracking-tighter",
                 isOpen && "bg-primary/10 text-primary"
