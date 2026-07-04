@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -234,35 +235,62 @@ function GR7Logo({ className }: { className?: string }) {
   );
 }
 
-function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
+function NavDropdown({ 
+  category, 
+  activeMenu, 
+  setActiveMenu 
+}: { 
+  category: typeof CATEGORIES[0],
+  activeMenu: string | null,
+  setActiveMenu: (name: string | null) => void
+}) {
   const { t } = useLanguage();
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
+  const [hoverOpen, setHoverOpen] = useState(false);
+
+  // The dropdown is open if it's hovered OR if it's the active persistent menu
+  const isOpen = hoverOpen || activeMenu === category.name;
+
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (activeMenu === category.name) {
+      setActiveMenu(null);
+    } else {
+      setActiveMenu(category.name);
+    }
+  };
 
   return (
     <div 
       className="relative"
-      onMouseEnter={() => setOpen(true)}
-      onMouseLeave={() => setOpen(false)}
+      onMouseEnter={() => setHoverOpen(true)}
+      onMouseLeave={() => setHoverOpen(false)}
     >
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
+      <DropdownMenu open={isOpen} onOpenChange={(val) => {
+          if (!val) {
+              setHoverOpen(false);
+              // Only clear activeMenu if it was this specific menu
+              if (activeMenu === category.name) setActiveMenu(null);
+          }
+      }}>
+        <DropdownMenuTrigger asChild onClick={handleToggle}>
           <Button 
             variant="ghost" 
             className={cn(
                 "h-10 px-1.5 xl:px-2 font-black text-[10px] flex items-center gap-1 text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5 transition-all focus-visible:ring-0 border-none shadow-none group tracking-tighter",
-                "data-[state=open]:bg-primary/10 data-[state=open]:text-primary"
+                isOpen && "bg-primary/10 text-primary"
             )}
           >
             <category.icon className={cn("size-3.5 transition-transform group-hover:scale-110", category.color)} />
             <span className="hidden xl:inline">{t(category.name)}</span>
-            <ChevronDown className="size-2.5 opacity-50 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            <ChevronDown className={cn("size-2.5 opacity-50 transition-transform duration-200", isOpen && "rotate-180")} />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent 
           align="end" 
           sideOffset={8}
           className="w-64 p-2 rounded-2xl shadow-2xl border-2 grid grid-cols-1 gap-1 bg-white dark:bg-slate-900 z-[110]"
+          onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-widest text-muted-foreground pb-2 px-3 text-left">
             {t(category.name)}
@@ -273,6 +301,10 @@ function NavDropdown({ category }: { category: typeof CATEGORIES[0] }) {
                 key={tool.href} 
                 asChild 
                 className="rounded-xl focus:bg-primary/5 focus:text-primary cursor-pointer transition-colors"
+                onClick={() => {
+                  setHoverOpen(false);
+                  setActiveMenu(null);
+                }}
             >
               <Link href={tool.href} className={cn(
                 "flex items-center gap-3 py-2.5 px-3 cursor-pointer transition-colors min-h-[44px]", 
@@ -380,6 +412,7 @@ function MobileNav() {
 function AppHeader() {
   const { t } = useLanguage();
   const pathname = usePathname();
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
   return (
     <header className="h-16 md:h-20 fixed top-0 left-0 right-0 bg-background/90 backdrop-blur-xl border-b border-border/50 shadow-sm z-[100] w-full flex justify-center">
@@ -398,7 +431,7 @@ function AppHeader() {
                 pathname === '/' ? "text-primary bg-primary/5" : "text-slate-800 dark:text-slate-200 hover:text-primary hover:bg-primary/5"
               )}
             >
-              <Link href="/">
+              <Link href="/" onClick={() => setActiveMenu(null)}>
                 <HomeIcon className="size-4" />
                 <span className="hidden xl:inline">{t('home')}</span>
               </Link>
@@ -408,7 +441,12 @@ function AppHeader() {
         <div className="flex items-center gap-1 sm:gap-2">
             <nav className="hidden lg:flex items-center gap-0.5 xl:gap-1 mr-1 xl:mr-2">
                 {CATEGORIES.map((cat) => (
-                  <NavDropdown key={cat.name} category={cat} />
+                  <NavDropdown 
+                    key={cat.name} 
+                    category={cat} 
+                    activeMenu={activeMenu}
+                    setActiveMenu={setActiveMenu}
+                  />
                 ))}
             </nav>
 
