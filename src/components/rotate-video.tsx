@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, type ChangeEvent, type DragEvent, useCallback, useEffect } from "react";
@@ -13,13 +14,14 @@ import {
     CheckCircle2, 
     Sparkles,
     Eye,
-    X,
+    X, 
     Settings2,
     MonitorPlay,
     Video,
     Maximize,
     Smartphone,
-    Monitor
+    Monitor,
+    FileVideo
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -240,7 +242,7 @@ export default function RotateVideoConverter() {
                         className="w-full max-w-6xl px-4 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start"
                     >
                         <div className="lg:col-span-8 flex flex-col gap-6">
-                            <Card className="overflow-hidden border-2 shadow-3xl flex flex-col bg-card/50 rounded-[2.5rem]">
+                            <Card className="overflow-hidden border-2 shadow-3xl h-full flex flex-col bg-card/50 rounded-[2.5rem]">
                                 <CardHeader className="bg-muted/30 border-b py-4 px-6 flex flex-row items-center justify-between">
                                     <div className="flex items-center gap-2 truncate pr-4 text-left">
                                         <FileVideo className="h-4 w-4 text-primary shrink-0" />
@@ -320,7 +322,7 @@ export default function RotateVideoConverter() {
                                 </CardContent>
                                 <CardFooter className="bg-muted/10 p-6 md:p-8 border-t border-white/10 flex flex-col gap-4">
                                     <Button 
-                                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary hover:bg-primary/90 border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl" 
+                                        className="magic-button w-full h-16 md:h-18 text-lg font-black bg-primary text-white hover:bg-primary/90 border-4 border-primary text-white hover:text-primary transition-all active:scale-95 disabled:opacity-50 group px-10 flex items-center justify-center gap-4 shadow-xl" 
                                         onClick={handleSaveRotated}
                                         disabled={isProcessing || rotation === 0}
                                     >
