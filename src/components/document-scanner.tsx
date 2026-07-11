@@ -144,7 +144,7 @@ export default function DocumentScanner() {
   const [contrast, setContrast] = useState([100]);
   const [rotation, setRotation] = useState(0);
   const [showBorder, setShowBorder] = useState(false);
-  const [borderWidth, setBorderWidth] = useState([5]); // Default thickness (0.5% scale)
+  const [borderWidth, setBorderWidth] = useState([5]);
 
   // Watermark States
   const [watermarkText, setWatermarkText] = useState("");
@@ -264,101 +264,183 @@ export default function DocumentScanner() {
     });
   };
 
+  /**
+   * IMPROVED FILTER ENGINE
+   * Implements advanced illumination mapping, unsharp mask sharpening,
+   * and refined logic for Magic, BW, and Document modes.
+   */
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
-    return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = "anonymous";
-        img.onload = () => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            const img = await new Promise<HTMLImageElement>((res, rej) => {
+                const i = new Image(); 
+                i.crossOrigin = "anonymous";
+                i.onload = () => res(i); 
+                i.onerror = () => rej(new Error("Load failed"));
+                i.src = imageSrc;
+            });
+
+            if (img.width === 0 || img.height === 0) {
+                return reject(new Error("Source image dimensions are zero"));
+            }
+
+            const rot = rotation;
+            const br = brightness[0];
+            const cr = contrast[0];
+
+            // STEP 1: Rotation
             const rotCanvas = document.createElement('canvas');
-            if (rotation === 90 || rotation === 270) {
-              rotCanvas.width = img.height;
-              rotCanvas.height = img.width;
+            if (rot === 90 || rot === 270) {
+                rotCanvas.width = img.height;
+                rotCanvas.height = img.width;
             } else {
-              rotCanvas.width = img.width;
-              rotCanvas.height = img.height;
+                rotCanvas.width = img.width;
+                rotCanvas.height = img.height;
             }
             const rotCtx = rotCanvas.getContext('2d')!;
             rotCtx.translate(rotCanvas.width / 2, rotCanvas.height / 2);
-            rotCtx.rotate((rotation * Math.PI) / 180);
+            rotCtx.rotate((rot * Math.PI) / 180);
             rotCtx.drawImage(img, -img.width / 2, -img.height / 2);
 
+            // STEP 2: Brightness and Contrast
             const adjCanvas = document.createElement('canvas');
             adjCanvas.width = rotCanvas.width;
             adjCanvas.height = rotCanvas.height;
             const adjCtx = adjCanvas.getContext('2d')!;
-            adjCtx.filter = `brightness(${brightness[0]}%) contrast(${contrast[0]}%)`;
+            adjCtx.filter = `brightness(${br}%) contrast(${cr}%)`;
             adjCtx.drawImage(rotCanvas, 0, 0);
-            adjCtx.filter = 'none';
 
             let finalCanvas: HTMLCanvasElement;
 
             if (filterType === 'original') {
                 finalCanvas = adjCanvas;
             } else if (filterType === 'photo') {
-                const pCanvas = document.createElement('canvas');
-                pCanvas.width = adjCanvas.width; pCanvas.height = adjCanvas.height;
-                const pCtx = pCanvas.getContext('2d')!;
-                pCtx.filter = 'saturate(1.2) contrast(1.1)';
-                pCtx.drawImage(adjCanvas, 0, 0);
-                finalCanvas = pCanvas;
+                const photoCanvas = document.createElement('canvas');
+                photoCanvas.width = adjCanvas.width;
+                photoCanvas.height = adjCanvas.height;
+                const photoCtx = photoCanvas.getContext('2d')!;
+                photoCtx.filter = 'saturate(1.1) contrast(1.05)';
+                photoCtx.drawImage(adjCanvas, 0, 0);
+                finalCanvas = photoCanvas;
             } else {
-                const scale = 0.1;
-                const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
-                const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
+                // STEP 3: Shadow Removal & Advanced Filters (Illumination Mapping)
+                const scale = 0.05; // 5% scale for lighting map
+                const sw = Math.max(1, Math.floor(adjCanvas.width * scale));
+                const sh = Math.max(1, Math.floor(adjCanvas.height * scale));
                 
                 const smallCanvas = document.createElement('canvas');
-                smallCanvas.width = smallW; smallCanvas.height = smallH;
+                smallCanvas.width = sw; smallCanvas.height = sh;
                 const smallCtx = smallCanvas.getContext('2d')!;
                 smallCtx.filter = 'blur(4px)';
-                smallCtx.drawImage(adjCanvas, 0, 0, smallW, smallH);
-                smallCtx.globalCompositeOperation = 'difference';
-                smallCtx.fillStyle = 'white';
-                smallCtx.fillRect(0, 0, smallW, smallH);
+                smallCtx.drawImage(adjCanvas, 0, 0, sw, sh);
 
-                const normCanvas = document.createElement('canvas');
-                normCanvas.width = adjCanvas.width; normCanvas.height = adjCanvas.height;
-                const normCtx = normCanvas.getContext('2d')!;
-                normCtx.drawImage(adjCanvas, 0, 0);
-                normCtx.globalCompositeOperation = 'color-dodge';
-                normCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, adjCanvas.width, adjCanvas.height);
+                // Smoothly scale lighting map back
+                const blurCanvas = document.createElement('canvas');
+                blurCanvas.width = adjCanvas.width; blurCanvas.height = adjCanvas.height;
+                const blurCtx = blurCanvas.getContext('2d')!;
+                blurCtx.imageSmoothingEnabled = true;
+                blurCtx.imageSmoothingQuality = 'high';
+                blurCtx.drawImage(smallCanvas, 0, 0, sw, sh, 0, 0, adjCanvas.width, adjCanvas.height);
+                const illumData = blurCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
 
-                const imageData = normCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height);
-                const data = imageData.data;
+                // Unsharp Mask (for sharpness)
+                const usmCanvas = document.createElement('canvas');
+                usmCanvas.width = adjCanvas.width; usmCanvas.height = adjCanvas.height;
+                const usmCtx = usmCanvas.getContext('2d')!;
+                usmCtx.filter = 'blur(2px)';
+                usmCtx.drawImage(adjCanvas, 0, 0);
+                const usmData = usmCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
 
-                let blackPoint = 120;
+                const origData = adjCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
+
+                const normalizedCanvas = document.createElement('canvas');
+                normalizedCanvas.width = adjCanvas.width; normalizedCanvas.height = adjCanvas.height;
+                const normCtx = normalizedCanvas.getContext('2d')!;
+                const outImageData = normCtx.createImageData(adjCanvas.width, adjCanvas.height);
+                const data = outImageData.data;
+
+                // Set thresholds based on filter
+                let blackPoint = 60;
                 let whitePoint = 230;
-                const satBoost = filterType === 'magic' ? 1.5 : 1.1;
-
-                if (filterType === 'magic') { blackPoint = 60; whitePoint = 245; }
-                else if (filterType === 'bw') { blackPoint = 140; whitePoint = 220; }
+                if (filterType === 'magic') { blackPoint = 50; whitePoint = 190; }
+                else if (filterType === 'bw') { blackPoint = 100; whitePoint = 180; }
                 const range = whitePoint - blackPoint;
 
+                // Pixel-by-pixel loop with advanced logic
                 for (let i = 0; i < data.length; i += 4) {
-                    let r = data[i], g = data[i+1], b = data[i+2];
-                    let lum = r * 0.299 + g * 0.587 + b * 0.114;
+                    const r0 = origData[i], g0 = origData[i+1], b0 = origData[i+2];
+                    const ur = usmData[i], ug = usmData[i+1], ub = usmData[i+2];
+
+                    // 1. Unsharp Mask (Sharpening)
+                    let sharpenAmount = filterType === 'magic' ? 1.5 : (filterType === 'bw' ? 2.0 : 1.0);
+                    let r = r0 + (r0 - ur) * sharpenAmount;
+                    let g = g0 + (g0 - ug) * sharpenAmount;
+                    let b = b0 + (b0 - ub) * sharpenAmount;
+                    r = Math.max(0, Math.min(255, r)); g = Math.max(0, Math.min(255, g)); b = Math.max(0, Math.min(255, b));
+
+                    const ir = illumData[i], ig = illumData[i+1], ib = illumData[i+2];
+                    const illumLum = ir * 0.299 + ig * 0.587 + ib * 0.114;
+                    const chroma = Math.max(r, g, b) - Math.min(r, g, b); // Color intensity
+
+                    // 2. Blending Factor for shadow removal
+                    let illumBlend = (illumLum - 50) / (130 - 50);
+                    if (chroma < 20) illumBlend += (20 - chroma) / 40;
+                    illumBlend = Math.max(0, Math.min(1, illumBlend));
+
+                    const factorR = (255 / Math.max(ir, 1)) * illumBlend + 1.0 * (1 - illumBlend);
+                    const factorG = (255 / Math.max(ig, 1)) * illumBlend + 1.0 * (1 - illumBlend);
+                    const factorB = (255 / Math.max(ib, 1)) * illumBlend + 1.0 * (1 - illumBlend);
+
+                    const dr = Math.min(255, r * factorR);
+                    const dg = Math.min(255, g * factorG);
+                    const db = Math.min(255, b * factorB);
+
+                    const lum = dr * 0.299 + dg * 0.587 + db * 0.114;
+
+                    // 3. Filter specific logic
                     if (filterType === 'bw') {
                         let v = lum < blackPoint ? 0 : lum > whitePoint ? 255 : (lum - blackPoint) * 255 / range;
                         data[i] = data[i+1] = data[i+2] = v;
+                    } else if (filterType === 'magic') {
+                        const protection = Math.min(90, chroma * 3.0);
+                        const activeWhitePoint = Math.min(255, whitePoint + protection);
+                        if (lum > activeWhitePoint) {
+                            data[i] = data[i+1] = data[i+2] = 255;
+                        } else {
+                            let whiteFactor = 1.0;
+                            if (lum > activeWhitePoint - 15) whiteFactor = (activeWhitePoint - lum) / 15;
+                            const adjBlack = blackPoint * Math.max(0, 1 - (chroma / 40));
+                            const curRange = activeWhitePoint - adjBlack;
+                            let s = (lum - adjBlack) * 255 / (curRange || 1);
+                            s = Math.min(255, Math.max(0, s));
+                            const satBoost = 1.35;
+                            const ratio = s / (lum || 1);
+                            let nr = (dr * ratio - s) * satBoost + s;
+                            let ng = (dg * ratio - s) * satBoost + s;
+                            let nb = (db * ratio - s) * satBoost + s;
+                            data[i] = Math.min(255, Math.max(0, nr * whiteFactor + 255 * (1 - whiteFactor)));
+                            data[i+1] = Math.min(255, Math.max(0, ng * whiteFactor + 255 * (1 - whiteFactor)));
+                            data[i+2] = Math.min(255, Math.max(0, nb * whiteFactor + 255 * (1 - whiteFactor)));
+                        }
                     } else {
-                        let s = lum < blackPoint ? 0 : lum > whitePoint ? 255 / lum : ((lum - blackPoint) * 255 / range) / lum;
-                        r = (r - lum) * satBoost + lum * s;
-                        g = (g - lum) * satBoost + lum * s;
-                        b = (b - lum) * satBoost + lum * s;
-                        data[i] = Math.min(255, Math.max(0, r));
-                        data[i+1] = Math.min(255, Math.max(0, g));
-                        data[i+2] = Math.min(255, Math.max(0, b));
+                        // Document Mode
+                        let s = (lum - blackPoint) * 255 / range;
+                        s = Math.min(255, Math.max(0, s));
+                        const ratio = s / (lum || 1);
+                        data[i] = Math.min(255, Math.max(0, dr * ratio));
+                        data[i+1] = Math.min(255, Math.max(0, dg * ratio));
+                        data[i+2] = Math.min(255, Math.max(0, db * ratio));
                     }
+                    data[i+3] = 255;
                 }
-                normCtx.putImageData(imageData, 0, 0);
-                finalCanvas = normCanvas;
+                normCtx.putImageData(outImageData, 0, 0);
+                finalCanvas = normalizedCanvas;
             }
 
+            // RE-APPLY BORDER & WATERMARK
             const finalCtx = finalCanvas.getContext('2d')!;
-            // CRITICAL: Reset composite operation to ensure black border is visible on white background
             finalCtx.globalCompositeOperation = 'source-over';
-
             if (showBorder) {
-                // Map borderWidth array value (0-20) to actual pixels based on canvas width
                 const bp = (borderWidth[0] / 1000) * finalCanvas.width;
                 finalCtx.strokeStyle = "#000000";
                 finalCtx.lineWidth = bp * 2;
@@ -368,19 +450,15 @@ export default function DocumentScanner() {
             if (watermarkText.trim()) {
                 finalCtx.setTransform(1, 0, 0, 1, 0, 0);
                 finalCtx.filter = 'none';
-
                 const mappedFontSize = Math.floor((watermarkSize[0] / 1000) * finalCanvas.width);
                 const mappedMarginX = Math.floor((watermarkMarginX[0] / 1000) * finalCanvas.width);
                 const mappedMarginY = Math.floor((watermarkMarginY[0] / 1000) * finalCanvas.width);
-                
                 finalCtx.font = `bold ${mappedFontSize}px sans-serif`;
                 finalCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
                 finalCtx.textBaseline = 'middle';
-                
                 const text = watermarkText.toUpperCase();
                 let x = 0, y = 0;
                 let textAlign: CanvasTextAlign = 'center';
-
                 switch (watermarkPosition) {
                     case 'top-left': x = mappedMarginX; y = mappedMarginY + mappedFontSize/2; textAlign = 'left'; break;
                     case 'top-center': x = finalCanvas.width / 2; y = mappedMarginY + mappedFontSize/2; textAlign = 'center'; break;
@@ -392,7 +470,6 @@ export default function DocumentScanner() {
                     case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'center'; break;
                     case 'bottom-right': x = finalCanvas.width - mappedMarginX; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'right'; break;
                 }
-
                 finalCtx.textAlign = textAlign;
                 finalCtx.save();
                 finalCtx.translate(x, y);
@@ -402,9 +479,7 @@ export default function DocumentScanner() {
             }
 
             resolve(finalCanvas.toDataURL('image/jpeg', 0.95));
-        };
-        img.onerror = () => reject("Load failed");
-        img.src = imageSrc;
+        } catch (err) { reject(err); }
     });
   };
 
