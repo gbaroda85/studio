@@ -265,9 +265,7 @@ export default function DocumentScanner() {
   };
 
   /**
-   * IMPROVED FILTER ENGINE
-   * Implements advanced illumination mapping, unsharp mask sharpening,
-   * and refined logic for Magic, BW, and Document modes.
+   * IMPROVED FILTER ENGINE - INTEGRATED USER LOGIC
    */
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
     return new Promise(async (resolve, reject) => {
@@ -288,7 +286,7 @@ export default function DocumentScanner() {
             const br = brightness[0];
             const cr = contrast[0];
 
-            // STEP 1: Rotation
+            // STEP 1: रोटेशन लागू करना (Rotation)
             const rotCanvas = document.createElement('canvas');
             if (rot === 90 || rot === 270) {
                 rotCanvas.width = img.height;
@@ -302,7 +300,7 @@ export default function DocumentScanner() {
             rotCtx.rotate((rot * Math.PI) / 180);
             rotCtx.drawImage(img, -img.width / 2, -img.height / 2);
 
-            // STEP 2: Brightness and Contrast
+            // STEP 2: ब्राइटनेस और कॉन्ट्रास्ट लागू करना (Canvas Filter API)
             const adjCanvas = document.createElement('canvas');
             adjCanvas.width = rotCanvas.width;
             adjCanvas.height = rotCanvas.height;
@@ -310,10 +308,8 @@ export default function DocumentScanner() {
             adjCtx.filter = `brightness(${br}%) contrast(${cr}%)`;
             adjCtx.drawImage(rotCanvas, 0, 0);
 
-            let finalCanvas: HTMLCanvasElement;
-
             if (filterType === 'original') {
-                finalCanvas = adjCanvas;
+                return resolve(adjCanvas.toDataURL('image/jpeg', 0.95));
             } else if (filterType === 'photo') {
                 const photoCanvas = document.createElement('canvas');
                 photoCanvas.width = adjCanvas.width;
@@ -321,125 +317,130 @@ export default function DocumentScanner() {
                 const photoCtx = photoCanvas.getContext('2d')!;
                 photoCtx.filter = 'saturate(1.1) contrast(1.05)';
                 photoCtx.drawImage(adjCanvas, 0, 0);
-                finalCanvas = photoCanvas;
-            } else {
-                // STEP 3: Shadow Removal & Advanced Filters (Illumination Mapping)
-                const scale = 0.05; // 5% scale for lighting map
-                const sw = Math.max(1, Math.floor(adjCanvas.width * scale));
-                const sh = Math.max(1, Math.floor(adjCanvas.height * scale));
-                
-                const smallCanvas = document.createElement('canvas');
-                smallCanvas.width = sw; smallCanvas.height = sh;
-                const smallCtx = smallCanvas.getContext('2d')!;
-                smallCtx.filter = 'blur(4px)';
-                smallCtx.drawImage(adjCanvas, 0, 0, sw, sh);
-
-                // Smoothly scale lighting map back
-                const blurCanvas = document.createElement('canvas');
-                blurCanvas.width = adjCanvas.width; blurCanvas.height = adjCanvas.height;
-                const blurCtx = blurCanvas.getContext('2d')!;
-                blurCtx.imageSmoothingEnabled = true;
-                blurCtx.imageSmoothingQuality = 'high';
-                blurCtx.drawImage(smallCanvas, 0, 0, sw, sh, 0, 0, adjCanvas.width, adjCanvas.height);
-                const illumData = blurCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
-
-                // Unsharp Mask (for sharpness)
-                const usmCanvas = document.createElement('canvas');
-                usmCanvas.width = adjCanvas.width; usmCanvas.height = adjCanvas.height;
-                const usmCtx = usmCanvas.getContext('2d')!;
-                usmCtx.filter = 'blur(2px)';
-                usmCtx.drawImage(adjCanvas, 0, 0);
-                const usmData = usmCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
-
-                const origData = adjCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
-
-                const normalizedCanvas = document.createElement('canvas');
-                normalizedCanvas.width = adjCanvas.width; normalizedCanvas.height = adjCanvas.height;
-                const normCtx = normalizedCanvas.getContext('2d')!;
-                const outImageData = normCtx.createImageData(adjCanvas.width, adjCanvas.height);
-                const data = outImageData.data;
-
-                // Set thresholds based on filter
-                let blackPoint = 60;
-                let whitePoint = 230;
-                if (filterType === 'magic') { blackPoint = 50; whitePoint = 190; }
-                else if (filterType === 'bw') { blackPoint = 100; whitePoint = 180; }
-                const range = whitePoint - blackPoint;
-
-                // Pixel-by-pixel loop with advanced logic
-                for (let i = 0; i < data.length; i += 4) {
-                    const r0 = origData[i], g0 = origData[i+1], b0 = origData[i+2];
-                    const ur = usmData[i], ug = usmData[i+1], ub = usmData[i+2];
-
-                    // 1. Unsharp Mask (Sharpening)
-                    let sharpenAmount = filterType === 'magic' ? 1.5 : (filterType === 'bw' ? 2.0 : 1.0);
-                    let r = r0 + (r0 - ur) * sharpenAmount;
-                    let g = g0 + (g0 - ug) * sharpenAmount;
-                    let b = b0 + (b0 - ub) * sharpenAmount;
-                    r = Math.max(0, Math.min(255, r)); g = Math.max(0, Math.min(255, g)); b = Math.max(0, Math.min(255, b));
-
-                    const ir = illumData[i], ig = illumData[i+1], ib = illumData[i+2];
-                    const illumLum = ir * 0.299 + ig * 0.587 + ib * 0.114;
-                    const chroma = Math.max(r, g, b) - Math.min(r, g, b); // Color intensity
-
-                    // 2. Blending Factor for shadow removal
-                    let illumBlend = (illumLum - 50) / (130 - 50);
-                    if (chroma < 20) illumBlend += (20 - chroma) / 40;
-                    illumBlend = Math.max(0, Math.min(1, illumBlend));
-
-                    const factorR = (255 / Math.max(ir, 1)) * illumBlend + 1.0 * (1 - illumBlend);
-                    const factorG = (255 / Math.max(ig, 1)) * illumBlend + 1.0 * (1 - illumBlend);
-                    const factorB = (255 / Math.max(ib, 1)) * illumBlend + 1.0 * (1 - illumBlend);
-
-                    const dr = Math.min(255, r * factorR);
-                    const dg = Math.min(255, g * factorG);
-                    const db = Math.min(255, b * factorB);
-
-                    const lum = dr * 0.299 + dg * 0.587 + db * 0.114;
-
-                    // 3. Filter specific logic
-                    if (filterType === 'bw') {
-                        let v = lum < blackPoint ? 0 : lum > whitePoint ? 255 : (lum - blackPoint) * 255 / range;
-                        data[i] = data[i+1] = data[i+2] = v;
-                    } else if (filterType === 'magic') {
-                        const protection = Math.min(90, chroma * 3.0);
-                        const activeWhitePoint = Math.min(255, whitePoint + protection);
-                        if (lum > activeWhitePoint) {
-                            data[i] = data[i+1] = data[i+2] = 255;
-                        } else {
-                            let whiteFactor = 1.0;
-                            if (lum > activeWhitePoint - 15) whiteFactor = (activeWhitePoint - lum) / 15;
-                            const adjBlack = blackPoint * Math.max(0, 1 - (chroma / 40));
-                            const curRange = activeWhitePoint - adjBlack;
-                            let s = (lum - adjBlack) * 255 / (curRange || 1);
-                            s = Math.min(255, Math.max(0, s));
-                            const satBoost = 1.35;
-                            const ratio = s / (lum || 1);
-                            let nr = (dr * ratio - s) * satBoost + s;
-                            let ng = (dg * ratio - s) * satBoost + s;
-                            let nb = (db * ratio - s) * satBoost + s;
-                            data[i] = Math.min(255, Math.max(0, nr * whiteFactor + 255 * (1 - whiteFactor)));
-                            data[i+1] = Math.min(255, Math.max(0, ng * whiteFactor + 255 * (1 - whiteFactor)));
-                            data[i+2] = Math.min(255, Math.max(0, nb * whiteFactor + 255 * (1 - whiteFactor)));
-                        }
-                    } else {
-                        // Document Mode
-                        let s = (lum - blackPoint) * 255 / range;
-                        s = Math.min(255, Math.max(0, s));
-                        const ratio = s / (lum || 1);
-                        data[i] = Math.min(255, Math.max(0, dr * ratio));
-                        data[i+1] = Math.min(255, Math.max(0, dg * ratio));
-                        data[i+2] = Math.min(255, Math.max(0, db * ratio));
-                    }
-                    data[i+3] = 255;
-                }
-                normCtx.putImageData(outImageData, 0, 0);
-                finalCanvas = normalizedCanvas;
+                return resolve(photoCanvas.toDataURL('image/jpeg', 0.95));
             }
 
-            // RE-APPLY BORDER & WATERMARK
+            // STEP 3: डॉक्यूमेंट / BW / Magic Color के लिए शैडो रिमूवल (Illumination Mapping)
+            const scale = 0.05; 
+            const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
+            const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
+            const smallCanvas = document.createElement('canvas');
+            smallCanvas.width = smallW;
+            smallCanvas.height = smallH;
+            const smallCtx = smallCanvas.getContext('2d')!;
+            smallCtx.filter = 'blur(4px)'; 
+            smallCtx.drawImage(adjCanvas, 0, 0, smallW, smallH);
+
+            const blurCanvas = document.createElement('canvas');
+            blurCanvas.width = adjCanvas.width;
+            blurCanvas.height = adjCanvas.height;
+            const blurCtx = blurCanvas.getContext('2d')!;
+            blurCtx.imageSmoothingEnabled = true;
+            blurCtx.imageSmoothingQuality = 'high';
+            blurCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, adjCanvas.width, adjCanvas.height);
+            const illumData = blurCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
+
+            // Unsharp Mask (शार्पनेस के लिए)
+            const usmCanvas = document.createElement('canvas');
+            usmCanvas.width = adjCanvas.width;
+            usmCanvas.height = adjCanvas.height;
+            const usmCtx = usmCanvas.getContext('2d')!;
+            usmCtx.filter = 'blur(2px)';
+            usmCtx.drawImage(adjCanvas, 0, 0);
+            const usmData = usmCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
+
+            const origData = adjCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
+
+            const normalizedCanvas = document.createElement('canvas');
+            normalizedCanvas.width = adjCanvas.width;
+            normalizedCanvas.height = adjCanvas.height;
+            const normCtx = normalizedCanvas.getContext('2d')!;
+            const outImageData = normCtx.createImageData(adjCanvas.width, adjCanvas.height);
+            const data = outImageData.data;
+
+            let blackPoint = 60;
+            let whitePoint = 230;
+            if (filterType === 'magic') {
+                blackPoint = 50;
+                whitePoint = 190;
+            } else if (filterType === 'bw') {
+                blackPoint = 100;
+                whitePoint = 180;
+            }
+            const range = whitePoint - blackPoint;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const r0 = origData[i], g0 = origData[i+1], b0 = origData[i+2];
+                const ur = usmData[i], ug = usmData[i+1], ub = usmData[i+2];
+
+                // 1. Unsharp Mask (शार्पनिंग)
+                let sharpenAmount = filterType === 'magic' ? 1.5 : (filterType === 'bw' ? 2.0 : 1.0);
+                let r = r0 + (r0 - ur) * sharpenAmount;
+                let g = g0 + (g0 - ug) * sharpenAmount;
+                let b = b0 + (b0 - ub) * sharpenAmount;
+                r = Math.max(0, Math.min(255, r)); g = Math.max(0, Math.min(255, g)); b = Math.max(0, Math.min(255, b));
+
+                const ir = illumData[i], ig = illumData[i+1], ib = illumData[i+2];
+                const illumLum = ir * 0.299 + ig * 0.587 + ib * 0.114;
+                const chroma = Math.max(r, g, b) - Math.min(r, g, b); 
+
+                let illumBlend = (illumLum - 50) / (130 - 50);
+                if (chroma < 20) illumBlend += (20 - chroma) / 40;
+                illumBlend = Math.max(0, Math.min(1, illumBlend));
+
+                const factorR = (255 / Math.max(ir, 1)) * illumBlend + 1.0 * (1 - illumBlend);
+                const factorG = (255 / Math.max(ig, 1)) * illumBlend + 1.0 * (1 - illumBlend);
+                const factorB = (255 / Math.max(ib, 1)) * illumBlend + 1.0 * (1 - illumBlend);
+
+                const dr = Math.min(255, r * factorR);
+                const dg = Math.min(255, g * factorG);
+                const db = Math.min(255, b * factorB);
+
+                const lum = dr * 0.299 + dg * 0.587 + db * 0.114;
+
+                if (filterType === 'bw') {
+                    let v = lum < blackPoint ? 0 : lum > whitePoint ? 255 : (lum - blackPoint) * 255 / range;
+                    data[i] = v; data[i+1] = v; data[i+2] = v;
+                } else if (filterType === 'magic') {
+                    const protection = Math.min(90, chroma * 3.0);
+                    const activeWhitePoint = Math.min(255, whitePoint + protection);
+                    if (lum > activeWhitePoint) {
+                        data[i] = 255; data[i+1] = 255; data[i+2] = 255;
+                    } else {
+                        let whiteFactor = 1.0;
+                        if (lum > activeWhitePoint - 15) whiteFactor = (activeWhitePoint - lum) / 15;
+                        const adjustedBlack = blackPoint * Math.max(0, 1 - (chroma / 40));
+                        const currentRange = activeWhitePoint - adjustedBlack;
+                        let s = (lum - adjustedBlack) * 255 / (currentRange || 1);
+                        s = Math.min(255, Math.max(0, s));
+                        const satBoost = 1.35;
+                        const ratio = s / (lum || 1);
+                        let nr = (dr * ratio - s) * satBoost + s;
+                        let ng = (dg * ratio - s) * satBoost + s;
+                        let nb = (db * ratio - s) * satBoost + s;
+                        data[i] = Math.min(255, Math.max(0, nr * whiteFactor + 255 * (1 - whiteFactor)));
+                        data[i+1] = Math.min(255, Math.max(0, ng * whiteFactor + 255 * (1 - whiteFactor)));
+                        data[i+2] = Math.min(255, Math.max(0, nb * whiteFactor + 255 * (1 - whiteFactor)));
+                    }
+                } else {
+                    let s = (lum - blackPoint) * 255 / range;
+                    s = Math.min(255, Math.max(0, s));
+                    const ratio = s / (lum || 1);
+                    data[i] = Math.min(255, Math.max(0, dr * ratio));
+                    data[i+1] = Math.min(255, Math.max(0, dg * ratio));
+                    data[i+2] = Math.min(255, Math.max(0, db * ratio));
+                }
+                data[i+3] = 255;
+            }
+            normCtx.putImageData(outImageData, 0, 0);
+
+            // FINAL STEP: RE-APPLY BORDER & WATERMARK ON TOP
+            const finalCanvas = document.createElement('canvas');
+            finalCanvas.width = normalizedCanvas.width;
+            finalCanvas.height = normalizedCanvas.height;
             const finalCtx = finalCanvas.getContext('2d')!;
-            finalCtx.globalCompositeOperation = 'source-over';
+            finalCtx.drawImage(normalizedCanvas, 0, 0);
+
             if (showBorder) {
                 const bp = (borderWidth[0] / 1000) * finalCanvas.width;
                 finalCtx.strokeStyle = "#000000";
@@ -448,26 +449,22 @@ export default function DocumentScanner() {
             }
 
             if (watermarkText.trim()) {
-                finalCtx.setTransform(1, 0, 0, 1, 0, 0);
-                finalCtx.filter = 'none';
                 const mappedFontSize = Math.floor((watermarkSize[0] / 1000) * finalCanvas.width);
                 const mappedMarginX = Math.floor((watermarkMarginX[0] / 1000) * finalCanvas.width);
                 const mappedMarginY = Math.floor((watermarkMarginY[0] / 1000) * finalCanvas.width);
                 finalCtx.font = `bold ${mappedFontSize}px sans-serif`;
                 finalCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
-                finalCtx.textBaseline = 'middle';
                 const text = watermarkText.toUpperCase();
-                let x = 0, y = 0;
-                let textAlign: CanvasTextAlign = 'center';
+                let x = 0, y = 0, textAlign: CanvasTextAlign = 'center';
                 switch (watermarkPosition) {
                     case 'top-left': x = mappedMarginX; y = mappedMarginY + mappedFontSize/2; textAlign = 'left'; break;
-                    case 'top-center': x = finalCanvas.width / 2; y = mappedMarginY + mappedFontSize/2; textAlign = 'center'; break;
+                    case 'top-center': x = finalCanvas.width/2; y = mappedMarginY + mappedFontSize/2; textAlign = 'center'; break;
                     case 'top-right': x = finalCanvas.width - mappedMarginX; y = mappedMarginY + mappedFontSize/2; textAlign = 'right'; break;
-                    case 'center-left': x = mappedMarginX; y = finalCanvas.height / 2; textAlign = 'left'; break;
-                    case 'center-center': x = finalCanvas.width / 2; y = finalCanvas.height / 2; textAlign = 'center'; break;
-                    case 'center-right': x = finalCanvas.width - mappedMarginX; y = finalCanvas.height / 2; textAlign = 'right'; break;
+                    case 'center-left': x = mappedMarginX; y = finalCanvas.height/2; textAlign = 'left'; break;
+                    case 'center-center': x = finalCanvas.width/2; y = finalCanvas.height/2; textAlign = 'center'; break;
+                    case 'center-right': x = finalCanvas.width - mappedMarginX; y = finalCanvas.height/2; textAlign = 'right'; break;
                     case 'bottom-left': x = mappedMarginX; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'left'; break;
-                    case 'bottom-center': x = finalCanvas.width / 2; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'center'; break;
+                    case 'bottom-center': x = finalCanvas.width/2; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'center'; break;
                     case 'bottom-right': x = finalCanvas.width - mappedMarginX; y = finalCanvas.height - mappedMarginY - mappedFontSize/2; textAlign = 'right'; break;
                 }
                 finalCtx.textAlign = textAlign;
