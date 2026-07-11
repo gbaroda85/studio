@@ -201,7 +201,16 @@ export default function DocumentScanner() {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
-            let src = cv.imread(img);
+            // Processing a smaller version for speed and better feature detection
+            const scaleFactor = Math.min(1.0, 800 / Math.max(img.width, img.height));
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width * scaleFactor;
+            canvas.height = img.height * scaleFactor;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return resolve(null);
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+            let src = cv.imread(canvas);
             let gray = new cv.Mat();
             let blurred = new cv.Mat();
             let edges = new cv.Mat();
@@ -210,11 +219,17 @@ export default function DocumentScanner() {
             let hierarchy = new cv.Mat();
 
             cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-            cv.GaussianBlur(gray, blurred, new cv.Size(7, 7), 0);
-            cv.Canny(blurred, edges, 50, 150);
             
+            // Bilateral filter for edge preserving smoothing
+            cv.bilateralFilter(gray, blurred, 9, 75, 75, cv.BORDER_DEFAULT);
+            
+            // Canny edge detection
+            cv.Canny(blurred, edges, 75, 200);
+            
+            // Closing morphology to fill gaps in lines
             const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(5, 5));
-            cv.dilate(edges, dilated, kernel);
+            cv.morphologyEx(edges, dilated, cv.MORPH_CLOSE, kernel);
+            
             cv.findContours(dilated, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
 
             let maxArea = 0;
@@ -228,7 +243,8 @@ export default function DocumentScanner() {
 
                 if (approx.rows === 4) {
                     let area = cv.contourArea(approx);
-                    if (area > maxArea && area > (src.rows * src.cols * 0.10)) {
+                    // Standard minimum document area is 15% of screen
+                    if (area > maxArea && area > (src.rows * src.cols * 0.15)) {
                         maxArea = area;
                         
                         let tempPoints = [];
@@ -239,6 +255,7 @@ export default function DocumentScanner() {
                             });
                         }
 
+                        // Order points: Top-Left, Top-Right, Bottom-Right, Bottom-Left
                         tempPoints.sort((a, b) => a.y - b.y);
                         let top = tempPoints.slice(0, 2).sort((a, b) => a.x - b.x);
                         let bottom = tempPoints.slice(2, 4).sort((a, b) => b.x - a.x);
@@ -246,8 +263,8 @@ export default function DocumentScanner() {
                         bestPoints = [
                             { x: (top[0].x / src.cols) * 100, y: (top[0].y / src.rows) * 100 },
                             { x: (top[1].x / src.cols) * 100, y: (top[1].y / src.rows) * 100 },
-                            { x: (bottom[0].x / src.cols) * 100, y: (bottom[0].y / src.rows) * 100 },
-                            { x: (bottom[1].x / src.cols) * 100, y: (bottom[1].y / src.rows) * 100 }
+                            { x: (bottom[1].x / src.cols) * 100, y: (bottom[1].y / src.rows) * 100 },
+                            { x: (bottom[0].x / src.cols) * 100, y: (bottom[0].y / src.rows) * 100 }
                         ];
                     }
                 }
@@ -265,7 +282,7 @@ export default function DocumentScanner() {
   };
 
   /**
-   * IMPROVED FILTER ENGINE - INTEGRATED USER LOGIC
+   * PERFORMANCE OPTIMIZED FILTER ENGINE
    */
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType): Promise<string> => {
     return new Promise(async (resolve, reject) => {
@@ -286,7 +303,7 @@ export default function DocumentScanner() {
             const br = brightness[0];
             const cr = contrast[0];
 
-            // STEP 1: रोटेशन लागू करना (Rotation)
+            // STEP 1: Rotation
             const rotCanvas = document.createElement('canvas');
             if (rot === 90 || rot === 270) {
                 rotCanvas.width = img.height;
@@ -300,7 +317,7 @@ export default function DocumentScanner() {
             rotCtx.rotate((rot * Math.PI) / 180);
             rotCtx.drawImage(img, -img.width / 2, -img.height / 2);
 
-            // STEP 2: ब्राइटनेस और कॉन्ट्रास्ट लागू करना (Canvas Filter API)
+            // STEP 2: Brightness & Contrast
             const adjCanvas = document.createElement('canvas');
             adjCanvas.width = rotCanvas.width;
             adjCanvas.height = rotCanvas.height;
@@ -320,7 +337,7 @@ export default function DocumentScanner() {
                 return resolve(photoCanvas.toDataURL('image/jpeg', 0.95));
             }
 
-            // STEP 3: डॉक्यूमेंट / BW / Magic Color के लिए शैडो रिमूवल (Illumination Mapping)
+            // STEP 3: Shadow Removal (Illumination Mapping)
             const scale = 0.05; 
             const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
             const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
@@ -340,7 +357,7 @@ export default function DocumentScanner() {
             blurCtx.drawImage(smallCanvas, 0, 0, smallW, smallH, 0, 0, adjCanvas.width, adjCanvas.height);
             const illumData = blurCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
 
-            // Unsharp Mask (शार्पनेस के लिए)
+            // Unsharp Mask
             const usmCanvas = document.createElement('canvas');
             usmCanvas.width = adjCanvas.width;
             usmCanvas.height = adjCanvas.height;
@@ -373,7 +390,6 @@ export default function DocumentScanner() {
                 const r0 = origData[i], g0 = origData[i+1], b0 = origData[i+2];
                 const ur = usmData[i], ug = usmData[i+1], ub = usmData[i+2];
 
-                // 1. Unsharp Mask (शार्पनिंग)
                 let sharpenAmount = filterType === 'magic' ? 1.5 : (filterType === 'bw' ? 2.0 : 1.0);
                 let r = r0 + (r0 - ur) * sharpenAmount;
                 let g = g0 + (g0 - ug) * sharpenAmount;
@@ -434,7 +450,6 @@ export default function DocumentScanner() {
             }
             normCtx.putImageData(outImageData, 0, 0);
 
-            // FINAL STEP: RE-APPLY BORDER & WATERMARK ON TOP
             const finalCanvas = document.createElement('canvas');
             finalCanvas.width = normalizedCanvas.width;
             finalCanvas.height = normalizedCanvas.height;
@@ -555,12 +570,13 @@ export default function DocumentScanner() {
       } catch (err) { toast({ variant: 'destructive', title: 'Warp Error' }); } finally { setIsProcessing(false); }
   };
 
+  // --- DEBOUNCED FILTER APPLICATION ---
   useEffect(() => {
       if (stage === 'studio' && flattenedSrc) {
           const timer = setTimeout(async () => {
               const res = await applyFrameDocFilter(flattenedSrc, activeFilter);
               setLiveResultSrc(res);
-          }, 50);
+          }, 150); // Industrial standard debounce for performance
           return () => clearTimeout(timer);
       }
   }, [activeFilter, brightness, contrast, rotation, showBorder, borderWidth, watermarkText, watermarkOpacity, watermarkSize, watermarkMarginX, watermarkMarginY, watermarkRotation, watermarkPosition, flattenedSrc, stage]);
@@ -1100,3 +1116,4 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
+
