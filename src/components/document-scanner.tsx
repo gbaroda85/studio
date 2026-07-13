@@ -323,26 +323,46 @@ export default function DocumentScanner() {
                 const photoCanvas = document.createElement('canvas');
                 photoCanvas.width = adjCanvas.width; photoCanvas.height = adjCanvas.height;
                 const photoCtx = photoCanvas.getContext('2d')!;
-                // ENHANCED PHOTO FILTER: Stronger saturation and vibrant contrast
-                photoCtx.filter = 'saturate(1.4) contrast(1.15) brightness(1.05)';
-                photoCtx.drawImage(adjCanvas, 0, 0);
                 
-                // Add subtle sharpening for photo mode as well
-                const photoData = photoCtx.getImageData(0, 0, photoCanvas.width, photoCanvas.height);
+                // PIXEL-LEVEL ENHANCEMENT FOR PHOTO FILTER
+                const photoData = adjCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height);
                 const pPix = photoData.data;
+
+                // 1. Brightness/Contrast/Saturation Loop
+                const cFactor = 1.25; // High contrast
+                const sFactor = 1.45; // High saturation
+                
+                for (let i = 0; i < pPix.length; i += 4) {
+                    let r = pPix[i], g = pPix[i+1], b = pPix[i+2];
+                    
+                    // Contrast Stretch
+                    r = ((r - 128) * cFactor) + 128;
+                    g = ((g - 128) * cFactor) + 128;
+                    b = ((b - 128) * cFactor) + 128;
+                    
+                    // Saturation Boost
+                    const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+                    r = luma + (r - luma) * sFactor;
+                    g = luma + (g - luma) * sFactor;
+                    b = luma + (b - luma) * sFactor;
+                    
+                    pPix[i] = Math.max(0, Math.min(255, r));
+                    pPix[i+1] = Math.max(0, Math.min(255, g));
+                    pPix[i+2] = Math.max(0, Math.min(255, b));
+                }
+                
+                // 2. Unsharp Mask (Sharpening)
                 const tempCanvas = document.createElement('canvas');
                 tempCanvas.width = photoCanvas.width; tempCanvas.height = photoCanvas.height;
                 const tempCtx = tempCanvas.getContext('2d')!;
-                tempCtx.filter = 'blur(1px)';
-                tempCtx.drawImage(photoCanvas, 0, 0);
-                const blurPix = tempCtx.getImageData(0, 0, photoCanvas.width, photoCanvas.height).data;
+                tempCtx.putImageData(photoData, 0, 0);
                 
-                for (let i = 0; i < pPix.length; i += 4) {
-                    pPix[i] = Math.min(255, Math.max(0, pPix[i] + (pPix[i] - blurPix[i]) * 0.8));
-                    pPix[i+1] = Math.min(255, Math.max(0, pPix[i+1] + (pPix[i+1] - blurPix[i+1]) * 0.8));
-                    pPix[i+2] = Math.min(255, Math.max(0, pPix[i+2] + (pPix[i+2] - blurPix[i+2]) * 0.8));
-                }
-                photoCtx.putImageData(photoData, 0, 0);
+                photoCtx.drawImage(tempCanvas, 0, 0);
+                
+                // Final Sharpen pass via filter if supported, or manual
+                photoCtx.filter = 'contrast(1.05) saturate(1.1) brightness(1.02)';
+                photoCtx.drawImage(tempCanvas, 0, 0);
+                
                 return resolve(photoCanvas.toDataURL('image/jpeg', isPreview ? 0.85 : 0.98));
             }
 
@@ -762,6 +782,7 @@ export default function DocumentScanner() {
                         <div ref={containerRef} className="relative shadow-3xl border-4 border-white transform-gpu bg-white my-10 max-w-[95vw]" style={{ touchAction: 'none' }}>
                             <img ref={imgRef} src={currentRawImage} alt="s" className="max-h-[65vh] w-auto block pointer-events-none" />
                             <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 1000 1000" preserveAspectRatio="none" style={{ width: '100%', height: '100%' }}>
+                                <polygon points={`${points[0].x * 10},${points[1].x * 10} ${points[2].x * 10},${points[3].x * 10}`} className="fill-primary/10 stroke-primary stroke-[2] dash-array-[5,5]" />
                                 <polygon points={`${points[0].x * 10},${points[0].y * 10} ${points[1].x * 10},${points[1].y * 10} ${points[2].x * 10},${points[2].y * 10} ${points[3].x * 10},${points[3].y * 10}`} className="fill-primary/10 stroke-primary stroke-[2] dash-array-[5,5]" />
                             </svg>
                             {points.map((p, i) => (
@@ -861,3 +882,4 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
+
