@@ -291,7 +291,7 @@ export default function DocumentScanner() {
             let workingW = img.width;
             let workingH = img.height;
             if (isPreview) {
-                const maxDim = 800; // Optimal speed for per-pixel loop
+                const maxDim = 800; 
                 if (workingW > maxDim || workingH > maxDim) {
                     const scale = maxDim / Math.max(workingW, workingH);
                     workingW *= scale;
@@ -317,15 +317,33 @@ export default function DocumentScanner() {
             adjCtx.filter = `brightness(${br}%) contrast(${cr}%)`;
             adjCtx.drawImage(rotCanvas, 0, 0);
 
-            if (filterType === 'original') return resolve(adjCanvas.toDataURL('image/jpeg', 0.9));
+            if (filterType === 'original') return resolve(adjCanvas.toDataURL('image/jpeg', 0.95));
 
             if (filterType === 'photo') {
                 const photoCanvas = document.createElement('canvas');
                 photoCanvas.width = adjCanvas.width; photoCanvas.height = adjCanvas.height;
                 const photoCtx = photoCanvas.getContext('2d')!;
-                photoCtx.filter = 'saturate(1.1) contrast(1.05)';
+                // ENHANCED PHOTO FILTER: Stronger saturation and vibrant contrast
+                photoCtx.filter = 'saturate(1.4) contrast(1.15) brightness(1.05)';
                 photoCtx.drawImage(adjCanvas, 0, 0);
-                return resolve(photoCanvas.toDataURL('image/jpeg', 0.9));
+                
+                // Add subtle sharpening for photo mode as well
+                const photoData = photoCtx.getImageData(0, 0, photoCanvas.width, photoCanvas.height);
+                const pPix = photoData.data;
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = photoCanvas.width; tempCanvas.height = photoCanvas.height;
+                const tempCtx = tempCanvas.getContext('2d')!;
+                tempCtx.filter = 'blur(1px)';
+                tempCtx.drawImage(photoCanvas, 0, 0);
+                const blurPix = tempCtx.getImageData(0, 0, photoCanvas.width, photoCanvas.height).data;
+                
+                for (let i = 0; i < pPix.length; i += 4) {
+                    pPix[i] = Math.min(255, Math.max(0, pPix[i] + (pPix[i] - blurPix[i]) * 0.8));
+                    pPix[i+1] = Math.min(255, Math.max(0, pPix[i+1] + (pPix[i+1] - blurPix[i+1]) * 0.8));
+                    pPix[i+2] = Math.min(255, Math.max(0, pPix[i+2] + (pPix[i+2] - blurPix[i+2]) * 0.8));
+                }
+                photoCtx.putImageData(photoData, 0, 0);
+                return resolve(photoCanvas.toDataURL('image/jpeg', isPreview ? 0.85 : 0.98));
             }
 
             const scale = 0.05; 
@@ -794,8 +812,16 @@ export default function DocumentScanner() {
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => setActiveFilter('bw')} />
                                 <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => setActiveFilter('photo')} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={X} onClick={() => setActiveFilter('original')} />
+                                
+                                {/* ALIGNED ROTATE BUTTON */}
                                 <div className="flex flex-col items-center gap-2">
-                                    <Button variant="outline" className="size-14 rounded-2xl shadow-lg border-2 transition-all p-0 bg-white/50 border-white/20 hover:border-primary/40" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-6"/></Button>
+                                    <Button 
+                                        variant="outline" 
+                                        className="size-14 rounded-2xl shadow-lg border-2 transition-all p-0 bg-white/50 border-white/20 hover:border-primary/40 active:scale-95" 
+                                        onClick={() => setRotation(r => (r + 90) % 360)}
+                                    >
+                                        <RotateCw className="size-6 text-muted-foreground/60"/>
+                                    </Button>
                                     <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Rotate</span>
                                 </div>
                             </div>
@@ -835,4 +861,3 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
-
