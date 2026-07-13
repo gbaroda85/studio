@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
@@ -132,7 +131,6 @@ export default function Mp3Cutter() {
     const initWavesurfer = useCallback((url: string) => {
         if (!containerRef.current) return;
         
-        // STABILIZATION: Strict height and explicit reset
         containerRef.current.innerHTML = "";
         
         const ws = WaveSurfer.create({
@@ -149,7 +147,6 @@ export default function Mp3Cutter() {
             dragToSeek: true,
             minPxPerSec: zoom[0],
             normalize: true,
-            // PERFORMANCE: Use WebAudio for speed
             backend: 'WebAudio'
         });
 
@@ -224,10 +221,11 @@ export default function Mp3Cutter() {
     }, [audioFile, stage, initWavesurfer]);
 
     useEffect(() => {
-        if (wavesurferRef.current) {
+        // FIX: Added duration check to ensure audio is loaded before zooming
+        if (wavesurferRef.current && duration > 0) {
             wavesurferRef.current.zoom(zoom[0]);
         }
-    }, [zoom]);
+    }, [zoom, duration]);
 
     const togglePlay = () => {
         if (!wavesurferRef.current) return;
@@ -438,6 +436,7 @@ export default function Mp3Cutter() {
         setResultUrl(null);
         setStage('upload');
         setProgress(0);
+        setDuration(0);
         setRegionsList([]);
         setActiveRegionId(null);
         if (fileInputRef.current) fileInputRef.current.value = "";

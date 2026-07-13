@@ -1,5 +1,4 @@
-
-"use client";
+'use client';
 
 import React, { useState, useRef, useEffect, useCallback, type ChangeEvent } from 'react';
 import { 
@@ -322,7 +321,7 @@ export default function DocumentScanner() {
             if (filterType === 'photo') {
                 const photoCanvas = document.createElement('canvas');
                 photoCanvas.width = adjCanvas.width; photoCanvas.height = adjCanvas.height;
-                const photoCtx = photoCanvas.getContext('2d')!;
+                const photoCtx = photoCanvas.getContext('2d', { willReadFrequently: true })!;
                 
                 // PIXEL-LEVEL ENHANCEMENT FOR PHOTO FILTER
                 const photoData = adjCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height);
@@ -359,7 +358,7 @@ export default function DocumentScanner() {
                 
                 photoCtx.drawImage(tempCanvas, 0, 0);
                 
-                // Final Sharpen pass via filter if supported, or manual
+                // Final Sharpen pass
                 photoCtx.filter = 'contrast(1.05) saturate(1.1) brightness(1.02)';
                 photoCtx.drawImage(tempCanvas, 0, 0);
                 
@@ -827,14 +826,14 @@ export default function DocumentScanner() {
                     <CardContent className="p-8 space-y-8 flex-1 text-left overflow-y-auto custom-scrollbar">
                         <div className="space-y-6">
                             <Label className="text-[10px] font-black uppercase tracking-widest opacity-60">Fidelity Filters</Label>
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-3 gap-3 items-start">
                                 <FilterBtn active={activeFilter === 'magic'} label="Magic" icon={Sparkles} onClick={() => setActiveFilter('magic')} />
                                 <FilterBtn active={activeFilter === 'document'} label="Docu" icon={FileText} onClick={() => setActiveFilter('document')} />
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => setActiveFilter('bw')} />
                                 <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => setActiveFilter('photo')} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={X} onClick={() => setActiveFilter('original')} />
                                 
-                                {/* ALIGNED ROTATE BUTTON */}
+                                {/* ALIGNED ROTATE BUTTON: Reusing FilterBtn logic for perfect alignment */}
                                 <div className="flex flex-col items-center gap-2">
                                     <Button 
                                         variant="outline" 
@@ -882,4 +881,3 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
-
