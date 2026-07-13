@@ -201,7 +201,6 @@ export default function DocumentScanner() {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.onload = () => {
-            // Processing a smaller version for speed and better feature detection
             const scaleFactor = Math.min(1.0, 800 / Math.max(img.width, img.height));
             const canvas = document.createElement('canvas');
             canvas.width = img.width * scaleFactor;
@@ -220,20 +219,11 @@ export default function DocumentScanner() {
             let hierarchy = new cv.Mat();
 
             cv.cvtColor(src, gray, cv.COLOR_RGBA2GRAY);
-            
-            // Gaussian blur for Noise reduction
             cv.GaussianBlur(gray, blurred, new cv.Size(5, 5), 0);
-            
-            // Adaptive thresholding to handle lighting variation
             cv.adaptiveThreshold(blurred, thresh, 255, cv.ADAPTIVE_THRESH_GAUSSIAN_C, cv.THRESH_BINARY, 11, 2);
-            
-            // Canny edge detection
             cv.Canny(thresh, edges, 75, 200);
-            
-            // Closing morphology to fill gaps in lines
             const kernel = cv.getStructuringElement(cv.MORPH_RECT, new cv.Size(5, 5));
             cv.morphologyEx(edges, dilated, cv.MORPH_CLOSE, kernel);
-            
             cv.findContours(dilated, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
 
             let maxArea = 0;
@@ -247,10 +237,8 @@ export default function DocumentScanner() {
 
                 if (approx.rows === 4) {
                     let area = cv.contourArea(approx);
-                    // Standard minimum document area is 15% of screen
                     if (area > maxArea && area > (src.rows * src.cols * 0.15)) {
                         maxArea = area;
-                        
                         let tempPoints = [];
                         for (let j = 0; j < 4; j++) {
                             tempPoints.push({
@@ -258,12 +246,9 @@ export default function DocumentScanner() {
                                 y: approx.data32S[j * 2 + 1]
                             });
                         }
-
-                        // Order points: Top-Left, Top-Right, Bottom-Right, Bottom-Left
                         tempPoints.sort((a, b) => a.y - b.y);
                         let top = tempPoints.slice(0, 2).sort((a, b) => a.x - b.x);
                         let bottom = tempPoints.slice(2, 4).sort((a, b) => b.x - a.x);
-                        
                         bestPoints = [
                             { x: (top[0].x / src.cols) * 100, y: (top[0].y / src.rows) * 100 },
                             { x: (top[1].x / src.cols) * 100, y: (top[1].y / src.rows) * 100 },
@@ -274,11 +259,8 @@ export default function DocumentScanner() {
                 }
                 approx.delete();
             }
-
             src.delete(); gray.delete(); blurred.delete(); thresh.delete(); edges.delete();
-            dilated.delete(); kernel.delete();
-            contours.delete(); hierarchy.delete();
-
+            dilated.delete(); kernel.delete(); contours.delete(); hierarchy.delete();
             resolve(bestPoints);
         };
         img.src = imageSrc;
@@ -286,7 +268,7 @@ export default function DocumentScanner() {
   };
 
   /**
-   * PERFORMANCE OPTIMIZED FILTER ENGINE (Applying your logic)
+   * PERFORMANCE OPTIMIZED FILTER ENGINE
    */
   const applyFrameDocFilter = async (imageSrc: string, filterType: FilterType, isPreview: boolean = false): Promise<string> => {
     return new Promise(async (resolve, reject) => {
@@ -305,11 +287,11 @@ export default function DocumentScanner() {
             const br = brightness[0];
             const cr = contrast[0];
 
-            // STEP 1: Optimization for Preview - Resize if needed
+            // SPEED OPTIMIZATION: Use smaller buffer for preview
             let workingW = img.width;
             let workingH = img.height;
             if (isPreview) {
-                const maxDim = 1200;
+                const maxDim = 800; // Optimal speed for per-pixel loop
                 if (workingW > maxDim || workingH > maxDim) {
                     const scale = maxDim / Math.max(workingW, workingH);
                     workingW *= scale;
@@ -317,7 +299,6 @@ export default function DocumentScanner() {
                 }
             }
 
-            // STEP 2: Rotation & Base Render
             const rotCanvas = document.createElement('canvas');
             if (rot === 90 || rot === 270) {
                 rotCanvas.width = workingH; rotCanvas.height = workingW;
@@ -329,7 +310,6 @@ export default function DocumentScanner() {
             rotCtx.rotate((rot * Math.PI) / 180);
             rotCtx.drawImage(img, -workingW / 2, -workingH / 2, workingW, workingH);
 
-            // STEP 3: Brightness & Contrast
             const adjCanvas = document.createElement('canvas');
             adjCanvas.width = rotCanvas.width;
             adjCanvas.height = rotCanvas.height;
@@ -348,7 +328,6 @@ export default function DocumentScanner() {
                 return resolve(photoCanvas.toDataURL('image/jpeg', 0.9));
             }
 
-            // STEP 4: Advanced Illumination Mapping & Unsharp Mask
             const scale = 0.05; 
             const smallW = Math.max(1, Math.floor(adjCanvas.width * scale));
             const smallH = Math.max(1, Math.floor(adjCanvas.height * scale));
@@ -374,11 +353,7 @@ export default function DocumentScanner() {
             const usmData = usmCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
 
             const origData = adjCtx.getImageData(0, 0, adjCanvas.width, adjCanvas.height).data;
-
-            const normalizedCanvas = document.createElement('canvas');
-            normalizedCanvas.width = adjCanvas.width; normalizedCanvas.height = adjCanvas.height;
-            const normCtx = normalizedCanvas.getContext('2d')!;
-            const outImageData = normCtx.createImageData(adjCanvas.width, adjCanvas.height);
+            const outImageData = adjCtx.createImageData(adjCanvas.width, adjCanvas.height);
             const data = outImageData.data;
 
             let blackPoint = 60, whitePoint = 230;
@@ -448,44 +423,38 @@ export default function DocumentScanner() {
                 }
                 data[i+3] = 255;
             }
-            normCtx.putImageData(outImageData, 0, 0);
-
-            // Final Composite
-            const finalCanvas = document.createElement('canvas');
-            finalCanvas.width = normalizedCanvas.width; finalCanvas.height = normalizedCanvas.height;
-            const finalCtx = finalCanvas.getContext('2d')!;
-            finalCtx.drawImage(normalizedCanvas, 0, 0);
+            adjCtx.putImageData(outImageData, 0, 0);
 
             if (showBorder) {
-                const bp = (borderWidth[0] / 1000) * finalCanvas.width;
-                finalCtx.strokeStyle = "#000000"; finalCtx.lineWidth = bp * 2;
-                finalCtx.strokeRect(0, 0, finalCanvas.width, finalCanvas.height);
+                const bp = (borderWidth[0] / 1000) * adjCanvas.width;
+                adjCtx.strokeStyle = "#000000"; adjCtx.lineWidth = bp * 2;
+                adjCtx.strokeRect(0, 0, adjCanvas.width, adjCanvas.height);
             }
 
             if (watermarkText.trim()) {
-                const mapFontSize = Math.floor((watermarkSize[0] / 1000) * finalCanvas.width);
-                const mapMX = Math.floor((watermarkMarginX[0] / 1000) * finalCanvas.width);
-                const mapMY = Math.floor((watermarkMarginY[0] / 1000) * finalCanvas.width);
-                finalCtx.font = `bold ${mapFontSize}px sans-serif`;
-                finalCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
+                const mapFontSize = Math.floor((watermarkSize[0] / 1000) * adjCanvas.width);
+                const mapMX = Math.floor((watermarkMarginX[0] / 1000) * adjCanvas.width);
+                const mapMY = Math.floor((watermarkMarginY[0] / 1000) * adjCanvas.width);
+                adjCtx.font = `bold ${mapFontSize}px sans-serif`;
+                adjCtx.fillStyle = `rgba(128, 128, 128, ${watermarkOpacity[0] / 100})`;
                 let x = 0, y = 0, textAlign: CanvasTextAlign = 'center';
                 switch (watermarkPosition) {
                     case 'top-left': x = mapMX; y = mapMY + mapFontSize/2; textAlign = 'left'; break;
-                    case 'top-center': x = finalCanvas.width/2; y = mapMY + mapFontSize/2; textAlign = 'center'; break;
-                    case 'top-right': x = finalCanvas.width - mapMX; y = mapMY + mapFontSize/2; textAlign = 'right'; break;
-                    case 'center-left': x = mapMX; y = finalCanvas.height/2; textAlign = 'left'; break;
-                    case 'center-center': x = finalCanvas.width/2; y = finalCanvas.height/2; textAlign = 'center'; break;
-                    case 'center-right': x = finalCanvas.width - mapMX; y = finalCanvas.height/2; textAlign = 'right'; break;
-                    case 'bottom-left': x = mapMX; y = finalCanvas.height - mapMY - mapFontSize/2; textAlign = 'left'; break;
-                    case 'bottom-center': x = finalCanvas.width/2; y = finalCanvas.height - mapMY - mapFontSize/2; textAlign = 'center'; break;
-                    case 'bottom-right': x = finalCanvas.width - mapMX; y = finalCanvas.height - mapMY - mapFontSize/2; textAlign = 'right'; break;
+                    case 'top-center': x = adjCanvas.width/2; y = mapMY + mapFontSize/2; textAlign = 'center'; break;
+                    case 'top-right': x = adjCanvas.width - mapMX; y = mapMY + mapFontSize/2; textAlign = 'right'; break;
+                    case 'center-left': x = mapMX; y = adjCanvas.height/2; textAlign = 'left'; break;
+                    case 'center-center': x = adjCanvas.width/2; y = adjCanvas.height/2; textAlign = 'center'; break;
+                    case 'center-right': x = adjCanvas.width - mapMX; y = adjCanvas.height/2; textAlign = 'right'; break;
+                    case 'bottom-left': x = mapMX; y = adjCanvas.height - mapMY - mapFontSize/2; textAlign = 'left'; break;
+                    case 'bottom-center': x = adjCanvas.width/2; y = adjCanvas.height - mapMY - mapFontSize/2; textAlign = 'center'; break;
+                    case 'bottom-right': x = adjCanvas.width - mapMX; y = adjCanvas.height - mapMY - mapFontSize/2; textAlign = 'right'; break;
                 }
-                finalCtx.textAlign = textAlign; finalCtx.save();
-                finalCtx.translate(x, y); finalCtx.rotate((-watermarkRotation[0] * Math.PI) / 180);
-                finalCtx.fillText(watermarkText.toUpperCase(), 0, 0); finalCtx.restore();
+                adjCtx.textAlign = textAlign; adjCtx.save();
+                adjCtx.translate(x, y); adjCtx.rotate((-watermarkRotation[0] * Math.PI) / 180);
+                adjCtx.fillText(watermarkText.toUpperCase(), 0, 0); adjCtx.restore();
             }
 
-            resolve(finalCanvas.toDataURL('image/jpeg', isPreview ? 0.8 : 0.95));
+            resolve(adjCanvas.toDataURL('image/jpeg', isPreview ? 0.8 : 0.95));
         } catch (err) { reject(err); }
     });
   };
@@ -825,7 +794,10 @@ export default function DocumentScanner() {
                                 <FilterBtn active={activeFilter === 'bw'} label="BW" icon={Highlighter} onClick={() => setActiveFilter('bw')} />
                                 <FilterBtn active={activeFilter === 'photo'} label="Photo" icon={ImageIcon} onClick={() => setActiveFilter('photo')} />
                                 <FilterBtn active={activeFilter === 'original'} label="None" icon={X} onClick={() => setActiveFilter('original')} />
-                                <Button variant="outline" className="size-14 rounded-2xl shadow-lg border-2 transition-all p-0 bg-white/50 border-white/20" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-6"/></Button>
+                                <div className="flex flex-col items-center gap-2">
+                                    <Button variant="outline" className="size-14 rounded-2xl shadow-lg border-2 transition-all p-0 bg-white/50 border-white/20 hover:border-primary/40" onClick={() => setRotation(r => (r + 90) % 360)}><RotateCw className="size-6"/></Button>
+                                    <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Rotate</span>
+                                </div>
                             </div>
                         </div>
                         <div className="space-y-6 pt-6 border-t">
@@ -863,3 +835,4 @@ function FilterBtn({ active, label, icon: Icon, onClick }: { active: boolean, la
         </div>
     );
 }
+
