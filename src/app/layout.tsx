@@ -6,13 +6,12 @@ import {Toaster} from '@/components/ui/toaster';
 import {LanguageProvider} from '@/contexts/language-context';
 import Script from 'next/script';
 
-// Optimized Viewport for Mobile-First UX
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 5, // Allow pinch-to-zoom for accessibility
+  maximumScale: 5,
   userScalable: true,
-  viewportFit: 'cover', // Full-bleed content for notched phones
+  viewportFit: 'cover',
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#ffffff' },
     { media: '(prefers-color-scheme: dark)', color: '#001D39' },
@@ -55,11 +54,7 @@ export const metadata: Metadata = {
     'bank statement password unlocker',
     'upsc image resizer tool',
     'ibps photo signature compressor',
-    'remove background from signature online',
-    'online marriage biodata maker free',
-    'passport photo maker india online',
     'merge pdf without uploading to server',
-    'image to pdf converter high quality',
     'gr7 tools',
     'private image editor online'
   ],
@@ -75,14 +70,7 @@ export const metadata: Metadata = {
     siteName: 'GR7 Tools Hub',
     title: 'GR7 Tools - 100% Private Online Image & PDF Studio',
     description: 'Fastest professional local browser tools for Images, PDFs and Calculators. No server storage, total privacy for your documents.',
-    images: [
-      {
-        url: '/opengraph-image',
-        width: 1200,
-        height: 630,
-        alt: 'GR7 Tools Hub Dashboard',
-      },
-    ],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'GR7 Tools Hub Dashboard' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -97,7 +85,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Structured Data for Google (SEO)
+  // Global Structured Data
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
@@ -131,7 +119,6 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&family=Dancing+Script:wght@700&display=swap"
           rel="stylesheet"
         />
-        <link rel="icon" href="/icon?v=25" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

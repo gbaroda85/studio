@@ -2,64 +2,48 @@ import { MetadataRoute } from 'next'
 
 /**
  * @fileOverview Comprehensive Sitemap for Next.js 15.
- * Includes every valid utility page with prioritized static routes.
+ * Includes every valid utility page with prioritized static routes and lastmod sync.
  */
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
+  const lastModified = new Date();
 
-  const routes = [
-    '',
-    '/tools',
-    '/privacy-policy',
-    '/terms-of-service',
-    // PDF Tools
-    '/organize-pdf',
+  const coreTools = [
+    '/image-compress',
     '/merge-pdf',
-    '/rotate-pdf',
-    '/lock-pdf',
+    '/aadhaar-printer',
     '/compress-pdf',
-    '/edit-pdf',
     '/unlock-pdf',
-    '/split-pdf',
-    '/crop-pdf',
-    '/pdf-to-image',
-    '/html-to-pdf',
-    '/text-to-pdf',
-    '/add-watermark',
-    '/add-page-numbers',
-    '/document-scan',
-    // Image Tools
+    '/image-to-text',
+    '/passport-photo',
+    '/document-scan'
+  ];
+
+  const secondaryTools = [
     '/passport-date-name',
     '/enhance-photo',
     '/signature-resizer',
     '/image-to-pdf',
-    '/image-compress',
     '/crop-image',
     '/image-resize',
     '/remove-background',
     '/remove-signature',
-    '/passport-photo',
     '/image-to-jpg',
     '/image-to-png',
-    '/image-to-text',
     '/marriage-biodata',
     '/ai-upscaler',
-    // Audio Tools
     '/merge-audio',
     '/mp3-cutter',
     '/audio-converter',
-    // Video Tools
     '/rotate-video',
     '/video-to-mp3',
-    // Calculators
     '/salary-slip',
     '/gst-invoice',
     '/gst-calculator',
     '/sip-calculator',
     '/fd-rd-calculator',
     '/income-tax-calculator',
-    '/standard-calculator',
     '/loan-calculator',
     '/age-calculator',
     '/percentage-calculator',
@@ -67,22 +51,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/interest-calculator',
     '/sales-tax-calculator',
     '/mortgage-calculator',
-    // Converters & File
     '/qr-code-generator',
     '/barcode-generator',
     '/acceleration-converter',
     '/area-converter',
     '/fuel-converter',
     '/pressure-converter',
-    '/aadhaar-printer',
     '/create-zip',
     '/unzip-file',
   ];
 
-  return routes.map((route) => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: (route === '' ? 'daily' : 'weekly') as 'daily' | 'weekly',
-    priority: route === '' ? 1 : 0.8,
-  }));
+  const sitemaps: MetadataRoute.Sitemap = [
+    { url: baseUrl, lastModified, changeFrequency: 'daily', priority: 1 },
+    { url: `${baseUrl}/tools`, lastModified, changeFrequency: 'daily', priority: 0.9 },
+    { url: `${baseUrl}/privacy-policy`, lastModified, changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${baseUrl}/terms-of-service`, lastModified, changeFrequency: 'monthly', priority: 0.3 },
+  ];
+
+  coreTools.forEach(route => {
+    sitemaps.push({ url: `${baseUrl}${route}`, lastModified, changeFrequency: 'weekly', priority: 0.9 });
+  });
+
+  secondaryTools.forEach(route => {
+    sitemaps.push({ url: `${baseUrl}${route}`, lastModified, changeFrequency: 'weekly', priority: 0.7 });
+  });
+
+  return sitemaps;
 }

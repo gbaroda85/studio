@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 
 /**
  * @fileOverview Infrastructure-Level Robots configuration.
- * Optimized for Googlebot rendering efficiency.
+ * Optimized for Googlebot rendering efficiency by allowing Next.js static assets.
  */
 
 export default function robots(): MetadataRoute.Robots {
