@@ -29,6 +29,15 @@ export const metadata: Metadata = {
   alternates: {
     canonical: 'https://www.gr7imagepdf.com',
   },
+  applicationName: 'GR7 Tools Hub',
+  authors: [{ name: 'Gaurav S' }],
+  creator: 'Gaurav S',
+  publisher: 'GR7 Tools',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   icons: {
     icon: [
       { url: '/icon?v=25', type: 'image/png' },
@@ -54,9 +63,6 @@ export const metadata: Metadata = {
     'gr7 tools',
     'private image editor online'
   ],
-  authors: [{ name: 'Gaurav S' }],
-  creator: 'Gaurav S',
-  manifest: '/manifest.json',
   appleWebApp: {
     title: 'GR7 Tools',
     statusBarStyle: 'default',
@@ -105,19 +111,14 @@ export default function RootLayout({
     }
   };
 
-  const softwareSchema = {
+  const organizationSchema = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "GR7 Image & PDF Tools Hub",
-    "operatingSystem": "All",
-    "applicationCategory": "MultimediaApplication",
-    "description": "A suite of high-performance image and PDF tools that work locally in the browser for maximum privacy. Includes SSC/UPSC resizers and Aadhaar tools.",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "featureList": "Image Compression, PDF Merging, Background Removal, Aadhaar Printing, Passport Photo Making, SSC Photo Resizing"
+    "@type": "Organization",
+    "name": "GR7 Tools",
+    "url": "https://www.gr7imagepdf.com",
+    "logo": "https://www.gr7imagepdf.com/icon",
+    "email": "gr7imagepdf@gmail.com",
+    "description": "Professional suite of client-side web tools for image and PDF processing."
   };
 
   return (
@@ -125,6 +126,7 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com" />
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&family=Orbitron:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&family=Dancing+Script:wght@700&display=swap"
           rel="stylesheet"
@@ -136,7 +138,7 @@ export default function RootLayout({
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareSchema) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
         />
       </head>
       <body className="font-body antialiased min-h-screen w-full flex flex-col m-0 p-0 overflow-x-hidden selection:bg-primary/20">

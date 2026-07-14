@@ -2,8 +2,7 @@ import { MetadataRoute } from 'next'
 
 /**
  * @fileOverview Infrastructure-Level Robots configuration.
- * FIX: Allowing Googlebot to access /_next/ is CRITICAL for modern SEO rendering.
- * Modern search engines need access to JS/CSS assets to generate the visual snapshot.
+ * Optimized for Googlebot rendering efficiency.
  */
 
 export default function robots(): MetadataRoute.Robots {
@@ -13,6 +12,7 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: [
           '/',
+          '/tools',
           '/_next/static/css/',
           '/_next/static/chunks/',
           '/_next/static/media/',
@@ -23,6 +23,7 @@ export default function robots(): MetadataRoute.Robots {
           '/api/',
           '/admin/',
           '/private/',
+          '/*?*', // Disallow crawling search/filter result strings to prevent duplicate content
         ],
       },
     ],

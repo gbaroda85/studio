@@ -1,14 +1,13 @@
 import { MetadataRoute } from 'next'
 
 /**
- * @fileOverview Professional Sitemap Generator for Next.js 15.
- * Returns an array of URL objects to ensure SEO compatibility and fix "e.some" errors.
+ * @fileOverview Comprehensive Sitemap for Next.js 15.
+ * Includes every valid utility page with prioritized static routes.
  */
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
 
-  // Core Static Routes
   const routes = [
     '',
     '/tools',
@@ -80,31 +79,10 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/unzip-file',
   ];
 
-  // Defensive check to ensure rules is an array
-  const safeRoutes = Array.isArray(routes) ? routes : [];
-
-  if (safeRoutes.length === 0) {
-    const staticRoutes = [
-        '',
-        '/tools',
-        '/privacy-policy',
-        '/terms-of-service',
-    ];
-    return staticRoutes.map(route => ({
-        url: `${baseUrl}${route}`,
-        lastModified: new Date(),
-        changeFrequency: 'daily',
-        priority: 1
-    }));
-  }
-
-  const sitemapEntries: MetadataRoute.Sitemap = safeRoutes.map((route) => ({
+  return routes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: (route === '' ? 'daily' : 'monthly') as 'daily' | 'monthly',
+    changeFrequency: (route === '' ? 'daily' : 'weekly') as 'daily' | 'weekly',
     priority: route === '' ? 1 : 0.8,
   }));
-
-  // Ensure the return value is strictly an array to avoid "e.some" errors in Next.js 15
-  return Array.isArray(sitemapEntries) ? sitemapEntries : [];
 }
