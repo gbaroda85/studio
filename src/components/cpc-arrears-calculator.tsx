@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo } from "react";
@@ -22,6 +21,7 @@ import {
     ResponsiveContainer, 
     Tooltip 
 } from "recharts";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,18 @@ import { cn } from "@/lib/utils";
 
 type CalcMode = 'serving' | 'pensioner';
 const COLORS = ["#0d5a71", "#ef4444"];
+
+const StarIcons = () => (
+    <>
+        {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className={`star-${i} pointer-events-none`}>
+                <svg viewBox="0 0 784.11 815.53" className="fill-white">
+                    <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
+                </svg>
+            </div>
+        ))}
+    </>
+);
 
 export default function CpcArrearsCalculator() {
   const [mode, setMode] = useState<CalcMode>('serving');
@@ -62,7 +74,6 @@ export default function CpcArrearsCalculator() {
     const oldDaRate = 0.53; 
     
     // Projected 8th CPC DA path for 18 months
-    // Months 1-6: 0% | 7-12: 5% | 13-18: 10% (Estimated for arrears)
     const avgNewDa = (0 * 6 + 0.05 * 6 + 0.10 * 6) / 18; 
     
     const basis = mode === 'serving' ? (b + mspVal) : b;
@@ -216,9 +227,8 @@ export default function CpcArrearsCalculator() {
             ) : (
                 <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="space-y-6">
                     
-                    {/* BIG ARREARS RESULT CARD (Matches Image) */}
+                    {/* BIG ARREARS RESULT CARD */}
                     <Card className="border-none shadow-3xl rounded-[3rem] overflow-hidden bg-primary text-white relative group">
-                        {/* Sparkle effects like professional apps */}
                         <div className="absolute top-0 right-0 size-80 bg-white/5 blur-3xl rounded-full" />
                         <StarIcons />
 
@@ -297,3 +307,6 @@ export default function CpcArrearsCalculator() {
   );
 }
 
+function Separator({ className }: { className?: string }) {
+    return <div className={cn("h-px w-full bg-slate-200", className)} />
+}
