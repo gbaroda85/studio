@@ -44,6 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/sip-calculator',
     '/fd-rd-calculator',
     '/income-tax-calculator',
+    '/cpc-arrears-calculator',
     '/loan-calculator',
     '/age-calculator',
     '/percentage-calculator',

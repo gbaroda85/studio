@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -155,6 +154,7 @@ const CATEGORIES = [
     icon: Calculator,
     color: "text-emerald-500",
     tools: [
+      { href: '/cpc-arrears-calculator', label: 'cpc_arrears_calculator_label', icon: Banknote },
       { href: '/salary-slip', label: 'salary_slip_label', icon: Banknote },
       { href: '/gst-invoice', label: 'gst_invoice_label', icon: Receipt },
       { href: '/gst-calculator', label: 'gst_calculator_label', icon: IndianRupee },

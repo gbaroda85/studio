@@ -97,6 +97,7 @@ const ALL_TOOLS = [
   { icon: Scissors, title: "SPLIT PDF", description: "Extract specific pages from any PDF file.", href: "/split-pdf", colorClass: "bg-gradient-to-br from-cyan-500 to-cyan-700", lightBg: "bg-cyan-50", category: "pdf-kit" },
 
   // FINANCE CENTER
+  { icon: Banknote, title: "8TH CPC ARREARS CALCULATOR", description: "Estimate salary hike and arrears for 8th Pay Commission.", href: "/cpc-arrears-calculator", colorClass: "bg-gradient-to-br from-teal-600 to-emerald-800", lightBg: "bg-emerald-50", category: "calculator" },
   { icon: Banknote, title: "SALARY SLIP GENERATOR", description: "Generate professional A4 pay slips for employees instantly.", href: "/salary-slip", colorClass: "bg-blue-600", lightBg: "bg-blue-50", category: "calculator" },
   { icon: Receipt, title: "GST INVOICE GENERATOR", description: "Generate professional GST invoices instantly.", href: "/gst-invoice", colorClass: "bg-emerald-600", lightBg: "bg-[#f0fdf4]", category: "calculator" },
   { icon: IndianRupee, title: "GST CALCULATOR", description: "Calculate GST addition or removal instantly.", href: "/gst-calculator", colorClass: "bg-indigo-600", lightBg: "bg-[#eff6ff]", category: "calculator" },
