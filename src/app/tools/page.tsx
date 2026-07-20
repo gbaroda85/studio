@@ -634,7 +634,7 @@ function ToolsPageContent() {
           </div>
           
           <h1 className="text-3xl md:text-4xl lg:text-5xl font-black mb-4 tracking-tighter animate-fade-in-up leading-tight uppercase font-headline text-black dark:text-white">
-            All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-50 to-accent">Hub Studio</span>
+            All Tools <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary">Hub Studio</span>
           </h1>
           
           <p className="text-base md:text-lg text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-semibold leading-relaxed animate-fade-in-up mb-8 font-body" style={{ animationDelay: '0.1s' }}>
