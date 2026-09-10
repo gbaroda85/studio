@@ -1,15 +1,25 @@
 import { MetadataRoute } from 'next'
 
 /**
- * @fileOverview Comprehensive Sitemap for Next.js 15.
- * Includes every valid utility page with prioritized static routes and lastmod sync.
+ * @fileOverview Dynamic Sitemap Generator for gr7imagepdf.com
+ * Requirements:
+ * 1. Includes all 58+ tool routes.
+ * 2. Dynamically sets lastmod to current timestamp for freshness signals.
+ * 3. Priority mapping: 1.0 for home, 0.8 for tools.
  */
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = 'https://www.gr7imagepdf.com';
-  const lastModified = new Date();
+  const currentDate = new Date();
 
-  const coreTools = [
+  // Primary Landing Pages (Priority 1.0)
+  const mainRoutes = [
+    '',
+    '/tools',
+  ];
+
+  // Utility Tool Pages (Priority 0.8)
+  const toolRoutes = [
     '/image-compress',
     '/merge-pdf',
     '/aadhaar-printer',
@@ -17,10 +27,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/unlock-pdf',
     '/image-to-text',
     '/passport-photo',
-    '/document-scan'
-  ];
-
-  const secondaryTools = [
+    '/document-scan',
     '/passport-date-name',
     '/enhance-photo',
     '/signature-resizer',
@@ -60,22 +67,55 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/pressure-converter',
     '/create-zip',
     '/unzip-file',
+    '/text-to-pdf',
+    '/add-watermark',
+    '/add-page-numbers',
+    '/pdf-to-image',
+    '/html-to-pdf',
+    '/crop-pdf',
+    '/split-pdf',
+    '/edit-pdf',
+    '/rotate-pdf',
+    '/standard-calculator'
   ];
 
-  const sitemaps: MetadataRoute.Sitemap = [
-    { url: baseUrl, lastModified, changeFrequency: 'daily', priority: 1 },
-    { url: `${baseUrl}/tools`, lastModified, changeFrequency: 'daily', priority: 0.9 },
-    { url: `${baseUrl}/privacy-policy`, lastModified, changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${baseUrl}/terms-of-service`, lastModified, changeFrequency: 'monthly', priority: 0.3 },
+  // Policy Pages (Priority 0.3)
+  const policyRoutes = [
+    '/privacy-policy',
+    '/terms-of-service',
   ];
 
-  coreTools.forEach(route => {
-    sitemaps.push({ url: `${baseUrl}${route}`, lastModified, changeFrequency: 'weekly', priority: 0.9 });
+  const sitemapEntries: MetadataRoute.Sitemap = [];
+
+  // Add Main Routes
+  mainRoutes.forEach(route => {
+    sitemapEntries.push({
+      url: `${baseUrl}${route}`,
+      lastModified: currentDate,
+      changeFrequency: 'daily',
+      priority: 1.0,
+    });
   });
 
-  secondaryTools.forEach(route => {
-    sitemaps.push({ url: `${baseUrl}${route}`, lastModified, changeFrequency: 'weekly', priority: 0.7 });
+  // Add Tool Routes
+  toolRoutes.forEach(route => {
+    sitemapEntries.push({
+      url: `${baseUrl}${route}`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    });
   });
 
-  return sitemaps;
+  // Add Policy Routes
+  policyRoutes.forEach(route => {
+    sitemapEntries.push({
+      url: `${baseUrl}${route}`,
+      lastModified: currentDate,
+      changeFrequency: 'monthly',
+      priority: 0.3,
+    });
+  });
+
+  return sitemapEntries;
 }

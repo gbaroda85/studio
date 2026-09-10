@@ -1,11 +1,13 @@
 import { MetadataRoute } from 'next'
 
 /**
- * @fileOverview Infrastructure-Level Robots configuration.
- * Optimized for Googlebot rendering efficiency by allowing Next.js static assets.
+ * @fileOverview Dynamic robots.txt configuration for gr7imagepdf.com.
+ * Points Googlebot directly to the dynamic sitemap and prevents crawl budget waste.
  */
 
 export default function robots(): MetadataRoute.Robots {
+  const baseUrl = 'https://www.gr7imagepdf.com';
+
   return {
     rules: [
       {
@@ -21,12 +23,14 @@ export default function robots(): MetadataRoute.Robots {
         ],
         disallow: [
           '/api/',
-          '/admin/',
-          '/private/',
-          '/*?*', // Disallow crawling search/filter result strings to prevent duplicate content
+          '/*?*', // Prevent crawling search results/filters to save budget
         ],
       },
+      {
+        userAgent: 'GPTBot',
+        disallow: ['/'], // Optional: Save server resources from AI scrapers
+      }
     ],
-    sitemap: 'https://www.gr7imagepdf.com/sitemap.xml',
+    sitemap: `${baseUrl}/sitemap.xml`,
   }
 }
