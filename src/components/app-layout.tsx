@@ -64,7 +64,10 @@ import {
   Gauge,
   AreaChart,
   Fuel,
-  Waves
+  Waves,
+  Facebook,
+  Twitter,
+  Github
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -252,7 +255,6 @@ function NavDropdown({
 
   const isPinned = activeMenu === category.name;
   
-  // The dropdown is open if pinned OR hovering (but not if explicitly closed via click while mouse is still over it)
   const isOpen = isPinned || (isHovering && !isForceClosed);
 
   const handleToggle = (e: React.MouseEvent) => {
@@ -260,11 +262,9 @@ function NavDropdown({
     e.stopPropagation();
     
     if (isPinned) {
-      // Toggle OFF and prevent immediate re-open via hover
       setActiveMenu(null);
       setIsForceClosed(true);
     } else {
-      // Toggle ON (Pins this category and automatically closes any other pinned one)
       setActiveMenu(category.name);
       setIsForceClosed(false);
     }
@@ -272,12 +272,12 @@ function NavDropdown({
 
   const handleMouseEnter = () => {
     setIsHovering(true);
-    setIsForceClosed(false); // Clear the forced-close state when re-entering the area
+    setIsForceClosed(false);
   };
 
   const handleMouseLeave = () => {
     setIsHovering(false);
-    setIsForceClosed(false); // Reset on leave so next entrance works normally
+    setIsForceClosed(false);
   };
 
   return (
@@ -289,7 +289,6 @@ function NavDropdown({
       <DropdownMenu 
         open={isOpen} 
         onOpenChange={(val) => {
-          // If Radix tries to close it (e.g. clicking outside), sync our states
           if (!val) {
               setIsHovering(false);
               if (isPinned) setActiveMenu(null);
@@ -301,7 +300,6 @@ function NavDropdown({
             variant="ghost" 
             onClick={handleToggle}
             onPointerDown={(e) => {
-               // Block Radix default dropdown toggle to strictly manage state via our controlled 'open' prop
                e.preventDefault();
             }}
             className={cn(
@@ -499,50 +497,125 @@ function AppHeader() {
 export function AppFooter() {
   const { t } = useLanguage();
   return (
-    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-16 w-full flex justify-center shrink-0">
-      <div className="w-full px-4 md:px-12 lg:px-16 max-w-[2000px] mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-12">
-            <div className="md:col-span-2 space-y-4 md:space-y-6">
-            <Link href="/" className="flex items-center gap-2 inline-block">
-                <GR7Logo />
-            </Link>
-            <p className="text-sm text-muted-foreground max-sm font-medium leading-relaxed text-left">
-                A specialized collection of professional-grade web utilities for instant file transformation. Everything happens locally in your browser for 100% privacy.
-            </p>
-            <div className="flex items-center gap-4 pt-4">
-                <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-green-600 bg-green-500/5 px-3 py-1 rounded-full border border-green-500/10">
-                    <ShieldCheck className="size-3" /> Client-Side
-                </div>
-                <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-black uppercase text-blue-600 bg-blue-500/5 px-3 py-1 rounded-full border border-blue-100/10">
-                    <Zap className="size-3" /> No Server Storage
-                </div>
-            </div>
-            </div>
+    <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-20 w-full flex justify-center shrink-0 no-print">
+      <div className="w-full px-6 md:px-12 lg:px-20 max-w-[2000px] mx-auto flex flex-col gap-12 md:gap-20">
+        
+        {/* Main Grid for 58+ Links */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
             
-            <div className="grid grid-cols-2 md:grid-cols-1 gap-8 md:col-span-2 text-left">
-                <div>
-                    <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Quick Links</h4>
-                    <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
-                        <li><Link href="/" className="hover:text-primary transition-colors">{t('home')}</Link></li>
-                        <li><Link href="/tools" className="hover:text-primary transition-colors">Browse All Tools</Link></li>
-                        <li><Link href="/privacy-policy" className="hover:text-primary transition-colors">{t('privacy_policy')}</Link></li>
-                        <li><Link href="/terms-of-service" className="hover:text-primary transition-colors">{t('terms_of_service')}</Link></li>
-                    </ul>
-                </div>
-
-                <div>
-                    <h4 className="font-black text-[10px] uppercase tracking-widest text-primary mb-4 md:mb-6">Connect</h4>
-                    <ul className="space-y-3 md:space-y-4 text-sm font-bold text-muted-foreground">
-                        <li><a href="mailto:gr7imagepdf@gmail.com" className="hover:text-primary transition-colors">Email Support</a></li>
-                        <li className="text-[10px] uppercase font-black opacity-50 pt-2">Developed by Gaurav S</li>
-                    </ul>
+            {/* Column 1: Branding & Intro */}
+            <div className="space-y-6 lg:col-span-1">
+                <Link href="/" className="inline-block">
+                    <GR7Logo />
+                </Link>
+                <p className="text-xs text-muted-foreground font-bold uppercase leading-relaxed tracking-tight opacity-70">
+                    GR7 Tools Hub is a professional, high-fidelity studio for all your digital document and image needs. 100% Private local RAM processing.
+                </p>
+                <div className="flex items-center gap-4 pt-4">
+                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Twitter className="size-4" /></a>
+                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Facebook className="size-4" /></a>
+                    <a href="#" className="text-muted-foreground hover:text-primary transition-colors"><Github className="size-4" /></a>
                 </div>
             </div>
+
+            {/* Column 2: Image Tools */}
+            <div className="space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary border-b border-primary/10 pb-2">Image Engine</h4>
+                <ul className="grid gap-2">
+                    {CATEGORIES.find(c => c.name === 'image_tools')?.tools.map(tool => (
+                        <li key={tool.href}>
+                            <Link href={tool.href} className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">
+                                {t(tool.label)}
+                            </Link>
+                        </li>
+                    ))}
+                    <li><Link href="/ai-upscaler" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">AI Image Upscaler</Link></li>
+                    <li><Link href="/marriage-biodata" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Marriage Biodata Maker</Link></li>
+                </ul>
+            </div>
+
+            {/* Column 3: PDF Studio */}
+            <div className="space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 border-b border-rose-500/10 pb-2">PDF Toolkit</h4>
+                <ul className="grid gap-2">
+                    {CATEGORIES.find(c => c.name === 'pdf_tools')?.tools.map(tool => (
+                        <li key={tool.href}>
+                            <Link href={tool.href} className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">
+                                {t(tool.label)}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Column 4: Finance & Calc */}
+            <div className="space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 border-b border-emerald-600/10 pb-2">Finance Hub</h4>
+                <ul className="grid gap-2">
+                    {CATEGORIES.find(c => c.name === 'calculator_pro')?.tools.map(tool => (
+                        <li key={tool.href}>
+                            <Link href={tool.href} className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">
+                                {t(tool.label)}
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+
+            {/* Column 5: Converters & Media */}
+            <div className="space-y-6">
+                <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 border-b border-indigo-600/10 pb-2">Utilities</h4>
+                <div className="space-y-6">
+                    <ul className="grid gap-2">
+                        {CATEGORIES.find(c => c.name === 'converter_tools')?.tools.map(tool => (
+                            <li key={tool.href}>
+                                <Link href={tool.href} className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">
+                                    {t(tool.label)}
+                                </Link>
+                            </li>
+                        ))}
+                        {CATEGORIES.find(c => c.name === 'file_tools')?.tools.map(tool => (
+                            <li key={tool.href}>
+                                <Link href={tool.href} className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">
+                                    {t(tool.label)}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="pt-2">
+                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 border-b border-indigo-600/10 pb-2 mb-3">Multimedia</h4>
+                         <ul className="grid gap-2">
+                            <li><Link href="/video-to-mp3" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Video to MP3</Link></li>
+                            <li><Link href="/rotate-video" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Rotate Video</Link></li>
+                            <li><Link href="/merge-audio" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Audio Merger</Link></li>
+                            <li><Link href="/mp3-cutter" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">MP3 Cutter Studio</Link></li>
+                         </ul>
+                    </div>
+                </div>
+            </div>
+
         </div>
-        <div className="w-full mt-10 md:mt-12 pt-8 border-t border-border/50 text-center">
-            <p className="text-[9px] md:text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em] md:tracking-[0.3em]">
-                © {new Date().getFullYear()} GR7 IMAGE PDF TOOLS HUB Studio
-            </p>
+
+        <div className="w-full h-px bg-border/50" />
+
+        <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-4">
+            <div className="flex flex-wrap items-center justify-center md:justify-start gap-8">
+                <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">
+                    © {new Date().getFullYear()} GR7 TOOLS HUB STUDIO
+                </p>
+                <div className="flex items-center gap-6">
+                    <Link href="/privacy-policy" className="text-[10px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest">{t('privacy_policy')}</Link>
+                    <Link href="/terms-of-service" className="text-[10px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest">{t('terms_of_service')}</Link>
+                </div>
+            </div>
+            <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2 text-[9px] font-black uppercase text-green-600 bg-green-500/5 px-4 py-1.5 rounded-full border border-green-500/10 shadow-sm">
+                    <ShieldCheck className="size-3.5" /> Client-Side Processing
+                </div>
+                <div className="flex items-center gap-2 text-[9px] font-black uppercase text-blue-600 bg-blue-500/5 px-4 py-1.5 rounded-full border border-blue-100/10 shadow-sm">
+                    <Zap className="size-3.5" /> No Data Storage
+                </div>
+            </div>
         </div>
       </div>
     </footer>
