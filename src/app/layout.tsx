@@ -38,14 +38,11 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: [
-      { url: '/icon?v=25', type: 'image/png' },
-      { url: '/icon?v=25', sizes: '32x32', type: 'image/png' },
-    ],
-    apple: [
-      { url: '/icon?v=25', type: 'image/png' },
-    ],
+    icon: '/icon',
+    shortcut: '/icon',
+    apple: '/icon',
   },
+  manifest: '/manifest.webmanifest',
   keywords: [
     'ssc photo signature resizer',
     'compress image to 20kb online',
