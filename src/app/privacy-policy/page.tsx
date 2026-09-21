@@ -1,12 +1,17 @@
+
+'use client';
+
 import { ShieldCheck, Database, Lock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Metadata } from 'next';
+import { useState, useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Privacy Policy - Your Data Stays on Your Device',
-  description: 'Learn how GR7 Tools protects your privacy. We use client-side processing, meaning your images and PDFs never leave your browser.',
-  alternates: { canonical: 'https://www.gr7imagepdf.com/privacy-policy' }
-};
+function UpdatedDate() {
+    const [date, setDate] = useState("");
+    useEffect(() => {
+        setDate(new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
+    }, []);
+    return <>{date}</>;
+}
 
 export default function PrivacyPolicyPage() {
   return (
@@ -71,7 +76,7 @@ export default function PrivacyPolicyPage() {
         </section>
         
         <p className="text-center text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest pb-20">
-          Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          Last Updated: <UpdatedDate />
         </p>
       </div>
     </main>

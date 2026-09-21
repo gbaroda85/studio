@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from 'next/link';
 import {usePathname} from 'next/navigation';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Crop,
   FileArchive,
@@ -67,7 +68,8 @@ import {
   Waves,
   Facebook,
   Twitter,
-  Github
+  Github,
+  Download
 } from 'lucide-react';
 
 import {ThemeToggle} from '@/components/theme-toggle';
@@ -494,6 +496,14 @@ function AppHeader() {
   );
 }
 
+function ClientYear() {
+  const [year, setYear] = useState(2025);
+  useEffect(() => {
+    setYear(new Date().getFullYear());
+  }, []);
+  return <>{year}</>;
+}
+
 export function AppFooter() {
   const { t } = useLanguage();
   return (
@@ -529,7 +539,6 @@ export function AppFooter() {
                             </Link>
                         </li>
                     ))}
-                    <li><Link href="/ai-upscaler" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">AI Image Upscaler</Link></li>
                     <li><Link href="/marriage-biodata" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Marriage Biodata Maker</Link></li>
                 </ul>
             </div>
@@ -601,7 +610,7 @@ export function AppFooter() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 pb-4">
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-8">
                 <p className="text-[10px] font-black text-muted-foreground/60 uppercase tracking-[0.2em]">
-                    © {new Date().getFullYear()} GR7 TOOLS HUB STUDIO
+                    © <ClientYear /> GR7 TOOLS HUB STUDIO
                 </p>
                 <div className="flex items-center gap-6">
                     <Link href="/privacy-policy" className="text-[10px] font-black text-muted-foreground hover:text-primary uppercase tracking-widest">{t('privacy_policy')}</Link>
@@ -623,14 +632,6 @@ export function AppFooter() {
 }
 
 export default function AppLayout({children}: {children: React.ReactNode}) {
-  const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
-  if (!isMounted) return null;
-  
   return (
     <div className="flex flex-col min-h-screen w-full bg-transparent relative overflow-x-hidden pt-16 md:pt-20">
       <AppHeader />

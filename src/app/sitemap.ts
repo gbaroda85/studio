@@ -1,3 +1,4 @@
+
 import { MetadataRoute } from 'next'
 
 /**
@@ -39,7 +40,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     '/image-to-jpg',
     '/image-to-png',
     '/marriage-biodata',
-    '/ai-upscaler',
     '/merge-audio',
     '/mp3-cutter',
     '/audio-converter',

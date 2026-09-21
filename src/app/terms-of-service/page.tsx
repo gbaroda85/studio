@@ -1,13 +1,17 @@
 
+'use client';
+
 import { BookOpen, CheckCircle2, AlertTriangle, Scale } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Metadata } from 'next';
+import { useState, useEffect } from 'react';
 
-export const metadata: Metadata = {
-  title: 'Terms of Service - GR7 Tools Hub',
-  description: 'Read the terms and conditions for using GR7 Tools. Our services are provided locally for private and professional use.',
-  alternates: { canonical: 'https://www.gr7imagepdf.com/terms-of-service' }
-};
+function UpdatedDate() {
+    const [date, setDate] = useState("");
+    useEffect(() => {
+        setDate(new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }));
+    }, []);
+    return <>{date}</>;
+}
 
 export default function TermsOfServicePage() {
   return (
@@ -65,7 +69,7 @@ export default function TermsOfServicePage() {
         </section>
         
         <p className="text-center text-[10px] font-black uppercase text-muted-foreground/50 tracking-widest pb-20">
-          Last Updated: {new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+          Last Updated: <UpdatedDate />
         </p>
       </div>
     </main>
