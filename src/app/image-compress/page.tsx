@@ -1,3 +1,4 @@
+
 import { Metadata } from 'next';
 import ImageCompressor from '@/components/image-compressor';
 import { HowToGuide } from '@/components/how-to-guide';

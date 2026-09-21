@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -335,6 +336,20 @@ export default function Page() {
                 </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* DENSE SEO LINKING SECTION - VISIBLE TO BOTS */}
+      <section className="py-12 bg-white dark:bg-slate-950 w-full overflow-hidden no-print">
+        <div className="max-w-7xl mx-auto px-6">
+            <h2 className="text-2xl font-black uppercase tracking-tighter mb-8 text-slate-800 dark:text-white">Crawlable Tool Index</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-4">
+                {ALL_TOOLS.map((tool, i) => (
+                    <Link key={i} href={tool.href} className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors underline decoration-dotted decoration-muted-foreground/30 underline-offset-4 uppercase tracking-tighter">
+                        {tool.title}
+                    </Link>
+                ))}
+            </div>
         </div>
       </section>
 
