@@ -167,7 +167,34 @@ export default function PassportPhotoMaker() {
             : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
             
         setCrop(initialCrop);
+        
+        setCompletedCrop({
+            unit: 'px',
+            x: (initialCrop.x / 100) * width,
+            y: (initialCrop.y / 100) * height,
+            width: (initialCrop.width / 100) * width,
+            height: (initialCrop.height / 100) * height
+        });
     }, [getAspectRatio]);
+
+    const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
+        const { width, height } = e.currentTarget;
+        const aspect = getAspectRatio();
+        
+        const initialCrop = aspect 
+            ? centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height), width, height)
+            : centerCrop({ unit: '%', width: 90, height: 90 }, width, height);
+            
+        setCrop(initialCrop);
+        
+        setCompletedCrop({
+            unit: 'px',
+            x: (initialCrop.x / 100) * width,
+            y: (initialCrop.y / 100) * height,
+            width: (initialCrop.width / 100) * width,
+            height: (initialCrop.height / 100) * height
+        });
+    };
 
     useEffect(() => {
         if (stage === 'crop' && imgRef.current) {
@@ -679,7 +706,7 @@ export default function PassportPhotoMaker() {
                     <div className="lg:col-span-3 space-y-4 md:space-y-6">
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
                             <CardHeader className="bg-primary/5 p-4 md:p-6 border-b border-white/10 text-left">
-                                <CardTitle className="text-base md:text-lg font-black uppercase flex items-center gap-2"><Printer className="size-4 md:size-5 text-primary" /> Print Sheets</CardTitle>
+                                <CardTitle className="text-base md:text-lg font-black uppercase gap-2 flex items-center"><Printer className="size-4 md:size-5 text-primary" /> Print Sheets</CardTitle>
                             </CardHeader>
                             <CardContent className="p-4 md:p-6 space-y-3 md:space-y-4">
                                 {PRINT_SHEETS.map((sheet, i) => (
