@@ -252,6 +252,7 @@ export default function PassportPhotoMaker() {
         if (!ctx) return;
 
         const currentAspect = getAspectRatio() || (faceImg.width / faceImg.height);
+        // Base internal resolution for HQ
         const targetW = 1200; 
         const targetH = targetW / currentAspect;
         canvas.width = targetW;
@@ -291,7 +292,9 @@ export default function PassportPhotoMaker() {
     }, [bgColor, scale, posX, posY, rotation, borderWidth, borderColor, brightness, contrast, saturation, blur, getAspectRatio]);
 
     useEffect(() => {
-        if (stage === 'studio') renderPhoto();
+        if (stage === 'studio' && faceImgRef.current) {
+            renderPhoto();
+        }
     }, [renderPhoto, stage]);
 
     const handleInitialCrop = async () => {
@@ -329,7 +332,6 @@ export default function PassportPhotoMaker() {
             faceImgRef.current = img;
             setStage('studio');
             setIsProcessing(false);
-            setTimeout(renderPhoto, 100);
         };
     };
 
@@ -376,9 +378,11 @@ export default function PassportPhotoMaker() {
             pw_mm = currentPreset.width; ph_mm = currentPreset.height;
         }
 
+        // Convert target mm to px based on 300 DPI
         const photoW_px = (pw_mm / 25.4) * DPI;
         const photoH_px = (ph_mm / 25.4) * DPI;
 
+        // Paper dimensions in px
         const pW = sheet.unit === 'inch' ? sheet.width * DPI : (sheet.width / 25.4) * DPI;
         const pH = sheet.unit === 'inch' ? sheet.height * DPI : (sheet.height / 25.4) * DPI;
 
@@ -388,7 +392,7 @@ export default function PassportPhotoMaker() {
         ];
 
         let bestFit = { w: pW, h: pH, cols: 0, rows: 0, total: -1 };
-        const gap = (2 / 25.4) * DPI; 
+        const gap = (3 / 25.4) * DPI; // 3mm gap
 
         orientations.forEach(o => {
             const c = Math.floor((o.w - gap) / (photoW_px + gap));
@@ -520,7 +524,7 @@ export default function PassportPhotoMaker() {
                                         src={imgSrc} 
                                         alt="source" 
                                         className="max-h-[45vh] md:max-h-[50vh] w-auto object-contain block" 
-                                        onLoad={updateCropHandles} 
+                                        onLoad={onImageLoad} 
                                     />
                                 </ReactCrop>
                             </div>
@@ -543,7 +547,7 @@ export default function PassportPhotoMaker() {
                 <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8 items-start h-full animate-in fade-in duration-500">
                     <div className="lg:col-span-3 space-y-4 md:space-y-6">
                         <Card className="glass-panel border-none shadow-2xl overflow-hidden rounded-2xl md:rounded-[2.5rem]">
-                            <CardHeader className="border-b border-white/10 p-4 md:p-6 bg-primary/5">
+                            <CardHeader className="border-b border-white/10 p-4 md:p-6 bg-primary/5 text-left">
                                 <div className="flex items-center justify-between mb-4">
                                      <CardTitle className="text-base md:text-lg font-black uppercase tracking-tighter flex items-center gap-2">
                                         <Settings2 className="size-4 md:size-5 text-primary" /> Adjustments
@@ -571,7 +575,7 @@ export default function PassportPhotoMaker() {
                                     </TabsList>
                                     <ScrollArea className="h-[250px] md:h-[450px]">
                                         <TabsContent value="filters" className="p-4 md:p-8 space-y-6 md:space-y-8">
-                                            <div className="space-y-4 md:space-y-6">
+                                            <div className="space-y-4 md:space-y-6 text-left">
                                                 <div className="space-y-3 md:space-y-4">
                                                     <div className="flex justify-between items-center"><Label className="text-[9px] md:text-[10px] font-black uppercase opacity-60">Brightness</Label><span className="text-[9px] md:text-[10px] font-mono font-bold">{brightness}%</span></div>
                                                     <Slider min={50} max={150} value={[brightness]} onValueChange={(v) => setBrightness(v[0])} />
@@ -586,7 +590,7 @@ export default function PassportPhotoMaker() {
                                                 </div>
                                             </div>
                                         </TabsContent>
-                                        <TabsContent value="studio" className="p-4 md:p-8 space-y-8 md:space-y-10">
+                                        <TabsContent value="studio" className="p-4 md:p-8 space-y-8 md:space-y-10 text-left">
                                             <div className="space-y-3 md:space-y-4">
                                                 <Label className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-primary">Background Color</Label>
                                                 <div className="grid grid-cols-4 gap-2 md:gap-3">
@@ -641,7 +645,7 @@ export default function PassportPhotoMaker() {
                             </Card>
                             <div className="absolute -bottom-10 md:-bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-1 md:gap-2 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-1 md:p-1.5 rounded-full shadow-2xl border-2 border-white/20 z-10 whitespace-nowrap">
                                 <Button variant="outline" size="icon" className="size-6 md:size-8 rounded-full" onClick={() => setScale(s => s + 5)}><ZoomIn className="size-3 md:size-3.5"/></Button>
-                                <Button variant="outline" size="icon" className="size-6 md:size-8 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-3 md:size-3.5"/></Button>
+                                <Button variant="outline" size="icon" className="size-6 md:size-8 rounded-full" onClick={() => setScale(s => s - 5)}><ZoomOut className="size-3.5 md:size-3.5"/></Button>
                                 <Separator orientation="vertical" className="h-3 md:h-5 mx-0.5" />
                                 
                                 <div className="grid grid-cols-2 gap-0.5">
