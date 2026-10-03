@@ -510,10 +510,8 @@ export function AppFooter() {
     <footer className="mt-auto border-t bg-white/50 dark:bg-black/20 py-12 md:py-20 w-full flex justify-center shrink-0 no-print">
       <div className="w-full px-6 md:px-12 lg:px-20 max-w-[2000px] mx-auto flex flex-col gap-12 md:gap-20">
         
-        {/* Main Grid for 58+ Links */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
             
-            {/* Column 1: Branding & Intro */}
             <div className="space-y-6 lg:col-span-1">
                 <Link href="/" className="inline-block">
                     <GR7Logo />
@@ -528,7 +526,6 @@ export function AppFooter() {
                 </div>
             </div>
 
-            {/* Column 2: Image Tools */}
             <div className="space-y-6">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-primary border-b border-primary/10 pb-2">Image Engine</h4>
                 <ul className="grid gap-2">
@@ -543,7 +540,6 @@ export function AppFooter() {
                 </ul>
             </div>
 
-            {/* Column 3: PDF Studio */}
             <div className="space-y-6">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 border-b border-rose-500/10 pb-2">PDF Toolkit</h4>
                 <ul className="grid gap-2">
@@ -557,7 +553,6 @@ export function AppFooter() {
                 </ul>
             </div>
 
-            {/* Column 4: Finance & Calc */}
             <div className="space-y-6">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-600 border-b border-emerald-600/10 pb-2">Finance Hub</h4>
                 <ul className="grid gap-2">
@@ -571,7 +566,6 @@ export function AppFooter() {
                 </ul>
             </div>
 
-            {/* Column 5: Converters & Media */}
             <div className="space-y-6">
                 <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 border-b border-indigo-600/10 pb-2">Utilities</h4>
                 <div className="space-y-6">
@@ -591,18 +585,8 @@ export function AppFooter() {
                             </li>
                         ))}
                     </ul>
-                    <div className="pt-2">
-                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600 border-b border-indigo-600/10 pb-2 mb-3">Multimedia</h4>
-                         <ul className="grid gap-2">
-                            <li><Link href="/video-to-mp3" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Video to MP3</Link></li>
-                            <li><Link href="/rotate-video" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Rotate Video</Link></li>
-                            <li><Link href="/merge-audio" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">Audio Merger</Link></li>
-                            <li><Link href="/mp3-cutter" className="text-[10px] font-bold text-muted-foreground hover:text-primary transition-colors uppercase tracking-tight">MP3 Cutter Studio</Link></li>
-                         </ul>
-                    </div>
                 </div>
             </div>
-
         </div>
 
         <div className="w-full h-px bg-border/50" />

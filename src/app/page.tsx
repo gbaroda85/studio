@@ -286,41 +286,6 @@ export default function Page() {
                     </p>
                 </div>
 
-                <div className="flex flex-wrap justify-center gap-2 md:gap-4 mb-6 animate-fade-in-up transform-gpu">
-                    <Link href="/tools" className="uiverse-clay-btn transform-gpu">
-                    <div className="button-outer">
-                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                        <LayoutGrid className="size-4 text-primary" />
-                        <span>ALL TOOLS</span>
-                        </div>
-                    </div>
-                    </Link>
-                    <Link href="/tools?tab=image" className="uiverse-clay-btn transform-gpu">
-                    <div className="button-outer">
-                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                        <ImageIcon className="size-4 text-blue-500" />
-                        <span>IMAGE TOOLS</span>
-                        </div>
-                    </div>
-                    </Link>
-                    <Link href="/tools?tab=pdf" className="uiverse-clay-btn transform-gpu">
-                    <div className="button-outer">
-                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                        <FileText className="size-4 text-rose-500" />
-                        <span>PDF TOOLS</span>
-                        </div>
-                    </div>
-                    </Link>
-                    <Link href="/tools?tab=calculator" className="uiverse-clay-btn transform-gpu">
-                    <div className="button-outer">
-                        <div className="button-inner flex items-center gap-2 px-4 md:px-6">
-                        <Calculator className="size-4 text-emerald-500" />
-                        <span>CALCULATORS</span>
-                        </div>
-                    </div>
-                    </Link>
-                </div>
-
                 <div className="max-w-2xl w-full mx-auto relative group animate-fade-in-up px-2 md:px-0 mt-6 transform-gpu">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-emerald-400 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity transform-gpu" />
                     <div className="relative transform-gpu">
@@ -336,20 +301,6 @@ export default function Page() {
                 </div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* DENSE SEO LINKING SECTION - VISIBLE TO BOTS */}
-      <section className="py-12 bg-white dark:bg-slate-950 w-full overflow-hidden no-print">
-        <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-2xl font-black uppercase tracking-tighter mb-8 text-slate-800 dark:text-white">Crawlable Tool Index</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-4">
-                {ALL_TOOLS.map((tool, i) => (
-                    <Link key={i} href={tool.href} className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors underline decoration-dotted decoration-muted-foreground/30 underline-offset-4 uppercase tracking-tighter">
-                        {tool.title}
-                    </Link>
-                ))}
-            </div>
         </div>
       </section>
 
