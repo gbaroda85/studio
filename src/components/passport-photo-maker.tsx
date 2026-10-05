@@ -97,7 +97,7 @@ type Stage = 'setup' | 'crop' | 'studio' | 'print';
 const StarIcons = () => (
     <>
         {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className={`star-${i}`}>
+            <div key={i} className={`star-${i} pointer-events-none`}>
                 <svg viewBox="0 0 784.11 815.53" className="fill-white">
                     <path d="M392.05 0c-20.9,210.08 -184.06,378.41 -392.05,407.78 207.96,29.33 371.12,197.68 392.05,407.75 20.93,-210.06 184.09,-378.41 392.06,-407.75 -207.97,-29.33 -371.13,-197.68 -392.06,-407.78z" />
                 </svg>
@@ -721,21 +721,23 @@ export default function PassportPhotoMaker() {
                 </div>
             )}
 
-            {/* 4. PRINT PREVIEW MODAL - GPU STABILIZED */}
+            {/* 4. PRINT PREVIEW MODAL - GPU STABILIZED & ANTI-FLICKER */}
             <AnimatePresence>
                 {stage === 'print' && printSheetSrc && (
                     <motion.div 
                         initial={{ opacity: 0 }} 
                         animate={{ opacity: 1 }} 
                         exit={{ opacity: 0 }} 
-                        className="fixed inset-0 z-[500] bg-black/95 backdrop-blur-3xl p-4 md:p-12 flex flex-col items-center justify-center overflow-y-auto transform-gpu"
+                        transition={{ duration: 0.3, ease: "easeOut" }}
+                        className="fixed inset-0 z-[1000] bg-black/95 backdrop-blur-3xl p-4 md:p-12 flex flex-col items-center justify-center overflow-y-auto transform-gpu isolate"
+                        style={{ backfaceVisibility: 'hidden' }}
                     >
                         <motion.div 
-                            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                            initial={{ scale: 0.95, opacity: 0, y: 10 }}
                             animate={{ scale: 1, opacity: 1, y: 0 }}
-                            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-16 items-center transform-gpu backface-hidden"
+                            exit={{ scale: 0.95, opacity: 0, y: 10 }}
+                            transition={{ duration: 0.4, ease: "easeOut" }}
+                            className="w-full max-w-6xl flex flex-col md:flex-row gap-8 md:gap-16 items-center transform-gpu"
                         >
                             <div className="flex-1 space-y-6 md:space-y-12 text-white text-center md:text-left">
                                 <div className="space-y-3">
@@ -762,7 +764,12 @@ export default function PassportPhotoMaker() {
                             </div>
                             <div className="flex-[1.3] relative flex justify-center max-w-full transform-gpu">
                                 <div className="shadow-[0_80px_160px_-20px_rgba(0,0,0,0.8)] border-[8px] md:border-[16px] border-white rounded-sm overflow-hidden bg-white max-w-full">
-                                    <img src={printSheetSrc} alt="Master Print Sheet" className="max-w-full h-auto max-h-[55vh] md:max-h-[70vh] block" />
+                                    <img 
+                                        src={printSheetSrc} 
+                                        alt="Master Print Sheet" 
+                                        className="max-w-full h-auto max-h-[55vh] md:max-h-[70vh] block" 
+                                        decoding="async"
+                                    />
                                 </div>
                             </div>
                         </motion.div>
